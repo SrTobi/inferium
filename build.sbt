@@ -15,7 +15,9 @@ lazy val core = crossProject.
   in(file("core")).
   settings(
     name := "inferium-core",
-    version := "0.1-SNAPSHOT"
+    version := "0.1-SNAPSHOT",
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
   ).
   jvmSettings(
     // Add JVM-specific settings here
