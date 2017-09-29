@@ -34,7 +34,8 @@ lazy val cli = project
   .dependsOn(coreJVM)
   .settings(
     name := "inferium-cli",
-    version := "0.1-SNAPSHOT"
+    version := "0.1-SNAPSHOT",
+    libraryDependencies += "com.lihaoyi" % "fastparse_2.12" % "0.4.4"
   )
 
 lazy val web = project
