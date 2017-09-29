@@ -13,7 +13,7 @@ object ECMAScript2018TokensParser {
   // from # 11.6
   // implementation inspired by http://www.scala-sbt.org/0.12.4/sxr/Parsers.scala.html#326954
   private val unicodeIdStart = CharPred(_.isLetter)
-  private val unicodeIdContinue = CharPred(c => c.isLetterOrDigit)  /* TODO: Check if this is the correct implementation */
+  private val unicodeIdContinue = CharPred(c => c.isLetterOrDigit) /* TODO: Check if this is the correct implementation */
 
   // # 11.1
   private val zwnj = "\u200C"
@@ -28,7 +28,7 @@ object ECMAScript2018TokensParser {
 
   // # 11.3
   val lineTerminator: UnitP = P("\n" | "\r" | "\u2028" | "\u2029")
-  val lineTerminatorSequence: UnitP = P( "\n" | "\r\n" | "\r" | "\f")
+  val lineTerminatorSequence: UnitP = P("\n" | "\r\n" | "\r" | "\f")
 
   // # 11.4
   val singleLineComment: UnitP = "//" ~ (!lineTerminator ~ sourceCharacter).rep
@@ -51,7 +51,7 @@ object ECMAScript2018TokensParser {
   val booleanLiteral: UnitP = P("true" | "false")
 
   // # 11.8.3
-  val hexDigit: UnitP = P( CharIn('0' to '9', 'a' to 'f', 'A' to 'F') )
+  val hexDigit: UnitP = P(CharIn('0' to '9', 'a' to 'f', 'A' to 'F'))
   val octalDigit: UnitP = P(CharIn('0' to '7'))
   val binaryDigit: UnitP = P(CharIn('0' to '1'))
 
@@ -60,31 +60,62 @@ object ECMAScript2018TokensParser {
 }
 
 object Ast {
+
   sealed abstract class AstNode
+
   sealed case class Block(statement: Seq[Statement]) extends AstNode
+
   sealed abstract class Statement extends AstNode
-  sealed abstract class DeclarationStatement extends Statement
+
   sealed abstract class NonDeclarationStatement extends Statement
 
   sealed case class EmptyStatement() extends Statement
+
   sealed case class BlockStatement(block: Block) extends Statement
+
   sealed case class VariableStatement(decls: Seq[Ast.VariableDeclaration]) extends Statement
+
   sealed case class IfStatement(condition: Expression, success: Statement, fail: Option[Statement]) extends Statement
 
+  sealed case class DeclarationStatement(decl: Declaration) extends Statement
+
+  sealed abstract class Binding extends AstNode
+  sealed case class BindingPattern() extends Binding
+  sealed case class BindingIdentifier(identifier: String) extends Binding
+
+  sealed abstract class Declaration extends Statement
+
+  sealed abstract class HoistableDeclaration extends Declaration
 
   sealed abstract class VariableDeclaration extends AstNode
-  sealed case class IdentifierDeclaration(identifier: String, initializer: Option[AssignmentExpression]) extends VariableDeclaration
+
+  sealed case class IdentifierDeclaration(identifier: BindingIdentifier, initializer: Option[AssignmentExpression]) extends VariableDeclaration
+
   sealed case class PatternDeclaration(pattern: BindingPattern, initializer: AssignmentExpression) extends VariableDeclaration
 
-  sealed abstract class BindingPattern extends AstNode
-
   sealed abstract class Expression extends AstNode
+
   sealed abstract class AssignmentExpression extends Expression
+
   sealed case class Script(statements: Seq[Statement]) extends AstNode
+
+  sealed class ClassDeclaration extends Declaration
+
+  sealed class LexicalDeclaration extends Declaration
+
+  case class DebuggerStatement() extends Statement
+
+  case class CatchBlock(parameter: Binding, block: Block)
+  case class TryStatement(block: Block, catchBlock: Option[CatchBlock], finallyBlock: Option[Block]) extends Statement
+
+  sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
+
+  sealed case class FunctionDeclaration() extends Declaration
 }
 
-class ArgP [Arg, R](func: (Arg) => Parser[R]) {
+class ArgP[Arg, R](func: (Arg) => Parser[R]) {
   private val cache = mutable.HashMap.empty[Arg, Parser[R]]
+
   def apply(args: Arg): Parser[R] = cache.getOrElseUpdate(args, func(args))
 }
 
@@ -94,6 +125,7 @@ object ArgP {
 
 
 object ECMAScript2018Parse {
+
   import ECMAScript2018TokensParser._
 
   // yield, await, return
@@ -102,13 +134,17 @@ object ECMAScript2018Parse {
   type YA = (Boolean, Boolean)
   // In, yield, await
   type IYA = (Boolean, Boolean, Boolean)
+  // yield, await, default
+  type YAD = (Boolean, Boolean, Boolean)
 
 
   // not implemented
-  lazy val bindingIdentifier: Parser[String] = identifierName
+  lazy val bindingIdentifier: Parser[Ast.BindingIdentifier] = identifierName.map(Ast.BindingIdentifier)
   lazy val bindingPattern: ArgP[YA, Ast.BindingPattern] = null
   lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = null
   lazy val expression: ArgP[IYA, Ast.Expression] = null
+  lazy val labelIdentifier: ArgP[YA, String] = ArgP()(_ => P(identifierName)) // TODO: fix reserved keywords
+  lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] =null
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
@@ -135,8 +171,8 @@ object ECMAScript2018Parse {
 
   lazy val variableDeclaration: ArgP[IYA, Ast.VariableDeclaration] = ArgP() {
     case iya@(_, y, a) =>
-      P((bindingIdentifier ~ initializer(iya).?).map{ case (bi, ini) => Ast.IdentifierDeclaration(bi, ini)}) |
-      P((bindingPattern(y, a) | initializer(iya)).map{ case (bp, ini) => Ast.PatternDeclaration(bp, ini)})
+      P(bindingIdentifier ~ initializer(iya).?).map((Ast.IdentifierDeclaration _).tupled) |
+        P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration _).tupled)
   }
 
   // # 13.4
@@ -144,17 +180,55 @@ object ECMAScript2018Parse {
 
   // # 13.6
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
-    case yar@(y, a, r) => P("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map {
-      case (cond, succ, fail) => Ast.IfStatement(cond, succ, fail)
-    }
+    case yar@(y, a, r) => P("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map((Ast.IfStatement _).tupled)
   }
+
+  // 13.13
+  lazy val labelledStatement: ArgP[YAR, Ast.LabelledStatement] = ArgP() {
+    case yar@(y, a, _) => P(labelIdentifier(y, a) ~ ":" ~ labelledItem(yar)).map((Ast.LabelledStatement _).tupled)
+  }
+  lazy val labelledItem: ArgP[YAR, Ast.Statement] = ArgP() {
+    case yar@(y, a, _) => statement(yar) | functionDeclaration(y, a, false)
+  }
+
+  // # 13.15
+  lazy val tryStatement: ArgP[YAR, Ast.TryStatement] = ArgP() {
+    yar => P("try" ~ block(yar) ~ `catch`(yar).? ~ `finally`(yar).?).map((Ast.TryStatement _).tupled)
+  }
+  lazy val `catch`: ArgP[YAR, Ast.CatchBlock] = ArgP() {
+    case yar@(y, a, _) => P("catch" ~ "(" ~ catchParameter(y, a) ~ ")" ~ block(yar)).map((Ast.CatchBlock _).tupled)
+  }
+  lazy val `finally`: ArgP[YAR, Ast.Block] = ArgP() {
+    yar => P("finally" ~ block(yar))
+  }
+  lazy val catchParameter: ArgP[YA, Ast.Binding] = ArgP() {
+    ya => bindingIdentifier | bindingPattern(ya)
+  }
+
+  // # 13.16
+  lazy val debuggerStatement: Parser[Ast.DebuggerStatement] = P("debugger" ~ ";").map(_ => Ast.DebuggerStatement())
 
   // # 13
   lazy val statement: ArgP[YAR, Ast.Statement] = ArgP() {
-    case yar@(y, a, r) => blockStatement(yar) | variableStatement(y, a) | emptyStatement | ifStatement(yar)
+    case yar@(y, a, r) =>
+      blockStatement(yar) |
+        variableStatement(y, a) |
+        emptyStatement |
+        labelledStatement(yar) |
+        ifStatement(yar) |
+        debuggerStatement
   }
-  lazy val declaration: ArgP[YA, Ast.DeclarationStatement] = null
+  lazy val declaration: ArgP[YA, Ast.Declaration] = ArgP() {
+    case (y, a) =>
+      hoistableDeclaration(y, a, false) |
+        classDeclaration(y, a, false) |
+        lexicalDeclaration(true, y, a)
+  }
+  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = null
+  lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = null
+  lazy val lexicalDeclaration: ArgP[IYA, Ast.LexicalDeclaration] = null
+
 
   // # 15.1
-  lazy val script: Parser[Ast.Script] = P(statement(false, false, false).rep).map(Ast.Script)
+  lazy val script: Parser[Ast.Script] = statementList(false, false, false).map(Ast.Script)
 }
