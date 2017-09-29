@@ -114,7 +114,9 @@ object Ast {
 
   case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
 
-  case class CaseClause(expression: Option[Expression], statements: Seq[Statement]) extends
+  case class CaseClause(expression: Option[Expression], statements: Seq[Statement]) extends AstNode
+
+  case class WithStatement(expression: Expression, statement: Statement) extends Statement
 
 }
 
@@ -185,7 +187,12 @@ object ECMAScript2018Parse {
 
   // # 13.6
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
-    case yar@(y, a, r) => P("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map((Ast.IfStatement _).tupled)
+    case yar@(y, a, _) => ("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map((Ast.IfStatement _).tupled)
+  }
+
+  // 13.11
+  lazy val withStatement: ArgP[YAR, Ast.WithStatement] = ArgP() {
+    case yar@(y, a, _) => ("with" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar)).map((Ast.WithStatement _).tupled)
   }
 
   // 13.12
@@ -236,6 +243,8 @@ object ECMAScript2018Parse {
       blockStatement(yar) |
         variableStatement(y, a) |
         emptyStatement |
+        withStatement(yar) |
+        switchStatement(yar) |
         labelledStatement(yar) |
         ifStatement(yar) |
         debuggerStatement
