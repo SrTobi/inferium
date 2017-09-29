@@ -111,6 +111,11 @@ object Ast {
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
 
   sealed case class FunctionDeclaration() extends Declaration
+
+  case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
+
+  case class CaseClause(expression: Option[Expression], statements: Seq[Statement]) extends
+
 }
 
 class ArgP[Arg, R](func: (Arg) => Parser[R]) {
@@ -181,6 +186,23 @@ object ECMAScript2018Parse {
   // # 13.6
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
     case yar@(y, a, r) => P("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map((Ast.IfStatement _).tupled)
+  }
+
+  // 13.12
+  lazy val switchStatement: ArgP[YAR, Ast.SwitchStatement] = ArgP() {
+    case yar@(y, a, _) => ("switch" ~ "(" ~ expression(true, y, a) ~ ")" ~ caseBlock(yar)).map((Ast.SwitchStatement _).tupled)
+  }
+  lazy val caseBlock: ArgP[YAR, Seq[Ast.CaseClause]] = ArgP() {
+    yar => (caseClauses(yar) ~ defaultClause(yar).? ~ caseClauses(yar)).map {
+      case (cs1, c, cs2) => cs1 ++ c ++ cs2
+    }
+  }
+  lazy val caseClauses: ArgP[YAR, Seq[Ast.CaseClause]] = ArgP()(caseClause(_).rep)
+  lazy val caseClause: ArgP[YAR, Ast.CaseClause] = ArgP() {
+    case yar@(y, a, _) => P("case" ~ expression(true, y, a).map(Some(_)) ~ ":" ~ statementList(yar)).map((Ast.CaseClause _).tupled)
+  }
+  lazy val defaultClause: ArgP[YAR, Ast.CaseClause] = ArgP() {
+    yar => P("default" ~ ":" ~ statementList(yar)).map(Ast.CaseClause(None, _))
   }
 
   // 13.13
