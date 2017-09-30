@@ -1,13 +1,31 @@
 package com.github.srtobi.inferium.cli.jsparser
 
-import com.github.srtobi.inferium.cli.jsparser.Ast.{BlockStatement, EmptyStatement, VariableStatement}
-import fastparse.all
-import fastparse.all._
-import fastparse.parsers.Terminals
+import fastparse.parsers.{Combinators, Terminals}
 
 import scala.collection.mutable
+import fastparse.{all, noApi}
+import fastparse.noApi._
 
-object ECMAScript2018TokensParser {
+
+class ArgP[Arg, R](func: (Arg) => Parser[R]) {
+  private val cache = mutable.HashMap.empty[Arg, Parser[R]]
+
+  def apply(args: Arg): Parser[R] = cache.getOrElseUpdate(args, func(args))
+}
+
+object ArgP {
+  def apply[Arg, R]()(func: (Arg) => Parser[R]): ArgP[Arg, R] = new ArgP[Arg, R](func)
+}
+
+trait StringToSourceName {
+  protected implicit def toSourceName(name: String): sourcecode.Name = sourcecode.Name(name)
+}
+
+object ECMAScript2018TokensParser extends StringToSourceName {
+
+  import fastparse.all
+  import fastparse.all._
+
   type UnitP = all.Parser[Unit]
 
   // from # 11.6
@@ -24,39 +42,57 @@ object ECMAScript2018TokensParser {
   val sourceCharacter: Terminals.AnyElem[Char, String] = AnyChar
 
   // # 11.2
-  val whiteSpace: UnitP = P("\t" | "\u000B" | "\u000C" | " " | "\u00A0" | zwnbsp /* | Other category "Zs" ???*/)
+  val whiteSpace: UnitP = P(CharIn(" ", "\t", "\u000B", "\u000C", "\u00A0", zwnbsp /* | Other category "Zs" ???*/))("ws")
 
   // # 11.3
-  val lineTerminator: UnitP = P("\n" | "\r" | "\u2028" | "\u2029")
-  val lineTerminatorSequence: UnitP = P("\n" | "\r\n" | "\r" | "\f")
+  val lineTerminator: UnitP = P(CharIn("\n", "\r", "\u2028", "\u2029"))("line-terminator")
+  val lineTerminatorSequence: UnitP = P(StringIn("\n", "\r\n", "\r", "\u2028", "\u2029"))("\\n")
 
   // # 11.4
-  val singleLineComment: UnitP = "//" ~ (!lineTerminator ~ sourceCharacter).rep
+  val singleLineComment: UnitP = "//" ~/ (!lineTerminator ~ sourceCharacter).rep
   private val commentEnd = "*/"
-  val multiLineComment: UnitP = "/*" ~/ (!commentEnd ~ AnyChar).rep ~/ commentEnd
-  val comment: UnitP = multiLineComment | singleLineComment
+  private val noCommentEnd = P(!commentEnd ~ AnyChar)
+  val multiLineComment: Parser[Boolean] =
+    NoCut(P("/*" ~/
+      (!lineTerminator ~/ noCommentEnd).rep ~/
+      lineTerminator.map(_ => true).? ~/
+      noCommentEnd.rep ~/
+      commentEnd
+    )("multiline-comment")).map(_.getOrElse(false))
+  val comment: UnitP = P(multiLineComment.map(_ => ()) | singleLineComment)("comment")
+  val inlineComment: UnitP = multiLineComment.filter(!_).map(_ => ())
 
   // # from 11.8.4
   lazy val hex4Digits: UnitP = hexDigit.rep(exactly = 4)
   lazy val codePoint: UnitP = "{" ~ hexDigit.rep(max = 4) ~ "}"
   val unicodeEscapeSequence: UnitP = P("u" ~ (hex4Digits | codePoint))
 
+  // # 11.6.2
+  val futureReservedWord: Seq[String] = Seq("enum")
+  val keyword: Seq[String] = Seq("await", "break", "case", "catch", "class", "const", "continue",
+    "debugger", "default", "delete", "do", "else", "export", "extends", "finally", "for", "function",
+    "if", "import", "in", "instanceof", "new", "return", "super", "switch", "this", "throw", "try", "typeof",
+    "var", "void", "while", "with", "yield")
+  val reservedWord: Seq[String] = keyword ++ Seq("null", "true", "false") ++ futureReservedWord
+
   // # 11.6
   val identifierStart: UnitP = P(unicodeIdStart | "$" | "_" | "\\" ~ unicodeEscapeSequence)
   val identifierPart: UnitP = P(unicodeIdContinue | "$" | "_" | "\\" ~ unicodeEscapeSequence | zwnj | zwj)
-  val identifierName: Parser[String] = P(unicodeIdStart ~ unicodeIdStart.rep).!
+  val identifierName: Parser[String] = P(unicodeIdStart ~ unicodeIdStart.rep).!.filter(!reservedWord.contains(_))
 
   // # 11.8.1 / 11.8.2
   val nullLiteral: UnitP = P("null")
-  val booleanLiteral: UnitP = P("true" | "false")
+  val booleanLiteral: UnitP = StringIn("true", "false")
 
   // # 11.8.3
   val hexDigit: UnitP = P(CharIn('0' to '9', 'a' to 'f', 'A' to 'F'))
   val octalDigit: UnitP = P(CharIn('0' to '7'))
   val binaryDigit: UnitP = P(CharIn('0' to '1'))
 
-
   //val commonToken: UnitP = identifierName
+  val ws: UnitP = P(whiteSpace | lineTerminatorSequence | comment)("ws")
+  val wsWithLineTerminator: UnitP = P(lineTerminatorSequence | multiLineComment.filter(a => a).map(_ => ()) | singleLineComment)("line-terminating")
+  val noLineTerminator: UnitP = P(whiteSpace | inlineComment)("no-line-terminator")
 }
 
 object Ast {
@@ -80,7 +116,9 @@ object Ast {
   sealed case class DeclarationStatement(decl: Declaration) extends Statement
 
   sealed abstract class Binding extends AstNode
+
   sealed case class BindingPattern() extends Binding
+
   sealed case class BindingIdentifier(identifier: String) extends Binding
 
   sealed abstract class Declaration extends Statement
@@ -106,6 +144,7 @@ object Ast {
   case class DebuggerStatement() extends Statement
 
   case class CatchBlock(parameter: Binding, block: Block)
+
   case class TryStatement(block: Block, catchBlock: Option[CatchBlock], finallyBlock: Option[Block]) extends Statement
 
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
@@ -118,22 +157,46 @@ object Ast {
 
   case class WithStatement(expression: Expression, statement: Statement) extends Statement
 
+  case class ReturnStatement(expression: Option[Expression]) extends Statement
+
+  case class BreakStatement(label: Option[String]) extends Statement
+
+  case class ContinueStatement(label: Option[String]) extends Statement
+
 }
 
-class ArgP[Arg, R](func: (Arg) => Parser[R]) {
-  private val cache = mutable.HashMap.empty[Arg, Parser[R]]
+/*private object JsWsApi extends fastparse.WhitespaceApi.Wrapper({
+  import fastparse.all._
+  import ECMAScript2018TokensParser._
+  ws.rep
+})*/
 
-  def apply(args: Arg): Parser[R] = cache.getOrElseUpdate(args, func(args))
+private class JsWsWrapper(WL: P0){
+  implicit def parserApi2[T, V](p0: T)(implicit c: T => P[V]): JsWhitespaceApi[V] =
+    new JsWhitespaceApi[V](p0, WL)
 }
 
-object ArgP {
-  def apply[Arg, R]()(func: (Arg) => Parser[R]): ArgP[Arg, R] = new ArgP[Arg, R](func)
+private object JsWsApi extends JsWsWrapper({
+  import fastparse.all._
+  import ECMAScript2018TokensParser._
+  ws.rep
+})
+
+private class JsWhitespaceApi[+T](p0: P[T], WL: P0) extends fastparse.WhitespaceApi[T](p0, WL) {
+  import fastparse.all._
+  import fastparse.parsers.Combinators.Sequence
+  import fastparse.core.Implicits.Sequencer
+
+  def ~~/[V, R](p: Parser[V])(implicit ev: Sequencer[T, V, R]): Parser[R] =
+    Sequence.flatten(Sequence(p0, p, cut=true).asInstanceOf[Sequence[R, R, R, Char, String]])
 }
 
 
-object ECMAScript2018Parse {
+object ECMAScript2018Parse extends StringToSourceName {
 
   import ECMAScript2018TokensParser._
+  import JsWsApi._
+
 
   // yield, await, return
   type YAR = (Boolean, Boolean, Boolean)
@@ -145,20 +208,29 @@ object ECMAScript2018Parse {
   type YAD = (Boolean, Boolean, Boolean)
 
 
+  // # 11.9 Automatic Semicolon
+  private lazy val `;` = noLineTerminator.rep ~~ P(";" | wsWithLineTerminator | &("}") | &(End))
+  private lazy val noLineTerminatorHere = noLineTerminator.rep
+
+  private def activate[V](a: Boolean, v: V): Option[V] = if (a) Some(v) else None
+  private def toEither[T](l: (Boolean, Parser[T])*) = Combinators.Either(l.flatMap { case (a, v) => activate(a, v) }: _*)
+
   // not implemented
   lazy val bindingIdentifier: Parser[Ast.BindingIdentifier] = identifierName.map(Ast.BindingIdentifier)
-  lazy val bindingPattern: ArgP[YA, Ast.BindingPattern] = null
-  lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = null
-  lazy val expression: ArgP[IYA, Ast.Expression] = null
-  lazy val labelIdentifier: ArgP[YA, String] = ArgP()(_ => P(identifierName)) // TODO: fix reserved keywords
-  lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] =null
+  lazy val bindingPattern: ArgP[YA, Ast.BindingPattern] = ArgP() { _ => P(Fail) }
+  lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = ArgP() { _ => P(Fail) }
+  lazy val expression: ArgP[IYA, Ast.Expression] = ArgP() { _ => P(Fail) }
+  lazy val labelIdentifier: ArgP[YA, String] = ArgP() {
+    case (y, a) => toEither((true, identifierName), (y, P("yield").!), (a, P("await").!))
+  }
+  lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() { _ => P(Fail) }
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
     yar => block(yar).map(Ast.BlockStatement)
   }
   lazy val block: ArgP[YAR, Ast.Block] = ArgP() {
-    yar => ("{" ~ statementList(yar) ~ "}").map(Ast.Block)
+    yar => P("{" ~/ statementListOpt(yar) ~ "}").map(Ast.Block)
   }
   lazy val statementListItem: ArgP[YAR, Ast.Statement] = ArgP() {
     case yar@(y, a, _) => statement(yar) | declaration(y, a)
@@ -166,10 +238,13 @@ object ECMAScript2018Parse {
   lazy val statementList: ArgP[YAR, Seq[Ast.Statement]] = ArgP() {
     yar => statementListItem(yar).rep(1)
   }
+  lazy val statementListOpt: ArgP[YAR, Seq[Ast.Statement]] = ArgP() {
+    yar => statementListItem(yar).rep
+  }
 
   // # 13.3.2
   lazy val variableStatement: ArgP[YA, Ast.VariableStatement] = ArgP() {
-    case (y, a) => ("var" ~ variableDeclarationList(true, y, a) ~ ";").map(VariableStatement)
+    case (y, a) => ("var" ~/ variableDeclarationList(true, y, a) ~~ `;`).map(Ast.VariableStatement)
   }
 
   lazy val variableDeclarationList: ArgP[IYA, Seq[Ast.VariableDeclaration]] = ArgP() {
@@ -178,8 +253,8 @@ object ECMAScript2018Parse {
 
   lazy val variableDeclaration: ArgP[IYA, Ast.VariableDeclaration] = ArgP() {
     case iya@(_, y, a) =>
-      P(bindingIdentifier ~ initializer(iya).?).map((Ast.IdentifierDeclaration _).tupled) |
-        P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration _).tupled)
+      P(bindingIdentifier ~ initializer(iya).?).map((Ast.IdentifierDeclaration.apply _).tupled) |
+        P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration.apply _).tupled)
   }
 
   // # 13.4
@@ -187,34 +262,50 @@ object ECMAScript2018Parse {
 
   // # 13.6
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
-    case yar@(y, a, _) => ("if" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?).map((Ast.IfStatement _).tupled)
+    case yar@(y, a, _) => P("if" ~/ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?)("if-statement").map((Ast.IfStatement.apply _).tupled)
+  }
+
+  // # 13.8
+  lazy val continueStatement: ArgP[YA, Ast.ContinueStatement] = ArgP() {
+    case (y, a) => P("continue" ~~/ (noLineTerminatorHere ~~ labelIdentifier(y, a)).? ~~ `;`)("continue-statmeent").map(Ast.ContinueStatement)
+  }
+
+  // # 13.9
+  lazy val breakStatement: ArgP[YA, Ast.BreakStatement] = ArgP() {
+    case (y, a) => P("break" ~~/ (noLineTerminatorHere ~~ labelIdentifier(y, a)).? ~~ `;`)("break-statmeent").map(Ast.BreakStatement)
+  }
+
+  // # 13.10
+  lazy val returnStatement: ArgP[YA, Ast.ReturnStatement] = ArgP() {
+    case (y, a) => P("return" ~~/ noLineTerminatorHere ~~ expression(true, y, a).? ~~ `;`)("return-statmeent").map(Ast.ReturnStatement)
   }
 
   // 13.11
   lazy val withStatement: ArgP[YAR, Ast.WithStatement] = ArgP() {
-    case yar@(y, a, _) => ("with" ~ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar)).map((Ast.WithStatement _).tupled)
+    case yar@(y, a, _) => P("with" ~/ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar))("with-statement").map((Ast.WithStatement.apply _).tupled)
   }
 
   // 13.12
   lazy val switchStatement: ArgP[YAR, Ast.SwitchStatement] = ArgP() {
-    case yar@(y, a, _) => ("switch" ~ "(" ~ expression(true, y, a) ~ ")" ~ caseBlock(yar)).map((Ast.SwitchStatement _).tupled)
+    case yar@(y, a, _) => P("switch" ~/ "(" ~ expression(true, y, a) ~ ")" ~ caseBlock(yar))("switch-statement").map((Ast.SwitchStatement.apply _).tupled)
   }
   lazy val caseBlock: ArgP[YAR, Seq[Ast.CaseClause]] = ArgP() {
-    yar => (caseClauses(yar) ~ defaultClause(yar).? ~ caseClauses(yar)).map {
-      case (cs1, c, cs2) => cs1 ++ c ++ cs2
-    }
+    yar =>
+      (caseClausesOpt(yar) ~ defaultClause(yar).? ~ caseClausesOpt(yar)).map {
+        case (cs1, c, cs2) => cs1 ++ c ++ cs2
+      }
   }
-  lazy val caseClauses: ArgP[YAR, Seq[Ast.CaseClause]] = ArgP()(caseClause(_).rep)
+  lazy val caseClausesOpt: ArgP[YAR, Seq[Ast.CaseClause]] = ArgP()(caseClause(_).rep)
   lazy val caseClause: ArgP[YAR, Ast.CaseClause] = ArgP() {
-    case yar@(y, a, _) => P("case" ~ expression(true, y, a).map(Some(_)) ~ ":" ~ statementList(yar)).map((Ast.CaseClause _).tupled)
+    case yar@(y, a, _) => P("case" ~/ expression(true, y, a).map(Some(_)) ~/ ":" ~/ statementListOpt(yar))("case-clause").map((Ast.CaseClause.apply _).tupled)
   }
   lazy val defaultClause: ArgP[YAR, Ast.CaseClause] = ArgP() {
-    yar => P("default" ~ ":" ~ statementList(yar)).map(Ast.CaseClause(None, _))
+    yar => P("default" ~/ ":" ~/ statementListOpt(yar))("default-clause").map(Ast.CaseClause(None, _))
   }
 
   // 13.13
   lazy val labelledStatement: ArgP[YAR, Ast.LabelledStatement] = ArgP() {
-    case yar@(y, a, _) => P(labelIdentifier(y, a) ~ ":" ~ labelledItem(yar)).map((Ast.LabelledStatement _).tupled)
+    case yar@(y, a, _) => P(labelIdentifier(y, a) ~ ":" ~ labelledItem(yar)).map((Ast.LabelledStatement.apply _).tupled)
   }
   lazy val labelledItem: ArgP[YAR, Ast.Statement] = ArgP() {
     case yar@(y, a, _) => statement(yar) | functionDeclaration(y, a, false)
@@ -222,20 +313,20 @@ object ECMAScript2018Parse {
 
   // # 13.15
   lazy val tryStatement: ArgP[YAR, Ast.TryStatement] = ArgP() {
-    yar => P("try" ~ block(yar) ~ `catch`(yar).? ~ `finally`(yar).?).map((Ast.TryStatement _).tupled)
+    yar => P("try" ~/ block(yar) ~/ `catch`(yar).? ~ `finally`(yar).?).map((Ast.TryStatement.apply _).tupled)
   }
   lazy val `catch`: ArgP[YAR, Ast.CatchBlock] = ArgP() {
-    case yar@(y, a, _) => P("catch" ~ "(" ~ catchParameter(y, a) ~ ")" ~ block(yar)).map((Ast.CatchBlock _).tupled)
+    case yar@(y, a, _) => P("catch" ~/ "(" ~/ catchParameter(y, a) ~ ")" ~ block(yar)).map((Ast.CatchBlock.apply _).tupled)
   }
   lazy val `finally`: ArgP[YAR, Ast.Block] = ArgP() {
-    yar => P("finally" ~ block(yar))
+    yar => P("finally" ~/ block(yar))
   }
   lazy val catchParameter: ArgP[YA, Ast.Binding] = ArgP() {
     ya => bindingIdentifier | bindingPattern(ya)
   }
 
   // # 13.16
-  lazy val debuggerStatement: Parser[Ast.DebuggerStatement] = P("debugger" ~ ";").map(_ => Ast.DebuggerStatement())
+  lazy val debuggerStatement: Parser[Ast.DebuggerStatement] = P("debugger" ~~ `;`)("debugger-statement").map(_ => Ast.DebuggerStatement())
 
   // # 13
   lazy val statement: ArgP[YAR, Ast.Statement] = ArgP() {
@@ -243,6 +334,9 @@ object ECMAScript2018Parse {
       blockStatement(yar) |
         variableStatement(y, a) |
         emptyStatement |
+        continueStatement(y, a) |
+        breakStatement(y, a) |
+        returnStatement(y, a) |
         withStatement(yar) |
         switchStatement(yar) |
         labelledStatement(yar) |
@@ -255,11 +349,19 @@ object ECMAScript2018Parse {
         classDeclaration(y, a, false) |
         lexicalDeclaration(true, y, a)
   }
-  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = null
-  lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = null
-  lazy val lexicalDeclaration: ArgP[IYA, Ast.LexicalDeclaration] = null
+  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() { _ => P(Fail) }
+  lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = ArgP() { _ => P(Fail) }
+  lazy val lexicalDeclaration: ArgP[IYA, Ast.LexicalDeclaration] = ArgP() { _ => P(Fail) }
 
 
   // # 15.1
-  lazy val script: Parser[Ast.Script] = statementList(false, false, false).map(Ast.Script)
+  lazy val script: Parser[Ast.Script] = P(ws.rep ~~ statementListOpt(false, false, false) ~ End)("script").map(Ast.Script)
+}
+
+object JsTests {
+
+  def main(args: Array[String]): Unit = {
+    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("break 3\n;")
+    println(ast)
+  }
 }
