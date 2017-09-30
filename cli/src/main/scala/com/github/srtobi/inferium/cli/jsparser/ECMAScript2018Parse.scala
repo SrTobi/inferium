@@ -1,5 +1,6 @@
 package com.github.srtobi.inferium.cli.jsparser
 
+import com.github.srtobi.inferium.cli.jsparser.Ast.VariableDeclarationType.VariableDeclarationType
 import fastparse.parsers.{Combinators, Terminals}
 
 import scala.collection.mutable
@@ -96,6 +97,10 @@ object ECMAScript2018TokensParser extends StringToSourceName {
 }
 
 object Ast {
+  object VariableDeclarationType extends Enumeration {
+    type VariableDeclarationType = Value
+    val Var, Let, Const = Value
+  }
 
   sealed abstract class AstNode
 
@@ -109,7 +114,7 @@ object Ast {
 
   sealed case class BlockStatement(block: Block) extends Statement
 
-  sealed case class VariableStatement(decls: Seq[Ast.VariableDeclaration]) extends Statement
+  sealed case class VariableStatement(declType: VariableDeclarationType, decls: Seq[Ast.VariableDeclaration]) extends Statement
 
   sealed case class IfStatement(condition: Expression, success: Statement, fail: Option[Statement]) extends Statement
 
@@ -117,19 +122,19 @@ object Ast {
 
   sealed abstract class Binding extends AstNode
 
-  sealed case class BindingPattern() extends Binding
+  sealed case class PatternBinding() extends Binding
 
-  sealed case class BindingIdentifier(identifier: String) extends Binding
+  sealed case class IdentifierBinding(identifier: String) extends Binding
 
-  sealed abstract class Declaration extends Statement
+  sealed abstract class Declaration extends AstNode
 
   sealed abstract class HoistableDeclaration extends Declaration
 
   sealed abstract class VariableDeclaration extends AstNode
 
-  sealed case class IdentifierDeclaration(identifier: BindingIdentifier, initializer: Option[AssignmentExpression]) extends VariableDeclaration
+  sealed case class IdentifierDeclaration(identifier: IdentifierBinding, initializer: Option[AssignmentExpression]) extends VariableDeclaration
 
-  sealed case class PatternDeclaration(pattern: BindingPattern, initializer: AssignmentExpression) extends VariableDeclaration
+  sealed case class PatternDeclaration(pattern: PatternBinding, initializer: AssignmentExpression) extends VariableDeclaration
 
   sealed abstract class Expression extends AstNode
 
@@ -149,7 +154,8 @@ object Ast {
 
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
 
-  sealed case class FunctionDeclaration() extends Declaration
+  sealed case class FunctionDeclaration() extends HoistableDeclaration
+  sealed case class GeneratorDeclaration() extends HoistableDeclaration
 
   case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
 
@@ -163,13 +169,17 @@ object Ast {
 
   case class ContinueStatement(label: Option[String]) extends Statement
 
-}
+  /*sealed abstract class IterationStatement extends Statement
 
-/*private object JsWsApi extends fastparse.WhitespaceApi.Wrapper({
-  import fastparse.all._
-  import ECMAScript2018TokensParser._
-  ws.rep
-})*/
+  case class DoWhileStatement(expression: Expression) extends IterationStatement
+
+  case class WhileStatement(expression: Expression) extends IterationStatement
+
+  abstract class ForInit
+  abstract class ForStatement() extends IterationStatement
+
+  abstract class Expr*/
+}
 
 private class JsWsWrapper(WL: P0){
   implicit def parserApi2[T, V](p0: T)(implicit c: T => P[V]): JsWhitespaceApi[V] =
@@ -216,14 +226,12 @@ object ECMAScript2018Parse extends StringToSourceName {
   private def toEither[T](l: (Boolean, Parser[T])*) = Combinators.Either(l.flatMap { case (a, v) => activate(a, v) }: _*)
 
   // not implemented
-  lazy val bindingIdentifier: Parser[Ast.BindingIdentifier] = identifierName.map(Ast.BindingIdentifier)
-  lazy val bindingPattern: ArgP[YA, Ast.BindingPattern] = ArgP() { _ => P(Fail) }
+  lazy val bindingIdentifier: Parser[Ast.IdentifierBinding] = identifierName.map(Ast.IdentifierBinding)
   lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = ArgP() { _ => P(Fail) }
   lazy val expression: ArgP[IYA, Ast.Expression] = ArgP() { _ => P(Fail) }
   lazy val labelIdentifier: ArgP[YA, String] = ArgP() {
     case (y, a) => toEither((true, identifierName), (y, P("yield").!), (a, P("await").!))
   }
-  lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() { _ => P(Fail) }
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
@@ -242,9 +250,29 @@ object ECMAScript2018Parse extends StringToSourceName {
     yar => statementListItem(yar).rep
   }
 
+  // # 13.3.1
+  lazy val lexicalDeclaration: ArgP[IYA, Ast.VariableStatement] = ArgP() {
+    iya => P(letOrConst ~/ bindingList(iya) ~~ `;`).map((Ast.VariableStatement.apply _).tupled)
+  }
+  lazy val letOrConst: Parser[Ast.VariableDeclarationType.VariableDeclarationType] = {
+    P("let").map(_ => Ast.VariableDeclarationType.Let) |
+      P("const").map(_ => Ast.VariableDeclarationType.Const)
+  }
+
+  lazy val bindingList: ArgP[IYA, Seq[Ast.VariableDeclaration]] = ArgP() {
+    iya => lexicalBinding(iya).rep(1)
+  }
+
+  lazy val lexicalBinding: ArgP[IYA, Ast.VariableDeclaration] = ArgP() {
+    case iya@(_, y, a) =>
+      P(bindingIdentifier ~ initializer(iya).?).map((Ast.IdentifierDeclaration.apply _).tupled) |
+        P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration.apply _).tupled)
+  }
+
+
   // # 13.3.2
   lazy val variableStatement: ArgP[YA, Ast.VariableStatement] = ArgP() {
-    case (y, a) => ("var" ~/ variableDeclarationList(true, y, a) ~~ `;`).map(Ast.VariableStatement)
+    case (y, a) => ("var" ~/ variableDeclarationList(true, y, a) ~~ `;`).map(decls => Ast.VariableStatement(Ast.VariableDeclarationType.Var, decls))
   }
 
   lazy val variableDeclarationList: ArgP[IYA, Seq[Ast.VariableDeclaration]] = ArgP() {
@@ -257,6 +285,9 @@ object ECMAScript2018Parse extends StringToSourceName {
         P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration.apply _).tupled)
   }
 
+  // # 13.3.3
+  lazy val bindingPattern: ArgP[YA, Ast.PatternBinding] = ArgP() { _ => P(Fail) }
+
   // # 13.4
   lazy val emptyStatement: Parser[Ast.EmptyStatement] = P(";").map(_ => Ast.EmptyStatement())
 
@@ -264,6 +295,9 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
     case yar@(y, a, _) => P("if" ~/ "(" ~ expression(true, y, a) ~ ")" ~ statement(yar) ~ ("else" ~ statement(yar)).?)("if-statement").map((Ast.IfStatement.apply _).tupled)
   }
+
+  // # 13.7
+
 
   // # 13.8
   lazy val continueStatement: ArgP[YA, Ast.ContinueStatement] = ArgP() {
@@ -308,7 +342,7 @@ object ECMAScript2018Parse extends StringToSourceName {
     case yar@(y, a, _) => P(labelIdentifier(y, a) ~ ":" ~ labelledItem(yar)).map((Ast.LabelledStatement.apply _).tupled)
   }
   lazy val labelledItem: ArgP[YAR, Ast.Statement] = ArgP() {
-    case yar@(y, a, _) => statement(yar) | functionDeclaration(y, a, false)
+    case yar@(y, a, _) => statement(yar) | functionDeclaration(y, a, false).map(Ast.DeclarationStatement)
   }
 
   // # 13.15
@@ -343,16 +377,32 @@ object ECMAScript2018Parse extends StringToSourceName {
         ifStatement(yar) |
         debuggerStatement
   }
-  lazy val declaration: ArgP[YA, Ast.Declaration] = ArgP() {
+  lazy val declaration: ArgP[YA, Ast.Statement] = ArgP() {
     case (y, a) =>
-      hoistableDeclaration(y, a, false) |
-        classDeclaration(y, a, false) |
+      hoistableDeclaration(y, a, false).map(Ast.DeclarationStatement) |
+        classDeclaration(y, a, false).map(Ast.DeclarationStatement) |
         lexicalDeclaration(true, y, a)
   }
-  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() { _ => P(Fail) }
+  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() {
+    yad => functionDeclaration(yad) | generatorDeclaration(yad) | asyncFunctionDeclaration(yad)
+  }
   lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = ArgP() { _ => P(Fail) }
-  lazy val lexicalDeclaration: ArgP[IYA, Ast.LexicalDeclaration] = ArgP() { _ => P(Fail) }
 
+
+  // # 14.1
+  lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
+    _ => Fail
+  }
+
+  // # 14.6
+  lazy val generatorDeclaration: ArgP[YAD, Ast.GeneratorDeclaration] = ArgP() {
+    _ => Fail
+  }
+
+  // # 14.6
+  lazy val asyncFunctionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
+    _ => Fail
+  }
 
   // # 15.1
   lazy val script: Parser[Ast.Script] = P(ws.rep ~~ statementListOpt(false, false, false) ~ End)("script").map(Ast.Script)
@@ -361,7 +411,7 @@ object ECMAScript2018Parse extends StringToSourceName {
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("break 3\n;")
+    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("const a;")
     println(ast)
   }
 }
