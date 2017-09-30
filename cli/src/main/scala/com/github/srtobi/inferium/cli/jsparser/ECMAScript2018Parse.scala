@@ -122,8 +122,20 @@ object Ast {
 
   sealed abstract class Binding extends AstNode
 
-  sealed case class PatternBinding() extends Binding
+  sealed abstract class PatternBinding extends Binding
+  sealed case class ObjectPatternBinding(properties: Seq[PropertyBinding]) extends PatternBinding
+  sealed trait PropertyBinding extends AstNode
+  sealed case class PatternBindingProperty(property: PropertyName, element: BindingElement) extends PropertyBinding
+  sealed case class ArrayPatternBinding(elements: Seq[ArrayElementBinding], rest: Option[Binding]) extends PatternBinding
 
+
+  sealed trait ArrayElementBinding extends AstNode
+  sealed case class ElisionBinding() extends ArrayElementBinding
+  sealed trait BindingElement
+  sealed case class PatternElementBinding(pattern: PatternBinding, default: Option[Expression]) extends ArrayElementBinding with BindingElement
+  sealed case class SingleNameBinding(name: String, default: Option[Expression]) extends ArrayElementBinding with PropertyBinding with BindingElement
+
+  sealed abstract class PropertyName extends AstNode
   sealed case class IdentifierBinding(identifier: String) extends Binding
 
   sealed abstract class Declaration extends AstNode
@@ -226,12 +238,18 @@ object ECMAScript2018Parse extends StringToSourceName {
   private def toEither[T](l: (Boolean, Parser[T])*) = Combinators.Either(l.flatMap { case (a, v) => activate(a, v) }: _*)
 
   // not implemented
-  lazy val bindingIdentifier: Parser[Ast.IdentifierBinding] = identifierName.map(Ast.IdentifierBinding)
   lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = ArgP() { _ => P(Fail) }
   lazy val expression: ArgP[IYA, Ast.Expression] = ArgP() { _ => P(Fail) }
-  lazy val labelIdentifier: ArgP[YA, String] = ArgP() {
-    case (y, a) => toEither((true, identifierName), (y, P("yield").!), (a, P("await").!))
+  lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() { _ => P(Fail) }
+
+  // 12.1
+  lazy val identifierReference: ArgP[YA, String] = ArgP() {
+    case (y, a) => toEither((true, identifier), (y, P("yield").!), (a, P("await").!))
   }
+  lazy val bindingIdentifier: Parser[Ast.IdentifierBinding] = identifier.map(Ast.IdentifierBinding)
+  lazy val labelIdentifier: ArgP[YA, String] = identifierReference
+  lazy val identifier: Parser[String] = identifierName
+
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
@@ -286,7 +304,36 @@ object ECMAScript2018Parse extends StringToSourceName {
   }
 
   // # 13.3.3
-  lazy val bindingPattern: ArgP[YA, Ast.PatternBinding] = ArgP() { _ => P(Fail) }
+  lazy val bindingPattern: ArgP[YA, Ast.PatternBinding] = ArgP() {
+    ya => objectBindingPattern(ya) | arrayBindingPattern(ya)
+  }
+  lazy val objectBindingPattern: ArgP[YA, Ast.ObjectPatternBinding] = ArgP() {
+    ya => P("{" ~/ bindingPropertyList(ya) ~/ ",".? ~ "}").map(Ast.ObjectPatternBinding)
+  }
+  lazy val arrayBindingPattern: ArgP[YA, Ast.ArrayPatternBinding] = ArgP() {
+    ya =>
+      P("[" ~/
+        (bindingElement(ya) | P("").map(_ => Ast.ElisionBinding())).rep(sep=",") ~
+        bindingRestElement(ya).? ~/
+        "]"
+      ).map((Ast.ArrayPatternBinding.apply _).tupled)
+  }
+  lazy val bindingPropertyList: ArgP[YA, Seq[Ast.PropertyBinding]] = ArgP() {
+    ya => bindingProperty(ya).rep(sep=",")
+  }
+  lazy val bindingProperty: ArgP[YA, Ast.PropertyBinding] = ArgP() {
+    ya => singleNameBinding(ya) |
+      P(propertyName(ya) ~ ":" ~ bindingElement(ya)).map((Ast.PatternBindingProperty.apply _).tupled)
+  }
+  lazy val bindingElement: ArgP[YA, Ast.ArrayElementBinding with Ast.BindingElement] = ArgP() {
+    case ya@(y, a) => singleNameBinding(ya) | (bindingPattern(ya) ~ initializer(true, y, a).?).map((Ast.PatternElementBinding.apply _).tupled)
+  }
+  lazy val singleNameBinding: ArgP[YA, Ast.SingleNameBinding] = ArgP() {
+    case (y, a) => P(bindingIdentifier.map(_.identifier) ~ initializer(true, y, a).?).map((Ast.SingleNameBinding.apply _).tupled)
+  }
+  lazy val bindingRestElement: ArgP[YA, Ast.Binding] = ArgP() {
+    ya => "..." ~ (bindingIdentifier | bindingPattern(ya))
+  }
 
   // # 13.4
   lazy val emptyStatement: Parser[Ast.EmptyStatement] = P(";").map(_ => Ast.EmptyStatement())
@@ -411,7 +458,7 @@ object ECMAScript2018Parse extends StringToSourceName {
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("const a;")
+    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("const { a};")
     println(ast)
   }
 }
