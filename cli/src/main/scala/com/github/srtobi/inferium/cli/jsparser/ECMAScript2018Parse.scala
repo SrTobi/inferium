@@ -209,7 +209,7 @@ object Ast {
 
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
 
-  sealed case class FunctionDeclaration() extends HoistableDeclaration
+  sealed case class FunctionDeclaration(function: Function) extends HoistableDeclaration
 
   sealed case class GeneratorDeclaration() extends HoistableDeclaration
 
@@ -264,7 +264,7 @@ object Ast {
   sealed case class NumericLiteral(value: String) extends LiteralExpression
   sealed case class StringLiteral(string: String) extends LiteralExpression
   sealed case class ArrayLiteral(elements: Seq[ArrayLiteralElement]) extends LiteralExpression
-  sealed case class ObjectLiteral(properties: Seq[PropertyDefinition])
+  sealed case class ObjectLiteral(properties: Seq[PropertyDefinition]) extends LiteralExpression
 
   sealed abstract class ArrayLiteralElement extends AstNode
   sealed case class ArrayElisionElement() extends ArrayLiteralElement
@@ -275,6 +275,8 @@ object Ast {
   sealed case class ShortcutPropertyDefinition(name: String) extends PropertyDefinition
   sealed case class NormalPropertyDefinition(name: PropertyName, initializer: Expression) extends PropertyDefinition
   sealed case class MethodPropertyDefinition() extends PropertyDefinition
+
+  sealed case class Function(identifier: Option[String], parameters: Seq[BindingElement], rest: Option[Binding], body: Seq[Statement]) extends PrimaryExpression
 }
 
 private class JsWsWrapper(WL: P0) {
@@ -361,7 +363,7 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val awaitExpression: ArgP[Y, Ast.Expression] = ???
   lazy val coverCallExpressionAndAsyncArrowHead: ArgP[YA, Ast.Expression] = ???
   lazy val templateLiteral: ArgP[YAT, Ast.TemplateLiteral] = ???
-  lazy val methodDefiniton: ArgP[YA, ()] = ???
+  lazy val methodDefiniton: ArgP[YA, Unit] = ???
 
 
   // 12.1
@@ -376,7 +378,10 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val primaryExpression: ArgP[YA, Ast.PrimaryExpression] = ArgP() {
     ya => thisExpression |
       identifierReference(ya).map(Ast.IdentifierReferenceExpression) |
-      literal
+      literal |
+      arrayLiteral(ya) |
+      objectLiteral(ya) |
+      functionExpression(ya)
   }
 
   // 12.2.2
@@ -406,8 +411,12 @@ object ECMAScript2018Parse extends StringToSourceName {
   }
 
   // 12.2.6
-  lazy val objectLiteral: ArgP[YA, Ast.ObjectLiteral] = ???
-  lazy val propertyDefinitionList: ArgP[YA, Seq[Ast.PropertyDefinition]] = ???
+  lazy val objectLiteral: ArgP[YA, Ast.ObjectLiteral] = ArgP() {
+    ya => P("{" ~ propertyDefinitionList(ya) ~ ",".? ~ "}").map(Ast.ObjectLiteral)
+  }
+  lazy val propertyDefinitionList: ArgP[YA, Seq[Ast.PropertyDefinition]] = ArgP() {
+    ya => propertyDefinition(ya).rep(sep=",")
+  }
   lazy val propertyDefinition: ArgP[YA, Ast.PropertyDefinition] = ArgP() {
     case ya@(y, a) =>
       identifierReference(ya).map(Ast.ShortcutPropertyDefinition) |
@@ -747,7 +756,34 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // # 14.1
   lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
-    _ => Fail
+    case (y, a, d) => P(
+      "function" ~/
+        bindingIdentifier.map(id => Some(id.identifier)) ~/
+        "(" ~ formalParameters(y, a) ~ ")" ~
+        "{" ~ functionBody(y, a) ~ "}"
+    ).map { case (id, (params, rest), body) => Ast.Function(id, params, rest, body) }
+      .map(Ast.FunctionDeclaration)
+  }
+  lazy val functionExpression: ArgP[YA, Ast.Function] = ArgP() {
+    ya => P(
+      "function" ~/
+        bindingIdentifier.map(_.identifier).? ~/
+        "(" ~ formalParameters(ya) ~ ")" ~
+        "{" ~ functionBody(ya) ~ "}"
+    ).map { case (id, (params, rest), body) => Ast.Function(id, params, rest, body) }
+  }
+  lazy val uniqueFormalParameters: ArgP[YA, (Seq[Ast.BindingElement], Option[Ast.Binding])] = formalParameters
+  lazy val formalParameters: ArgP[YA, (Seq[Ast.BindingElement], Option[Ast.Binding])] = ArgP() {
+    ya => formalParameter(ya).rep(sep=",") ~ (P(",").map(_ => None) | functionRestParameter(ya).?)
+  }
+  lazy val formalParameterList: ArgP[YA, Seq[Ast.BindingElement]] = ArgP() {
+    ya => formalParameter(ya).rep
+  }
+  lazy val functionRestParameter: ArgP[YA, Ast.Binding] = bindingRestElement
+  lazy val formalParameter: ArgP[YA, Ast.ArrayElementBinding with Ast.BindingElement] = bindingElement
+  lazy val functionBody: ArgP[YA, Seq[Ast.Statement]] = functionStatementList
+  lazy val functionStatementList: ArgP[YA, Seq[Ast.Statement]] = ArgP() {
+    case (y, a) => statementList(y, a, true)
   }
 
   // # 14.6
