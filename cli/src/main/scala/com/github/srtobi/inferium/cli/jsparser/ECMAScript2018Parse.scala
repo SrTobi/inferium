@@ -1,10 +1,11 @@
 package com.github.srtobi.inferium.cli.jsparser
 
 import com.github.srtobi.inferium.cli.jsparser.Ast.VariableDeclarationType.VariableDeclarationType
+import com.sun.xml.internal.ws.api.ComponentFeature.Target
 import fastparse.parsers.{Combinators, Terminals}
 
 import scala.collection.mutable
-import fastparse.{all, noApi}
+import fastparse.{all, core, noApi}
 import fastparse.noApi._
 
 
@@ -83,12 +84,42 @@ object ECMAScript2018TokensParser extends StringToSourceName {
 
   // # 11.8.1 / 11.8.2
   val nullLiteral: UnitP = P("null")
-  val booleanLiteral: UnitP = StringIn("true", "false")
+  val booleanLiteral: Parser[Boolean] = P("true").map(_ => true) | P("false").map(_ => false)
 
   // # 11.8.3
-  val hexDigit: UnitP = P(CharIn('0' to '9', 'a' to 'f', 'A' to 'F'))
-  val octalDigit: UnitP = P(CharIn('0' to '7'))
-  val binaryDigit: UnitP = P(CharIn('0' to '1'))
+  val hexDigit: UnitP = CharIn('0' to '9', 'a' to 'f', 'A' to 'F')
+  val hexDigits: UnitP = hexDigit.rep(1)
+  val hexIntegerLiteral: UnitP = StringInIgnoreCase("0x") ~ hexDigits
+  val octalDigit: UnitP = CharIn('0' to '7')
+  val octalDigits: UnitP = octalDigit.rep(1)
+  val octalIntegerLiteral: UnitP = StringInIgnoreCase("0o") ~ octalDigits
+  val binaryDigit: UnitP = CharIn('0' to '1')
+  val binaryDigits: UnitP = binaryDigit.rep(1)
+  val binaryIntegerLiteral: UnitP = StringInIgnoreCase("0b") ~ binaryDigits
+  val decimalDigit: UnitP = CharIn('0' to '9')
+  val nonZeroDigit: UnitP = CharIn('1' to '9')
+  val decimalDigits: UnitP = decimalDigit.rep(1)
+  val signedInteger: UnitP = CharIn("+-").? ~ decimalDigits
+  val exponentIndicator: UnitP = CharIn("eE")
+  val exponentPart: UnitP = P(exponentIndicator ~ signedInteger)
+  val decimalIntegerLiteral: UnitP = "0" | nonZeroDigit ~ decimalDigits
+  val decimalLiteral: UnitP = P(
+    decimalIntegerLiteral ~ ("." ~ decimalDigits.?).? ~ exponentPart.? |
+    "." ~ decimalDigits ~ exponentPart.?
+  )
+  val numericLiteral: UnitP = P(decimalLiteral | binaryIntegerLiteral | octalIntegerLiteral | hexIntegerLiteral)
+
+  // 11.8.4
+  val hexEscapeSequence: UnitP = "x" ~ hexDigit ~ hexDigit
+  val singleEscapeCharacter: UnitP = CharIn("'", "\"", "\\", "bfnrtv")
+  val escapeCharacter: UnitP = singleEscapeCharacter | decimalDigit | CharIn("xu")
+  val nonEscapeCharacter: UnitP = !(escapeCharacter | lineTerminator) ~ sourceCharacter
+  val characterEscapeSequence: UnitP = singleEscapeCharacter | nonEscapeCharacter
+  val escapeSequence: UnitP = characterEscapeSequence | "0" ~ !decimalDigit | hexEscapeSequence | unicodeEscapeSequence
+  val lineContinuation: UnitP = "\\" ~ lineTerminatorSequence
+  val doubleStringCharacter: UnitP = "\\" ~ escapeSequence | !(CharIn("\"\\") | lineTerminator) ~ sourceCharacter | lineContinuation
+  val singleStringCharacter: UnitP = "\\" ~ escapeSequence | !(CharIn("\'\\") | lineTerminator) ~ sourceCharacter | lineContinuation
+  val stringLiteral: Parser[String] = "\"" ~/ doubleStringCharacter.rep.! ~ "\"" | "\'" ~/ singleStringCharacter.rep.! ~ "\'"
 
   //val commonToken: UnitP = identifierName
   val ws: UnitP = P(whiteSpace | lineTerminatorSequence | comment)("ws")
@@ -97,6 +128,7 @@ object ECMAScript2018TokensParser extends StringToSourceName {
 }
 
 object Ast {
+
   object VariableDeclarationType extends Enumeration {
     type VariableDeclarationType = Value
     val Var, Let, Const = Value
@@ -123,19 +155,30 @@ object Ast {
   sealed abstract class Binding extends AstNode
 
   sealed abstract class PatternBinding extends Binding
+
   sealed case class ObjectPatternBinding(properties: Seq[PropertyBinding]) extends PatternBinding
+
   sealed trait PropertyBinding extends AstNode
+
   sealed case class PatternBindingProperty(property: PropertyName, element: BindingElement) extends PropertyBinding
+
   sealed case class ArrayPatternBinding(elements: Seq[ArrayElementBinding], rest: Option[Binding]) extends PatternBinding
 
 
   sealed trait ArrayElementBinding extends AstNode
+
   sealed case class ElisionBinding() extends ArrayElementBinding
+
   sealed trait BindingElement
+
   sealed case class PatternElementBinding(pattern: PatternBinding, default: Option[Expression]) extends ArrayElementBinding with BindingElement
+
   sealed case class SingleNameBinding(name: String, default: Option[Expression]) extends ArrayElementBinding with PropertyBinding with BindingElement
 
   sealed abstract class PropertyName extends AstNode
+  sealed case class ComputedPropertyName(expression: Expression) extends PropertyName
+  sealed case class LiteralPropertyName(literal: String) extends PropertyName
+
   sealed case class IdentifierBinding(identifier: String) extends Binding
 
   sealed abstract class Declaration extends AstNode
@@ -144,9 +187,9 @@ object Ast {
 
   sealed abstract class VariableDeclaration extends AstNode
 
-  sealed case class IdentifierDeclaration(identifier: IdentifierBinding, initializer: Option[AssignmentExpression]) extends VariableDeclaration
+  sealed case class IdentifierDeclaration(identifier: IdentifierBinding, initializer: Option[Expression]) extends VariableDeclaration
 
-  sealed case class PatternDeclaration(pattern: PatternBinding, initializer: AssignmentExpression) extends VariableDeclaration
+  sealed case class PatternDeclaration(pattern: PatternBinding, initializer: Expression) extends VariableDeclaration
 
   sealed abstract class Expression extends AstNode
 
@@ -167,6 +210,7 @@ object Ast {
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
 
   sealed case class FunctionDeclaration() extends HoistableDeclaration
+
   sealed case class GeneratorDeclaration() extends HoistableDeclaration
 
   case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
@@ -191,9 +235,49 @@ object Ast {
   abstract class ForStatement() extends IterationStatement
 
   abstract class Expr*/
+
+  sealed abstract class PrimaryExpression extends Expression
+
+  sealed case class ThisExpression() extends PrimaryExpression
+
+  sealed case class BinaryOperatorExpression(operator: String, left: Expression, right: Expression) extends Expression
+  sealed case class ConditionalOperatior(condition: Expression, success: Expression, fail: Expression) extends Expression
+  sealed case class UnaryExpression(operator: String, expression: Expression) extends Expression
+
+  sealed case class Arguments(arguments: Seq[Expression], rest: Option[Expression]) extends AstNode
+
+  sealed case class TemplateLiteral() extends AstNode
+
+  sealed case class NewTargetExpression() extends Expression
+  sealed case class SuperExpression() extends Expression
+  sealed case class NewExpression(target: Expression, arguments: Option[Arguments]) extends Expression
+  sealed abstract class CallExpression extends Expression
+  sealed case class FunctionCallExpression(target: Expression, arguments: Arguments) extends CallExpression
+  sealed case class ArrayAccessExpression(target: Expression, index: Expression) extends CallExpression
+  sealed case class PropertyAccessExpression(target: Expression, property: String) extends CallExpression
+  sealed case class TaggedTemplateExpression(tag: Expression, template: TemplateLiteral) extends CallExpression // TODO: do template
+
+  sealed case class IdentifierReferenceExpression(identifier: String) extends PrimaryExpression
+  sealed abstract class LiteralExpression extends PrimaryExpression
+  sealed case class NullLiteral() extends LiteralExpression
+  sealed case class BooleanLiteral(value: Boolean) extends LiteralExpression
+  sealed case class NumericLiteral(value: String) extends LiteralExpression
+  sealed case class StringLiteral(string: String) extends LiteralExpression
+  sealed case class ArrayLiteral(elements: Seq[ArrayLiteralElement]) extends LiteralExpression
+  sealed case class ObjectLiteral(properties: Seq[PropertyDefinition])
+
+  sealed abstract class ArrayLiteralElement extends AstNode
+  sealed case class ArrayElisionElement() extends ArrayLiteralElement
+  sealed case class ArraySpreadElement(expression: Expression) extends ArrayLiteralElement
+  sealed case class ArrayElement(expression: Expression) extends ArrayLiteralElement
+
+  sealed abstract class PropertyDefinition extends AstNode
+  sealed case class ShortcutPropertyDefinition(name: String) extends PropertyDefinition
+  sealed case class NormalPropertyDefinition(name: PropertyName, initializer: Expression) extends PropertyDefinition
+  sealed case class MethodPropertyDefinition() extends PropertyDefinition
 }
 
-private class JsWsWrapper(WL: P0){
+private class JsWsWrapper(WL: P0) {
   implicit def parserApi2[T, V](p0: T)(implicit c: T => P[V]): JsWhitespaceApi[V] =
     new JsWhitespaceApi[V](p0, WL)
 }
@@ -205,12 +289,13 @@ private object JsWsApi extends JsWsWrapper({
 })
 
 private class JsWhitespaceApi[+T](p0: P[T], WL: P0) extends fastparse.WhitespaceApi[T](p0, WL) {
+
   import fastparse.all._
   import fastparse.parsers.Combinators.Sequence
   import fastparse.core.Implicits.Sequencer
 
   def ~~/[V, R](p: Parser[V])(implicit ev: Sequencer[T, V, R]): Parser[R] =
-    Sequence.flatten(Sequence(p0, p, cut=true).asInstanceOf[Sequence[R, R, R, Char, String]])
+    Sequence.flatten(Sequence(p0, p, cut = true).asInstanceOf[Sequence[R, R, R, Char, String]])
 }
 
 
@@ -228,19 +313,56 @@ object ECMAScript2018Parse extends StringToSourceName {
   type IYA = (Boolean, Boolean, Boolean)
   // yield, await, default
   type YAD = (Boolean, Boolean, Boolean)
-
+  // In, await
+  type IA = (Boolean, Boolean)
+  // yield
+  type Y = Boolean
+  // yield, await, tagged
+  type YAT = (Boolean, Boolean, Boolean)
 
   // # 11.9 Automatic Semicolon
   private lazy val `;` = noLineTerminator.rep ~~ P(";" | wsWithLineTerminator | &("}") | &(End))
   private lazy val noLineTerminatorHere = noLineTerminator.rep
 
   private def activate[V](a: Boolean, v: V): Option[V] = if (a) Some(v) else None
+
   private def toEither[T](l: (Boolean, Parser[T])*) = Combinators.Either(l.flatMap { case (a, v) => activate(a, v) }: _*)
 
+  private def makeBinaryOperatorFolder(leftAssociative: Boolean) = {
+
+    def leftFolder(acc: Ast.Expression, e: (String, Ast.Expression)) = e match {
+      case (op, sub) => Ast.BinaryOperatorExpression(op, acc, sub)
+    }
+    def rightFolder(e: (String, Ast.Expression), acc: Ast.Expression) = leftFolder(acc, e)
+
+    val fold = if (leftAssociative)
+      (init: Ast.Expression, list: Seq[(String, Ast.Expression)]) => list.foldLeft(init)(leftFolder)
+    else
+      (init: Ast.Expression, list: Seq[(String, Ast.Expression)]) => list.foldRight(init)(rightFolder)
+
+    fold
+  }
+
+  private def makeBinaryOperatorParser[Args, SubArgs, E <: Ast.Expression](opParser: Parser[String], subParser: ArgP[SubArgs, E], leftAssociative: Boolean, c: Args => SubArgs) = {
+    val fold = makeBinaryOperatorFolder(leftAssociative)
+    ArgP() {
+      args: Args =>
+        P(subParser(c(args)) ~ (opParser.! ~ subParser(c(args))).rep).map {
+          case (init, list) => fold(init, list)
+        }
+    }
+  }
+
   // not implemented
-  lazy val initializer: ArgP[IYA, Ast.AssignmentExpression] = ArgP() { _ => P(Fail) }
-  lazy val expression: ArgP[IYA, Ast.Expression] = ArgP() { _ => P(Fail) }
-  lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() { _ => P(Fail) }
+
+  lazy val yieldExpression: ArgP[IA, Ast.Expression] = ???
+  lazy val arrowFunctionExpression: ArgP[IYA, Ast.Expression] = ???
+  lazy val asyncArrowFunction: ArgP[IYA, Ast.Expression] = ???
+  lazy val awaitExpression: ArgP[Y, Ast.Expression] = ???
+  lazy val coverCallExpressionAndAsyncArrowHead: ArgP[YA, Ast.Expression] = ???
+  lazy val templateLiteral: ArgP[YAT, Ast.TemplateLiteral] = ???
+  lazy val methodDefiniton: ArgP[YA, ()] = ???
+
 
   // 12.1
   lazy val identifierReference: ArgP[YA, String] = ArgP() {
@@ -250,6 +372,192 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val labelIdentifier: ArgP[YA, String] = identifierReference
   lazy val identifier: Parser[String] = identifierName
 
+  // # 12.2
+  lazy val primaryExpression: ArgP[YA, Ast.PrimaryExpression] = ArgP() {
+    ya => thisExpression |
+      identifierReference(ya).map(Ast.IdentifierReferenceExpression) |
+      literal
+  }
+
+  // 12.2.2
+  lazy val thisExpression: Parser[Ast.ThisExpression] = P("this").map(_ => Ast.ThisExpression())
+
+  // 12.2.4
+  lazy val literal: Parser[Ast.LiteralExpression] = P(
+    nullLiteral.map(_ => Ast.NullLiteral()) |
+    booleanLiteral.map(Ast.BooleanLiteral) |
+    numericLiteral.!.map(Ast.NumericLiteral) |
+    stringLiteral.map(Ast.StringLiteral)
+  )
+
+  // 12.2.5
+  lazy val arrayLiteral: ArgP[YA, Ast.ArrayLiteral] = ArgP() {
+    ya => P("[" ~ elementList(ya) ~ "]").map(Ast.ArrayLiteral)
+  }
+  lazy val elementList: ArgP[YA, Seq[Ast.ArrayLiteralElement]] = ArgP() {
+    case ya@(y, a) => (
+      P(",").map(_ => Ast.ArrayElisionElement()) |
+      assignmentExpression(true, y, a).map(Ast.ArrayElement) |
+      spreadElement(ya)
+    ).rep(sep=",")
+  }
+  lazy val spreadElement: ArgP[YA, Ast.ArraySpreadElement] = ArgP() {
+    case (y, a) => P("..." ~ assignmentExpression(true, y, a)).map(Ast.ArraySpreadElement)
+  }
+
+  // 12.2.6
+  lazy val objectLiteral: ArgP[YA, Ast.ObjectLiteral] = ???
+  lazy val propertyDefinitionList: ArgP[YA, Seq[Ast.PropertyDefinition]] = ???
+  lazy val propertyDefinition: ArgP[YA, Ast.PropertyDefinition] = ArgP() {
+    case ya@(y, a) =>
+      identifierReference(ya).map(Ast.ShortcutPropertyDefinition) |
+      // TODO: CoverInitializedName is ignored... I am not sure in which context this would be allowed
+      P(propertyName(ya) ~ ":" ~ assignmentExpression(true, y, a)).map((Ast.NormalPropertyDefinition.apply _).tupled) |
+      methodDefiniton(ya).map(_ => Ast.MethodPropertyDefinition()) // TODO: implement it
+  }
+  lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() { _ => P(Fail) }
+  lazy val literalPropertyName: Parser[Ast.PropertyName] = P(
+    identifierName |
+    stringLiteral |
+    numericLiteral
+  ).!.map(Ast.LiteralPropertyName)
+  lazy val computedPropertyName: ArgP[YA, Ast.PropertyName] = ArgP() {
+    case (y, a) => P("[" ~ assignmentExpression(true, y, a) ~ "]").map(Ast.ComputedPropertyName)
+  }
+  lazy val initializer: ArgP[IYA, Ast.Expression] = ArgP() {
+    iya => "=" ~ assignmentExpression(iya)
+  }
+
+  // 12.3
+  private def makeTargetExpression(ya: (Boolean, Boolean))( target: Ast.Expression) = ya match {
+    case (y, a) =>
+      arguments(ya).map(Ast.FunctionCallExpression(target, _)) |
+        P("[" ~ expression(true, y, a) ~ "]").map(Ast.ArrayAccessExpression(target, _)) |
+        P("." ~ identifierName).map(Ast.PropertyAccessExpression(target, _)) |
+        P(templateLiteral(y, a, true)).map(Ast.TaggedTemplateExpression(target, _))
+  }
+  lazy val memberExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    case ya@(y, a) =>
+      P(
+        primaryExpression(ya) |
+        superProperty(ya) |
+        metaProperty |
+        ("new" ~ memberExpression(ya) ~ arguments(ya)).map{ case (target, args) => Ast.NewExpression(target, Some(args))}
+      ).flatMap(makeTargetExpression(ya))
+  }
+  lazy val superProperty: ArgP[YA, Ast.Expression] = ArgP() {
+    case (y, a) => "super" ~ (
+      P("[" ~ expression(true, y, a) ~ "]").map(Ast.ArrayAccessExpression(Ast.SuperExpression(), _)) |
+      P("." ~ identifierName).map(Ast.PropertyAccessExpression(Ast.SuperExpression(), _))
+    )
+  }
+  lazy val metaProperty: Parser[Ast.NewTargetExpression] = newTarget
+  lazy val newTarget: Parser[Ast.NewTargetExpression] = P("new" ~ "." ~ "target").map(_ => Ast.NewTargetExpression())
+  lazy val newExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    ya => memberExpression(ya) | ("new" ~ newExpression(ya)).map(Ast.NewExpression(_, None))
+  }
+  lazy val callExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    case ya@(y, a) =>
+      P(
+        coverCallExpressionAndAsyncArrowHead(ya) |
+        superCall(ya)
+      ).flatMap(makeTargetExpression(ya))
+  }
+  lazy val superCall: ArgP[YA, Ast.Expression] = ArgP() {
+    ya => P("super" ~ arguments(ya)).map(args => Ast.FunctionCallExpression(Ast.SuperExpression(), args))
+  }
+  lazy val arguments: ArgP[YA, Ast.Arguments] = ArgP() {
+    ya => "(" ~ argumentList(ya) ~ ",".? ~ ")"
+  }
+  lazy val argumentList: ArgP[YA, Ast.Arguments] = ArgP() {
+    case (y, a) =>
+      P(
+        assignmentExpression(true, y, a).rep(sep = P(",")) ~
+        ("," ~ "..." ~ assignmentExpression(true, y, a)).?
+      ).map((Ast.Arguments.apply _).tupled)
+  }
+  lazy val leftHandSideExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    ya => newExpression(ya) | callExpression(ya)
+  }
+
+  // 12.4
+  lazy val updateExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    ya =>
+      P(  // TODO: use better operator representation
+        StringIn("++", "--").!.map("pre_" + _) ~ leftHandSideExpression(ya) |
+        P(leftHandSideExpression(ya) ~~ noLineTerminatorHere ~~ StringIn("++", "--").!.map("post_" + _))
+          .map{case (e, op) => (op, e)}
+      ).map((Ast.UnaryExpression.apply _).tupled)
+  }
+  // 12.5
+  lazy val unaryExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    case ya@(y, a) =>
+      toEither((true, updateExpression(ya)), (true, unaryOperatorExpression(ya)), (a, awaitExpression(y)))
+  }
+  private lazy val unaryOperatorExpression: ArgP[YA, Ast.UnaryExpression] = ArgP() {
+    ya => P(unaryOperators ~ unaryExpression(ya)).map((Ast.UnaryExpression.apply _).tupled)
+  }
+  private val unaryOperators = StringIn("delete", "void", "typeof", "+", "-", "~", "!").!
+
+  // 12.6
+  lazy val exponentiationExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(P("**").!, additiveExpression, leftAssociative = false, a => a)
+
+  // 12.7
+  lazy val multiplicativeExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(multiplicativeOperators, exponentiationExpression, leftAssociative = true, a => a)
+  private val multiplicativeOperators = StringIn("*", "/", "%").!
+
+  // 12.8
+  lazy val additiveExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(additiveOperators, multiplicativeExpression, leftAssociative = true, a => a)
+  private val additiveOperators = StringIn("+", "-").!
+
+  // 12.9
+  lazy val shiftExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(shiftOperator, additiveExpression, leftAssociative = true, a => a)
+  private val shiftOperator = StringIn(">>>", ">>", "<<").!
+  // 12.10
+  // NOTE: the in-production would give +In to it's subsequent RelationalExpressions
+  //       this is not explicitly stated here, because the production is only used if i is already true
+  lazy val relationalExpression: ArgP[IYA, Ast.Expression] = ArgP() {
+    case iya@(i, _, _) => makeBinaryOperatorParser(relationalOperator(i), shiftExpression, leftAssociative = true, (t:IYA) => t match {case (_, y, a) => (y, a)})(iya)
+  }
+  private def relationalOperator(in: Boolean) = StringIn(Seq("<=", ">=", "<", ">", "instanceof") ++ (if (in) Seq("in") else Seq()): _*).!
+
+  // 12.11
+  lazy val equalityExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(equalityOperator, relationalExpression, leftAssociative = true, a => a)
+  private val equalityOperator = StringIn("!==", "===", "!=", "==").!
+
+  // 12.12
+  lazy val bitwiseANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("&").!, equalityExpression, leftAssociative = true, a => a)
+  lazy val bitwiseXORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("^").!, bitwiseANDExpression, leftAssociative = true, a => a)
+  lazy val bitwiseORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("|").!, bitwiseXORExpression, leftAssociative = true, a => a)
+
+  // 12.13
+  lazy val logicalANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("&&").!, bitwiseORExpression, leftAssociative = true, a => a)
+  lazy val logicalORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("||").!, logicalANDExpression, leftAssociative = true, a => a)
+
+  // 12.14
+  lazy val conditionalExpression: ArgP[IYA, Ast.Expression] = ArgP() {
+    case (iya) => P(logicalORExpression(iya) ~ ("?" ~/ assignmentExpression(iya) ~ ":" ~/ assignmentExpression(iya)).?).map {
+      case (expr, None) => expr
+      case (cond, Some((success, fail))) => Ast.ConditionalOperatior(cond, success, fail)
+    }
+  }
+
+
+  // 12.15
+  lazy val assignmentExpression: ArgP[IYA, Ast.Expression] = ArgP() {
+    case iya@(i, y, a) =>
+      toEither(
+        (true, NoCut(conditionalExpression(iya))),
+        (y, yieldExpression(i, a)),
+        (true, arrowFunctionExpression(iya)),
+        (true, asyncArrowFunction(iya)),
+        (true, (leftHandSideExpression(i, a) ~ assignmentOperator ~ assignmentExpression(iya)).map{case (l, op, r) => Ast.BinaryOperatorExpression(op, l, r)})
+      )
+  }
+  lazy val assignmentOperator: Parser[String] = StringIn("=", "*=", "/=", "%=", "+=" , "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "**=").!
+
+  // 12.16
+  lazy val expression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P(",").!, primaryExpression, leftAssociative = true, _ => (true, true))
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
@@ -313,17 +621,18 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val arrayBindingPattern: ArgP[YA, Ast.ArrayPatternBinding] = ArgP() {
     ya =>
       P("[" ~/
-        (bindingElement(ya) | P("").map(_ => Ast.ElisionBinding())).rep(sep=",") ~
+        (bindingElement(ya) | P("").map(_ => Ast.ElisionBinding())).rep(sep = ",") ~
         bindingRestElement(ya).? ~/
         "]"
       ).map((Ast.ArrayPatternBinding.apply _).tupled)
   }
   lazy val bindingPropertyList: ArgP[YA, Seq[Ast.PropertyBinding]] = ArgP() {
-    ya => bindingProperty(ya).rep(sep=",")
+    ya => bindingProperty(ya).rep(sep = ",")
   }
   lazy val bindingProperty: ArgP[YA, Ast.PropertyBinding] = ArgP() {
-    ya => singleNameBinding(ya) |
-      P(propertyName(ya) ~ ":" ~ bindingElement(ya)).map((Ast.PatternBindingProperty.apply _).tupled)
+    ya =>
+      singleNameBinding(ya) |
+        P(propertyName(ya) ~ ":" ~ bindingElement(ya)).map((Ast.PatternBindingProperty.apply _).tupled)
   }
   lazy val bindingElement: ArgP[YA, Ast.ArrayElementBinding with Ast.BindingElement] = ArgP() {
     case ya@(y, a) => singleNameBinding(ya) | (bindingPattern(ya) ~ initializer(true, y, a).?).map((Ast.PatternElementBinding.apply _).tupled)
@@ -417,7 +726,7 @@ object ECMAScript2018Parse extends StringToSourceName {
         emptyStatement |
         continueStatement(y, a) |
         breakStatement(y, a) |
-        returnStatement(y, a) |
+        (if(r) returnStatement(y, a) else Fail) | //TODO: Custom error
         withStatement(yar) |
         switchStatement(yar) |
         labelledStatement(yar) |
@@ -458,7 +767,11 @@ object ECMAScript2018Parse extends StringToSourceName {
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    val Parsed.Success(ast, _) = ECMAScript2018Parse.script.parse("const { a};")
-    println(ast)
+    ECMAScript2018Parse.script.parse("return;") match {
+      case Parsed.Success(ast, _) =>
+        println(ast)
+      case f@Parsed.Failure(lastParser, _, extra) =>
+        println(f)
+    }
   }
 }
