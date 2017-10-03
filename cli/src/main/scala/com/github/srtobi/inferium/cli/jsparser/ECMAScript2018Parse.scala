@@ -2,6 +2,7 @@ package com.github.srtobi.inferium.cli.jsparser
 
 import com.github.srtobi.inferium.cli.jsparser.Ast.VariableDeclarationType.VariableDeclarationType
 import com.sun.xml.internal.ws.api.ComponentFeature.Target
+import fastparse.core.Parsed.Success
 import fastparse.parsers.{Combinators, Terminals}
 
 import scala.collection.mutable
@@ -134,6 +135,11 @@ object Ast {
     val Var, Let, Const = Value
   }
 
+  object ClosureType extends Enumeration {
+    type ClosureType = Value
+    val Normal, Async, Generator = Value
+  }
+
   sealed abstract class AstNode
 
   sealed case class Block(statement: Seq[Statement]) extends AstNode
@@ -197,7 +203,7 @@ object Ast {
 
   sealed case class Script(statements: Seq[Statement]) extends AstNode
 
-  sealed class ClassDeclaration extends Declaration
+  sealed case class ClassDeclaration(clazz: Class) extends Declaration
 
   sealed class LexicalDeclaration extends Declaration
 
@@ -276,7 +282,17 @@ object Ast {
   sealed case class NormalPropertyDefinition(name: PropertyName, initializer: Expression) extends PropertyDefinition
   sealed case class MethodPropertyDefinition() extends PropertyDefinition
 
-  sealed case class Function(identifier: Option[String], parameters: Seq[BindingElement], rest: Option[Binding], body: Seq[Statement]) extends PrimaryExpression
+  sealed case class Parameters(parameters: Seq[BindingElement], rest: Option[Binding])
+  sealed case class Function(closureType: ClosureType.ClosureType, identifier: Option[String], parameters: Parameters, body: Seq[Statement]) extends PrimaryExpression
+  sealed case class Class(identifier: Option[String], heritage: Option[Expression], methods: Seq[ClassMember]) extends PrimaryExpression
+
+  sealed case class ClassMember(method: MethodDefinition, isStatic: Boolean) extends AstNode
+  sealed abstract class MethodDefinition extends AstNode
+  sealed case class Method(closureType: ClosureType.ClosureType, name: PropertyName, parameters: Parameters, body: Seq[Statement]) extends MethodDefinition
+  sealed case class PropertyGetter(name: PropertyName, body: Seq[Statement]) extends MethodDefinition
+  sealed case class PropertySetter(name: PropertyName, parameter: BindingElement,  body: Seq[Statement]) extends MethodDefinition
+
+  sealed case class YieldExpression(expression: Option[Expression], array: Boolean) extends Expression
 }
 
 private class JsWsWrapper(WL: P0) {
@@ -357,14 +373,12 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // not implemented
 
-  lazy val yieldExpression: ArgP[IA, Ast.Expression] = ???
   lazy val arrowFunctionExpression: ArgP[IYA, Ast.Expression] = ???
   lazy val asyncArrowFunction: ArgP[IYA, Ast.Expression] = ???
   lazy val awaitExpression: ArgP[Y, Ast.Expression] = ???
   lazy val coverCallExpressionAndAsyncArrowHead: ArgP[YA, Ast.Expression] = ???
   lazy val templateLiteral: ArgP[YAT, Ast.TemplateLiteral] = ???
-  lazy val methodDefiniton: ArgP[YA, Unit] = ???
-
+  lazy val asyncMethod: ArgP[YA, Ast.Method] = ???
 
   // 12.1
   lazy val identifierReference: ArgP[YA, String] = ArgP() {
@@ -381,7 +395,9 @@ object ECMAScript2018Parse extends StringToSourceName {
       literal |
       arrayLiteral(ya) |
       objectLiteral(ya) |
-      functionExpression(ya)
+      functionExpression(ya) |
+      classExpression(ya) |
+      generatorExpression
   }
 
   // 12.2.2
@@ -422,7 +438,7 @@ object ECMAScript2018Parse extends StringToSourceName {
       identifierReference(ya).map(Ast.ShortcutPropertyDefinition) |
       // TODO: CoverInitializedName is ignored... I am not sure in which context this would be allowed
       P(propertyName(ya) ~ ":" ~ assignmentExpression(true, y, a)).map((Ast.NormalPropertyDefinition.apply _).tupled) |
-      methodDefiniton(ya).map(_ => Ast.MethodPropertyDefinition()) // TODO: implement it
+      methodDefinition(ya).map(_ => Ast.MethodPropertyDefinition()) // TODO: implement it
   }
   lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() { _ => P(Fail) }
   lazy val literalPropertyName: Parser[Ast.PropertyName] = P(
@@ -751,17 +767,16 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() {
     yad => functionDeclaration(yad) | generatorDeclaration(yad) | asyncFunctionDeclaration(yad)
   }
-  lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = ArgP() { _ => P(Fail) }
 
 
   // # 14.1
   lazy val functionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
     case (y, a, d) => P(
       "function" ~/
-        bindingIdentifier.map(id => Some(id.identifier)) ~/
+        (if (d) Pass.map(_ => None) else bindingIdentifier.map(id => Some(id.identifier))) ~/
         "(" ~ formalParameters(y, a) ~ ")" ~
         "{" ~ functionBody(y, a) ~ "}"
-    ).map { case (id, (params, rest), body) => Ast.Function(id, params, rest, body) }
+    ).map { case (id, params, body) => Ast.Function(Ast.ClosureType.Normal, id, params, body) }
       .map(Ast.FunctionDeclaration)
   }
   lazy val functionExpression: ArgP[YA, Ast.Function] = ArgP() {
@@ -770,11 +785,11 @@ object ECMAScript2018Parse extends StringToSourceName {
         bindingIdentifier.map(_.identifier).? ~/
         "(" ~ formalParameters(ya) ~ ")" ~
         "{" ~ functionBody(ya) ~ "}"
-    ).map { case (id, (params, rest), body) => Ast.Function(id, params, rest, body) }
+    ).map { case (id, params, body) => Ast.Function(Ast.ClosureType.Normal, id, params, body) }
   }
-  lazy val uniqueFormalParameters: ArgP[YA, (Seq[Ast.BindingElement], Option[Ast.Binding])] = formalParameters
-  lazy val formalParameters: ArgP[YA, (Seq[Ast.BindingElement], Option[Ast.Binding])] = ArgP() {
-    ya => formalParameter(ya).rep(sep=",") ~ (P(",").map(_ => None) | functionRestParameter(ya).?)
+  lazy val uniqueFormalParameters: ArgP[YA, Ast.Parameters] = formalParameters
+  lazy val formalParameters: ArgP[YA, Ast.Parameters] = ArgP() {
+    ya => P(formalParameter(ya).rep(sep=",") ~ (P(",").map(_ => None) | functionRestParameter(ya).?)).map((Ast.Parameters.apply _).tupled)
   }
   lazy val formalParameterList: ArgP[YA, Seq[Ast.BindingElement]] = ArgP() {
     ya => formalParameter(ya).rep
@@ -786,10 +801,115 @@ object ECMAScript2018Parse extends StringToSourceName {
     case (y, a) => statementList(y, a, true)
   }
 
-  // # 14.6
-  lazy val generatorDeclaration: ArgP[YAD, Ast.GeneratorDeclaration] = ArgP() {
-    _ => Fail
+  // 14.3
+  lazy val methodDefinition: ArgP[YA, Ast.MethodDefinition] = ArgP() {
+    ya =>
+      P(
+        normalMethod(ya) |
+        generatorMethod(ya) |
+        asyncMethod(ya) |
+        propertyGetter(ya) |
+        propertySetter(ya)
+      )
   }
+  private val normalMethod: ArgP[YA, Ast.Method] = ArgP() {
+    ya =>
+      P(
+        propertyName(ya) ~
+          "(" ~/ uniqueFormalParameters(ya) ~ ")" ~/
+          "{" ~/ functionBody(false, false) ~ "}"
+      ).map{ case (prop, params, body) => Ast.Method(Ast.ClosureType.Normal, prop, params, body)}
+  }
+  private lazy val propertyGetter: ArgP[YA, Ast.PropertyGetter] = ArgP() {
+    ya =>
+      P(
+        "get" ~ propertyName(ya) ~
+          "(" ~/ ")" ~/
+          "{" ~/ functionBody(false, false) ~ "}"
+      ).map { case (prop, body) => Ast.PropertyGetter(prop, body) }
+  }
+
+  private lazy val propertySetter: ArgP[YA, Ast.PropertySetter] = ArgP() {
+    ya =>
+      P(
+        "get" ~ propertyName(ya) ~
+          "(" ~/ propertySetParameterList ~ ")" ~/
+          "{" ~/ functionBody(false, false) ~ "}"
+      ).map { case (prop, param, body) => Ast.PropertySetter(prop, param, body) }
+  }
+  lazy val propertySetParameterList: Parser[Ast.BindingElement] = formalParameter(false, false)
+
+
+  // 14.4
+  lazy val generatorMethod: ArgP[YA, Ast.Method] = ArgP() {
+    ya =>
+      P(
+        "*" ~
+          propertyName(ya) ~/
+          "(" ~/ uniqueFormalParameters(true, false) ~ ")" ~/
+          "{" ~/ generatorBody ~ "}"
+      ).map { case (prop, params, body) => Ast.Method(Ast.ClosureType.Generator, prop, params, body) }
+  }
+  lazy val generatorDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
+    case (_, _, d) => P(
+      "function" ~ "*" ~/
+        (if (d) Pass.map(_ => None) else bindingIdentifier.map(id => Some(id.identifier))) ~/
+        "(" ~/ formalParameters(true, false) ~ ")" ~/
+        "{" ~/ generatorBody ~ "}"
+    ).map{ case (id, params, body) => Ast.FunctionDeclaration(Ast.Function(Ast.ClosureType.Generator, id, params, body))}
+  }
+  lazy val generatorExpression: Parser[Ast.Function] = P(
+    "function" ~ "*" ~/
+      bindingIdentifier.map(_.identifier).? ~/
+    "(" ~/ formalParameters(true, false) ~ ")" ~/
+    "{" ~/ generatorBody ~ "}"
+  ).map{ case (id, params, body) => Ast.Function(Ast.ClosureType.Generator, id, params, body)}
+  lazy val generatorBody: Parser[Seq[Ast.Statement]] = functionBody(true, false)
+  lazy val yieldExpression: ArgP[IA, Ast.YieldExpression] = ArgP() {
+    case (i, a) =>
+      P(
+        "yield" ~~/
+        (noLineTerminatorHere ~~
+          (assignmentExpression(i, true, a) ~~ Pass.map(_ => false) |
+            "*" ~ assignmentExpression(i, true, a) ~~ Pass.map(_ => true))
+        ).?
+      ).map {
+        case None => Ast.YieldExpression(None, array = false)
+        case Some((e, array)) => Ast.YieldExpression(Some(e), array)
+      }
+  }
+
+  // 14.5
+  lazy val classDeclaration: ArgP[YAD, Ast.ClassDeclaration] = ArgP() {
+    case yad@(y, a, d) =>
+      P(
+        "class" ~/
+        (if (d) Pass.map(_ => None) else bindingIdentifier.map(id => Some(id.identifier))) ~/
+        classTail(y, a)
+      ).map{ case (id, (heritage, body)) => Ast.ClassDeclaration(Ast.Class(id, heritage, body))}
+
+  }
+  lazy val classExpression: ArgP[YA, Ast.Class] = ArgP() {
+    ya => P(
+      "class" ~/ bindingIdentifier.map(_.identifier).? ~/ classTail(ya)
+    ).map{ case (id, (heritage, body)) => Ast.Class(id, heritage, body)}
+  }
+  lazy val classTail: ArgP[YA, (Option[Ast.Expression], Seq[Ast.ClassMember])] = ArgP() {
+    ya => classHeritage(ya).? ~/ "{" ~/ classBody(ya) ~ "}"
+  }
+  lazy val classHeritage: ArgP[YA, Ast.Expression] = ArgP() {
+    ya => "extends" ~/ leftHandSideExpression(ya)
+  }
+  lazy val classBody: ArgP[YA, Seq[Ast.ClassMember]] = classElementList
+  lazy val classElementList: ArgP[YA, Seq[Ast.ClassMember]] = ArgP() {
+    ya => classElement(ya).rep.map(_.flatten)
+  }
+  lazy val classElement: ArgP[YA, Option[Ast.ClassMember]] = ArgP() {
+    ya =>
+      P(";").map(_ => None) |
+      P(P("static").!.?.map(_.isDefined) ~ methodDefinition(ya)).map{ case (static, d) => Some(Ast.ClassMember(d, static))}
+  }
+
 
   // # 14.6
   lazy val asyncFunctionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
