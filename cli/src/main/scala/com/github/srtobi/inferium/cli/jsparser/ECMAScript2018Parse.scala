@@ -1,7 +1,5 @@
 package com.github.srtobi.inferium.cli.jsparser
 
-import com.github.srtobi.inferium.cli.jsparser.Ast.VariableDeclarationType.VariableDeclarationType
-import com.sun.xml.internal.ws.api.ComponentFeature.Target
 import fastparse.core.Parsed.Success
 import fastparse.parsers.{Combinators, Terminals}
 
@@ -10,14 +8,28 @@ import fastparse.{all, core, noApi}
 import fastparse.noApi._
 
 
-class ArgP[Arg, R](func: (Arg) => Parser[R]) {
+class ArgP[Arg, R](func: (Arg) => Parser[R], enc: sourcecode.Enclosing) {
   private val cache = mutable.HashMap.empty[Arg, Parser[R]]
 
-  def apply(args: Arg): Parser[R] = cache.getOrElseUpdate(args, func(args))
+  import fastparse.all
+  import fastparse.all._
+  def apply(args: Arg): Parser[R] = cache.getOrElseUpdate(args, func(args).opaque(scimEnclosing(enc) + args).log())
+
+  private def scimEnclosing(enc: sourcecode.Enclosing): String = {
+    val v = enc.value
+    val end = v.lastIndexOf(".") match {
+      case -1 => v
+      case i => v.substring(i + 1)
+    }
+    return end.indexOf(" ") match {
+      case -1 => end
+      case i => end.substring(0, i)
+    }
+  }
 }
 
 object ArgP {
-  def apply[Arg, R]()(func: (Arg) => Parser[R]): ArgP[Arg, R] = new ArgP[Arg, R](func)
+  def apply[Arg, R]()(func: (Arg) => Parser[R])(implicit enc: sourcecode.Enclosing): ArgP[Arg, R] = new ArgP[Arg, R](func, enc)
 }
 
 trait StringToSourceName {
@@ -103,7 +115,7 @@ object ECMAScript2018TokensParser extends StringToSourceName {
   val signedInteger: UnitP = CharIn("+-").? ~ decimalDigits
   val exponentIndicator: UnitP = CharIn("eE")
   val exponentPart: UnitP = P(exponentIndicator ~ signedInteger)
-  val decimalIntegerLiteral: UnitP = "0" | nonZeroDigit ~ decimalDigits
+  val decimalIntegerLiteral: UnitP = P("0" | nonZeroDigit ~ decimalDigits.?)
   val decimalLiteral: UnitP = P(
     decimalIntegerLiteral ~ ("." ~ decimalDigits.?).? ~ exponentPart.? |
     "." ~ decimalDigits ~ exponentPart.?
@@ -128,172 +140,6 @@ object ECMAScript2018TokensParser extends StringToSourceName {
   val noLineTerminator: UnitP = P(whiteSpace | inlineComment)("no-line-terminator")
 }
 
-object Ast {
-
-  object VariableDeclarationType extends Enumeration {
-    type VariableDeclarationType = Value
-    val Var, Let, Const = Value
-  }
-
-  object ClosureType extends Enumeration {
-    type ClosureType = Value
-    val Normal, Async, Generator = Value
-  }
-
-  sealed abstract class AstNode
-
-  sealed case class Block(statement: Seq[Statement]) extends AstNode
-
-  sealed abstract class Statement extends AstNode
-
-  sealed abstract class NonDeclarationStatement extends Statement
-
-  sealed case class EmptyStatement() extends Statement
-
-  sealed case class BlockStatement(block: Block) extends Statement
-
-  sealed case class VariableStatement(declType: VariableDeclarationType, decls: Seq[Ast.VariableDeclaration]) extends Statement
-
-  sealed case class IfStatement(condition: Expression, success: Statement, fail: Option[Statement]) extends Statement
-
-  sealed case class DeclarationStatement(decl: Declaration) extends Statement
-
-  sealed abstract class Binding extends AstNode
-
-  sealed abstract class PatternBinding extends Binding
-
-  sealed case class ObjectPatternBinding(properties: Seq[PropertyBinding]) extends PatternBinding
-
-  sealed trait PropertyBinding extends AstNode
-
-  sealed case class PatternBindingProperty(property: PropertyName, element: BindingElement) extends PropertyBinding
-
-  sealed case class ArrayPatternBinding(elements: Seq[ArrayElementBinding], rest: Option[Binding]) extends PatternBinding
-
-
-  sealed trait ArrayElementBinding extends AstNode
-
-  sealed case class ElisionBinding() extends ArrayElementBinding
-
-  sealed trait BindingElement
-
-  sealed case class PatternElementBinding(pattern: PatternBinding, default: Option[Expression]) extends ArrayElementBinding with BindingElement
-
-  sealed case class SingleNameBinding(name: String, default: Option[Expression]) extends ArrayElementBinding with PropertyBinding with BindingElement
-
-  sealed abstract class PropertyName extends AstNode
-  sealed case class ComputedPropertyName(expression: Expression) extends PropertyName
-  sealed case class LiteralPropertyName(literal: String) extends PropertyName
-
-  sealed case class IdentifierBinding(identifier: String) extends Binding
-
-  sealed abstract class Declaration extends AstNode
-
-  sealed abstract class HoistableDeclaration extends Declaration
-
-  sealed abstract class VariableDeclaration extends AstNode
-
-  sealed case class IdentifierDeclaration(identifier: IdentifierBinding, initializer: Option[Expression]) extends VariableDeclaration
-
-  sealed case class PatternDeclaration(pattern: PatternBinding, initializer: Expression) extends VariableDeclaration
-
-  sealed abstract class Expression extends AstNode
-
-  sealed abstract class AssignmentExpression extends Expression
-
-  sealed case class Script(statements: Seq[Statement]) extends AstNode
-
-  sealed case class ClassDeclaration(clazz: Class) extends Declaration
-
-  sealed class LexicalDeclaration extends Declaration
-
-  case class DebuggerStatement() extends Statement
-
-  case class CatchBlock(parameter: Binding, block: Block)
-
-  case class TryStatement(block: Block, catchBlock: Option[CatchBlock], finallyBlock: Option[Block]) extends Statement
-
-  sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
-
-  sealed case class FunctionDeclaration(function: Function) extends HoistableDeclaration
-
-  sealed case class GeneratorDeclaration() extends HoistableDeclaration
-
-  case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
-
-  case class CaseClause(expression: Option[Expression], statements: Seq[Statement]) extends AstNode
-
-  case class WithStatement(expression: Expression, statement: Statement) extends Statement
-
-  case class ReturnStatement(expression: Option[Expression]) extends Statement
-
-  case class BreakStatement(label: Option[String]) extends Statement
-
-  case class ContinueStatement(label: Option[String]) extends Statement
-
-  /*sealed abstract class IterationStatement extends Statement
-
-  case class DoWhileStatement(expression: Expression) extends IterationStatement
-
-  case class WhileStatement(expression: Expression) extends IterationStatement
-
-  abstract class ForInit
-  abstract class ForStatement() extends IterationStatement
-
-  abstract class Expr*/
-
-  sealed abstract class PrimaryExpression extends Expression
-
-  sealed case class ThisExpression() extends PrimaryExpression
-
-  sealed case class BinaryOperatorExpression(operator: String, left: Expression, right: Expression) extends Expression
-  sealed case class ConditionalOperatior(condition: Expression, success: Expression, fail: Expression) extends Expression
-  sealed case class UnaryExpression(operator: String, expression: Expression) extends Expression
-
-  sealed case class Arguments(arguments: Seq[Expression], rest: Option[Expression]) extends AstNode
-
-  sealed case class TemplateLiteral() extends AstNode
-
-  sealed case class NewTargetExpression() extends Expression
-  sealed case class SuperExpression() extends Expression
-  sealed case class NewExpression(target: Expression, arguments: Option[Arguments]) extends Expression
-  sealed abstract class CallExpression extends Expression
-  sealed case class FunctionCallExpression(target: Expression, arguments: Arguments) extends CallExpression
-  sealed case class ArrayAccessExpression(target: Expression, index: Expression) extends CallExpression
-  sealed case class PropertyAccessExpression(target: Expression, property: String) extends CallExpression
-  sealed case class TaggedTemplateExpression(tag: Expression, template: TemplateLiteral) extends CallExpression // TODO: do template
-
-  sealed case class IdentifierReferenceExpression(identifier: String) extends PrimaryExpression
-  sealed abstract class LiteralExpression extends PrimaryExpression
-  sealed case class NullLiteral() extends LiteralExpression
-  sealed case class BooleanLiteral(value: Boolean) extends LiteralExpression
-  sealed case class NumericLiteral(value: String) extends LiteralExpression
-  sealed case class StringLiteral(string: String) extends LiteralExpression
-  sealed case class ArrayLiteral(elements: Seq[ArrayLiteralElement]) extends LiteralExpression
-  sealed case class ObjectLiteral(properties: Seq[PropertyDefinition]) extends LiteralExpression
-
-  sealed abstract class ArrayLiteralElement extends AstNode
-  sealed case class ArrayElisionElement() extends ArrayLiteralElement
-  sealed case class ArraySpreadElement(expression: Expression) extends ArrayLiteralElement
-  sealed case class ArrayElement(expression: Expression) extends ArrayLiteralElement
-
-  sealed abstract class PropertyDefinition extends AstNode
-  sealed case class ShortcutPropertyDefinition(name: String) extends PropertyDefinition
-  sealed case class NormalPropertyDefinition(name: PropertyName, initializer: Expression) extends PropertyDefinition
-  sealed case class MethodPropertyDefinition() extends PropertyDefinition
-
-  sealed case class Parameters(parameters: Seq[BindingElement], rest: Option[Binding])
-  sealed case class Function(closureType: ClosureType.ClosureType, identifier: Option[String], parameters: Parameters, body: Seq[Statement]) extends PrimaryExpression
-  sealed case class Class(identifier: Option[String], heritage: Option[Expression], methods: Seq[ClassMember]) extends PrimaryExpression
-
-  sealed case class ClassMember(method: MethodDefinition, isStatic: Boolean) extends AstNode
-  sealed abstract class MethodDefinition extends AstNode
-  sealed case class Method(closureType: ClosureType.ClosureType, name: PropertyName, parameters: Parameters, body: Seq[Statement]) extends MethodDefinition
-  sealed case class PropertyGetter(name: PropertyName, body: Seq[Statement]) extends MethodDefinition
-  sealed case class PropertySetter(name: PropertyName, parameter: BindingElement,  body: Seq[Statement]) extends MethodDefinition
-
-  sealed case class YieldExpression(expression: Option[Expression], array: Boolean) extends Expression
-}
 
 private class JsWsWrapper(WL: P0) {
   implicit def parserApi2[T, V](p0: T)(implicit c: T => P[V]): JsWhitespaceApi[V] =
@@ -321,6 +167,7 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   import ECMAScript2018TokensParser._
   import JsWsApi._
+  import Ast.{Operator => Op}
 
 
   // yield, await, return
@@ -337,79 +184,94 @@ object ECMAScript2018Parse extends StringToSourceName {
   type Y = Boolean
   // yield, await, tagged
   type YAT = (Boolean, Boolean, Boolean)
+  // In
+  type I = Boolean
 
   // # 11.9 Automatic Semicolon
   private lazy val `;` = noLineTerminator.rep ~~ P(";" | wsWithLineTerminator | &("}") | &(End))
   private lazy val noLineTerminatorHere = noLineTerminator.rep
 
+  private def opIn[O <: Ast.Operator](ops: O*): Parser[O] = Combinators.Either(ops.map(o => {P(o.text).!.map(_ => o)}): _*)
   private def activate[V](a: Boolean, v: V): Option[V] = if (a) Some(v) else None
-
   private def toEither[T](l: (Boolean, Parser[T])*) = Combinators.Either(l.flatMap { case (a, v) => activate(a, v) }: _*)
 
   private def makeBinaryOperatorFolder(leftAssociative: Boolean) = {
 
-    def leftFolder(acc: Ast.Expression, e: (String, Ast.Expression)) = e match {
+    def leftFolder(acc: Ast.Expression, e: (Ast.BinaryOperator, Ast.Expression)) = e match {
       case (op, sub) => Ast.BinaryOperatorExpression(op, acc, sub)
     }
-    def rightFolder(e: (String, Ast.Expression), acc: Ast.Expression) = leftFolder(acc, e)
+    def rightFolder(e: (Ast.BinaryOperator, Ast.Expression), acc: Ast.Expression) = e match {
+      case (op, sub) => Ast.BinaryOperatorExpression(op, sub, acc)
+    }
+    def transformRightToLft(init: Ast.Expression, list: Seq[(Ast.BinaryOperator, Ast.Expression)]): (Ast.Expression, Seq[(Ast.BinaryOperator, Ast.Expression)]) = list match {
+      case (op, e) +: rest =>
+        val (newIni, newList) = transformRightToLft(e, rest)
+        (newIni, (op, init) +: newList)
+      case _ => (init, list)
+    }
 
     val fold = if (leftAssociative)
-      (init: Ast.Expression, list: Seq[(String, Ast.Expression)]) => list.foldLeft(init)(leftFolder)
+      (init: Ast.Expression, list: Seq[(Ast.BinaryOperator, Ast.Expression)]) => list.foldLeft(init)(leftFolder)
     else
-      (init: Ast.Expression, list: Seq[(String, Ast.Expression)]) => list.foldRight(init)(rightFolder)
+      (init: Ast.Expression, list: Seq[(Ast.BinaryOperator, Ast.Expression)]) => {
+        val (ini, lst) = transformRightToLft(init, list)
+        lst.foldRight(ini)(rightFolder)
+      }
 
     fold
   }
 
-  private def makeBinaryOperatorParser[Args, SubArgs, E <: Ast.Expression](opParser: Parser[String], subParser: ArgP[SubArgs, E], leftAssociative: Boolean, c: Args => SubArgs) = {
+  private def makeBinaryOperatorParser[Args, SubArgs, E <: Ast.Expression](opParser: => Parser[Ast.BinaryOperator],
+                                                                           subParser: => ArgP[SubArgs, E],
+                                                                           leftAssociative: Boolean, c: Args => SubArgs)
+                                                                          (implicit enc: sourcecode.Enclosing) = {
     val fold = makeBinaryOperatorFolder(leftAssociative)
+    lazy val op = opParser
+    lazy val sub = subParser
     ArgP() {
       args: Args =>
-        P(subParser(c(args)) ~ (opParser.! ~ subParser(c(args))).rep).map {
+        P(sub(c(args)) ~ (op ~ sub(c(args))).rep).map {
           case (init, list) => fold(init, list)
         }
-    }
+    }(enc)
   }
 
   // not implemented
-
-  lazy val arrowFunctionExpression: ArgP[IYA, Ast.Expression] = ???
-  lazy val asyncArrowFunction: ArgP[IYA, Ast.Expression] = ???
-  lazy val awaitExpression: ArgP[Y, Ast.Expression] = ???
-  lazy val coverCallExpressionAndAsyncArrowHead: ArgP[YA, Ast.Expression] = ???
-  lazy val templateLiteral: ArgP[YAT, Ast.TemplateLiteral] = ???
-  lazy val asyncMethod: ArgP[YA, Ast.Method] = ???
+  lazy val templateLiteral: ArgP[YAT, Ast.TemplateLiteral] = ArgP() { _ => Fail }
 
   // 12.1
   lazy val identifierReference: ArgP[YA, String] = ArgP() {
-    case (y, a) => toEither((true, identifier), (y, P("yield").!), (a, P("await").!))
+    case (y, a) => toEither((true, identifier), (!y, P("yield").!), (!a, P("await").!))
   }
   lazy val bindingIdentifier: Parser[Ast.IdentifierBinding] = identifier.map(Ast.IdentifierBinding)
   lazy val labelIdentifier: ArgP[YA, String] = identifierReference
   lazy val identifier: Parser[String] = identifierName
 
   // # 12.2
-  lazy val primaryExpression: ArgP[YA, Ast.PrimaryExpression] = ArgP() {
-    ya => thisExpression |
+  lazy val primaryExpression: ArgP[YA, Ast.Expression] = ArgP() {
+    case ya@(y, a) =>
+      thisExpression |
       identifierReference(ya).map(Ast.IdentifierReferenceExpression) |
       literal |
       arrayLiteral(ya) |
       objectLiteral(ya) |
       functionExpression(ya) |
       classExpression(ya) |
-      generatorExpression
+      generatorExpression |
+      asyncFunctionExpression |
+      "(" ~ expression(true, y, a) ~ ")"
   }
 
   // 12.2.2
   lazy val thisExpression: Parser[Ast.ThisExpression] = P("this").map(_ => Ast.ThisExpression())
 
   // 12.2.4
-  lazy val literal: Parser[Ast.LiteralExpression] = P(
+  lazy val literal: Parser[Ast.LiteralExpression] = NoCut(
     nullLiteral.map(_ => Ast.NullLiteral()) |
     booleanLiteral.map(Ast.BooleanLiteral) |
     numericLiteral.!.map(Ast.NumericLiteral) |
     stringLiteral.map(Ast.StringLiteral)
-  )
+  ).log()
 
   // 12.2.5
   lazy val arrayLiteral: ArgP[YA, Ast.ArrayLiteral] = ArgP() {
@@ -440,7 +302,9 @@ object ECMAScript2018Parse extends StringToSourceName {
       P(propertyName(ya) ~ ":" ~ assignmentExpression(true, y, a)).map((Ast.NormalPropertyDefinition.apply _).tupled) |
       methodDefinition(ya).map(_ => Ast.MethodPropertyDefinition()) // TODO: implement it
   }
-  lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() { _ => P(Fail) }
+  lazy val propertyName: ArgP[YA, Ast.PropertyName] = ArgP() {
+    ya => literalPropertyName | computedPropertyName(ya)
+  }
   lazy val literalPropertyName: Parser[Ast.PropertyName] = P(
     identifierName |
     stringLiteral |
@@ -450,16 +314,18 @@ object ECMAScript2018Parse extends StringToSourceName {
     case (y, a) => P("[" ~ assignmentExpression(true, y, a) ~ "]").map(Ast.ComputedPropertyName)
   }
   lazy val initializer: ArgP[IYA, Ast.Expression] = ArgP() {
-    iya => "=" ~ assignmentExpression(iya)
+    iya => P("=" ~/ assignmentExpression(iya))
   }
 
   // 12.3
-  private def makeTargetExpression(ya: (Boolean, Boolean))( target: Ast.Expression) = ya match {
+  private def makeTargetExpression(ya: (Boolean, Boolean), canCall: Boolean)(target: Ast.Expression) = ya match {
     case (y, a) =>
-      arguments(ya).map(Ast.FunctionCallExpression(target, _)) |
+      P(
+        (if(canCall) arguments(ya).map(Ast.FunctionCallExpression(target, _)) else Fail) |
         P("[" ~ expression(true, y, a) ~ "]").map(Ast.ArrayAccessExpression(target, _)) |
         P("." ~ identifierName).map(Ast.PropertyAccessExpression(target, _)) |
         P(templateLiteral(y, a, true)).map(Ast.TaggedTemplateExpression(target, _))
+      ).?.map(_.getOrElse(target))
   }
   lazy val memberExpression: ArgP[YA, Ast.Expression] = ArgP() {
     case ya@(y, a) =>
@@ -468,7 +334,7 @@ object ECMAScript2018Parse extends StringToSourceName {
         superProperty(ya) |
         metaProperty |
         ("new" ~ memberExpression(ya) ~ arguments(ya)).map{ case (target, args) => Ast.NewExpression(target, Some(args))}
-      ).flatMap(makeTargetExpression(ya))
+      ).flatMap(makeTargetExpression(ya, canCall = false))
   }
   lazy val superProperty: ArgP[YA, Ast.Expression] = ArgP() {
     case (y, a) => "super" ~ (
@@ -479,20 +345,20 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val metaProperty: Parser[Ast.NewTargetExpression] = newTarget
   lazy val newTarget: Parser[Ast.NewTargetExpression] = P("new" ~ "." ~ "target").map(_ => Ast.NewTargetExpression())
   lazy val newExpression: ArgP[YA, Ast.Expression] = ArgP() {
-    ya => memberExpression(ya) | ("new" ~ newExpression(ya)).map(Ast.NewExpression(_, None))
+    ya => P(memberExpression(ya) | ("new" ~ newExpression(ya)).map(Ast.NewExpression(_, None)))
   }
   lazy val callExpression: ArgP[YA, Ast.Expression] = ArgP() {
     case ya@(y, a) =>
       P(
-        coverCallExpressionAndAsyncArrowHead(ya) |
+        coverCallExpressionAndAsyncArrowHead(ya).map((Ast.FunctionCallExpression.apply _).tupled) |
         superCall(ya)
-      ).flatMap(makeTargetExpression(ya))
+      ).flatMap(makeTargetExpression(ya, canCall = true))
   }
   lazy val superCall: ArgP[YA, Ast.Expression] = ArgP() {
     ya => P("super" ~ arguments(ya)).map(args => Ast.FunctionCallExpression(Ast.SuperExpression(), args))
   }
   lazy val arguments: ArgP[YA, Ast.Arguments] = ArgP() {
-    ya => "(" ~ argumentList(ya) ~ ",".? ~ ")"
+    ya => P("(" ~ argumentList(ya) ~ ",".? ~ ")")
   }
   lazy val argumentList: ArgP[YA, Ast.Arguments] = ArgP() {
     case (y, a) =>
@@ -502,17 +368,16 @@ object ECMAScript2018Parse extends StringToSourceName {
       ).map((Ast.Arguments.apply _).tupled)
   }
   lazy val leftHandSideExpression: ArgP[YA, Ast.Expression] = ArgP() {
-    ya => newExpression(ya) | callExpression(ya)
+    ya => callExpression(ya) | newExpression(ya)
   }
 
   // 12.4
   lazy val updateExpression: ArgP[YA, Ast.Expression] = ArgP() {
     ya =>
-      P(  // TODO: use better operator representation
-        StringIn("++", "--").!.map("pre_" + _) ~ leftHandSideExpression(ya) |
-        P(leftHandSideExpression(ya) ~~ noLineTerminatorHere ~~ StringIn("++", "--").!.map("post_" + _))
-          .map{case (e, op) => (op, e)}
-      ).map((Ast.UnaryExpression.apply _).tupled)
+      // TODO: use better operator representation
+      P(opIn(Op.`pre++`, Op.`pre--`) ~ leftHandSideExpression(ya)).map((Ast.UnaryExpression.apply _).tupled) |
+      P(leftHandSideExpression(ya) ~~ noLineTerminatorHere ~~ opIn(Op.`post++`, Op.`post--`).?)
+        .map{case (e, op) => op.map(Ast.UnaryExpression(_, e)).getOrElse(e)}
   }
   // 12.5
   lazy val unaryExpression: ArgP[YA, Ast.Expression] = ArgP() {
@@ -522,48 +387,48 @@ object ECMAScript2018Parse extends StringToSourceName {
   private lazy val unaryOperatorExpression: ArgP[YA, Ast.UnaryExpression] = ArgP() {
     ya => P(unaryOperators ~ unaryExpression(ya)).map((Ast.UnaryExpression.apply _).tupled)
   }
-  private val unaryOperators = StringIn("delete", "void", "typeof", "+", "-", "~", "!").!
+  private val unaryOperators = opIn(Op.`delete`, Op.`void`, Op.`typeof`, Op.`unary+`, Op.`unary-`, Op.`~`, Op.`!`)
 
   // 12.6
-  lazy val exponentiationExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(P("**").!, additiveExpression, leftAssociative = false, a => a)
+  lazy val exponentiationExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`**`), unaryExpression, leftAssociative = false, a => a)
 
   // 12.7
   lazy val multiplicativeExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(multiplicativeOperators, exponentiationExpression, leftAssociative = true, a => a)
-  private val multiplicativeOperators = StringIn("*", "/", "%").!
+  private val multiplicativeOperators = opIn(Op.`*`, Op.`/`, Op.`%`)
 
   // 12.8
   lazy val additiveExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(additiveOperators, multiplicativeExpression, leftAssociative = true, a => a)
-  private val additiveOperators = StringIn("+", "-").!
+  private val additiveOperators = opIn(Op.`binary+`, Op.`binary-`)
 
   // 12.9
   lazy val shiftExpression: ArgP[YA, Ast.Expression] = makeBinaryOperatorParser(shiftOperator, additiveExpression, leftAssociative = true, a => a)
-  private val shiftOperator = StringIn(">>>", ">>", "<<").!
+  private val shiftOperator = opIn(Op.`>>>`, Op.`>>`, Op.`<<`)
   // 12.10
   // NOTE: the in-production would give +In to it's subsequent RelationalExpressions
   //       this is not explicitly stated here, because the production is only used if i is already true
   lazy val relationalExpression: ArgP[IYA, Ast.Expression] = ArgP() {
-    case iya@(i, _, _) => makeBinaryOperatorParser(relationalOperator(i), shiftExpression, leftAssociative = true, (t:IYA) => t match {case (_, y, a) => (y, a)})(iya)
+    case iya@(i, _, _) => makeBinaryOperatorParser(relationalOperator(i), shiftExpression, leftAssociative = true, (t:IYA) => t match {case (_, y, a) => (y, a)})(sourcecode.Enclosing.generate)(iya)
   }
-  private def relationalOperator(in: Boolean) = StringIn(Seq("<=", ">=", "<", ">", "instanceof") ++ (if (in) Seq("in") else Seq()): _*).!
+  private def relationalOperator(in: Boolean) = opIn(Seq(Op.`<=`, Op.`>=`, Op.`<`, Op.`>`, Op.`instanceof`) ++ (if (in) Seq(Op.`in`) else Seq()): _*)
 
   // 12.11
   lazy val equalityExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(equalityOperator, relationalExpression, leftAssociative = true, a => a)
-  private val equalityOperator = StringIn("!==", "===", "!=", "==").!
+  private val equalityOperator = opIn(Op.`!==`, Op.`===`, Op.`!=`, Op.`==`)
 
   // 12.12
-  lazy val bitwiseANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("&").!, equalityExpression, leftAssociative = true, a => a)
-  lazy val bitwiseXORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("^").!, bitwiseANDExpression, leftAssociative = true, a => a)
-  lazy val bitwiseORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("|").!, bitwiseXORExpression, leftAssociative = true, a => a)
+  lazy val bitwiseANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`&`), equalityExpression, leftAssociative = true, a => a)
+  lazy val bitwiseXORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`^`), bitwiseANDExpression, leftAssociative = true, a => a)
+  lazy val bitwiseORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`|`), bitwiseXORExpression, leftAssociative = true, a => a)
 
   // 12.13
-  lazy val logicalANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("&&").!, bitwiseORExpression, leftAssociative = true, a => a)
-  lazy val logicalORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P("||").!, logicalANDExpression, leftAssociative = true, a => a)
+  lazy val logicalANDExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`&&`), bitwiseORExpression, leftAssociative = true, a => a)
+  lazy val logicalORExpression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`||`), logicalANDExpression, leftAssociative = true, a => a)
 
   // 12.14
   lazy val conditionalExpression: ArgP[IYA, Ast.Expression] = ArgP() {
     case (iya) => P(logicalORExpression(iya) ~ ("?" ~/ assignmentExpression(iya) ~ ":" ~/ assignmentExpression(iya)).?).map {
       case (expr, None) => expr
-      case (cond, Some((success, fail))) => Ast.ConditionalOperatior(cond, success, fail)
+      case (cond, Some((success, fail))) => Ast.ConditionalOperatorExpression(cond, success, fail)
     }
   }
 
@@ -571,18 +436,49 @@ object ECMAScript2018Parse extends StringToSourceName {
   // 12.15
   lazy val assignmentExpression: ArgP[IYA, Ast.Expression] = ArgP() {
     case iya@(i, y, a) =>
-      toEither(
-        (true, NoCut(conditionalExpression(iya))),
+      P(!")" ~ toEither(
         (y, yieldExpression(i, a)),
-        (true, arrowFunctionExpression(iya)),
+        (true, arrowFunction(iya)),
         (true, asyncArrowFunction(iya)),
-        (true, (leftHandSideExpression(i, a) ~ assignmentOperator ~ assignmentExpression(iya)).map{case (l, op, r) => Ast.BinaryOperatorExpression(op, l, r)})
-      )
+        (true, conditionalExpression(iya).log("conditional")),
+        (true, (leftHandSideExpression(i, a) ~ (assignmentOperator ~ assignmentExpression(iya)).?).map{
+          case (l, None) => l
+          case (l, Some((op, r))) => Ast.BinaryOperatorExpression(op, l, r)
+        })
+      ))
   }
-  lazy val assignmentOperator: Parser[String] = StringIn("=", "*=", "/=", "%=", "+=" , "-=", "<<=", ">>=", ">>>=", "&=", "^=", "|=", "**=").!
+  lazy val assignmentOperator: Parser[Ast.BinaryOperator] = opIn(Op.`=`, Op.`*=`, Op.`/=`, Op.`%=`, Op.`+=` , Op.`-=`, Op.`<<=`, Op.`>>=`, Op.`>>>=`, Op.`&=`, Op.`^=`, Op.`|=`, Op.`**=`)
 
   // 12.16
-  lazy val expression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(P(",").!, primaryExpression, leftAssociative = true, _ => (true, true))
+  lazy val expression: ArgP[IYA, Ast.Expression] = makeBinaryOperatorParser(opIn(Op.`,`), assignmentExpression, leftAssociative = true, a => a)
+
+
+  // # 13
+  lazy val statement: ArgP[YAR, Ast.Statement] = ArgP() {
+    case yar@(y, a, r) =>
+      blockStatement(yar) |
+        variableStatement(y, a) |
+        emptyStatement |
+        ifStatement(yar) |
+        continueStatement(y, a) |
+        breakStatement(y, a) |
+        (if(r) returnStatement(y, a) else Fail) | //TODO: Custom error
+        withStatement(yar) |
+        switchStatement(yar) |
+        labelledStatement(yar) |
+        tryStatement(yar) |
+        debuggerStatement |
+        expressionStatement(y, a)
+  }
+  lazy val declaration: ArgP[YA, Ast.Statement] = ArgP() {
+    case (y, a) =>
+      hoistableDeclaration(y, a, false).map(Ast.DeclarationStatement) |
+        classDeclaration(y, a, false).map(Ast.DeclarationStatement) |
+        lexicalDeclaration(true, y, a)
+  }
+  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() {
+    yad => functionDeclaration(yad) | generatorDeclaration(yad) | asyncFunctionDeclaration(yad)
+  }
 
   // # 13.2
   lazy val blockStatement: ArgP[YAR, Ast.BlockStatement] = ArgP() {
@@ -592,7 +488,7 @@ object ECMAScript2018Parse extends StringToSourceName {
     yar => P("{" ~/ statementListOpt(yar) ~ "}").map(Ast.Block)
   }
   lazy val statementListItem: ArgP[YAR, Ast.Statement] = ArgP() {
-    case yar@(y, a, _) => statement(yar) | declaration(y, a)
+    case yar@(y, a, _) => !("}" | End) ~ (declaration(y, a) | statement(yar))
   }
   lazy val statementList: ArgP[YAR, Seq[Ast.Statement]] = ArgP() {
     yar => statementListItem(yar).rep(1)
@@ -623,17 +519,17 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // # 13.3.2
   lazy val variableStatement: ArgP[YA, Ast.VariableStatement] = ArgP() {
-    case (y, a) => ("var" ~/ variableDeclarationList(true, y, a) ~~ `;`).map(decls => Ast.VariableStatement(Ast.VariableDeclarationType.Var, decls))
+    case (y, a) => P("var" ~/ variableDeclarationList(true, y, a) ~~ `;`).map(decls => Ast.VariableStatement(Ast.VariableDeclarationType.Var, decls))
   }
 
   lazy val variableDeclarationList: ArgP[IYA, Seq[Ast.VariableDeclaration]] = ArgP() {
-    iya => variableDeclaration(iya).rep(1)
+    iya => variableDeclaration(iya).rep(1, sep = ",")
   }
 
   lazy val variableDeclaration: ArgP[IYA, Ast.VariableDeclaration] = ArgP() {
     case iya@(_, y, a) =>
-      P(bindingIdentifier ~ initializer(iya).?).map((Ast.IdentifierDeclaration.apply _).tupled) |
-        P(bindingPattern(y, a) ~ initializer(iya)).map((Ast.PatternDeclaration.apply _).tupled)
+      P(bindingIdentifier ~/ initializer(iya).?).map((Ast.IdentifierDeclaration.apply _).tupled) |
+        P(bindingPattern(y, a) ~/ initializer(iya)).map((Ast.PatternDeclaration.apply _).tupled)
   }
 
   // # 13.3.3
@@ -671,6 +567,11 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // # 13.4
   lazy val emptyStatement: Parser[Ast.EmptyStatement] = P(";").map(_ => Ast.EmptyStatement())
+
+  // # 13.5
+  lazy val expressionStatement: ArgP[YA, Ast.ExpressionStatement] = ArgP() {
+    case (y, a) => P(expression(true, y, a) ~~ `;`).map(Ast.ExpressionStatement)
+  }
 
   // # 13.6
   lazy val ifStatement: ArgP[YAR, Ast.IfStatement] = ArgP() {
@@ -728,7 +629,7 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // # 13.15
   lazy val tryStatement: ArgP[YAR, Ast.TryStatement] = ArgP() {
-    yar => P("try" ~/ block(yar) ~/ `catch`(yar).? ~ `finally`(yar).?).map((Ast.TryStatement.apply _).tupled)
+    yar => P("try" ~/ block(yar) ~/ `catch`(yar).? ~ `finally`(yar).?).filter{case (_, c, f) => c.isDefined || f.isDefined}.map((Ast.TryStatement.apply _).tupled)
   }
   lazy val `catch`: ArgP[YAR, Ast.CatchBlock] = ArgP() {
     case yar@(y, a, _) => P("catch" ~/ "(" ~/ catchParameter(y, a) ~ ")" ~ block(yar)).map((Ast.CatchBlock.apply _).tupled)
@@ -743,30 +644,6 @@ object ECMAScript2018Parse extends StringToSourceName {
   // # 13.16
   lazy val debuggerStatement: Parser[Ast.DebuggerStatement] = P("debugger" ~~ `;`)("debugger-statement").map(_ => Ast.DebuggerStatement())
 
-  // # 13
-  lazy val statement: ArgP[YAR, Ast.Statement] = ArgP() {
-    case yar@(y, a, r) =>
-      blockStatement(yar) |
-        variableStatement(y, a) |
-        emptyStatement |
-        continueStatement(y, a) |
-        breakStatement(y, a) |
-        (if(r) returnStatement(y, a) else Fail) | //TODO: Custom error
-        withStatement(yar) |
-        switchStatement(yar) |
-        labelledStatement(yar) |
-        ifStatement(yar) |
-        debuggerStatement
-  }
-  lazy val declaration: ArgP[YA, Ast.Statement] = ArgP() {
-    case (y, a) =>
-      hoistableDeclaration(y, a, false).map(Ast.DeclarationStatement) |
-        classDeclaration(y, a, false).map(Ast.DeclarationStatement) |
-        lexicalDeclaration(true, y, a)
-  }
-  lazy val hoistableDeclaration: ArgP[YAD, Ast.HoistableDeclaration] = ArgP() {
-    yad => functionDeclaration(yad) | generatorDeclaration(yad) | asyncFunctionDeclaration(yad)
-  }
 
 
   // # 14.1
@@ -798,7 +675,30 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val formalParameter: ArgP[YA, Ast.ArrayElementBinding with Ast.BindingElement] = bindingElement
   lazy val functionBody: ArgP[YA, Seq[Ast.Statement]] = functionStatementList
   lazy val functionStatementList: ArgP[YA, Seq[Ast.Statement]] = ArgP() {
-    case (y, a) => statementList(y, a, true)
+    case (y, a) => statementListOpt(y, a, true)
+  }
+
+  // 14.2
+  lazy val arrowFunction: ArgP[IYA, Ast.Function] = ArgP() {
+    case (i, y, a) =>
+      P(
+        arrowParameters(y, a) ~~ noLineTerminatorHere ~~ "=>" ~ conciseBody(i)
+      ).map{ case (params, body) => Ast.Function(Ast.ClosureType.Arrow, None, params, body)}
+  }
+  lazy val arrowParameters: ArgP[YA, Ast.Parameters] = ArgP() {
+    ya =>
+      P(
+        bindingIdentifier.map(id => Ast.Parameters(Seq(Ast.SingleNameBinding(id.identifier, None)), None)) |
+          arrowFormalParameters(ya)
+      )
+  }
+  lazy val conciseBody: ArgP[I, Seq[Ast.Statement]] = ArgP() {
+    i =>
+      P("{" ~ functionBody(false, false) ~ "}") |
+        assignmentExpression(i, false, false).map(exp => Seq(Ast.ExpressionStatement(exp)))
+  }
+  lazy val arrowFormalParameters: ArgP[YA, Ast.Parameters] = ArgP() {
+    ya => P("(" ~ uniqueFormalParameters(ya) ~ ")")
   }
 
   // 14.3
@@ -913,17 +813,62 @@ object ECMAScript2018Parse extends StringToSourceName {
 
   // # 14.6
   lazy val asyncFunctionDeclaration: ArgP[YAD, Ast.FunctionDeclaration] = ArgP() {
-    _ => Fail
+    case (y, a, d) => P(
+      "async" ~~ noLineTerminatorHere ~~ "function" ~/
+        (if (d) Pass.map(_ => None) else bindingIdentifier.map(id => Some(id.identifier))) ~/
+        "(" ~ formalParameters(false, true) ~ ")" ~
+        "{" ~ asyncFunctionBody ~ "}"
+    ).map { case (id, params, body) => Ast.Function(Ast.ClosureType.Async, id, params, body) }
+      .map(Ast.FunctionDeclaration)
+  }
+  lazy val asyncFunctionExpression: Parser[Ast.Function] = P(
+    "async" ~~ noLineTerminatorHere ~~ "function" ~/
+      bindingIdentifier.map(_.identifier).? ~/
+      "(" ~ formalParameters(false, true) ~ ")" ~
+      "{" ~ asyncFunctionBody ~ "}"
+  ).map { case (id, params, body) => Ast.Function(Ast.ClosureType.Async, id, params, body) }
+
+  lazy val asyncMethod: ArgP[YA, Ast.Method] = ArgP() {
+    ya =>
+      P(
+        "async" ~~ noLineTerminatorHere ~~ propertyName(ya) ~
+          "(" ~/ uniqueFormalParameters(ya) ~ ")" ~/
+          "{" ~/ asyncFunctionBody ~ "}"
+      ).map{ case (prop, params, body) => Ast.Method(Ast.ClosureType.Async, prop, params, body)}
+  }
+  lazy val asyncFunctionBody: Parser[Seq[Ast.Statement]] = functionBody(false, true)
+  lazy val awaitExpression: ArgP[Y, Ast.Expression] = ArgP() {
+    y => P("await" ~/ unaryExpression(y, true)).map(Ast.AwaitExpression)
+  }
+
+  // 14.7
+  lazy val asyncArrowFunction: ArgP[IYA, Ast.Function] = ArgP() {
+    case (i, y, a) =>
+      P(
+        "async" ~ arrowFormalParameters(y, a) ~~ noLineTerminatorHere ~~ "=>" ~ asyncConciseBody(i)
+      ).map{ case (params, body) => Ast.Function(Ast.ClosureType.AsyncArrow, None, params, body) }
+  }
+  lazy val asyncConciseBody: ArgP[I, Seq[Ast.Statement]] = ArgP() {
+    i =>
+      P("{" ~ asyncFunctionBody ~ "}") |
+      assignmentExpression(i, false, true).map(exp => Seq(Ast.ExpressionStatement(exp)))
+
+  }
+  lazy val asyncArrowBindingIdentifier: ArgP[Y, Ast.Parameters] = ArgP() {
+    _ => bindingIdentifier.map(id => Ast.Parameters(Seq(Ast.SingleNameBinding(id.identifier, None)), None))
+  }
+  lazy val coverCallExpressionAndAsyncArrowHead: ArgP[YA, (Ast.Expression, Ast.Arguments)] = ArgP() {
+    ya => NoCut(memberExpression(ya) ~ arguments(ya))
   }
 
   // # 15.1
-  lazy val script: Parser[Ast.Script] = P(ws.rep ~~ statementListOpt(false, false, false) ~ End)("script").map(Ast.Script)
+  lazy val script: Parser[Ast.Script] = P(Pass ~ statementListOpt(false, false, false) ~ End)("script").map(Ast.Script)
 }
 
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    ECMAScript2018Parse.script.parse("return;") match {
+    ECMAScript2018Parse.script.parse("var {x = \"blub\" + 0} = test()") match {
       case Parsed.Success(ast, _) =>
         println(ast)
       case f@Parsed.Failure(lastParser, _, extra) =>
