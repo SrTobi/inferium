@@ -86,7 +86,7 @@ object Ast {
 
   sealed abstract class AstNode
 
-  sealed case class Block(statement: Seq[Statement]) extends AstNode
+  sealed case class Block(statements: Seq[Statement]) extends AstNode
 
   sealed abstract class Statement extends AstNode
 
@@ -119,7 +119,7 @@ object Ast {
 
   sealed case class ElisionBinding() extends ArrayElementBinding
 
-  sealed trait BindingElement
+  sealed trait BindingElement extends AstNode
 
   sealed case class PatternElementBinding(pattern: PatternBinding, default: Option[Expression]) extends ArrayElementBinding with BindingElement
 
@@ -149,19 +149,15 @@ object Ast {
 
   sealed case class ClassDeclaration(clazz: Class) extends Declaration
 
-  sealed class LexicalDeclaration extends Declaration
-
   case class DebuggerStatement() extends Statement
 
-  case class CatchBlock(parameter: Binding, block: Block)
+  case class CatchBlock(parameter: Binding, block: Block) extends AstNode
 
   case class TryStatement(block: Block, catchBlock: Option[CatchBlock], finallyBlock: Option[Block]) extends Statement
 
   sealed case class LabelledStatement(label: String, statement: Statement) extends Statement
 
   sealed case class FunctionDeclaration(function: Function) extends HoistableDeclaration
-
-  sealed case class GeneratorDeclaration() extends HoistableDeclaration
 
   case class SwitchStatement(expression: Expression, clauses: Seq[CaseClause]) extends Statement
 
@@ -226,7 +222,7 @@ object Ast {
   sealed case class NormalPropertyDefinition(name: PropertyName, initializer: Expression) extends PropertyDefinition
   sealed case class MethodPropertyDefinition() extends PropertyDefinition
 
-  sealed case class Parameters(parameters: Seq[BindingElement], rest: Option[Binding])
+  sealed case class Parameters(parameters: Seq[BindingElement], rest: Option[Binding]) extends AstNode
   sealed case class Function(closureType: ClosureType.ClosureType, identifier: Option[String], parameters: Parameters, body: Seq[Statement]) extends PrimaryExpression
   sealed case class Class(identifier: Option[String], heritage: Option[Expression], methods: Seq[ClassMember]) extends PrimaryExpression
 

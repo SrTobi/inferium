@@ -279,13 +279,13 @@ object ECMAScript2018Parse extends StringToSourceName {
   }
   lazy val elementList: ArgP[YA, Seq[Ast.ArrayLiteralElement]] = ArgP() {
     case ya@(y, a) => (
-      P(",").map(_ => Ast.ArrayElisionElement()) |
+      &(StringIn(",", "]")).map(_ => Ast.ArrayElisionElement()) |
       assignmentExpression(true, y, a).map(Ast.ArrayElement) |
       spreadElement(ya)
     ).rep(sep=",")
   }
   lazy val spreadElement: ArgP[YA, Ast.ArraySpreadElement] = ArgP() {
-    case (y, a) => P("..." ~ assignmentExpression(true, y, a)).map(Ast.ArraySpreadElement)
+    case (y, a) => P("..." ~/ assignmentExpression(true, y, a)).map(Ast.ArraySpreadElement)
   }
 
   // 12.2.6
@@ -363,8 +363,8 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val argumentList: ArgP[YA, Ast.Arguments] = ArgP() {
     case (y, a) =>
       P(
-        assignmentExpression(true, y, a).rep(sep = P(",")) ~
-        ("," ~ "..." ~ assignmentExpression(true, y, a)).?
+        P("..." ~/ assignmentExpression(true, y, a)).map(e => (Seq(), Some(e))) |
+          (assignmentExpression(true, y, a).rep(sep = P(",")) ~ ("," ~ "..." ~ assignmentExpression(true, y, a)).?)
       ).map((Ast.Arguments.apply _).tupled)
   }
   lazy val leftHandSideExpression: ArgP[YA, Ast.Expression] = ArgP() {
@@ -542,8 +542,11 @@ object ECMAScript2018Parse extends StringToSourceName {
   lazy val arrayBindingPattern: ArgP[YA, Ast.ArrayPatternBinding] = ArgP() {
     ya =>
       P("[" ~/
-        (bindingElement(ya) | P("").map(_ => Ast.ElisionBinding())).rep(sep = ",") ~
-        bindingRestElement(ya).? ~/
+        (
+          bindingRestElement(ya).map(e => (Seq(), Some(e))) |
+            P(bindingElement(ya) | &(StringIn(",", "]")).map(_ => Ast.ElisionBinding())).rep(sep = ",") ~
+            ("," ~ bindingRestElement(ya).?).?.map(_.flatten)
+          )~/
         "]"
       ).map((Ast.ArrayPatternBinding.apply _).tupled)
   }
@@ -562,7 +565,7 @@ object ECMAScript2018Parse extends StringToSourceName {
     case (y, a) => P(bindingIdentifier.map(_.identifier) ~ initializer(true, y, a).?).map((Ast.SingleNameBinding.apply _).tupled)
   }
   lazy val bindingRestElement: ArgP[YA, Ast.Binding] = ArgP() {
-    ya => "..." ~ (bindingIdentifier | bindingPattern(ya))
+    ya => "..." ~/ (bindingIdentifier | bindingPattern(ya))
   }
 
   // # 13.4
@@ -666,7 +669,9 @@ object ECMAScript2018Parse extends StringToSourceName {
   }
   lazy val uniqueFormalParameters: ArgP[YA, Ast.Parameters] = formalParameters
   lazy val formalParameters: ArgP[YA, Ast.Parameters] = ArgP() {
-    ya => P(formalParameter(ya).rep(sep=",") ~ (P(",").map(_ => None) | functionRestParameter(ya).?)).map((Ast.Parameters.apply _).tupled)
+    ya =>
+      P(functionRestParameter(ya).map(e => (Seq(), Some(e))) |
+        formalParameter(ya).rep(sep = ",") ~ (P(",") ~ functionRestParameter(ya).?).?.map(_.flatten)).map((Ast.Parameters.apply _).tupled)
   }
   lazy val formalParameterList: ArgP[YA, Seq[Ast.BindingElement]] = ArgP() {
     ya => formalParameter(ya).rep
@@ -868,9 +873,10 @@ object ECMAScript2018Parse extends StringToSourceName {
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    ECMAScript2018Parse.script.parse("var {x = \"blub\" + 0} = test()") match {
+    ECMAScript2018Parse.script.parse("var test = async (...blub) => { return true;}") match {
       case Parsed.Success(ast, _) =>
         println(ast)
+        println(PrettyPrinter.print(ast))
       case f@Parsed.Failure(lastParser, _, extra) =>
         println(f)
     }
