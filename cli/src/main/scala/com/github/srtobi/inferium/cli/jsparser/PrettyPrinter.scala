@@ -13,6 +13,11 @@ private class PrettyPrinter private(){
   import Ast._
 
   def print(node: Ast.AstNode): Seq[Piece] = node match {
+    case ArrayAccessExpression(target, idx) =>
+      print(target) ++ Seq(c1("["), print(idx), c1("]")).flatten
+    case ArrayPatternBinding(elements, rest) =>
+      c("[") +: listAndRest(elements, rest) :+ c("]")
+    case ArraySpreadElement(expr) => c("...") +: print(expr)
     case Script(statements) => statements.map(print).flatMap(_ :+ Code("\n"))
     case ArrayLiteral(es) => c("[") +: betweenAll(es, c(", ")) :+ c("]")
     case ArrayElement(e) => print(e)
@@ -27,12 +32,16 @@ private class PrettyPrinter private(){
     case Class(id, heritage, member) =>
       (c("class ") +: Seq(
         id.toSeq.flatMap(id => c1(id + " ")),
-        heritage.toSeq.flatMap(e => c("extends ") +: print(e))
+        heritage.toSeq.flatMap(e => c("extends ") +: print(e) :+ c(" "))
       ).flatten) ++ block(member)
     case ClassDeclaration(cl) => print(cl)
+    case ClassMember(mem, true) => c("static ") +: print(mem)
+    case ClassMember(mem, false) => print(mem)
+    case ComputedPropertyName(expr) => c("[") +: print(expr) :+ c("]")
     case ConditionalOperatorExpression(cond, succ, fail) =>
       Seq(c1("("), print(cond), c1("?"), print(succ), c1(":"), print(fail), c1(")")).flatten
     case ContinueStatement(label) => c1(s"continue $label")
+    case DebuggerStatement() => c1("debugger;")
     case DeclarationStatement(decl) => print(decl)
     case EmptyStatement() => c1(";")
     case ExpressionStatement(expr) => print(expr) :+ c(";")
@@ -71,10 +80,26 @@ private class PrettyPrinter private(){
       fail.map(blk => Seq(c("\nelse\n"), in(print(blk)))).getOrElse(Seq())
     case LabelledStatement(label, statements) =>
       in(c1(label + ":"), -1) +: (c1("\n") ++ print(statements))
+    case LiteralPropertyName(lit) => c1(lit)
+    case Method(ty, name, params, body) =>
+      Seq(
+        ty match {
+          case ClosureType.Async => c1("async ")
+          case ClosureType.Generator => c1("*")
+        },
+        print(name),
+        print(params),
+        ty match {
+          case ClosureType.Arrow | ClosureType.AsyncArrow => c1(" =>")
+          case _ => Seq()
+        },
+        c1(" "),
+        block(body)
+      ).flatten
     case NullLiteral() => c1("null")
     case NumericLiteral(n) => c1(n)
     case Parameters(params, rest) =>
-      c("(") +: (betweenAll(params, c(", ")) ++ rest.toSeq.flatMap(r => c(if (params.isEmpty) "..." else ", ...") +: print(r))) :+ c(")")
+      c("(") +: listAndRest(params, rest) :+ c(")")
     case ReturnStatement(expr) => expr match {
       case Some(e) => c("return ") +: print(e) :+ c(";")
       case None => c1("return;")
@@ -87,6 +112,7 @@ private class PrettyPrinter private(){
         c(op.text) +: print(expr)
       else
         print(expr) :+ c(op.text)
+    case SuperExpression() => c1("super")
     case VariableStatement(ty, decls) =>
       c(ty.toString.toLowerCase + " ") +: betweenAll(decls, c(", ")) :+ c(";")
     case YieldExpression(expr, array) =>
@@ -97,6 +123,7 @@ private class PrettyPrinter private(){
       }
   }
 
+  private def listAndRest(list: Seq[AstNode], rest: Option[AstNode]): Seq[Piece] = betweenAll(list, c(", ")) ++ rest.toSeq.flatMap(r => c(if (list.isEmpty) "..." else ", ...") +: print(r))
   private def optToName(id: Option[String]) = id.map(_ + " ").getOrElse("")
   private def block(nodes: Seq[AstNode]): Seq[Piece] = Seq(c("{\n"), in(nodes.flatMap(print(_) :+ c("\n"))), c("}"))
   private def betweenAll(nodes: Seq[AstNode], sep: Piece): Seq[Piece] = nodes.flatMap(sep +: print(_)) match {

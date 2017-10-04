@@ -873,7 +873,7 @@ object ECMAScript2018Parse extends StringToSourceName {
 object JsTests {
 
   def main(args: Array[String]): Unit = {
-    ECMAScript2018Parse.script.parse("var test = async (...blub) => { return true;}") match {
+    ECMAScript2018Parse.script.parse("class test extends (a + this) { async xx(a,) {}}") match {
       case Parsed.Success(ast, _) =>
         println(ast)
         println(PrettyPrinter.print(ast))
