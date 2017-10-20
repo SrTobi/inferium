@@ -2,10 +2,15 @@ package com.github.srtobi.inferium.core
 
 import scala.collection.mutable
 
-class UId private (val num: Int, val group: String) {
+case class UId private (num: Int, group: String) {
   def id: String = s"$group[$num]"
 
   override def toString: String = id
+
+  override def equals(o: scala.Any): Boolean = o match {
+    case ref: AnyRef => this eq ref
+    case _ => false
+  }
 }
 
 object UId {
