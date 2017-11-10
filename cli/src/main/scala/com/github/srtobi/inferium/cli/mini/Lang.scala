@@ -224,7 +224,7 @@ object LangPrinter {
       case IfStmt(cond, success, None) => indent + s"if (${p(cond)}) ${printBlk(success, indent)}"
       case ReturnStmt(expr) => indent + s"return ${expr.map(p).getOrElse("")}"
       case VarStmt(name, init) => indent + s"var $name = ${p(init)}"
-      case AssignmentStmt(target, init) => init + s"${p(target)} = ${p(init)}"
+      case AssignmentStmt(target, init) => indent + s"${p(target)} = ${p(init)}"
       case Object(properties) => properties.map(p).mkString("@{", ", ", "}")
       case Property(name, init) => s"$name: ${p(init)}"
       case Identifier(id) => id
