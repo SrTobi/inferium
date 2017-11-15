@@ -11,7 +11,7 @@ class TypeMapper(private val exprMap: scala.collection.Map[UId, TypeVariable]) {
 }
 
 
-private class HeapBuilder(solver: CSolver, begin: HeapNode) {
+class HeapBuilder(solver: CSolver, begin: HeapNode) {
 
 
   private val prevHeaps = mutable.ArrayBuffer.empty[HeapNode]
@@ -42,6 +42,8 @@ private class HeapBuilder(solver: CSolver, begin: HeapNode) {
   def makeCall(function: TypeVariable, args: Seq[TypeVariable]): TypeVariable = {
     val nextHeap = new HeapNode(solver)
     val call = new CallSite(solver, function, args, nextHeap)
+    connectTo(call)
+    setTo(nextHeap)
     return call.returnType
   }
 
@@ -70,14 +72,23 @@ private class HeapBuilder(solver: CSolver, begin: HeapNode) {
   }
 }
 
-private class Environment(val surrounding: Option[Environment], val args: Seq[String], val solver: CSolver) {
+class Environment(val surrounding: Option[Environment], val args: Seq[String], val solver: CSolver) {
 
   val vars = mutable.HashMap.empty[String, TypeVariable]
+  val depth: Int = surrounding.map(_.depth + 1).getOrElse(0)
 
+  def lookupContextDepth(name: String): (Int, TypeVariable) = if (vars.contains(name)) {
+    (depth, vars(name))
+  } else {
+    surrounding.map(_.lookupContextDepth(name)).getOrElse(throw new IllegalArgumentException(s"Unknown variable '$name'"))
+  }
+}
+
+class EnvAdapter(val env: Environment, funcdef: Ast.Function) {
+  import env._
   val heapBegin = new HeapNode(solver)
   val heapEnd = new HeapNode(solver)
   val heap = new HeapBuilder(solver, heapBegin)
-  val depth: Int = surrounding.map(_.depth + 1).getOrElse(0)
   val scopeObjects: Seq[TypeVariable] = Seq.fill(depth + 1)(new TypeVariable(solver))
   val scope: TypeVariable = scopeObjects.last
   heap.newObject().flowsTo(scope)
@@ -90,13 +101,7 @@ private class Environment(val surrounding: Option[Environment], val args: Seq[St
       argType
   }
   val returnType = new TypeVariable(solver)
-  val functionType = new FunctionType(solver, argTypes, returnType, scopeObjects, heapBegin, heapEnd)
-
-  private def lookupContextDepth(name: String): (Int, TypeVariable) = if (vars.contains(name)) {
-    (depth, vars(name))
-  } else {
-    surrounding.map(_.lookupContextDepth(name)).getOrElse(throw new IllegalArgumentException(s"Unknown variable '$name'"))
-  }
+  val functionType = new FunctionType(solver, argTypes, returnType, scopeObjects.init, funcdef, env.surrounding)
 
   private def lookupContext(name: String): (TypeVariable, TypeVariable) = lookupContextDepth(name) match {
     case (d, v) => (scopeObjects(d), v)
@@ -134,13 +139,14 @@ class Globals(solver: CSolver) {
   val falseType = new ConcreteType(solver, "false")
 }
 
-private class ConstraintBuilder private (val solver: CSolver, prevEnv: Option[Environment], prevContext: NodeContext, globals: Globals, params: Seq[String], val astMap: mutable.HashMap[UId, TypeVariable]) {
+class ConstraintBuilder(val solver: CSolver, funcdef: Ast.Function, prevEnv: Option[Environment], prevContext: NodeContext, globals: Globals, val astMap: mutable.HashMap[UId, TypeVariable]) {
   import Ast._
   import globals._
 
+  val params = funcdef.args
   val context = new NodeContext(solver, Some(prevContext))
   solver.pushContext(context)
-  val env = new Environment(prevEnv, params, solver)
+  val env = new EnvAdapter(new Environment(prevEnv, params, solver), funcdef)
   val heap: HeapBuilder = env.heap
   val heapEnds: ArrayBuffer[HeapNode] = mutable.ArrayBuffer.empty[HeapNode]
   solver.registerHeapStart(env.heapBegin)
@@ -155,17 +161,17 @@ private class ConstraintBuilder private (val solver: CSolver, prevEnv: Option[En
       if (b) trueType else falseType
     case Call(func, args) =>
       heap.makeCall(visitExpression(func), args.map(visitExpression))
-    case Function(args, body) =>
-      val builder = new ConstraintBuilder(solver, Some(env), context, globals, args, astMap)
-      builder.buildFunction(body)
-      val f = builder.env.functionType
+    case func@Function(args, body) =>
+      val builder = new ConstraintBuilder(solver, func, Some(env.env), context, globals, astMap)
+      builder.build()
+      val ft = builder.env.functionType
       // wire all scopes + new Scope into function
-      assert(env.scopeObjects.length == f.scopes.init.length)
-      env.scopeObjects.zip(f.scopes.init).foreach {
+      assert(env.scopeObjects.length == ft.scopes.length)
+      env.scopeObjects.zip(ft.scopes).foreach {
         case (from, to) => from.flowsTo(to)
       }
       regType(expression, env.functionType)
-      f
+      ft
     case Identifier(name) =>
       env.readLocal(name)
     case Object(properties) =>
@@ -236,20 +242,14 @@ private class ConstraintBuilder private (val solver: CSolver, prevEnv: Option[En
 
   private[this] def visitBlock(block: Ast.Block): Unit = block.foreach(visitStatement)
 
-  def buildScript(script: Script): Unit = {
-    assert(prevEnv.isEmpty)
-    visitBlock(script.main)
-    finish()
-  }
-
-  def buildFunction(block: Ast.Block): Unit = {
-    visitBlock(block)
+  def build(): Unit = {
+    visitBlock(funcdef.block)
     finish()
   }
 
   def finish(): Unit = {
     heap.merge(heapEnds)
-    env.vars.foreach {
+    env.env.vars.foreach {
       case (name, v) => heap.makeRead(env.scope, name).flowsTo(v)
     }
     heap.finish(env.heapEnd)
@@ -263,10 +263,10 @@ object ConstraintBuilder {
     val solver = new CSolver
     val globals = new Globals(solver)
     val map = mutable.HashMap.empty[UId, TypeVariable]
-    val builder = new ConstraintBuilder(solver, None, globals.globalContext, globals, Seq(), map)
-    builder.buildScript(script)
+    val builder = new ConstraintBuilder(solver, Ast.Function(Seq(), script.main), None, globals.globalContext, globals, map)
+    builder.build()
     solver.popContext()
-    solver.solve()
+    solver.solve(globals)
     return (solver, new TypeMapper(map))
   }
 }
@@ -289,16 +289,22 @@ object ConstraintBuilderTest {
       stmt =>
         println(LangPrinter.print(stmt) + "  // " + ty.lookup(stmt).map(printTypeVar).getOrElse("()"))
     }
+    println("---------------------")
+    //solver.printTypes()
   }
 
   def main(args: Array[String]): Unit = {
     val code =
       """
-        |var x = 3;
-        |x = undefined;
-        |var f = $() {
-        |  return $(y) { return x - y }
-        |}
+        |var slot = $(x) {
+        |  return $() {
+        |    return x
+        |  }
+        |};
+        |var one = slot(1);
+        |var two = slot(2);
+        |var y = two();
+        |var x = one()
       """.stripMargin
     LangParser.script.parse(code) match {
       case Parsed.Success(ast, _) =>

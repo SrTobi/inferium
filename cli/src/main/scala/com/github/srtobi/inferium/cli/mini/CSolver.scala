@@ -82,6 +82,8 @@ abstract class SpecificConstraintNode[NodeType <: SpecificConstraintNode[NodeTyp
 abstract class TypeUsage(solver: CSolver, idGroup: String) extends SpecificConstraintNode[TypeUsage](solver, idGroup) {
   def name: String
   def fencing: Boolean
+
+  solver.typeUsages += this
 }
 
 class TypeVariable(solver: CSolver) extends TypeUsage(solver, "TypeVar") {
@@ -94,7 +96,12 @@ class TypeVariable(solver: CSolver) extends TypeUsage(solver, "TypeVar") {
   override def fencing: Boolean = false
 }
 
-class FunctionType(solver: CSolver, val args: Seq[TypeVariable], val ret: TypeVariable, val scopes: Seq[TypeVariable], val heapBegin: HeapNode, val heapEnd: HeapNode) extends TypeVariable(solver) {
+class FunctionType(solver: CSolver,
+                   val args: Seq[TypeVariable],
+                   val ret: TypeVariable,
+                   val scopes: Seq[TypeVariable],
+                   val code: Ast.Function,
+                   val env: Option[Environment]) extends TypeVariable(solver) {
   override def name: String = s"func#${id.num}"
 
   override def fencing: Boolean = true
@@ -132,6 +139,7 @@ class ReadObjectPropertyHeap(solver: CSolver, val targetObject: TypeVariable, va
 class CallSite(solver: CSolver, val function: TypeVariable, val arguments: Seq[TypeVariable], val nextHeap: HeapNode) extends HeapNode(solver) {
   solver.registerCallSite(this)
 
+  var callMapping = mutable.Map.empty[FunctionType, HeapNode]
   val returnType: TypeVariable = new TypeVariable(solver)
 }
 
@@ -139,6 +147,7 @@ class CSolver {
   private val heapStarts = mutable.ArrayBuffer.empty[HeapNode]
   private val callSites = mutable.ArrayBuffer.empty[CallSite]
   private val contextStack = mutable.Stack[NodeContext]()
+  val typeUsages = mutable.ArrayBuffer.empty[TypeUsage]
 
   def curContext: NodeContext = contextStack.top
   def pushContext(nodeContext: NodeContext): Unit = contextStack.push(nodeContext)
@@ -162,15 +171,15 @@ class CSolver {
     }
   }
 
-  def solve(): Unit = {
+  def solve(globals: Globals): Unit = {
     var changed = false
     do {
       changed = false
-      heapStarts.foreach(changed ||= propagateHeap(_))
+      heapStarts.foreach(changed ||= propagateHeap(_, globals))
     } while (changed)
   }
 
-  private def propagateHeap(start: HeapNode): Boolean = {
+  private def propagateHeap(start: HeapNode, globals: Globals): Boolean = {
     type Heap = mutable.HashMap[ObjectRefType, mutable.HashMap[String, mutable.Set[TypeVariable]]]
 
     def cloneHeap(h: Heap): Heap = {
@@ -237,7 +246,27 @@ class CSolver {
               .map(_.getOrElseUpdate(write.property, mutable.HashSet.empty))
             outflow.foreach{slot => slot.clear(); slot += write.value}
           case callSite: CallSite =>
-            expandCallSite(callSite)
+            val funcs = callSite.function.in.toStream.collect{case f: FunctionType => f}
+            val heapNodes = funcs.map{
+              f => callSite.callMapping.getOrElseUpdate(f, {
+                val cb = new ConstraintBuilder(this, f.code, f.env, callSite.context, globals, mutable.HashMap.empty)
+                // wire stuff
+                callSite.arguments.zip(cb.env.argTypes).foreach {
+                  case (from, to) => from.flowsTo(to)
+                }
+                assert(f.scopes.size == cb.env.scopeObjects.size - 1)
+                f.scopes.zip(cb.env.scopeObjects.init).foreach {
+                  case (from, to) => from.flowsTo(to)
+                }
+                cb.env.returnType.flowsTo(callSite.returnType)
+
+                cb.build()
+                cb.env.heapEnd.flowsTo(callSite.nextHeap)
+                changed ||= true
+                cb.env.heapBegin
+              })
+            }
+            queue ++= (heap #:: Stream.continually(cloneHeap(heap))).zip(heapNodes)
           case _ => ()
         }
         // CallSites are not allowed to have outs
@@ -247,10 +276,6 @@ class CSolver {
     }
     assert(waitingHeaps.isEmpty)
     return changed
-  }
-
-  private def expandCallSite(callSite: CallSite): Boolean = {
-    return false
   }
 
   /*
@@ -274,4 +299,12 @@ class CSolver {
       }
     }
   }*/
+
+  def printTypes(): Unit = {
+    typeUsages.foreach(n => {
+      println(n + ": ")
+      println("  -> " + n.in.mkString(", "))
+      println("  <- " + n.out.mkString(", "))
+    })
+  }
 }
