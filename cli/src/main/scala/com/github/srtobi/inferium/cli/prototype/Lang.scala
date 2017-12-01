@@ -166,15 +166,20 @@ object LangParser {
     identifierName ~/ ":" ~/ expression
   ).map((Ast.Property.apply _).tupled)
 
+  lazy val blockOrReturnExpression: Parser[Ast.Block] = P(
+    block
+      | expression.map((e) => Seq(Ast.ReturnStmt(Some(e))))
+  )
+
   lazy val primaryExpression: Parser[Ast.Expression] = P(
     P("undefined").map(_ => Ast.UndefinedLiteral()) |
     booleanLiteral.map(Ast.BooleanLit) |
     numericLiteral.!.map(Ast.NumberLit) |
     identifierName.map(Ast.Identifier) |
     stringLiteral.map(Ast.StringLiteral) |
-    "(" ~/ expression ~ ")" |
-    ("$" ~/ "(" ~/ identifierName.rep(sep=",") ~ ")" ~ block).map((Ast.Function.apply _).tupled) |
-    ("@" ~/ "{" ~/ property.rep(sep=",") ~ "}").map(Ast.Object)
+    ("(" ~ identifierName.rep(sep=",") ~ ")" ~ "=>" ~ blockOrReturnExpression).map((Ast.Function.apply _).tupled) |
+    ("(" ~/ expression ~ ")") |
+    ("{" ~/ property.rep(sep=",") ~ "}").map(Ast.Object)
   )
 
   private def makeInner(left: Expression): Parser[Ast.Expression] = P(
@@ -194,14 +199,22 @@ object LangParser {
     }
   )
 
-  lazy val statements: Parser[Seq[Ast.Statement]] = statement.rep(sep=";")
+  lazy val blockOrStatement: Parser[Ast.Block] = P(
+    block
+     | P(";").map((_) => Seq())
+     | statement.map(Seq(_))
+  )
+
+  lazy val exprEnd: UnitP = noLineTerminator.repX ~~ (&(End) | &("}") | &("else") | CharIn(";\n"))
+
+  lazy val statements: Parser[Seq[Ast.Statement]] = (P(";").map((_) => None) | statement.map(Some(_))).rep.map(_.flatten)
   lazy val block: Parser[Seq[Ast.Statement]] = P("{" ~ statements ~ "}")
   lazy val statement: Parser[Ast.Statement] = P(
-      ("if" ~/ "(" ~/ expression ~ ")" ~/ block ~/ ("else" ~/ block).?).map((Ast.IfStmt.apply _).tupled) |
+      ("if" ~/ "(" ~/ expression ~ ")" ~/ blockOrStatement ~/ ("else" ~/ blockOrStatement).?).map((Ast.IfStmt.apply _).tupled) |
       ("return" ~/ expression.?).map(Ast.ReturnStmt) |
-      ("var" ~/ identifierName ~/ "=" ~/ expression).map((Ast.VarStmt.apply _).tupled) |
-      (NoCut(expression) ~ "=" ~/ expression).map((Ast.AssignmentStmt.apply _).tupled) |
-        expression.map(Ast.ExpressionStmt)
+      ("var" ~/ identifierName ~/ "=" ~/ expression ~~ exprEnd).map((Ast.VarStmt.apply _).tupled) |
+      (NoCut(expression) ~ "=" ~/ expression ~~ exprEnd).map((Ast.AssignmentStmt.apply _).tupled) |
+      (expression ~~ exprEnd).map(Ast.ExpressionStmt)
   )
 
   lazy val script: Parser[Ast.Script] = P(Pass ~ statements ~ End).map(Ast.Script)
@@ -248,7 +261,7 @@ object LangPrinter {
 object LangTests {
 
   def main(args: Array[String]): Unit = {
-    LangParser.script.parse("var x = $(x) { return undefined }; x()+ 1 + y.e.x()(); if (test) {@{a: l + b, b: ha.u(3)}}") match {
+    LangParser.script.parse("var x = (x) => { return undefined }; x()+ 1 + y.e.x()(); if (test) { x = {a: l + b, b: ha.u(3)}}") match {
       case Parsed.Success(ast, _) =>
         println(ast)
         println(LangPrinter.print(ast))
