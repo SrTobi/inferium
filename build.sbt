@@ -15,7 +15,8 @@ lazy val core = crossProject.
   in(file("core")).
   settings(
     name := "inferium-core",
-    version := "0.1-SNAPSHOT"
+    version := "0.1-SNAPSHOT",
+    libraryDependencies += "com.lihaoyi" % "fastparse_2.12" % "0.4.4"
   ).
   jvmSettings(
     // Add JVM-specific settings here
@@ -33,7 +34,6 @@ lazy val cli = project
   .settings(
     name := "inferium-cli",
     version := "0.1-SNAPSHOT",
-    libraryDependencies += "com.lihaoyi" % "fastparse_2.12" % "0.4.4",
     libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1",
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test
   )
@@ -46,5 +46,5 @@ lazy val web = project
   .settings(
     name := "inferium-web",
     version := "0.1-SNAPSHOT",
-    scalaJSUseMainModuleInitializer := true
+    scalaJSUseMainModuleInitializer := true,
   )

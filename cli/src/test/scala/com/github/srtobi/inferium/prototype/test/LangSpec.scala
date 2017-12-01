@@ -1,6 +1,6 @@
 package com.github.srtobi.inferium.prototype.test
 
-import com.github.srtobi.inferium.cli.prototype.LangParser
+import com.github.srtobi.inferium.prototype.LangParser
 import fastparse.core.Parsed
 import org.scalatest.{FlatSpec, Matchers}
 import org.scalatest.prop.{GeneratorDrivenPropertyChecks, TableDrivenPropertyChecks}

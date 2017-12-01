@@ -1,6 +1,6 @@
-package com.github.srtobi.inferium.cli.prototype.mini
+package com.github.srtobi.inferium.prototype.mini
 
-import com.github.srtobi.inferium.cli.prototype.{Ast, LangParser, LangPrinter}
+import com.github.srtobi.inferium.prototype.{Ast, LangParser, LangPrinter}
 import com.github.srtobi.inferium.core.UId
 import fastparse.core.Parsed
 

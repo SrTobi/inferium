@@ -1,6 +1,6 @@
-package com.github.srtobi.inferium.cli.prototype
+package com.github.srtobi.inferium.prototype
 
-import com.github.srtobi.inferium.cli.prototype.Ast.Expression
+import com.github.srtobi.inferium.prototype.Ast.Expression
 import com.github.srtobi.inferium.core.UId
 import fastparse.noApi._
 import fastparse.parsers.Terminals
