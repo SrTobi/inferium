@@ -16,7 +16,7 @@ lazy val core = crossProject.
   settings(
     name := "inferium-core",
     version := "0.1-SNAPSHOT",
-    libraryDependencies += "com.lihaoyi" % "fastparse_2.12" % "0.4.4"
+    libraryDependencies += "com.lihaoyi" % "fastparse_2.12" % "1.0.0"
   ).
   jvmSettings(
     // Add JVM-specific settings here
@@ -34,8 +34,8 @@ lazy val cli = project
   .settings(
     name := "inferium-cli",
     version := "0.1-SNAPSHOT",
-    libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.1",
-    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % Test
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4",
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
   )
 
 
