@@ -1,13 +1,9 @@
-package com.github.srtobi.inferium.cli.mini
+package com.github.srtobi.inferium.cli.prototype
 
-import com.github.srtobi.inferium.cli.mini.Ast.Expression
+import com.github.srtobi.inferium.cli.prototype.Ast.Expression
 import com.github.srtobi.inferium.core.UId
-import fastparse.core.Parsed.Success
-import fastparse.parsers.{Combinators, Terminals}
-
-import scala.collection.mutable
-import fastparse.{all, core, noApi}
 import fastparse.noApi._
+import fastparse.parsers.Terminals
 
 object Ast {
 
@@ -145,16 +141,16 @@ private class LangWsWrapper(WL: P0) {
 }
 
 private object LangWsApi extends LangWsWrapper({
-  import fastparse.all._
   import LangTokens._
+  import fastparse.all._
   ws.rep
 })
 
 private class LangWhitespaceApi[+T](p0: P[T], WL: P0) extends fastparse.WhitespaceApi[T](p0, WL) {
 
   import fastparse.all._
-  import fastparse.parsers.Combinators.Sequence
   import fastparse.core.Implicits.Sequencer
+  import fastparse.parsers.Combinators.Sequence
 
   def ~~/[V, R](p: Parser[V])(implicit ev: Sequencer[T, V, R]): Parser[R] =
     Sequence.flatten(Sequence(p0, p, cut = true).asInstanceOf[Sequence[R, R, R, Char, String]])

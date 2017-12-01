@@ -1,5 +1,6 @@
-package com.github.srtobi.inferium.cli.mini
+package com.github.srtobi.inferium.cli.prototype.mini
 
+import com.github.srtobi.inferium.cli.prototype.Ast
 import com.github.srtobi.inferium.core.UId
 
 import scala.collection.mutable

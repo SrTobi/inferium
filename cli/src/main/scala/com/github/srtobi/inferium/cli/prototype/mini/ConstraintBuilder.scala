@@ -1,5 +1,6 @@
-package com.github.srtobi.inferium.cli.mini
+package com.github.srtobi.inferium.cli.prototype.mini
 
+import com.github.srtobi.inferium.cli.prototype.{Ast, LangParser, LangPrinter}
 import com.github.srtobi.inferium.core.UId
 import fastparse.core.Parsed
 
@@ -304,7 +305,10 @@ object ConstraintBuilderTest {
         |var one = slot(1);
         |var two = slot(2);
         |var y = two();
-        |var x = one()
+        |var x = one();
+        |var f = $(f) {
+        | f(3)
+        |}
       """.stripMargin
     LangParser.script.parse(code) match {
       case Parsed.Success(ast, _) =>
