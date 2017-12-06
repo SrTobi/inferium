@@ -6,12 +6,11 @@ import scala.collection.mutable
 
 
 
-class FlowAnalysis private (val scriptTemplate: Templates.Script) {
-    private val heap: Heap = ???
-    private val unificationHeapState = heap.newHeapState()
+class FlowAnalysis private (val scriptTemplate: Templates.Script, private val solver: Solver, private val heap: Heap) {
+    private val unificationHeapState = heap.newMergeHeapState()
 
     {
-        val startHeap = heap.newHeapState()
+        val startHeap = heap.newEmptyHeapState()
 
         //instantiate(scriptTemplate, startHeap, unificationHeapState)
     }
@@ -22,11 +21,7 @@ class FlowAnalysis private (val scriptTemplate: Templates.Script) {
     }
 
     private def analyseStep(): Boolean = {
-        val changedNodes = heap.propagateFlow()
-
-        changedNodes.foreach(_.inputChanged())
-
-        return changedNodes.isEmpty
+        ???
     }
 
 
@@ -39,8 +34,8 @@ class FlowAnalysis private (val scriptTemplate: Templates.Script) {
 }
 
 object FlowAnalysis {
-    def create(script: Ast.Script): FlowAnalysis = {
+    def create(script: Ast.Script, solver: Solver, heap: Heap): FlowAnalysis = {
         val scriptTemplate = TemplateBuilder.buildScriptTemplate(script)
-        return new FlowAnalysis(scriptTemplate)
+        return new FlowAnalysis(scriptTemplate, solver, heap)
     }
 }

@@ -4,7 +4,7 @@ import com.github.srtobi.inferium.prototype.Ast
 
 object Templates {
     trait Script {
-        def instantiate(solver: Solver, heap: Heap, inHeap: HeapState, outHeap: HeapState): Nodes.Function
+        def instantiate(solver: Solver, heap: Heap, endNode: Nodes.Node): (Nodes.Node, ValueHandleMerger)
     }
 
     trait Closure {
@@ -17,8 +17,8 @@ object Templates {
 
     trait Function {
         def closure: Closure
-        def parameter: Seq[String]
+        def parameters: Seq[String]
 
-        def instantiate(closures: Seq[ValueProvider], inHeap: HeapState, outHeap: HeapState): Nodes.Function
+        def instantiate(closures: Seq[Value], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node
     }
 }

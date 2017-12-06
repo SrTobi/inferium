@@ -144,7 +144,7 @@ class ConstraintBuilder(val solver: CSolver, funcdef: Ast.Function, prevEnv: Opt
   import Ast._
   import globals._
 
-  val params = funcdef.args
+  val params = funcdef.params
   val context = new NodeContext(solver, Some(prevContext))
   solver.pushContext(context)
   val env = new EnvAdapter(new Environment(prevEnv, params, solver), funcdef)

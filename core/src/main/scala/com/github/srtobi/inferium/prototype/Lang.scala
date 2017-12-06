@@ -19,7 +19,7 @@ object Ast {
   case class Identifier(name: String) extends Expression
   case class Property(name: String, init: Expression) extends Node
   case class Operator(op: String, left: Expression, right: Expression) extends Expression
-  case class Function(args: Seq[String], block: Block) extends Expression
+  case class Function(params: Seq[String], block: Block) extends Expression
   case class PropertyAccess(base: Expression, property: String) extends Expression
   case class Call(function: Expression, args: Seq[Expression]) extends Expression
 

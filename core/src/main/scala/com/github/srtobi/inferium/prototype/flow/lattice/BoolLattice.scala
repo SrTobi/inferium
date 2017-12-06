@@ -13,4 +13,6 @@ object BoolLattice {
     case object True extends BoolLattice
     case object False extends BoolLattice
     case object Bottom extends BoolLattice
+
+    def apply(value: Boolean): BoolLattice = if (value) True else False
 }
