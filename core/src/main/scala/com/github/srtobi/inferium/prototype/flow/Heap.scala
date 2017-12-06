@@ -8,7 +8,7 @@ trait ValueProvider {
     def notUsedBy(node: Node): Unit
     def fetch(): Value
     def asOption: Option[Value]
-    def foreach(f: Value => _)
+    def foreach(f: Value => Unit)
 }
 
 trait ValueSubmitter extends ValueProvider{
@@ -36,12 +36,6 @@ trait Heap {
     def newHeapWriter(inState: HeapState, outState: HeapState, property: String): HeapWriter
 
     def propagateFlow(): Traversable[Node]
-
-    def deriveHeapState(from: HeapState): HeapState = {
-        val newState = newHeapState()
-        addHeapFlow(from, newState)
-        return newState
-    }
 }
 
 trait HeapState {

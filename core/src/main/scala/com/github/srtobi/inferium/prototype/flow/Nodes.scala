@@ -58,8 +58,8 @@ object Nodes {
         uses(left, right)
 
         override def inputChanged(): Unit = {
-            left.foreach(_ flowsTo solver.number())
-            right.foreach(_ flowsTo solver.number())
+            left.foreach(_.flowsTo(solver.number()))
+            right.foreach(_.flowsTo(solver.number()))
 
             // TODO: if both left and right are concrete values submit the subtraction result
             resultSubmitter.submit(solver.number())
@@ -102,6 +102,7 @@ object Nodes {
                     connectThenBranch()
                 case BoolLattice.False =>
                     connectElseBranch()
+                case BoolLattice.Bottom =>
             }
         }
 
@@ -120,7 +121,9 @@ object Nodes {
         }
     }
 
-    class FunctionCall(val target: ValueProvider, val arguments: Seq[ValueProvider]) extends Node {
+    class FunctionCall(val target: ValueProvider, val arguments: Seq[ValueProvider])(heap: Heap) extends Node {
+        private val resultSubmitter = heap.newValueSubmitter()
+
         uses(target)
 
         override def inputChanged(): Unit = {
@@ -131,5 +134,7 @@ object Nodes {
             // TODO: - instantiate each function and inline it
             // TODO: - use effects on heap
         }
+
+        def result: ValueProvider = resultSubmitter
     }
 }

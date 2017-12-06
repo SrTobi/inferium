@@ -9,7 +9,9 @@ trait Solver {
     def boolean(): Value
     def boolean(specific: Boolean): Value
     def number(): Value
-    def number(specific: Int): Value
+    def number(specific: String): Value
     def string(): Value
     def string(specific: String): Value
+
+    def function(): Value
 }
