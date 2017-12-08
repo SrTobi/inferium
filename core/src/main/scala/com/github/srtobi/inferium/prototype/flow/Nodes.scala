@@ -7,7 +7,7 @@ import scala.collection.mutable
 
 
 object Nodes {
-    import Heap.{HeapState, ValueHandle, HandleReader, HandleWriter}
+    import Heap.{State, ValueHandle, HandleReader, HandleWriter}
 
     class Node()(implicit val flowAnalysis: FlowAnalysis) {
         private var nextNode: Node = _
@@ -17,10 +17,10 @@ object Nodes {
             assert(nextNode == null)
             nextNode = node
         }
-        private var _outHeap: HeapState = _
+        private var _outHeap: State = _
 
-        def outHeap: HeapState = _outHeap
-        protected def outHeap_=(heapState: HeapState): Unit = {
+        def outHeap: State = _outHeap
+        protected def outHeap_=(heapState: State): Unit = {
             assert(_outHeap == null)
             _outHeap = heapState
         }
@@ -28,10 +28,10 @@ object Nodes {
         def heap: Heap = flowAnalysis.heap
         def solver: Solver = flowAnalysis.solver
 
-        protected final def activate(node: Node, heapState: HeapState): Unit = flowAnalysis.activate(node, heapState)
+        protected final def activate(node: Node, heapState: State): Unit = flowAnalysis.activate(node, heapState)
         protected final def activate(node: Node, heapStateBuilder: HeapStateBuilder): Unit = activate(node, heapStateBuilder.end())
 
-        def doActivation(inHeap: HeapState): Unit = {
+        def doActivation(inHeap: State): Unit = {
             val builder = new HeapStateBuilder(inHeap, this)
             onActivate(builder)
             if (outHeap == null) {
@@ -187,7 +187,7 @@ object Nodes {
                 activate(Conditional.this.next, Conditional.this.outHeap)
             }
         }
-        private var heapAfterCond: HeapState = _
+        private var heapAfterCond: State = _
 
         outHeap = heap.newMergeHeapState()
 
@@ -232,7 +232,7 @@ object Nodes {
             }
         }
 
-        private def connectBranch(branch: (Node, Node), heapState: HeapState): Unit = branch match {
+        private def connectBranch(branch: (Node, Node), heapState: State): Unit = branch match {
             case (begin, end) =>
                 end.next = endOfBranchNode
                 activate(begin, heapState)

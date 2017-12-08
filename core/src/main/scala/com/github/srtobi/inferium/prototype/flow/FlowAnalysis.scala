@@ -4,5 +4,5 @@ trait FlowAnalysis {
     def solver: Solver
     def heap: Heap
 
-    def activate(node: Nodes.Node, heapState: Heap.HeapState): Unit
+    def activate(node: Nodes.Node, heapState: Heap.State): Unit
 }
