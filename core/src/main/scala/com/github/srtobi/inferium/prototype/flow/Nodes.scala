@@ -7,6 +7,8 @@ import scala.collection.mutable
 
 
 object Nodes {
+    import Heap.{HeapState, ValueHandle, HandleReader, HandleWriter}
+
     class Node()(implicit val flowAnalysis: FlowAnalysis) {
         private var nextNode: Node = _
 

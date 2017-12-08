@@ -1,9 +1,11 @@
 package com.github.srtobi.inferium.prototype.flow
 
 import com.github.srtobi.inferium.prototype.Ast
+import com.github.srtobi.inferium.prototype.flow.Heap._
 import com.github.srtobi.inferium.prototype.flow.TemplateBuilder.{Closure, FunctionTemplate}
 
 import scala.collection.mutable
+
 
 
 private class TemplateBuilder(body: Seq[Ast.Statement],

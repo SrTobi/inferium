@@ -11,7 +11,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     import Nodes.Node
 
     private val endNode = new Node()(this)
-    private val nodesToActivate = mutable.Queue.empty[(Node, HeapState)]
+    private val nodesToActivate = mutable.Queue.empty[(Node, Heap.HeapState)]
     private val (beginNode, unificationHeapState) = scriptTemplate.instantiate(this, endNode)
 
 
@@ -22,7 +22,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
             changed = analyseStep()
         } while (changed)
     }*/
-    override def activate(node: Node, heapState: HeapState): Unit = {
+    override def activate(node: Node, heapState: Heap.HeapState): Unit = {
         nodesToActivate.enqueue((node, heapState))
     }
 

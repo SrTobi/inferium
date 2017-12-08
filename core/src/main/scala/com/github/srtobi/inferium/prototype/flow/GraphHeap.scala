@@ -6,13 +6,13 @@ class GraphHeap extends Heap {
 
 
 
-    override def newEmptyHeapState(): HeapState = ???
+    override def newEmptyHeapState(): Heap.HeapState = ???
 
-    override def newMergeHeapState(): MergeHeapState = ???
+    override def newMergeHeapState(): Heap.MergeHeapState = ???
 
-    override def newValueHandle(): ValueHandle = ???
+    override def newValueHandle(): Heap.ValueHandle = ???
 
-    override def newValueHandleMerger(): ValueHandleMerger = ???
+    override def newValueHandleMerger(): Heap.ValueHandleMerger = ???
 
     override def propagateFlow(): Boolean = ???
 }

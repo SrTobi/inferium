@@ -4,7 +4,7 @@ import com.github.srtobi.inferium.prototype.Ast
 
 object Templates {
     trait Script {
-        def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, ValueHandleMerger)
+        def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, Heap.ValueHandleMerger)
     }
 
     trait Closure {
@@ -19,6 +19,6 @@ object Templates {
         def closure: Closure
         def parameters: Seq[String]
 
-        def instantiate(closures: Seq[EmptyObject], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node
+        def instantiate(closures: Seq[EmptyObject], arguments: Seq[Heap.ValueHandle], endNode: Nodes.Node, returnMerger: Heap.ValueHandleMerger): Nodes.Node
     }
 }
