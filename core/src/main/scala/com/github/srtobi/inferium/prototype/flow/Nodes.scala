@@ -2,16 +2,43 @@ package com.github.srtobi.inferium.prototype.flow
 
 import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 
 
 object Nodes {
-    class Node {
-        var next: Node = _
-        protected var outHeap: HeapState = _
+    class Node()(implicit val flowAnalysis: FlowAnalysis) {
+        private var nextNode: Node = _
 
-        final def activate(heapState: HeapState): Unit = ???
-        final def activate(heapStateBuilder: HeapStateBuilder): Unit = activate(heapStateBuilder.end())
+        def next: Node = nextNode
+        def next_=(node: Node): Unit = {
+            assert(nextNode == null)
+            nextNode = node
+        }
+        private var _outHeap: HeapState = _
+
+        def outHeap: HeapState = _outHeap
+        protected def outHeap_=(heapState: HeapState): Unit = {
+            assert(_outHeap == null)
+            _outHeap = heapState
+        }
+
+        def heap: Heap = flowAnalysis.heap
+        def solver: Solver = flowAnalysis.solver
+
+        protected final def activate(node: Node, heapState: HeapState): Unit = flowAnalysis.activate(node, heapState)
+        protected final def activate(node: Node, heapStateBuilder: HeapStateBuilder): Unit = activate(node, heapStateBuilder.end())
+
+        def doActivation(inHeap: HeapState): Unit = {
+            val builder = new HeapStateBuilder(inHeap, this)
+            onActivate(builder)
+            if (outHeap == null) {
+                outHeap = builder.end()
+            } else {
+                assert(builder.hasEnded)
+            }
+            assert(outHeap != null)
+        }
 
         // when a heap flows into the node
         def onActivate(heap: HeapStateBuilder): Unit = {}
@@ -23,8 +50,8 @@ object Nodes {
         def onValueChange(): Unit = {}
     }
 
-    class BeginNode extends Node {
-        override def onActivate(heap: HeapStateBuilder): Unit = next.activate(heap)
+    class BeginNode(implicit flowAnalysis: FlowAnalysis) extends Node {
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = activate(next, heapFlow)
     }
 
 
@@ -33,19 +60,19 @@ object Nodes {
      * - target has an upper bound on { propertyName: (,result) }
      * - all subsequent reads to propertyName on target must yield the same Value
      */
-    class PropertyRead(val target: ValueHandle, val propertyName: String)(heap: Heap) extends Node {
+    class PropertyRead(val target: ValueHandle, val propertyName: String)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private var targetReader: HandleReader = _
         val result: ValueHandle = heap.newValueHandle()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            targetReader = heap.newHandleReader(target)
-            heap.readProperty(target, propertyName, result)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            targetReader = heapFlow.newHandleReader(target)
+            heapFlow.readProperty(target, propertyName, result)
         }
 
         override def onHandleChange(): Unit = {
             // writing on null or undefined ends the program
             if (!targetReader.read().throwsWhenWrittenOrReadOn) {
-                next.activate(outHeap)
+                activate(next, outHeap)
             }
         }
     }
@@ -56,11 +83,11 @@ object Nodes {
      * - target has an upper bound on { propertyName: (,result) }
      * - all subsequent reads to propertyName on target must yield the same Value
      */
-    class LocalRead(val target: Value, val propertyName: String)(heap: Heap) extends Node {
+    class LocalRead(val target: EmptyObject, val propertyName: String)(implicit flowAnalysis: FlowAnalysis) extends Node {
         val result: ValueHandle = heap.newValueHandle()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            heap.readLocal(target, propertyName, result)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            heapFlow.readLocal(target, propertyName, result)
         }
     }
 
@@ -68,18 +95,18 @@ object Nodes {
      * - target has an upper bound on { propertyName: value }
      * - value has an upper bound on { propertyName: ... }
      */
-    class PropertyWrite(val target: ValueHandle, val propertyName: String, val value: ValueHandle) extends Node {
+    class PropertyWrite(val target: ValueHandle, val propertyName: String, val value: ValueHandle)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private var targetReader: HandleReader = _
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            targetReader = heap.newHandleReader(target)
-            heap.writeProperty(target, propertyName, value)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            targetReader = heapFlow.newHandleReader(target)
+            heapFlow.writeProperty(target, propertyName, value)
         }
 
         override def onHandleChange(): Unit = {
             // writing on null or undefined ends the program
             if (!targetReader.read().throwsWhenWrittenOrReadOn) {
-                next.activate(outHeap)
+                activate(next, outHeap)
             }
         }
     }
@@ -88,10 +115,10 @@ object Nodes {
      * - target has an upper bound on { propertyName: value }
      * - value has an upper bound on { propertyName: ... }
      */
-    class LocalWrite(val target: Value, val propertyName: String, val value: ValueHandle) extends Node {
+    class LocalWrite(val target: EmptyObject, val propertyName: String, val value: ValueHandle)(implicit flowAnalysis: FlowAnalysis) extends Node {
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            heap.writeLocal(target, propertyName, value)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            heapFlow.writeLocal(target, propertyName, value)
         }
     }
 
@@ -99,7 +126,7 @@ object Nodes {
      * - left/right have an upper bound on number
      * - the result has a lower bound on number or is the result of the subtraction of left and right
      */
-    class Subtraction(val left: ValueHandle, val right: ValueHandle)(heap: Heap, solver: Solver) extends Node {
+    class Subtraction(val left: ValueHandle, val right: ValueHandle)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private var leftReader: HandleReader = _
         private var rightReader: HandleReader = _
         private var resultWriter: HandleWriter = _
@@ -108,12 +135,12 @@ object Nodes {
         private def leftValue = leftReader.read()
         private def rightValue = rightReader.read()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            leftReader = heap.newHandleReader(left)
-            rightReader = heap.newHandleReader(right)
-            resultWriter = heap.newHandleWriter(result)
-            outHeap = heap.end()
-            next.activate(outHeap)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            leftReader = heapFlow.newHandleReader(left)
+            rightReader = heapFlow.newHandleReader(right)
+            resultWriter = heapFlow.newHandleWriter(result)
+            outHeap = heapFlow.end()
+            activate(next, outHeap)
         }
 
         override def onHandleChange(): Unit = {
@@ -123,7 +150,7 @@ object Nodes {
 
         override def onValueChange(): Unit = {
             (leftValue, rightValue) match {
-                case (ConcreteNumber(leftNum), ConcreteNumber(rightNum)) =>
+                case (NumberValue(leftNum), NumberValue(rightNum)) =>
                     resultWriter.write(solver.number((leftNum + rightNum).toString))
                 case _ =>
                     resultWriter.write(solver.number())
@@ -134,37 +161,37 @@ object Nodes {
     /*
      * - the result has a lower bound on value
      */
-    class Literal(val literal: Value)(heap: Heap) extends Node {
+    class Literal(val literal: Value)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private var resultWriter: HandleWriter = _
         val result: ValueHandle = heap.newValueHandle()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            resultWriter = heap.newHandleWriter(result)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            resultWriter = heapFlow.newHandleWriter(result)
             resultWriter.write(literal)
-            outHeap = heap.end()
-            next.activate(outHeap)
+            outHeap = heapFlow.end()
+            activate(next, outHeap)
         }
     }
 
-    class NewObject()(heap: Heap, solver: Solver) extends Literal(solver.newEmptyObject())(heap)
+    class NewObject()(implicit flowAnalysis: FlowAnalysis) extends Literal(flowAnalysis.solver.newEmptyObject())
 
-    class Conditional(val cond: ValueHandle, val thenBranch: (Node, Node), val elseBranch: Option[(Node, Node)])(heap: Heap) extends Node {
+    class Conditional(val cond: ValueHandle, val thenBranch: (Node, Node), val elseBranch: Option[(Node, Node)])(implicit flowAnalysis: FlowAnalysis) extends Node {
 
         private var thenConnected: Boolean = false
         private var elseConnected: Boolean = false
         private var condReader: HandleReader = _
         private val endOfBranchNode = new Node {
-            override def onActivate(heap: HeapStateBuilder): Unit = {
-                Conditional.this.next.activate(Conditional.this.outHeap)
+            override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+                activate(Conditional.this.next, Conditional.this.outHeap)
             }
         }
         private var heapAfterCond: HeapState = _
 
         outHeap = heap.newMergeHeapState()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            condReader = heap.newHandleReader(cond)
-            heapAfterCond = heap.end()
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            condReader = heapFlow.newHandleReader(cond)
+            heapAfterCond = heapFlow.end()
         }
 
         override def onValueChange(): Unit = {
@@ -197,7 +224,7 @@ object Nodes {
                     case Some(elseBra) =>
                         connectBranch(elseBra, heapAfterFalsyfy)
                     case None =>
-                        endOfBranchNode.activate(heapAfterFalsyfy)
+                        activate(endOfBranchNode, heapAfterFalsyfy)
                 }
                 elseConnected = true
             }
@@ -206,16 +233,16 @@ object Nodes {
         private def connectBranch(branch: (Node, Node), heapState: HeapState): Unit = branch match {
             case (begin, end) =>
                 end.next = endOfBranchNode
-                begin.activate(heapState)
+                activate(begin, heapState)
         }
     }
 
-    class FunctionCall(val target: ValueHandle, val arguments: Seq[ValueHandle])(heap: Heap) extends Node {
+    class FunctionCall(val target: ValueHandle, val arguments: Seq[ValueHandle])(implicit flowAnalysis: FlowAnalysis) extends Node {
         private var targetReader: HandleReader = _
         private val instantiated = mutable.Set.empty[FunctionValue]
         private val endOfBranchNode = new Node {
-            override def onActivate(heap: HeapStateBuilder): Unit = {
-                FunctionCall.this.next.activate(FunctionCall.this.outHeap)
+            override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+                activate(FunctionCall.this.next, FunctionCall.this.outHeap)
             }
         }
 
@@ -223,8 +250,8 @@ object Nodes {
         def result: ValueHandle = returnMerger
         outHeap = heap.newMergeHeapState()
 
-        override def onActivate(heap: HeapStateBuilder): Unit = {
-            targetReader = heap.newHandleReader(target)
+        override def onActivate(heapFlow: HeapStateBuilder): Unit = {
+            targetReader = heapFlow.newHandleReader(target)
         }
 
         override def onValueChange(): Unit = {
@@ -234,10 +261,6 @@ object Nodes {
 
             for (FunctionValue(template, closures) <- functions.filter(!instantiated.contains(_))) {
                 template.instantiate(closures, arguments, endOfBranchNode, returnMerger)
-            }
-
-            if (functions.nonEmpty) {
-                next.activate(outHeap)
             }
         }
     }

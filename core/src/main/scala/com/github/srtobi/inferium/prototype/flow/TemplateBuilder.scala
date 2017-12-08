@@ -7,13 +7,11 @@ import scala.collection.mutable
 
 
 private class TemplateBuilder(body: Seq[Ast.Statement],
-                              outerClosureValues: Seq[Value],
+                              outerClosureValues: Seq[EmptyObject],
                               parameter: Seq[(String, ValueHandle)],
                               outerClosure: Option[Templates.Closure],
-                              solver: Solver,
-                              heap: Heap,
                               endNode: Nodes.Node,
-                              returnMerger: ValueHandleMerger) {
+                              returnMerger: ValueHandleMerger)(implicit val flowAnalysis: FlowAnalysis) {
 
     private class NodeBuilder {
         var begin: Nodes.BeginNode = new Nodes.BeginNode
@@ -39,6 +37,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         }
     }
 
+    private def solver = flowAnalysis.solver
     private var done = false
     private val thisClosureValue = solver.newEmptyObject()
     private val closureValues = outerClosureValues :+ thisClosureValue
@@ -47,19 +46,19 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
     private[this] def buildExpression(expr: Ast.Expression, newnode: NodeBuilder): ValueHandle = expr match {
         case Ast.UndefinedLiteral() =>
-            val node = newnode(new Nodes.Literal(solver.undefined())(heap))
+            val node = newnode(new Nodes.Literal(solver.undefined()))
             return node.result
 
         case Ast.BooleanLit(bool) =>
-            val node = newnode(new Nodes.Literal(solver.boolean(bool))(heap))
+            val node = newnode(new Nodes.Literal(solver.boolean(bool)))
             return node.result
 
         case Ast.NumberLit(n) =>
-            val node = newnode(new Nodes.Literal(solver.number(n))(heap))
+            val node = newnode(new Nodes.Literal(solver.number(n)))
             return node.result
 
         case Ast.StringLiteral(str) =>
-            val node = newnode(new Nodes.Literal(solver.string(str))(heap))
+            val node = newnode(new Nodes.Literal(solver.string(str)))
             return node.result
 
         case Ast.Identifier(id) =>
@@ -69,14 +68,14 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         case Ast.Operator("-", left, right) =>
             val leftValue = buildExpression(left, newnode)
             val rightValue  = buildExpression(right, newnode)
-            val node = newnode(new Nodes.Subtraction(leftValue, rightValue)(heap, solver))
+            val node = newnode(new Nodes.Subtraction(leftValue, rightValue))
             return node.result
 
         case Ast.Operator(op, _, _) =>
             throw new IllegalArgumentException(s"Operation $op is currently not permitted!")
 
         case Ast.Object(props) =>
-            val objNode = newnode(new Nodes.NewObject()(heap, solver))
+            val objNode = newnode(new Nodes.NewObject())
             val objValue = objNode.result
             for (prop <- props) {
                 val initValue = buildExpression(prop.init, newnode)
@@ -86,19 +85,19 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
         case Ast.PropertyAccess(base, property) =>
             val baseValue = buildExpression(base, newnode)
-            val node = newnode(new Nodes.PropertyRead(baseValue, property)(heap))
+            val node = newnode(new Nodes.PropertyRead(baseValue, property))
             return node.result
 
         case Ast.Call(func, args) =>
             val funcValue = buildExpression(func, newnode)
             val argValues = args.map(buildExpression(_, newnode))
 
-            val node = newnode(new Nodes.FunctionCall(funcValue, argValues)(heap))
+            val node = newnode(new Nodes.FunctionCall(funcValue, argValues))
             return node.result
 
         case func: Ast.Function =>
-            val templ = new FunctionTemplate(func, new Closure(Some(closure)))(solver, heap)
-            val node = newnode(new Nodes.Literal(FunctionValue(templ, closureValues))(heap))
+            val templ = new FunctionTemplate(func, new Closure(Some(closure)))
+            val node = newnode(new Nodes.Literal(FunctionValue(templ, closureValues)))
             return node.result
     }
 
@@ -110,7 +109,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             val condValue = buildExpression(cond, newnode)
             val thenBranch = buildBranch(success)
             val elseBranch = fail.map(buildBranch)
-            newnode(new Nodes.Conditional(condValue, thenBranch, elseBranch)(heap))
+            newnode(new Nodes.Conditional(condValue, thenBranch, elseBranch))
 
         case Ast.AssignmentStmt(Ast.PropertyAccess(base, property), expr) =>
             val baseValue = buildExpression(base, newnode)
@@ -146,7 +145,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
     private[this] def buildLocalRead(name: String, newnode: NodeBuilder): ValueHandle = {
         val closureIdx = closure.closureIndexForVar(name)
-        val node = newnode(new Nodes.LocalRead(closureValues(closureIdx), name)(heap))
+        val node = newnode(new Nodes.LocalRead(closureValues(closureIdx), name))
         return node.result
     }
 
@@ -185,12 +184,12 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
 object TemplateBuilder {
 
-    private class FunctionTemplate(val ast: Ast.Function, override val closure: Templates.Closure)(solver: Solver, heap: Heap) extends Templates.Function {
+    private class FunctionTemplate(val ast: Ast.Function, override val closure: Templates.Closure)(implicit val flowAnalysis: FlowAnalysis) extends Templates.Function {
 
         override def parameters: Seq[String] = ast.params
 
-        override def instantiate(closures: Seq[Value], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node = {
-            val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), solver, heap, endNode, returnMerger)
+        override def instantiate(closures: Seq[EmptyObject], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node = {
+            val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), endNode, returnMerger)
             return builder.build()
         }
 
@@ -209,9 +208,9 @@ object TemplateBuilder {
     }
 
     def buildScriptTemplate(script: Ast.Script): Templates.Script = new Templates.Script {
-        override def instantiate(solver: Solver, heap: Heap, endNode: Nodes.Node): (Nodes.Node, ValueHandleMerger) = {
-            val returnMerger = heap.newValueHandleMerger()
-            val builder = new TemplateBuilder(script.main, Seq(), Seq(), None, solver, heap, endNode, returnMerger)
+        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, ValueHandleMerger) = {
+            val returnMerger = flowAnalysis.heap.newValueHandleMerger()
+            val builder = new TemplateBuilder(script.main, Seq(), Seq(), None, endNode, returnMerger)(flowAnalysis)
             return (builder.build(), returnMerger)
         }
     }

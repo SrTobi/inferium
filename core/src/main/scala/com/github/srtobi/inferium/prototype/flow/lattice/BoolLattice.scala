@@ -5,7 +5,11 @@ package com.github.srtobi.inferium.prototype.flow.lattice
 sealed abstract class BoolLattice extends Lattice[BoolLattice] {
     import BoolLattice._
 
-    def unify(other: BoolLattice): BoolLattice = if (this == other) this else Top
+    def unify(other: BoolLattice): BoolLattice = if (this == other) this else (this, other) match {
+        case (Bottom, o) => o
+        case (o, Bottom) => o
+        case _ => Top
+    }
 }
 
 object BoolLattice {

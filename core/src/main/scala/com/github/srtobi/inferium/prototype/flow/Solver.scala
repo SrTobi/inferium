@@ -3,15 +3,15 @@ package com.github.srtobi.inferium.prototype.flow
 trait Solver {
     //def newValue(): Value
 
-    def newEmptyObject(): Value
+    def newEmptyObject(): EmptyObject
 
-    def undefined(): Value
-    def boolean(): Value
-    def boolean(specific: Boolean): Value
-    def number(): Value
-    def number(specific: String): Value
-    def string(): Value
-    def string(specific: String): Value
+    def undefined(): UndefinedValue
+    def nullValue(): NullValue
 
-    def function(): Value
+    def boolean(): BoolValue
+    def boolean(specific: Boolean): BoolValue
+    def number(): NumberValue
+    def number(specific: String): NumberValue
+    def string(): StringValue
+    def string(specific: String): StringValue
 }

@@ -18,7 +18,7 @@ trait ValueSubmitter extends ValueProvider{
 }*/
 
 trait ValueHandleMerger extends ValueHandle {
-    def add(handles: ValueHandle*): Unit = ???
+    def add(handles: ValueHandle*): Unit
 }
 
 trait HandleReader {
@@ -34,8 +34,8 @@ trait HeapState {
     def newHandleWriter(handle: ValueHandle, node: Node): (HandleWriter, HeapState)
     def readProperty(target: ValueHandle, property: String, into: ValueHandle): HeapState
     def writeProperty(target: ValueHandle, property: String, value: ValueHandle): HeapState
-    def readLocal(target: Value, name: String, into: ValueHandle): HeapState
-    def writeLocal(target: Value, name: String, value: ValueHandle): HeapState
+    def readLocal(target: EmptyObject, name: String, into: ValueHandle): HeapState
+    def writeLocal(target: EmptyObject, name: String, value: ValueHandle): HeapState
     def truthyfy(cond: ValueHandle): HeapState
     def falsyfy(cond: ValueHandle): HeapState
 }
@@ -46,41 +46,50 @@ trait MergeHeapState extends HeapState {
 
 class HeapStateBuilder(private var cur: HeapState, private val node: Node) {
     def newHandleReader(handle: ValueHandle): HandleReader = {
+        assert(isBuilding)
         val (reader, newHeap) = cur.newHandleReader(handle, node)
         cur = newHeap
         return reader
     }
 
     def newHandleWriter(handle: ValueHandle): HandleWriter = {
+        assert(isBuilding)
         val (writer, newHeap) = cur.newHandleWriter(handle, node)
         cur = newHeap
         return writer
     }
 
     def readProperty(target: ValueHandle, property: String, into: ValueHandle): Unit = {
+        assert(isBuilding)
         cur = cur.readProperty(target, property, into)
     }
 
     def writeProperty(target: ValueHandle, property: String, value: ValueHandle): Unit = {
+        assert(isBuilding)
         cur = cur.writeProperty(target, property, value)
     }
 
-    def readLocal(target: Value, property: String, into: ValueHandle): Unit = {
+    def readLocal(target: EmptyObject, property: String, into: ValueHandle): Unit = {
+        assert(isBuilding)
         cur = cur.readLocal(target, property, into)
     }
 
-    def writeLocal(target: Value, property: String, value: ValueHandle): Unit = {
+    def writeLocal(target: EmptyObject, property: String, value: ValueHandle): Unit = {
+        assert(isBuilding)
         cur = cur.writeLocal(target, property, value)
     }
 
     def end(): HeapState = {
-        if (cur eq null) {
+        if (cur == null) {
             throw new IllegalStateException("Can not end a builder a second time")
         }
         val result = cur
         cur = null
         return result
     }
+
+    def isBuilding: Boolean = !hasEnded
+    def hasEnded: Boolean = cur == null
 }
 
 trait Heap {
@@ -89,5 +98,9 @@ trait Heap {
     def newValueHandle(): ValueHandle
     def newValueHandleMerger(): ValueHandleMerger
 
-    def propagateFlow(): Traversable[Node]
+    def propagateFlow(): Boolean
+}
+
+object Heap {
+
 }
