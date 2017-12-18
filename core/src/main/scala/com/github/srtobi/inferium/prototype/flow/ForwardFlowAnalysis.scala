@@ -11,10 +11,13 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     import Nodes.Node
 
     private val endNode = new Node()(this)
+    private val unificationHeapState = heap.newMergeHeapState()
+    private val (scriptReturnMerger, heapStateAfterUnification) = unificationHeapState.newValueHandleMerger()
     private val nodesToActivate = mutable.Queue.empty[(Node, Heap.State)]
-    private val (beginNode, unificationHeapState) = scriptTemplate.instantiate(this, endNode)
+    private val beginNode = scriptTemplate.instantiate(this, endNode, scriptReturnMerger)
+    private val startHeapState = heap.newEmptyHeapState()
 
-
+    activate(beginNode, startHeapState)
 
     /*def analyse(): Unit = {
         var changed = false
@@ -39,7 +42,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         var changed = false
 
         changed = activateNodes()
-        changed = heap.propagateFlow() || changed
+        changed = heap.propagateFlow(startHeapState) || changed
 
         return changed
     }

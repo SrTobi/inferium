@@ -4,21 +4,28 @@ import Nodes.Node
 
 
 class HeapStateBuilder(private var cur: Heap.State, private val node: Node) {
-    def newHandleReader(handle: Heap.ValueHandle): Heap.HandleReader = {
+    def newHandleReader(handle: Heap.ValueHandle, handler: Heap.ValueHandleChangeHandler): Heap.HandleReader = {
         assert(isBuilding)
-        val (reader, newHeap) = cur.newHandleReader(handle, node)
+        val (reader, newHeap) = cur.newHandleReader(handle, handler)
         cur = newHeap
         return reader
     }
 
     def newHandleWriter(handle: Heap.ValueHandle): Heap.HandleWriter = {
         assert(isBuilding)
-        val (writer, newHeap) = cur.newHandleWriter(handle, node)
+        val (writer, newHeap) = cur.newHandleWriter(handle)
         cur = newHeap
         return writer
     }
 
-    def readProperty(target: Heap.ValueHandle, property: String, into: Heap.ValueHandle): Unit = {
+    def newHandleMerge(): Heap.ValueHandleMerger = {
+        assert(isBuilding)
+        val (merger, newHeap) = cur.newValueHandleMerger()
+        cur = newHeap
+        return merger
+    }
+
+    /*def readProperty(target: Heap.ValueHandle, property: String, into: Heap.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.readProperty(target, property, into)
     }
@@ -36,7 +43,7 @@ class HeapStateBuilder(private var cur: Heap.State, private val node: Node) {
     def writeLocal(target: EmptyObject, property: String, value: Heap.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.writeLocal(target, property, value)
-    }
+    }*/
 
     def end(): Heap.State = {
         if (cur == null) {
@@ -53,15 +60,19 @@ class HeapStateBuilder(private var cur: Heap.State, private val node: Node) {
 
 trait Heap {
     def newEmptyHeapState(): Heap.State
-    def newMergeHeapState(): Heap.MergeState
+    def newMergeHeapState(numTip: Int = 0): Heap.MergeState
     def newValueHandle(): Heap.ValueHandle
-    def newValueHandleMerger(): Heap.ValueHandleMerger
 
-    def propagateFlow(): Boolean
+    def propagateFlow(startHeap: Heap.State): Boolean
 }
 
 object Heap {
     trait ValueHandle
+
+    trait ValueHandleChangeHandler extends ValueChangeHandler {
+        def onHandleChanged(oldValue: Option[Value], newValue: Value): Unit
+        override def onValueChanged(): Unit = {}
+    }
 
     trait ValueHandleMerger extends ValueHandle {
         def add(handles: ValueHandle*): Unit
@@ -76,12 +87,10 @@ object Heap {
     }
 
     trait State {
-        def newHandleReader(handle: ValueHandle, node: Node): (HandleReader, State)
-        def newHandleWriter(handle: ValueHandle, node: Node): (HandleWriter, State)
-        def readProperty(target: ValueHandle, property: String, into: ValueHandle): State
-        def writeProperty(target: ValueHandle, property: String, value: ValueHandle): State
-        def readLocal(target: EmptyObject, name: String, into: ValueHandle): State
-        def writeLocal(target: EmptyObject, name: String, value: ValueHandle): State
+        def newHandleReader(handle: ValueHandle, handler: ValueHandleChangeHandler): (HandleReader, State)
+        def newHandleWriter(handle: ValueHandle): (HandleWriter, State)
+        def newValueHandleMerger(): (Heap.ValueHandleMerger, State)
+
         def truthyfy(cond: ValueHandle): State
         def falsyfy(cond: ValueHandle): State
     }

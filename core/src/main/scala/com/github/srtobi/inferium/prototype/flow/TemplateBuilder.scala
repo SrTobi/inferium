@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 
 private class TemplateBuilder(body: Seq[Ast.Statement],
-                              outerClosureValues: Seq[EmptyObject],
+                              outerClosureValues: Seq[Heap.ValueHandle],
                               parameter: Seq[(String, ValueHandle)],
                               outerClosure: Option[Templates.Closure],
                               endNode: Nodes.Node,
@@ -41,7 +41,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
     private def solver = flowAnalysis.solver
     private var done = false
-    private val thisClosureValue = solver.newEmptyObject()
+    private val thisClosureValue = flowAnalysis.heap.newValueHandle()
     private val closureValues = outerClosureValues :+ thisClosureValue
 
     private val closure = new Closure(outerClosure)
@@ -142,12 +142,12 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
 
     private[this] def buildLocalAssignment(name: String, value: ValueHandle, newnode: NodeBuilder): Unit = {
         val localValue = closureValues(closure.closureIndexForVar(name))
-        newnode(new Nodes.LocalWrite(localValue, name, value))
+        newnode(new Nodes.PropertyWrite(localValue, name, value))
     }
 
     private[this] def buildLocalRead(name: String, newnode: NodeBuilder): ValueHandle = {
         val closureIdx = closure.closureIndexForVar(name)
-        val node = newnode(new Nodes.LocalRead(closureValues(closureIdx), name))
+        val node = newnode(new Nodes.PropertyRead(closureValues(closureIdx), name))
         return node.result
     }
 
@@ -190,7 +190,7 @@ object TemplateBuilder {
 
         override def parameters: Seq[String] = ast.params
 
-        override def instantiate(closures: Seq[EmptyObject], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node = {
+        override def instantiate(closures: Seq[Heap.ValueHandle], arguments: Seq[ValueHandle], endNode: Nodes.Node, returnMerger: ValueHandleMerger): Nodes.Node = {
             val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), endNode, returnMerger)
             return builder.build()
         }
@@ -210,10 +210,9 @@ object TemplateBuilder {
     }
 
     def buildScriptTemplate(script: Ast.Script): Templates.Script = new Templates.Script {
-        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, ValueHandleMerger) = {
-            val returnMerger = flowAnalysis.heap.newValueHandleMerger()
+        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node, returnMerger: Heap.ValueHandleMerger): Nodes.Node = {
             val builder = new TemplateBuilder(script.main, Seq(), Seq(), None, endNode, returnMerger)(flowAnalysis)
-            return (builder.build(), returnMerger)
+            return builder.build()
         }
     }
 }
