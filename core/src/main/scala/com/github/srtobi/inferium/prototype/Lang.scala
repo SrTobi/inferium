@@ -205,7 +205,7 @@ object LangParser {
      | statement.map(Seq(_))
   )
 
-  lazy val exprEnd: UnitP = noLineTerminator.repX ~~ (&(End) | &("}") | &("else") | CharIn(";\n"))
+  lazy val exprEnd: UnitP = noLineTerminator.repX ~~ (&(End) | &("}") | &("else") | ";" | lineTerminator)
 
   lazy val statements: Parser[Seq[Ast.Statement]] = (P(";").map((_) => None) | statement.map(Some(_))).rep.map(_.flatten)
   lazy val block: Parser[Seq[Ast.Statement]] = P("{" ~ statements ~ "}")
