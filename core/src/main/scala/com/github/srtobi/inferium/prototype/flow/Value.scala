@@ -11,15 +11,18 @@ trait ValueChangeHandler {
 
 abstract class ValueLike {
     def asBool: BoolLattice
-    def asConcreteValue: Option[ConcreteValue]
     def asFunctions: Traversable[FunctionValue]
-
-    def asSet: mutable.Set[Value]
+    def asObjects: Traversable[ObjectValue]
 
     def throwsWhenWrittenOrReadOn: Boolean
 }
 
-sealed abstract class Value(implicit val flowAnalysis: FlowAnalysis) extends ValueLike {
+sealed abstract class Value extends ValueLike {
+
+    override def asFunctions: Traversable[FunctionValue] = Seq.empty
+    override def throwsWhenWrittenOrReadOn: Boolean = false
+    override def asObjects: Traversable[ObjectValue] = Traversable()
+    override def asBool: BoolLattice = BoolLattice.True
     /*def in: scala.collection.Set[Value] = inValues
     def out: scala.collection.Set[Value] = outValues
 
@@ -51,51 +54,76 @@ sealed abstract class Value(implicit val flowAnalysis: FlowAnalysis) extends Val
     //def getProperty(name: String): scala.collection.Set[HeapState.ValueHandle]
 }
 
-sealed abstract class ConcreteValue(implicit flowAnalysis: FlowAnalysis) extends Value {
+case object NeverValue extends Value {
+    override def throwsWhenWrittenOrReadOn: Boolean = true
+    override def asBool: BoolLattice = BoolLattice.Top
 
-    override def asConcreteValue: Option[ConcreteValue] = Some(this)
-    override def asFunctions: Traversable[FunctionValue] = Seq.empty
-    override def throwsWhenWrittenOrReadOn: Boolean = false
-
-    override def asSet: mutable.Set[Value] = mutable.Set(this)
-
-    override def asBool: BoolLattice = BoolLattice.True
-    //override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = Set()
+    override def toString: String = "never"
 }
 
-case class NeverValue()(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue
-
-case class UndefinedValue()(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
+case object UndefinedValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
+
+    override def toString: String = "undefined"
 }
 
-case class NullValue()(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
+case object NullValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
+
+    override def toString: String = "null"
 }
 
-case class BoolValue(value: Boolean)(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
+case class BoolValue(value: Boolean) extends Value {
     override def asBool: BoolLattice = BoolLattice(value)
-}
-case class NumberValue(value: Int)(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
-    override def asBool: BoolLattice = BoolLattice(value != 0)
-}
-case class StringValue(value: String)(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
-    override def asBool: BoolLattice = BoolLattice(value != "")
-}
-case class EmptyObject(id: Int)(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue
 
-case class FunctionValue(template: Templates.Function, closures: Seq[HeapHandle])(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
-    override def asFunctions: Traversable[FunctionValue] = Seq(this)
+    override def toString: String = value.toString
 }
-/*
-class UnionValue()(implicit flowAnalysis: FlowAnalysis) extends Value {
+case class NumberValue(value: Int) extends Value {
+    override def asBool: BoolLattice = BoolLattice(value != 0)
+
+    override def toString: String = value.toString
+}
+case class StringValue(value: String) extends Value {
+    override def asBool: BoolLattice = BoolLattice(value != "")
+
+    override def toString: String = "\"" + value + "\""
+}
+class ObjectValue extends Value {
+    val internalId: Long = ObjectValue.nextObjId()
+    override def asObjects: Traversable[ObjectValue] = Traversable(this)
+
+    override def toString: String = s"obj#$internalId"
+}
+
+object ObjectValue {
+    private var nextId: Long = 0
+    def nextObjId(): Long = {
+        nextId += 1
+        return nextId
+    }
+}
+
+class FunctionValue(val template: Templates.Function, val closures: Seq[Value]) extends ObjectValue() {
+    override def asFunctions: Traversable[FunctionValue] = Traversable(this)
+
+    override def toString: String = s"func#$internalId"
+}
+
+object FunctionValue {
+    def unapply(fv: FunctionValue): Option[(Templates.Function, Seq[Value])] = Some((fv.template, fv.closures))
+}
+
+class UnionValue(val values: Seq[Value]) extends ObjectValue() {
+
+    assert(values.size >= 2)
+    assert(values.forall(v => !v.isInstanceOf[UnionValue]))
 
     override def asBool: BoolLattice = {
-        assert(in.nonEmpty)
-        var result: BoolLattice = in.head.asBool
-        for (bool <- in.iterator.drop(1)) {
+        val it = values.iterator
+        var result: BoolLattice = it.next().asBool
+        for (bool <- it) {
             result = result.unify(bool.asBool)
             if (result == BoolLattice.Top) {
                 return BoolLattice.Top
@@ -104,27 +132,32 @@ class UnionValue()(implicit flowAnalysis: FlowAnalysis) extends Value {
         return result
     }
 
-    override def asConcreteValue: Option[ConcreteValue] = {
-        assert(in.nonEmpty)
-        return in.head.asConcreteValue.map {
-            result =>
-                for (value <- in.iterator.drop(1)) {
-                    value.asConcreteValue match {
-                        case Some(concrete) if concrete == result =>
-                            ()
-                        case _ =>
-                            return None
-                    }
-                }
-                result
+    override def asObjects: Traversable[ObjectValue] = values.flatMap(_.asObjects) :+ this
+    override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
+    override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
+
+    override def toString: String = values.mkString(" | ")
+}
+
+object UnionValue {
+    def apply(values: Value*): Value = {
+        return values.flatMap(unpackUnion).distinct match {
+            case Seq() => NeverValue
+            case Seq(value) => value
+            case seq => new UnionValue(seq)
         }
     }
 
-    override def asFunctions: Traversable[FunctionValue] = in.flatMap(_.asFunctions)
-    override def throwsWhenWrittenOrReadOn: Boolean = in.forall(_.throwsWhenWrittenOrReadOn)
-    override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = in.foldLeft(Set[HeapState.ValueHandle]())(_ | _.getProperty(name))
+    def unapply(arg: UnionValue): Option[Seq[Value]] = Some(arg.values)
+
+    private def unpackUnion(value: Value): Seq[Value] = value match {
+        case UnionValue(values) => values
+        case NeverValue => Seq()
+        case noUnion => Seq(noUnion)
+    }
 }
 
+/*
 class UnionValueBuilder(implicit flowAnalysis: FlowAnalysis) {
     private lazy val union = new UnionValue
     def build(values: Seq[Value]): Value = values match {

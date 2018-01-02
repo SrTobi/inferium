@@ -1,6 +1,7 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.Ast
+import com.github.srtobi.inferium.prototype.{Ast, LangParser}
+import fastparse.core.Parsed
 
 import scala.collection.mutable
 
@@ -14,12 +15,12 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         override def onControlFlow(heap: HeapMemory): Unit = assert(nodesToPropagate.isEmpty)
         override def onNoControlFlow(): Unit = assert(nodesToPropagate.isEmpty)
     }
-    private val mergeNode = new Nodes.MergeNode(-1, endNode)(this)
+    private val mergeNode = new Nodes.MergeNode(0, endNode)(this)
     private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
-    private val (beginNode, results) = scriptTemplate.instantiate(this, mergeNode)
+    private val (beginNode, returns) = scriptTemplate.instantiate(this, mergeNode)
     private val startHeapState = heap.newEmptyHeapState()
 
-    mergeNode.setNumBranchesToWaitFor(results.length)
+    mergeNode.setNumBranchesToWaitFor(returns.length)
     controlFlowTo(beginNode, startHeapState)
 
     //activate(beginNode, startHeapState)
@@ -35,10 +36,13 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     }*/
 
     override def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit = {
+        assert(node ne null)
+        assert(heapState ne null)
         nodesToPropagate.enqueue((node, Some(heapState)))
     }
 
     override def noControlFlowTo(node: Nodes.Node): Unit = {
+        assert(node ne null)
         nodesToPropagate.enqueue((node, None))
     }
 
@@ -71,11 +75,15 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         return changed
     }
 
-    private def analyse(): Unit = {
-        analyseFlow()
-    }
+    def analyse(): Unit = {
+        // analyse initial code
+        assert(nodesToPropagate.nonEmpty)
+        propagateControlFlow()
 
-    override def newHeapHandle(): HeapHandle = heap.newHandle()
+        val scriptValue = UnionValue(returns.map(_.newSource().get()): _*)
+
+        println(scriptValue)
+    }
 
     override def unify(heaps: HeapMemory*): HeapMemory = heap.unify(heaps: _*)
 }

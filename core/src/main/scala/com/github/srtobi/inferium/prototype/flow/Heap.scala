@@ -1,22 +1,19 @@
 package com.github.srtobi.inferium.prototype.flow
 
 
-abstract class HeapHandle
+//abstract class HeapHandle
 
 abstract class HeapMemory {
-    def read(handle: HeapHandle): ValueLike
-    def write(handle: HeapHandle, value: ValueLike): Unit
-    def readProperty(target: HeapHandle, propertyName: String): HeapHandle
-    def writeProperty(target: HeapHandle, propertyName: String, handle: HeapHandle): Unit
-
-    def unifyHandles(handles: Seq[HeapHandle], target: HeapHandle): Unit
+    //def read(handle: HeapHandle): ValueLike
+    //def write(handle: HeapHandle, value: ValueLike): Unit
+    def readProperty(target: Value, propertyName: String): Value
+    def writeProperty(target: Value, propertyName: String, handle: Value): Unit
 
     def split(): HeapMemory
 }
 
 abstract class Heap {
     def newEmptyHeapState(): HeapMemory
-    def newHandle(): HeapHandle
 
     def unify(heaps: HeapMemory*): HeapMemory
 }

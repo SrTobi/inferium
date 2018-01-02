@@ -5,30 +5,27 @@ import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 import scala.annotation.tailrec
 import scala.collection.mutable
 
-abstract class HandleSourceProvider {
-    def newSource(): HandleSource
+abstract class ValueSourceProvider {
+    def newSource(): ValueSource
 }
 
-class HandleSink extends HandleSourceProvider {
-    private var currentHandle: HeapHandle = _
+class ValueSink extends ValueSourceProvider {
+    private var currentValue: Value = NeverValue
 
-    def set(handle: HeapHandle): Unit = currentHandle = handle
+    def set(value: Value): Unit = {
+        assert(value ne null)
+        currentValue = value
+    }
 
-    override def newSource(): HandleSource = new HandleSource {
-        override def hasChanged: Boolean = true
-        override def get(): HeapHandle = {
-            assert(currentHandle ne null)
-            return currentHandle
-        }
-        override def noControlGet(): Option[HeapHandle] = {
-            return Option(currentHandle)
+    override def newSource(): ValueSource = new ValueSource {
+        override def get(): Value = {
+            assert(currentValue ne null)
+            return currentValue
         }
     }
 }
-abstract class HandleSource {
-    def hasChanged: Boolean
-    def get(): HeapHandle
-    def noControlGet(): Option[HeapHandle]
+abstract class ValueSource {
+    def get(): Value
 }
 
 
@@ -86,11 +83,11 @@ object Nodes {
 
         private var waitingHeap: HeapMemory = _
 
-        assert(numBranchesToWaitFor > 0 || numBranchesToWaitFor == -1)
+        assert(numBranchesToWaitFor >= 0)
         this.next = nextNode
 
         def setNumBranchesToWaitFor(num: Int): Unit = {
-            assert(numBranchesToWaitFor == -1)
+            assert(numBranchesToWaitFor == 0)
             numBranchesToWaitFor = num
         }
 
@@ -132,13 +129,19 @@ object Nodes {
      * - target has an upper bound on { propertyName: (,result) }
      * - all subsequent reads to propertyName on target must yield the same Value
      */
-    class PropertyRead(val target: HandleSource, val propertyName: String)(implicit flowAnalysis: FlowAnalysis) extends Node {
-        private val _result = new HandleSink
-        def result: HandleSourceProvider = _result
+    class PropertyRead(val target: ValueSource, val propertyName: String)(implicit flowAnalysis: FlowAnalysis) extends Node {
+        private val _result = new ValueSink
+        def result: ValueSourceProvider = _result
 
         override def onControlFlow(heap: HeapMemory): Unit = {
-            _result.set(heap.readProperty(target.get(), propertyName))
-            controlFlowTo(next, heap)
+            val targetValue = target.get()
+            if (!targetValue.throwsWhenWrittenOrReadOn) {
+                _result.set(heap.readProperty(targetValue, propertyName))
+                controlFlowTo(next, heap)
+            } else {
+                // program stops
+                noControlFlowTo(next)
+            }
         }
         /*override def onActivate(heapFlow: HeapStateBuilder): Unit = {
             targetReader = heapFlow.newHandleReader(target, this)
@@ -176,7 +179,7 @@ object Nodes {
      * - target has an upper bound on { propertyName: value }
      * - value has an upper bound on { propertyName: ... }
      */
-    class PropertyWrite(val target: HandleSource, val propertyName: String, val value: HandleSource)(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class PropertyWrite(val target: ValueSource, val propertyName: String, val value: ValueSource)(implicit flowAnalysis: FlowAnalysis) extends Node {
 
         /*override def onActivate(heapFlow: HeapStateBuilder): Unit = {
             targetReader = heapFlow.newHandleReader(target, this)
@@ -191,11 +194,10 @@ object Nodes {
             }
         }*/
         override def onControlFlow(heap: HeapMemory): Unit = {
-            val targetHandle = target.get()
-            val targetValue = heap.read(targetHandle)
+            val targetValue = target.get()
             if (!targetValue.throwsWhenWrittenOrReadOn) {
                 val valueHandle = value.get()
-                heap.writeProperty(targetHandle, propertyName, valueHandle)
+                heap.writeProperty(targetValue, propertyName, valueHandle)
                 controlFlowTo(next, heap)
             } else {
                 // program stops
@@ -219,9 +221,9 @@ object Nodes {
      * - left/right have an upper bound on number
      * - the result has a lower bound on number or is the result of the subtraction of left and right
      */
-    class Subtraction(val left: HandleSource, val right: HandleSource)(implicit flowAnalysis: FlowAnalysis) extends Node {
-        private val _result = new HandleSink
-        def result: HandleSourceProvider = _result
+    class Subtraction(val left: ValueSource, val right: ValueSource)(implicit flowAnalysis: FlowAnalysis) extends Node {
+        private val _result = new ValueSink
+        def result: ValueSourceProvider = _result
 
         /*private def leftValue = leftReader.read()
         private def rightValue = rightReader.read()
@@ -248,19 +250,16 @@ object Nodes {
             }
         }*/
 
-        private val resultHandle = flowAnalysis.newHeapHandle()
-
         override def onControlFlow(heap: HeapMemory): Unit = {
-            lazy val leftValue = heap.read(left.get())
-            lazy val rightValue = heap.read(right.get())
+            lazy val leftValue = left.get()
+            lazy val rightValue = right.get()
 
             (leftValue, rightValue) match {
                 case (NumberValue(leftNum), NumberValue(rightNum)) =>
-                    heap.write(resultHandle, solver.number((leftNum + rightNum).toString))
+                    _result.set(solver.number((leftNum - rightNum).toString))
                 case _ =>
-                    heap.write(resultHandle, solver.number())
+                    _result.set(solver.number())
             }
-            _result.set(resultHandle)
             controlFlowTo(next, heap)
         }
     }
@@ -269,13 +268,11 @@ object Nodes {
      * - the result has a lower bound on value
      */
     class Literal(val literal: Value)(implicit flowAnalysis: FlowAnalysis) extends Node {
-        private val resultHandle = flowAnalysis.newHeapHandle()
-        private val _result = new HandleSink
-        def result: HandleSourceProvider = _result
+        private val _result = new ValueSink
+        def result: ValueSourceProvider = _result
 
         override def onControlFlow(heap: HeapMemory): Unit = {
-            heap.write(resultHandle, literal)
-            _result.set(resultHandle)
+            _result.set(literal)
 
             controlFlowTo(next, heap)
         }
@@ -289,7 +286,7 @@ object Nodes {
 
     class NewObject()(implicit flowAnalysis: FlowAnalysis) extends Literal(flowAnalysis.solver.newEmptyObject())
 
-    class Conditional(val cond: HandleSource, val thenBranch: (Node, Node), val elseBranch: Option[(Node, Node)])(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class Conditional(val cond: ValueSource, val thenBranch: (Node, Node), val elseBranch: Option[(Node, Node)])(implicit flowAnalysis: FlowAnalysis) extends Node {
 
         /*private var thenConnected: Boolean = false
         private var elseConnected: Boolean = false
@@ -355,49 +352,44 @@ object Nodes {
                 activate(begin, heapState)
         }*/
 
+        lazy val endOfBranchNode = new MergeNode(0, next)
         override def onControlFlow(heap: HeapMemory): Unit = {
-            val endOfBranchNode = new MergeNode(2, next)
-            val condHandle = cond.get()
-            val condValue = heap.read(condHandle)
+            val condValue = cond.get()
+            endOfBranchNode.setNumBranchesToWaitFor(2)
+
+            connectBranch(thenBranch)
+            elseBranch.foreach(connectBranch)
+
+            val thenBegin = thenBranch._1
+            val elseBegin = elseBranch.map(_._1).getOrElse(endOfBranchNode)
 
             condValue.asBool match {
                 case BoolLattice.Top =>
-                    connectThenBranch(heap, endOfBranchNode)
-                    connectElseBranch(heap, endOfBranchNode)
+                    controlFlowTo(thenBegin, heap)
+                    controlFlowTo(elseBegin, heap)
 
                 case BoolLattice.True =>
-                    noControlFlowTo(elseBranch.map(_._1).getOrElse(endOfBranchNode))
-                    connectThenBranch(heap, endOfBranchNode)
+                    controlFlowTo(thenBegin, heap)
+                    noControlFlowTo(elseBegin)
 
                 case BoolLattice.False =>
-                    noControlFlowTo(thenBranch._1)
-                    connectThenBranch(heap, endOfBranchNode)
+                    controlFlowTo(elseBegin, heap)
+                    noControlFlowTo(thenBegin)
             }
         }
 
-        private def connectThenBranch(heap: HeapMemory, endOfBranchNode: Node): Unit = connectBranch(thenBranch, heap, endOfBranchNode)
-        private def connectElseBranch(heap: HeapMemory, endOfBranchNode: Node): Unit = {
-            elseBranch match {
-                case Some(elseBra) =>
-                    connectBranch(elseBra, heap, endOfBranchNode)
-                case None =>
-                    controlFlowTo(endOfBranchNode, heap)
-            }
-        }
-
-        private def connectBranch(branch: (Node, Node), heap: HeapMemory, endOfBranchNode: Node): Unit = branch match {
+        private def connectBranch(branch: (Node, Node)): Unit = branch match {
             case (begin, end) =>
                 assert((end.next eq endOfBranchNode) || (end.next eq null))
                 if (end.next eq null) {
                     end.next = endOfBranchNode
                 }
-                controlFlowTo(begin, heap)
         }
     }
 
-    class FunctionCall(val target: HandleSource, val arguments: Seq[HandleSourceProvider])(implicit flowAnalysis: FlowAnalysis) extends Node {
-        private val _result = new HandleSink
-        def result: HandleSourceProvider = _result
+    class FunctionCall(val target: ValueSource, val arguments: Seq[ValueSourceProvider])(implicit flowAnalysis: FlowAnalysis) extends Node {
+        private val _result = new ValueSink
+        def result: ValueSourceProvider = _result
         /*private var targetReader: HandleReader = _
         private val instantiated = mutable.Set.empty[FunctionValue]
         private val endOfBranchNode = new Node {
@@ -434,13 +426,13 @@ object Nodes {
 
 
         override def onControlFlow(heap: HeapMemory): Unit = {
-            val funcVal = heap.read(target.get())
+            val funcVal = target.get()
             val functions = funcVal.asFunctions
 
-            val allReturns = mutable.Buffer.empty[HandleSource]
-            val mergeNode = new MergeNode(-1, new Node() {
+            val allReturns = mutable.Buffer.empty[ValueSource]
+            val mergeNode = new MergeNode(0, new Node() {
                 override def onControlFlow(heap: HeapMemory): Unit = {
-                    _result.set(heap.unifyHandles(allReturns.flatMap(_.noControlGet())))
+                    _result.set(UnionValue(allReturns.map(_.get()): _*))
                     controlFlowTo(FunctionCall.this.next, heap)
                 }
 
@@ -461,10 +453,19 @@ object Nodes {
         }
     }
 
-    class ReturnNode(val deadNode: Node)(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class ReturnNode(val returnValue: ValueSource, val deadNode: Option[Node])(implicit flowAnalysis: FlowAnalysis) extends Node {
+        private val _result = new ValueSink
+        def result: ValueSourceProvider = _result
         override def onControlFlow(heap: HeapMemory): Unit = {
-            noControlFlowTo(deadNode)
+            _result.set(returnValue.get())
+            deadNode.foreach(noControlFlowTo)
             controlFlowTo(next, heap)
+        }
+
+        override def onNoControlFlow(): Unit = {
+            _result.set(NeverValue)
+            deadNode.foreach(noControlFlowTo)
+            noControlFlowTo(next)
         }
     }
 }

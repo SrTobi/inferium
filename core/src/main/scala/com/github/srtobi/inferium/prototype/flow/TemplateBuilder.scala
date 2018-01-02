@@ -1,6 +1,7 @@
 package com.github.srtobi.inferium.prototype.flow
 
 import com.github.srtobi.inferium.prototype.Ast
+import com.github.srtobi.inferium.prototype.flow.Nodes.BeginNode
 import com.github.srtobi.inferium.prototype.flow.TemplateBuilder.{Closure, FunctionTemplate}
 
 import scala.collection.mutable
@@ -8,18 +9,17 @@ import scala.collection.mutable
 
 
 private class TemplateBuilder(body: Seq[Ast.Statement],
-                              outerClosureHandles: Seq[HeapHandle],
-                              parameter: Seq[(String, HandleSourceProvider)],
+                              outerClosureValues: Seq[Value],
+                              parameter: Seq[(String, ValueSourceProvider)],
                               outerClosure: Option[Templates.Closure],
                               endNode: Nodes.Node)(implicit val flowAnalysis: FlowAnalysis) {
 
-    private class NodeBuilder {
-        var begin: Nodes.BeginNode = new Nodes.BeginNode
+    private class NodeBuilder(begin: Nodes.BeginNode) {
         private var cur: Nodes.Node = begin
 
         def apply[T <: Nodes.Node](node: T): T = {
             assert(cur != null)
-            assert(node.next == null)
+            assert(node.next == null || (node eq endNode))
             cur.next = node
             cur = node
             return node
@@ -32,28 +32,28 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         }
 
         def startOver(node: Nodes.BeginNode): Unit = {
-            begin = node
-            cur = begin
+            cur = node
         }
     }
 
     private def solver = flowAnalysis.solver
     private var done = false
-    private val thisClosureHandle = flowAnalysis.newHeapHandle()
-    private val closureHandles = outerClosureHandles :+ thisClosureHandle
-    private val returns = mutable.Buffer.empty[HandleSourceProvider]
+    private val thisClosureValue = solver.newEmptyObject()
+    private val closureValues = outerClosureValues :+ thisClosureValue
+    private val returns = mutable.Buffer.empty[ValueSourceProvider]
 
     private val closure = new Closure(outerClosure)
 
-    private def wrapHandle(handle: HeapHandle): HandleSource = {
-        val sink = new HandleSink
-        sink.set(handle)
-        return sink.newSource()
+
+    private def wrapValue(value: Value): ValueSourceProvider = {
+        val sink = new ValueSink
+        sink.set(value)
+        return sink
     }
 
-    private[this] def buildExpression(expr: Ast.Expression, newnode: NodeBuilder): HandleSourceProvider = expr match {
+    private[this] def buildExpression(expr: Ast.Expression, newnode: NodeBuilder): ValueSourceProvider = expr match {
         case Ast.UndefinedLiteral() =>
-            val node = newnode(new Nodes.Literal(solver.undefined()))
+            val node = newnode(new Nodes.Literal(UndefinedValue))
             return node.result
 
         case Ast.BooleanLit(bool) =>
@@ -103,8 +103,8 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             return node.result
 
         case func: Ast.Function =>
-            val templ = new FunctionTemplate(func, new Closure(Some(closure)))
-            val node = newnode(new Nodes.Literal(FunctionValue(templ, closureHandles)))
+            val templ = new FunctionTemplate(func, closure)
+            val node = newnode(new Nodes.Literal(new FunctionValue(templ, closureValues)))
             return node.result
     }
 
@@ -134,10 +134,11 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             buildLocalAssignment(name, expr, newnode)
 
         case Ast.ReturnStmt(expr) =>
-            returns += expr.map(buildExpression(_, newnode))
+            val returnValue = expr.map(buildExpression(_, newnode))
                 .getOrElse(buildExpression(Ast.UndefinedLiteral(), newnode))
             val deadNode = new Nodes.BeginNode()
-            newnode(new Nodes.ReturnNode(deadNode))
+            val node = newnode(new Nodes.ReturnNode(returnValue.newSource(), Some(deadNode)))
+            returns += node.result
             newnode(endNode)
             newnode.startOver(deadNode)
     }
@@ -148,33 +149,35 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         buildLocalAssignment(name, exprValue, newNode)
     }
 
-    private[this] def buildLocalAssignment(name: String, value: HandleSourceProvider, newnode: NodeBuilder): Unit = {
-        val localValue = closureHandles(closure.closureIndexForVar(name))
-        newnode(new Nodes.PropertyWrite(wrapHandle(localValue), name, value.newSource()))
+    private[this] def buildLocalAssignment(name: String, value: ValueSourceProvider, newnode: NodeBuilder): Unit = {
+        val localValue = closureValues(closure.closureIndexForVar(name))
+        newnode(new Nodes.PropertyWrite(wrapValue(localValue).newSource(), name, value.newSource()))
     }
 
-    private[this] def buildLocalRead(name: String, newnode: NodeBuilder): HandleSourceProvider = {
+    private[this] def buildLocalRead(name: String, newnode: NodeBuilder): ValueSourceProvider = {
         val closureIdx = closure.closureIndexForVar(name)
-        val node = newnode(new Nodes.PropertyRead(wrapHandle(closureHandles(closureIdx)), name))
+        val node = newnode(new Nodes.PropertyRead(wrapValue(closureValues(closureIdx)).newSource(), name))
         return node.result
     }
 
     private[this] def buildBranch(stmts: Seq[Ast.Statement]): (Nodes.Node, Nodes.Node) = {
-        val newNode = new NodeBuilder
+        val beginNode = new BeginNode()
+        val newNode = new NodeBuilder(beginNode)
         buildStatements(stmts, newNode)
-        return (newNode.begin, newNode.end())
+        return (beginNode, newNode.end())
     }
 
     private[this] def buildStatements(stmts: Seq[Ast.Statement], nodeBuilder: NodeBuilder): Unit = {
         stmts.foreach(buildStatement(_, nodeBuilder))
     }
 
-    def build(): (Nodes.Node, Seq[HandleSourceProvider]) = {
+    def build(): (Nodes.Node, Seq[ValueSourceProvider]) = {
         if (done) {
             throw new IllegalStateException("A builder can only be used once!")
         }
 
-        val newNode = new NodeBuilder
+        val beginNode = new BeginNode()
+        val newNode = new NodeBuilder(beginNode)
 
         // write parameters
         for((paramName, paramValue) <- parameter) {
@@ -183,11 +186,13 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         }
 
         buildStatements(body, newNode)
-
+        val undefReturnValue = wrapValue(UndefinedValue)
+        val node = newNode(new Nodes.ReturnNode(undefReturnValue.newSource(), None))
+        returns += node.result
         newNode(endNode)
         newNode.end()
         done = true
-        return (newNode.begin, returns)
+        return (beginNode, returns)
     }
 }
 
@@ -198,7 +203,7 @@ object TemplateBuilder {
 
         override def parameters: Seq[String] = ast.params
 
-        override def instantiate(closures: Seq[HeapHandle], arguments: Seq[HandleSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[HandleSourceProvider]) = {
+        override def instantiate(closures: Seq[Value], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
             val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), endNode)
             return builder.build()
         }
@@ -218,7 +223,7 @@ object TemplateBuilder {
     }
 
     def buildScriptTemplate(script: Ast.Script): Templates.Script = new Templates.Script {
-        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, Seq[HandleSourceProvider]) = {
+        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
             val builder = new TemplateBuilder(script.main, Seq(), Seq(), None, endNode)(flowAnalysis)
             return builder.build()
         }

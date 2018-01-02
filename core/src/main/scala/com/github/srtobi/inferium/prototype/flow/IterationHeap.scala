@@ -12,21 +12,13 @@ class IterationHeap extends Heap {
 
 
 
-    override def newEmptyHeapState(): HeapMemory = ???
-
-    private var nextHandleId = 0
-    override def newHandle(): HeapHandle = {
-        nextHandleId += 1
-        return Handle(nextHandleId)
-    }
-    override def unify(heaps: HeapMemory*): HeapMemory = ???
+    override def newEmptyHeapState(): HeapMemory = new Memory()
+    override def unify(heaps: HeapMemory*): HeapMemory = Memory.unify(heaps.map(_.asInstanceOf[Memory]))
 }
 
 object IterationHeap {
-    type Values = mutable.Set[Value]
-    case class Handle(id: Int) extends HeapHandle
 
-    case class UnionValue(values: Values) extends ValueLike {
+    /*case class UnionValue(values: Values) extends ValueLike {
         override def asBool: BoolLattice = {
             assert(values.nonEmpty)
             val it = values.iterator
@@ -61,80 +53,126 @@ object IterationHeap {
 
         override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
         override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
-    }
+    }*/
+
+    type Properties = mutable.Map[String, Value]
 
     class Memory(val idx: Int = 0, val prev: Option[Memory] = None) extends HeapMemory {
-        private val handleValues = mutable.Map.empty[Handle, Values]
+        private val objects = mutable.Map.empty[ObjectValue, Properties]
         private var ended = false
 
-        private def set(handle: Handle, values: Values): Unit = {
+        private def set(obj: ObjectValue, property: String, value: Value): Unit = {
             assert(!ended)
-            handleValues += (handle -> values)
+            objects.getOrElseUpdate(obj, mutable.Map.empty[String, Value]) += (property -> value)
         }
 
-        private def get(handle: Handle): Values = {
-            return handleValues.getOrElseUpdate(handle, prev.flatMap(p => p.getImpl(handle)).getOrElse(throw new IllegalStateException("Can not read unwritten handle")))
+        private def getHere(obj: ObjectValue, property: String): Option[Value] = {
+            return objects.get(obj).flatMap(_.get(property))
         }
 
-        private def getImpl(handle: Handle): Option[Values] = {
-            return handleValues.get(handle).map(Some(_)).getOrElse(prev.flatMap(p => p.getImpl(handle)))
+        private def getRec(obj: ObjectValue, property: String): Option[Value] = {
+            lazy val inPrev = prev.flatMap(_.getRec(obj, property))
+            return getHere(obj, property).orElse(inPrev)
         }
 
-        override def read(handle: HeapHandle): ValueLike = {
-            return UnionValue(get(handle.asInstanceOf[Handle]))
-        }
-        override def write(handle: HeapHandle, value: ValueLike): Unit = {
-            set(handle.asInstanceOf[Handle], value.asSet)
-        }
-
-        override def readProperty(target: HeapHandle, propertyName: String): HeapHandle = ???
-        override def writeProperty(target: HeapHandle, propertyName: String, handle: HeapHandle): Unit = ???
-
-        override def unifyHandles(handles: Seq[HeapHandle], target: HeapHandle): Unit = {
-            val values = mutable.Set.empty[Value]
-
-            for (handle <- handles) {
-                values ++= get(handle.asInstanceOf[Handle])
+        private def get(obj: ObjectValue, property: String): Value = {
+            getHere(obj, property) match {
+                case Some(value) => value
+                case None =>
+                    val value = prev.flatMap(_.getRec(obj, property)).getOrElse(UndefinedValue)
+                    set(obj, property, value)
+                    value
             }
+        }
 
-            set(target.asInstanceOf[Handle], values)
+        override def readProperty(target: Value, propertyName: String): Value = {
+            val objs = target.asObjects.map(get(_, propertyName))
+            return if (objs.isEmpty) UndefinedValue else UnionValue(objs.toSeq: _*)
+        }
+        override def writeProperty(target: Value, propertyName: String, value: Value): Unit = {
+            for(obj <- target.asObjects) {
+                set(obj, propertyName, value)
+            }
         }
 
         override def split(): HeapMemory = {
             ended = true
-            new Memory(idx + 1, if (handleValues.isEmpty) prev else Some(this))
+            new Memory(idx + 1, if (objects.isEmpty) prev else Some(this))
         }
+    }
 
-        def unify(other: Memory): Memory = {
-            assert(other ne this)
+    object Memory {
 
-            this.ended = true
-            other.ended = true
+        private class Unifier(var memory: Memory) {
+            def index: Int = memory.idx
+            val objects = mutable.Map.empty[ObjectValue, Properties]
 
-            val handles = mutable.Set.empty[Handle]
-            var (a, b) = (this, other)
-            val newIdx = 1 + Math.max(a.idx, b.idx)
-
-            while (a ne b) {
-                if (a.idx < b.idx) {
-                    val tmp = a
-                    a = b
-                    b = tmp
+            def up(): Unit = {
+                assert(memory.prev.nonEmpty)
+                memory = memory.prev.get
+                for (pair@(obj, _) <- memory.objects) {
+                    if (!objects.contains(obj)) {
+                        objects += pair
+                    }
                 }
-                handles ++= a.handleValues.keys
-                assert(a.prev.nonEmpty)
-                a = a.prev.get
             }
 
-            val newMemory = new Memory(newIdx, Some(a))
+            def merge(otherObjs: mutable.Map[ObjectValue, Properties]): Unit = {
+                for (objPropPair@(obj, props) <- otherObjs) {
+                    objects.get(obj) match {
+                        case Some(properties) =>
+                            for (propValuePair@(prop, value) <- props) {
+                                properties.get(prop) match {
+                                    case Some(value2) =>
+                                        properties.update(prop, UnionValue(value, value2))
+                                    case None =>
+                                        properties += propValuePair
+                                }
+                            }
+                        case None =>
+                            objects += objPropPair
+                    }
+                }
+            }
+        }
 
-            handles.foreach(h => {
-                val aval = a.getImpl(h).getOrElse(mutable.Set())
-                val bval = b.getImpl(h).getOrElse(mutable.Set())
-                newMemory.set(h, aval | bval)
-            })
+        def unify(memories: Seq[Memory]): Memory = {
+            assert(memories.nonEmpty)
+            assert(memories.distinct.length == memories.length)
 
-            return newMemory
+            memories match {
+                case Seq(mem) =>
+                    return mem
+            }
+
+            memories.foreach(_.ended = true)
+            val newIndex = memories.map(_.idx).max + 1
+            val unifiers = mutable.Map.empty[Memory, Unifier]
+            unifiers ++= memories.map(mem => mem -> new Unifier(mem))
+
+            // the greatest index must be front!
+            val queue = mutable.PriorityQueue.empty[Unifier](Ordering.by(_.index))
+            queue ++= unifiers.values
+
+            while(true) {
+                val unifier = queue.dequeue()
+
+                if (queue.isEmpty) {
+                    return new Memory(newIndex, Some(unifier.memory))
+                }
+
+                unifiers -= unifier.memory
+                unifier.up()
+                unifiers.get(unifier.memory) match {
+                    case Some(equalUnifier) =>
+                        equalUnifier.merge(unifier.objects)
+                    case None =>
+                        unifiers += (unifier.memory -> unifier)
+                        queue += unifier
+                }
+            }
+
+            throw new IllegalStateException("should not be reached")
         }
     }
 }

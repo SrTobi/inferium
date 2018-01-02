@@ -6,6 +6,5 @@ trait FlowAnalysis {
     def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit
     def noControlFlowTo(node: Nodes.Node): Unit
 
-    def newHeapHandle(): HeapHandle
     def unify(heaps: HeapMemory*): HeapMemory
 }
