@@ -15,8 +15,6 @@ trait Solver {
     def string(): StringValue
     def string(specific: String): StringValue
 
-    def union(member: Value*): UnionValue
-    def unify(member: Value*): Value
-
-    def withProperty(target: Value, property: String, value: Heap.ValueHandle): PropertyValue
+    /*def union(member: Value*): UnionValue
+    def unify(member: Value*): Value*/
 }

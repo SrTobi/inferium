@@ -1,51 +1,74 @@
 package com.github.srtobi.inferium.prototype.flow
 
+
+abstract class HeapHandle
+
+abstract class HeapMemory {
+    def read(handle: HeapHandle): ValueLike
+    def write(handle: HeapHandle, value: ValueLike): Unit
+    def readProperty(target: HeapHandle, propertyName: String): HeapHandle
+    def writeProperty(target: HeapHandle, propertyName: String, handle: HeapHandle): Unit
+
+    def unifyHandles(handles: Seq[HeapHandle], target: HeapHandle): Unit
+
+    def split(): HeapMemory
+}
+
+abstract class Heap {
+    def newEmptyHeapState(): HeapMemory
+    def newHandle(): HeapHandle
+
+    def unify(heaps: HeapMemory*): HeapMemory
+}
+
+
+
+/*
 import Nodes.Node
 
-
-class HeapStateBuilder(private var cur: Heap.State, private val node: Node) {
-    def newHandleReader(handle: Heap.ValueHandle, handler: Heap.ValueHandleChangeHandler): Heap.HandleReader = {
+class HeapStateBuilder(private var cur: HeapState.State, private val node: Node) {
+    def newHandleReader(handle: HeapState.ValueHandle, handler: HeapState.ValueHandleChangeHandler): HeapState.HandleReader = {
         assert(isBuilding)
         val (reader, newHeap) = cur.newHandleReader(handle, handler)
         cur = newHeap
         return reader
     }
 
-    def newHandleWriter(handle: Heap.ValueHandle): Heap.HandleWriter = {
+    def newHandleWriter(handle: HeapState.ValueHandle): HeapState.HandleWriter = {
         assert(isBuilding)
         val (writer, newHeap) = cur.newHandleWriter(handle)
         cur = newHeap
         return writer
     }
 
-    def newHandleMerge(): Heap.ValueHandleMerger = {
+    def newHandleMerge(): HeapState.ValueHandleMerger = {
         assert(isBuilding)
         val (merger, newHeap) = cur.newValueHandleMerger()
         cur = newHeap
         return merger
     }
 
-    /*def readProperty(target: Heap.ValueHandle, property: String, into: Heap.ValueHandle): Unit = {
+    /*def readProperty(target: HeapState.ValueHandle, property: String, into: HeapState.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.readProperty(target, property, into)
     }
 
-    def writeProperty(target: Heap.ValueHandle, property: String, value: Heap.ValueHandle): Unit = {
+    def writeProperty(target: HeapState.ValueHandle, property: String, value: HeapState.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.writeProperty(target, property, value)
     }
 
-    def readLocal(target: EmptyObject, property: String, into: Heap.ValueHandle): Unit = {
+    def readLocal(target: EmptyObject, property: String, into: HeapState.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.readLocal(target, property, into)
     }
 
-    def writeLocal(target: EmptyObject, property: String, value: Heap.ValueHandle): Unit = {
+    def writeLocal(target: EmptyObject, property: String, value: HeapState.ValueHandle): Unit = {
         assert(isBuilding)
         cur = cur.writeLocal(target, property, value)
     }*/
 
-    def end(): Heap.State = {
+    def end(): HeapState.State = {
         if (cur == null) {
             throw new IllegalStateException("Can not end a builder a second time")
         }
@@ -58,15 +81,15 @@ class HeapStateBuilder(private var cur: Heap.State, private val node: Node) {
     def hasEnded: Boolean = cur == null
 }
 
-trait Heap {
-    def newEmptyHeapState(): Heap.State
-    def newMergeHeapState(numTip: Int = 0): Heap.MergeState
-    def newValueHandle(): Heap.ValueHandle
+trait HeapState {
+    def newEmptyHeapState(): HeapState.State
+    def newMergeHeapState(numTip: Int = 0): HeapState.MergeState
+    def newValueHandle(): HeapState.ValueHandle
 
-    def propagateFlow(startHeap: Heap.State): Boolean
+    def propagateFlow(startHeap: HeapState.State): Boolean
 }
 
-object Heap {
+object HeapState {
     trait ValueHandle
 
     trait ValueHandleChangeHandler extends ValueChangeHandler {
@@ -89,7 +112,7 @@ object Heap {
     trait State {
         def newHandleReader(handle: ValueHandle, handler: ValueHandleChangeHandler): (HandleReader, State)
         def newHandleWriter(handle: ValueHandle): (HandleWriter, State)
-        def newValueHandleMerger(): (Heap.ValueHandleMerger, State)
+        def newValueHandleMerger(): (HeapState.ValueHandleMerger, State)
 
         def truthyfy(cond: ValueHandle): State
         def falsyfy(cond: ValueHandle): State
@@ -98,4 +121,4 @@ object Heap {
     trait MergeState extends State {
         def addInflow(heapState: State): Unit
     }
-}
+}*/

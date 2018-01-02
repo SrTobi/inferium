@@ -1,29 +1,168 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.Heap.ValueHandleChangeHandler
+import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
 import scala.collection.mutable
 
-class IterationHeap(solver: Solver) extends Heap {
+
+class IterationHeap extends Heap {
+    import IterationHeap._
+
+
+
+
+
+    override def newEmptyHeapState(): HeapMemory = ???
+
+    private var nextHandleId = 0
+    override def newHandle(): HeapHandle = {
+        nextHandleId += 1
+        return Handle(nextHandleId)
+    }
+    override def unify(heaps: HeapMemory*): HeapMemory = ???
+}
+
+object IterationHeap {
+    type Values = mutable.Set[Value]
+    case class Handle(id: Int) extends HeapHandle
+
+    case class UnionValue(values: Values) extends ValueLike {
+        override def asBool: BoolLattice = {
+            assert(values.nonEmpty)
+            val it = values.iterator
+            var result: BoolLattice = it.next().asBool
+            for (bool <- it) {
+                result = result.unify(bool.asBool)
+                if (result == BoolLattice.Top) {
+                    return BoolLattice.Top
+                }
+            }
+            return result
+        }
+        override def asConcreteValue: Option[ConcreteValue] = {
+            assert(values.nonEmpty)
+            val it = values.iterator
+            return it.next().asConcreteValue.map {
+                result =>
+                    for (value <- it) {
+                        value.asConcreteValue match {
+                            case Some(concrete) if concrete == result =>
+                                ()
+                            case _ =>
+                                return None
+                        }
+                    }
+                    result
+            }
+
+        }
+
+        override def asSet: mutable.Set[Value] = values.clone()
+
+        override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
+        override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
+    }
+
+    class Memory(val idx: Int = 0, val prev: Option[Memory] = None) extends HeapMemory {
+        private val handleValues = mutable.Map.empty[Handle, Values]
+        private var ended = false
+
+        private def set(handle: Handle, values: Values): Unit = {
+            assert(!ended)
+            handleValues += (handle -> values)
+        }
+
+        private def get(handle: Handle): Values = {
+            return handleValues.getOrElseUpdate(handle, prev.flatMap(p => p.getImpl(handle)).getOrElse(throw new IllegalStateException("Can not read unwritten handle")))
+        }
+
+        private def getImpl(handle: Handle): Option[Values] = {
+            return handleValues.get(handle).map(Some(_)).getOrElse(prev.flatMap(p => p.getImpl(handle)))
+        }
+
+        override def read(handle: HeapHandle): ValueLike = {
+            return UnionValue(get(handle.asInstanceOf[Handle]))
+        }
+        override def write(handle: HeapHandle, value: ValueLike): Unit = {
+            set(handle.asInstanceOf[Handle], value.asSet)
+        }
+
+        override def readProperty(target: HeapHandle, propertyName: String): HeapHandle = ???
+        override def writeProperty(target: HeapHandle, propertyName: String, handle: HeapHandle): Unit = ???
+
+        override def unifyHandles(handles: Seq[HeapHandle], target: HeapHandle): Unit = {
+            val values = mutable.Set.empty[Value]
+
+            for (handle <- handles) {
+                values ++= get(handle.asInstanceOf[Handle])
+            }
+
+            set(target.asInstanceOf[Handle], values)
+        }
+
+        override def split(): HeapMemory = {
+            ended = true
+            new Memory(idx + 1, if (handleValues.isEmpty) prev else Some(this))
+        }
+
+        def unify(other: Memory): Memory = {
+            assert(other ne this)
+
+            this.ended = true
+            other.ended = true
+
+            val handles = mutable.Set.empty[Handle]
+            var (a, b) = (this, other)
+            val newIdx = 1 + Math.max(a.idx, b.idx)
+
+            while (a ne b) {
+                if (a.idx < b.idx) {
+                    val tmp = a
+                    a = b
+                    b = tmp
+                }
+                handles ++= a.handleValues.keys
+                assert(a.prev.nonEmpty)
+                a = a.prev.get
+            }
+
+            val newMemory = new Memory(newIdx, Some(a))
+
+            handles.foreach(h => {
+                val aval = a.getImpl(h).getOrElse(mutable.Set())
+                val bval = b.getImpl(h).getOrElse(mutable.Set())
+                newMemory.set(h, aval | bval)
+            })
+
+            return newMemory
+        }
+    }
+}
+
+/*
+import com.github.srtobi.inferium.prototype.flow.Heap.ValueHandleChangeHandler
+
+import scala.collection.mutable
+class IterationHeap(solver: Solver) extends HeapState {
 
     private val unprocessedInflow = mutable.Queue.empty[(HeapNode, HeapNode)]
 
-    private class Handle extends Heap.ValueHandle
+    private class Handle extends HeapState.ValueHandle
 
     private class Memory(val idx: Int = 0, val prev: Option[Memory] = None) {
-        private val handleValue = mutable.Map.empty[Heap.ValueHandle, Value]
+        private val handleValue = mutable.Map.empty[HeapState.ValueHandle, Value]
         private var ended = false
 
-        def set(handle: Heap.ValueHandle, value: Value): Unit = {
+        def set(handle: HeapState.ValueHandle, value: Value): Unit = {
             assert(!ended)
             handleValue += (handle -> value)
         }
 
-        def get(handle: Heap.ValueHandle): Value = {
+        def get(handle: HeapState.ValueHandle): Value = {
             return handleValue.getOrElseUpdate(handle, prev.flatMap(p => p.getImpl(handle)).getOrElse(solver.undefined()))
         }
 
-        private def getImpl(handle: Heap.ValueHandle): Option[Value] = {
+        private def getImpl(handle: HeapState.ValueHandle): Option[Value] = {
             return handleValue.get(handle).map(Some(_)).getOrElse(prev.flatMap(p => p.getImpl(handle)))
         }
 
@@ -38,7 +177,7 @@ class IterationHeap(solver: Solver) extends Heap {
                 return this
             this.ended = true
 
-            val handles = mutable.Set.empty[Heap.ValueHandle]
+            val handles = mutable.Set.empty[HeapState.ValueHandle]
             var (a, b) = (this, other)
             val newIdx = 1 + Math.max(a.idx, b.idx)
 
@@ -77,12 +216,12 @@ class IterationHeap(solver: Solver) extends Heap {
 
     private class NothingNode extends HeapNode
 
-    private class WriteNode(val handle: Handle) extends HeapNode with Heap.HandleWriter {
+    private class WriteNode(val handle: Handle) extends HeapNode with HeapState.HandleWriter {
         var value: Option[Value] = None
         override def write(value: Value): Unit = this.value = Some(value)
     }
 
-    private class ReadNode(val handle: Handle, handler: ValueHandleChangeHandler) extends HeapNode with Heap.HandleReader {
+    private class ReadNode(val handle: Handle, handler: ValueHandleChangeHandler) extends HeapNode with HeapState.HandleReader {
         private var value: Value = _
         override def read(): Value = value
 
@@ -98,37 +237,37 @@ class IterationHeap(solver: Solver) extends Heap {
         }
     }
 
-    private class MergeNode extends HeapNode with Heap.ValueHandleMerger {
+    private class MergeNode extends HeapNode with HeapState.ValueHandleMerger {
         val handles = mutable.Set.empty[Handle]
-        override def add(handles: Heap.ValueHandle*): Unit = this.handles ++= handles.map(_.asInstanceOf[Handle])
+        override def add(handles: HeapState.ValueHandle*): Unit = this.handles ++= handles.map(_.asInstanceOf[Handle])
     }
 
 
-    private class State(val node: HeapNode) extends Heap.State with Heap.MergeState {
-        override def newHandleReader(handle: Heap.ValueHandle, changeHandler: ValueHandleChangeHandler): (Heap.HandleReader, Heap.State) = {
+    private class State(val node: HeapNode) extends HeapState.State with HeapState.MergeState {
+        override def newHandleReader(handle: HeapState.ValueHandle, changeHandler: ValueHandleChangeHandler): (HeapState.HandleReader, HeapState.State) = {
             val h = handle.asInstanceOf[Handle]
             val reader = new ReadNode(h, changeHandler)
             unprocessedInflow += (node -> reader)
             return (reader, new State(reader))
         }
 
-        override def newHandleWriter(handle: Heap.ValueHandle): (Heap.HandleWriter, Heap.State) = {
+        override def newHandleWriter(handle: HeapState.ValueHandle): (HeapState.HandleWriter, HeapState.State) = {
             val h = handle.asInstanceOf[Handle]
             val writer = new WriteNode(h)
             unprocessedInflow += (node -> writer)
             return (writer, new State(writer))
         }
 
-        override def newValueHandleMerger(): (Heap.ValueHandleMerger, Heap.State) = {
+        override def newValueHandleMerger(): (HeapState.ValueHandleMerger, HeapState.State) = {
             val merger = new MergeNode
             unprocessedInflow += (node -> merger)
             return (merger, new State(merger))
         }
 
-        override def truthyfy(cond: Heap.ValueHandle): Heap.State = ???
-        override def falsyfy(cond: Heap.ValueHandle): Heap.State = ???
+        override def truthyfy(cond: HeapState.ValueHandle): HeapState.State = ???
+        override def falsyfy(cond: HeapState.ValueHandle): HeapState.State = ???
 
-        override def addInflow(heapState: Heap.State): Unit = {
+        override def addInflow(heapState: HeapState.State): Unit = {
             val pre = heapState.asInstanceOf[State].node
             unprocessedInflow += (pre -> node)
         }
@@ -137,11 +276,11 @@ class IterationHeap(solver: Solver) extends Heap {
 
 
 
-    override def newEmptyHeapState(): Heap.State = new State(new NothingNode)
-    override def newMergeHeapState(numTip: Int): Heap.MergeState = new State(new NothingNode)
-    override def newValueHandle(): Heap.ValueHandle = new Handle
+    override def newEmptyHeapState(): HeapState.State = new State(new NothingNode)
+    override def newMergeHeapState(numTip: Int): HeapState.MergeState = new State(new NothingNode)
+    override def newValueHandle(): HeapState.ValueHandle = new Handle
 
-    override def propagateFlow(startHeap: Heap.State): Boolean = {
+    override def propagateFlow(startHeap: HeapState.State): Boolean = {
 
 
         while (unprocessedInflow.nonEmpty) {
@@ -203,3 +342,4 @@ class IterationHeap(solver: Solver) extends Heap {
         return changed
     }
 }
+*/

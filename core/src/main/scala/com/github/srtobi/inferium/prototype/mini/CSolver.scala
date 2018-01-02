@@ -127,8 +127,8 @@ class TypeAcceptor(solver: CSolver) extends TypeUsage(solver, "TypeAcceptor") {
 // --------------------------- Effects ---------------------------------
 
 
-// --------------------------- Heap ---------------------------------
-class HeapNode(solver: CSolver) extends SpecificConstraintNode[HeapNode](solver, "Heap")
+// --------------------------- HeapState ---------------------------------
+class HeapNode(solver: CSolver) extends SpecificConstraintNode[HeapNode](solver, "HeapState")
 class NewObjectHeap(solver: CSolver) extends HeapNode(solver) {
   val newObjectRefType: ObjectRefType = new ObjectRefType(solver)
 }

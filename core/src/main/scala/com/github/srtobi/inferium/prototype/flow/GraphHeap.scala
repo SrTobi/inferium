@@ -1,10 +1,10 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.Heap.{ValueHandle, ValueHandleChangeHandler}
+/*import com.github.srtobi.inferium.prototype.flow.Heap.{ValueHandle, ValueHandleChangeHandler}
 
 import scala.collection.mutable
-/*
-class GraphHeap(solver: Solver) extends Heap {
+
+class GraphHeap(solver: Solver) extends HeapState {
 
     class Handle extends ValueHandle {
     }
@@ -64,7 +64,7 @@ class GraphHeap(solver: Solver) extends Heap {
         val prev: mutable.Buffer[HeapNode] = mutable.Buffer.empty[HeapNode]
     }
 
-    class HReader(val handle: Handle, val node: HeapNode, handler: ValueHandleChangeHandler) extends Heap.HandleReader {
+    class HReader(val handle: Handle, val node: HeapNode, handler: ValueHandleChangeHandler) extends HeapState.HandleReader {
         private var _slot: ValueSlot = _
         def slot: ValueSlot = _slot
         def slot_=(newSlot: ValueSlot): Unit = {
@@ -75,7 +75,7 @@ class GraphHeap(solver: Solver) extends Heap {
         override def read(): Value = slot.value
     }
 
-    class HWriter(val handle: Handle, val slot: ValueSlot) extends Heap.HandleWriter {
+    class HWriter(val handle: Handle, val slot: ValueSlot) extends HeapState.HandleWriter {
         override def write(value: Value): Unit = {
             slot.value = value
         }
@@ -88,35 +88,35 @@ class GraphHeap(solver: Solver) extends Heap {
     }*/
 
 
-    class State(val node: HeapNode) extends Heap.State {
-        override def newHandleReader(handle: Heap.ValueHandle, changeHandler: ValueHandleChangeHandler): (Heap.HandleReader, Heap.State) = {
+    class State(val node: HeapNode) extends HeapState.State {
+        override def newHandleReader(handle: HeapState.ValueHandle, changeHandler: ValueHandleChangeHandler): (HeapState.HandleReader, HeapState.State) = {
             val h = handle.asInstanceOf[Handle]
             return (node.makeHReader(h, changeHandler), this)
         }
         
-        override def newHandleWriter(handle: Heap.ValueHandle): (Heap.HandleWriter, Heap.State) = {
+        override def newHandleWriter(handle: HeapState.ValueHandle): (HeapState.HandleWriter, HeapState.State) = {
             val h = handle.asInstanceOf[Handle]
             val next = node.makePredecessor()
             return (next.makeHWriter(h), new State(next))
         }
 
-        override def newValueHandleMerger(): (Heap.ValueHandleMerger, Heap.State) = {
+        override def newValueHandleMerger(): (HeapState.ValueHandleMerger, HeapState.State) = {
             val next = node.makePredecessor()
             return (new HandleMerger(node, next), new State(next))
         }
 
-        override def truthyfy(cond: Heap.ValueHandle): Heap.State = ???
-        override def falsyfy(cond: Heap.ValueHandle): Heap.State = ???
+        override def truthyfy(cond: HeapState.ValueHandle): HeapState.State = ???
+        override def falsyfy(cond: HeapState.ValueHandle): HeapState.State = ???
     }
 
-    class MergeState(override val node: MergeHeapNode) extends State(node) with Heap.MergeState {
-        override def addInflow(heapState: Heap.State): Unit = {
+    class MergeState(override val node: MergeHeapNode) extends State(node) with HeapState.MergeState {
+        override def addInflow(heapState: HeapState.State): Unit = {
             // register flow change
         }
     }
 
 
-    class HandleMerger(readNode: HeapNode, writeNode: HeapNode) extends Handle with Heap.ValueHandleMerger with Heap.ValueHandleChangeHandler {
+    class HandleMerger(readNode: HeapNode, writeNode: HeapNode) extends Handle with HeapState.ValueHandleMerger with HeapState.ValueHandleChangeHandler {
         private val readers = mutable.Map.empty[ValueHandle, HReader]
         private val writer = writeNode.makeHWriter(this)
         private val union = solver.union()
@@ -140,14 +140,14 @@ class GraphHeap(solver: Solver) extends Heap {
         }
     }
 
-    override def newEmptyHeapState(): Heap.State = new State(new StartNode)
+    override def newEmptyHeapState(): HeapState.State = new State(new StartNode)
 
-    override def newMergeHeapState(numTip: Int): Heap.MergeState = new MergeState(new MergeHeapNode(0))
+    override def newMergeHeapState(numTip: Int): HeapState.MergeState = new MergeState(new MergeHeapNode(0))
 
-    override def newValueHandle(): Heap.ValueHandle = new Handle
+    override def newValueHandle(): HeapState.ValueHandle = new Handle
 
 
-    override def propagateFlow(startHeap: Heap.State): Boolean = {
+    override def propagateFlow(startHeap: HeapState.State): Boolean = {
         return ???
     }
 }

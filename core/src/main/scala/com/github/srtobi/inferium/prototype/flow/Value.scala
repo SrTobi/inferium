@@ -3,16 +3,24 @@ package com.github.srtobi.inferium.prototype.flow
 import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
 import scala.collection.mutable
-
+/*
 trait ValueChangeHandler {
     def onValueChanged()
 }
+*/
 
-sealed abstract class Value(implicit val flowAnalysis: FlowAnalysis) {
-    protected val inValues = mutable.Set.empty[Value]
-    protected val outValues = mutable.Set.empty[Value]
+abstract class ValueLike {
+    def asBool: BoolLattice
+    def asConcreteValue: Option[ConcreteValue]
+    def asFunctions: Traversable[FunctionValue]
 
-    def in: scala.collection.Set[Value] = inValues
+    def asSet: mutable.Set[Value]
+
+    def throwsWhenWrittenOrReadOn: Boolean
+}
+
+sealed abstract class Value(implicit val flowAnalysis: FlowAnalysis) extends ValueLike {
+    /*def in: scala.collection.Set[Value] = inValues
     def out: scala.collection.Set[Value] = outValues
 
     final def flowsTo(toValue: Value): Unit = {
@@ -38,14 +46,9 @@ sealed abstract class Value(implicit val flowAnalysis: FlowAnalysis) {
     def onInFlow(inValue: Value): Unit = {}
     def onOutFlow(outValue: Value): Unit = {}
     def onInFlowRemoved(inValue: Value): Unit = {}
-    def onOutFlowRemoved(outValue: Value): Unit = {}
+    def onOutFlowRemoved(outValue: Value): Unit = {}*/
 
-    def asBool: BoolLattice
-    def asConcreteValue: Option[ConcreteValue]
-    def asFunctions: Traversable[FunctionValue]
-
-    def throwsWhenWrittenOrReadOn: Boolean
-    def getProperty(name: String): scala.collection.Set[Heap.ValueHandle]
+    //def getProperty(name: String): scala.collection.Set[HeapState.ValueHandle]
 }
 
 sealed abstract class ConcreteValue(implicit flowAnalysis: FlowAnalysis) extends Value {
@@ -54,8 +57,10 @@ sealed abstract class ConcreteValue(implicit flowAnalysis: FlowAnalysis) extends
     override def asFunctions: Traversable[FunctionValue] = Seq.empty
     override def throwsWhenWrittenOrReadOn: Boolean = false
 
+    override def asSet: mutable.Set[Value] = mutable.Set(this)
+
     override def asBool: BoolLattice = BoolLattice.True
-    override def getProperty(name: String): collection.Set[Heap.ValueHandle] = Set()
+    //override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = Set()
 }
 
 case class NeverValue()(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue
@@ -81,10 +86,10 @@ case class StringValue(value: String)(implicit flowAnalysis: FlowAnalysis) exten
 }
 case class EmptyObject(id: Int)(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue
 
-case class FunctionValue(template: Templates.Function, closures: Seq[Heap.ValueHandle])(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
+case class FunctionValue(template: Templates.Function, closures: Seq[HeapHandle])(implicit flowAnalysis: FlowAnalysis) extends ConcreteValue {
     override def asFunctions: Traversable[FunctionValue] = Seq(this)
 }
-
+/*
 class UnionValue()(implicit flowAnalysis: FlowAnalysis) extends Value {
 
     override def asBool: BoolLattice = {
@@ -117,7 +122,7 @@ class UnionValue()(implicit flowAnalysis: FlowAnalysis) extends Value {
 
     override def asFunctions: Traversable[FunctionValue] = in.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = in.forall(_.throwsWhenWrittenOrReadOn)
-    override def getProperty(name: String): collection.Set[Heap.ValueHandle] = in.foldLeft(Set[Heap.ValueHandle]())(_ | _.getProperty(name))
+    override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = in.foldLeft(Set[HeapState.ValueHandle]())(_ | _.getProperty(name))
 }
 
 class UnionValueBuilder(implicit flowAnalysis: FlowAnalysis) {
@@ -133,12 +138,12 @@ class UnionValueBuilder(implicit flowAnalysis: FlowAnalysis) {
 
 class PropertyValue(property: String)(implicit flowAnalysis: FlowAnalysis) extends UnionValue {
 
-    var value: Heap.ValueHandle = _
+    var value: HeapState.ValueHandle = _
 
-    override def getProperty(name: String): collection.Set[Heap.ValueHandle] = {
+    override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = {
         if (name == property)
             Set(value)
         else
             super.getProperty(name)
     }
-}
+}*/

@@ -6,18 +6,23 @@ import scala.collection.mutable
 
 
 
-class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override val solver: Solver, override val heap: Heap) extends FlowAnalysis {
+class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override val solver: Solver, val heap: Heap) extends FlowAnalysis {
 
     import Nodes.Node
 
-    private val endNode = new Node()(this)
-    private val unificationHeapState = heap.newMergeHeapState()
-    private val (scriptReturnMerger, heapStateAfterUnification) = unificationHeapState.newValueHandleMerger()
-    private val nodesToActivate = mutable.Queue.empty[(Node, Heap.State)]
-    private val beginNode = scriptTemplate.instantiate(this, endNode, scriptReturnMerger)
+    private val endNode = new Node()(this) {
+        override def onControlFlow(heap: HeapMemory): Unit = assert(nodesToPropagate.isEmpty)
+        override def onNoControlFlow(): Unit = assert(nodesToPropagate.isEmpty)
+    }
+    private val mergeNode = new Nodes.MergeNode(-1, endNode)(this)
+    private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
+    private val (beginNode, results) = scriptTemplate.instantiate(this, mergeNode)
     private val startHeapState = heap.newEmptyHeapState()
 
-    activate(beginNode, startHeapState)
+    mergeNode.setNumBranchesToWaitFor(results.length)
+    controlFlowTo(beginNode, startHeapState)
+
+    //activate(beginNode, startHeapState)
 
     /*def analyse(): Unit = {
         var changed = false
@@ -25,24 +30,33 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
             changed = analyseStep()
         } while (changed)
     }*/
-    override def activate(node: Node, heapState: Heap.State): Unit = {
-        nodesToActivate.enqueue((node, heapState))
+    /*override def activate(node: Node, heapState: HeapState.State): Unit = {
+        nodesToPropagate.enqueue((node, heapState))
+    }*/
+
+    override def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit = {
+        nodesToPropagate.enqueue((node, Some(heapState)))
     }
 
-    private def activateNodes(): Boolean = {
-        val changed = nodesToActivate.nonEmpty
-        while (nodesToActivate.nonEmpty) {
-            val (node, heapState) = nodesToActivate.dequeue()
-            node.doActivation(heapState)
+    override def noControlFlowTo(node: Nodes.Node): Unit = {
+        nodesToPropagate.enqueue((node, None))
+    }
+
+    private def propagateControlFlow(): Unit = {
+        val changed = nodesToPropagate.nonEmpty
+        while (nodesToPropagate.nonEmpty) {
+            val (node, heapState) = nodesToPropagate.dequeue()
+            heapState match {
+                case Some(state) => node.onControlFlow(state)
+                case None => node.onNoControlFlow()
+            }
         }
-        return changed
     }
 
-    private def analyseFlowStep(): Boolean = {
+    private def analyseControlFlowStep(): Boolean = {
         var changed = false
 
-        changed = activateNodes()
-        changed = heap.propagateFlow(startHeapState) || changed
+        propagateControlFlow()
 
         return changed
     }
@@ -50,7 +64,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     private def analyseFlow(): Boolean = {
         var changed = false
 
-        while(analyseFlowStep()) {
+        while(analyseControlFlowStep()) {
             changed = true
         }
 
@@ -60,6 +74,10 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     private def analyse(): Unit = {
         analyseFlow()
     }
+
+    override def newHeapHandle(): HeapHandle = heap.newHandle()
+
+    override def unify(heaps: HeapMemory*): HeapMemory = heap.unify(heaps: _*)
 }
 
 object ForwardFlowAnalysis {
