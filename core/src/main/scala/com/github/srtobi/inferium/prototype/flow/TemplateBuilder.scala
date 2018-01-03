@@ -9,7 +9,7 @@ import scala.collection.mutable
 
 
 private class TemplateBuilder(body: Seq[Ast.Statement],
-                              outerClosureValues: Seq[Value],
+                              outerClosureValues: Seq[ValueLike],
                               parameter: Seq[(String, ValueSourceProvider)],
                               outerClosure: Option[Templates.Closure],
                               endNode: Nodes.Node)(implicit val flowAnalysis: FlowAnalysis) {
@@ -45,7 +45,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
     private val closure = new Closure(outerClosure)
 
 
-    private def wrapValue(value: Value): ValueSourceProvider = {
+    private def wrapValue(value: ValueLike): ValueSourceProvider = {
         val sink = new ValueSink
         sink.set(value)
         return sink
@@ -216,7 +216,7 @@ object TemplateBuilder {
 
         override def parameters: Seq[String] = ast.params
 
-        override def instantiate(closures: Seq[Value], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
+        override def instantiate(closures: Seq[ValueLike], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
             val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), endNode)
             return builder.build()
         }

@@ -19,6 +19,6 @@ object Templates {
         def closure: Closure
         def parameters: Seq[String]
 
-        def instantiate(closures: Seq[Value], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider])
+        def instantiate(closures: Seq[ValueLike], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider])
     }
 }

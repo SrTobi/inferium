@@ -73,7 +73,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     }
 
     def lastHeap: Option[HeapMemory] = Option(lastMemory)
-    def scriptReturn: Value = UnionValue(returns.map(_.newSource().get()): _*)
+    def scriptReturn: ValueLike = UnionValue(returns.map(_.newSource().get()): _*)
 
     def analyse(): Unit = {
         // analyse initial code
@@ -95,7 +95,7 @@ object ForwardFlowAnalysis {
         def apply(valueMembers: (String, Any)*): IniObject = new IniObject(Map(valueMembers.map { case (prop, value) => (prop, toPropertyValue(value))}: _*))
     }
 
-    type PropertyValue = Either[IniObject, Value]
+    type PropertyValue = Either[IniObject, ValueLike]
 
     private def writeIniObjectToHeap(heap: HeapMemory, obj: IniObject, objMap: mutable.Map[IniObject, ObjectValue] = mutable.Map.empty[IniObject, ObjectValue]): ObjectValue = {
         return objMap.getOrElse(obj, {

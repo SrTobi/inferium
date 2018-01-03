@@ -1,15 +1,11 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.lattice.{BoolLattice, GeneralBoolLattice}
+import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
 import scala.collection.mutable
-/*
-trait ValueChangeHandler {
-    def onValueChanged()
-}
-*/
 
 abstract class ValueLike {
+    def asValue: Value
     def asBool: BoolLattice
     def asFunctions: Traversable[FunctionValue]
     def asObject: Option[ObjectValue]
@@ -21,6 +17,7 @@ abstract class ValueLike {
 
 sealed abstract class Value extends ValueLike {
 
+    override def asValue: Value = this
     override def asFunctions: Traversable[FunctionValue] = Seq.empty
     override def throwsWhenWrittenOrReadOn: Boolean = false
     override def asObject: Option[ObjectValue] = None
@@ -144,17 +141,17 @@ object ObjectValue {
     }
 }
 
-final class FunctionValue(val template: Templates.Function, val closures: Seq[Value]) extends ObjectValue() {
+final class FunctionValue(val template: Templates.Function, val closures: Seq[ValueLike]) extends ObjectValue() {
     override def asFunctions: Traversable[FunctionValue] = Traversable(this)
 
     override def toString: String = s"func#$internalId"
 }
 
 object FunctionValue {
-    def unapply(fv: FunctionValue): Option[(Templates.Function, Seq[Value])] = Some((fv.template, fv.closures))
+    def unapply(fv: FunctionValue): Option[(Templates.Function, Seq[ValueLike])] = Some((fv.template, fv.closures))
 }
 
-final class UnionValue(val values: Seq[Value]) extends ObjectValue() {
+final class UnionValue(val values: Seq[ValueLike]) extends ObjectValue() {
 
     assert(values.size >= 2)
     assert(values.forall(v => !v.isInstanceOf[UnionValue]))
@@ -182,7 +179,7 @@ final class UnionValue(val values: Seq[Value]) extends ObjectValue() {
 }
 
 object UnionValue {
-    def apply(values: Value*): Value = {
+    def apply(values: ValueLike*): ValueLike = {
         values match {
             case Seq(value) => return value
             case _ =>
@@ -190,7 +187,7 @@ object UnionValue {
         var boolValue: BoolValue = null
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
-        val objectValues = mutable.Set.empty[Value]
+        val objectValues = mutable.Set.empty[ValueLike]
         var hasUndefined = false
         var hasNull = false
 
@@ -234,7 +231,7 @@ object UnionValue {
         }
     }
 
-    def withUndefined(value: Value): Value = value match {
+    def withUndefined(value: ValueLike): ValueLike = value match {
         case UnionValue(values) => values match {
             case UndefinedValue +: _ => value
             case seq => new UnionValue(UndefinedValue +: seq)
@@ -244,9 +241,9 @@ object UnionValue {
         case _ => new UnionValue(Seq(UndefinedValue, value))
     }
 
-    def unapply(arg: UnionValue): Option[Seq[Value]] = Some(arg.values)
+    def unapply(arg: UnionValue): Option[Seq[ValueLike]] = Some(arg.values)
 
-    private def unpackUnion(value: Value): Seq[Value] = value match {
+    private def unpackUnion(value: ValueLike): Seq[ValueLike] = value match {
         case UnionValue(values) => values
         case NeverValue => Seq()
         case noUnion => Seq(noUnion)
@@ -263,27 +260,3 @@ case class UnionSet(values: Any*) {
 
     override def toString: String = values.mkString("[", " | ", "]")
 }
-
-/*
-class UnionValueBuilder(implicit flowAnalysis: FlowAnalysis) {
-    private lazy val union = new UnionValue
-    def build(values: Seq[Value]): Value = values match {
-        case Seq(value) =>
-            return value
-        case _ =>
-            values.foreach(_.flowsTo(union))
-            return union
-    }
-}
-
-class PropertyValue(property: String)(implicit flowAnalysis: FlowAnalysis) extends UnionValue {
-
-    var value: HeapState.ValueHandle = _
-
-    override def getProperty(name: String): collection.Set[HeapState.ValueHandle] = {
-        if (name == property)
-            Set(value)
-        else
-            super.getProperty(name)
-    }
-}*/

@@ -10,22 +10,22 @@ abstract class ValueSourceProvider {
 }
 
 class ValueSink extends ValueSourceProvider {
-    private var currentValue: Value = NeverValue
+    private var currentValue: ValueLike = NeverValue
 
-    def set(value: Value): Unit = {
+    def set(value: ValueLike): Unit = {
         assert(value ne null)
         currentValue = value
     }
 
     override def newSource(): ValueSource = new ValueSource {
-        override def get(): Value = {
+        override def get(): ValueLike = {
             assert(currentValue ne null)
             return currentValue
         }
     }
 }
 abstract class ValueSource {
-    def get(): Value
+    def get(): ValueLike
 }
 
 
@@ -167,7 +167,7 @@ object Nodes {
     /*
      * - the result has a lower bound on value
      */
-    class Literal(val literal: Value)(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class Literal(val literal: ValueLike)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private val _result = new ValueSink
         def result: ValueSourceProvider = _result
 

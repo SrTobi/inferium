@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
-    private def analyse(code: String): (Option[HeapMemory], Value) = {
+    private def analyse(code: String): (Option[HeapMemory], ValueLike) = {
         inside (LangParser.script.parse(code)) {
             case Parsed.Success(script, _) =>
 
@@ -191,5 +191,17 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |a.prop = "d"
               |return x.prop
             """.stripMargin)) { case (Some(_), res) => UnionSet("d", UndefinedValue) shouldBe res}
+    }
+
+    it should "filter Values which can not be property accessed" in {
+
+        inside(analyse(
+            """
+              |var x = { prop: "a" }
+              |if (rand) {
+              |  x = undefined
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
     }
 }

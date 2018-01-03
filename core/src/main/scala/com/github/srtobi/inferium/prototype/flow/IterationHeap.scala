@@ -56,7 +56,7 @@ object IterationHeap {
     }*/
 
     type MemoryMap = mutable.Map[ObjectValue, Properties]
-    type Properties = mutable.Map[String, (Int, Value)]
+    type Properties = mutable.Map[String, (Int, ValueLike)]
 
     class Memory(val idx: Int = 0, val prev: Option[Memory] = None, private val objects: MemoryMap = mutable.Map.empty) extends HeapMemory {
 
@@ -68,16 +68,16 @@ object IterationHeap {
             return writeCount
         }
 
-        private def set(obj: ObjectValue, property: String, value: Value, writeId: Int): Unit = {
+        private def set(obj: ObjectValue, property: String, value: ValueLike, writeId: Int): Unit = {
             assert(!ended)
             objects.getOrElseUpdate(obj, mutable.Map.empty) += (property -> (writeId, value))
         }
 
-        private[this] def getHere(obj: ObjectValue, property: String): Option[(Int, Value)] = {
+        private[this] def getHere(obj: ObjectValue, property: String): Option[(Int, ValueLike)] = {
             return objects.get(obj).flatMap(_.get(property))
         }
 
-        private def get(obj: ObjectValue, baseObjects: Set[ObjectValue], property: String, cache: Boolean): Value = {
+        private def get(obj: ObjectValue, baseObjects: Set[ObjectValue], property: String, cache: Boolean): ValueLike = {
             getHere(obj, property) match {
                 case Some((id, value)) =>
                     val overwritingProps = baseObjects.toSeq.flatMap(getHere(_, property)).filter(_._1 > id).map(_._2)
@@ -102,13 +102,13 @@ object IterationHeap {
             }
         }
 
-        def readProperty(target: Value, property: String, cache: Boolean): Value = {
+        def readProperty(target: ValueLike, property: String, cache: Boolean): ValueLike = {
             val result = target.asObject.map(get(_, target.baseObjects.toSet, property, cache = cache)).getOrElse(UndefinedValue)
             if (target.propertyWriteMaybeNoOp) UnionValue.withUndefined(result) else result
         }
 
-        override def readProperty(target: Value, propertyName: String): Value = readProperty(target, propertyName, cache = true)
-        override def writeProperty(target: Value, propertyName: String, value: Value): Unit = {
+        override def readProperty(target: ValueLike, propertyName: String): ValueLike = readProperty(target, propertyName, cache = true)
+        override def writeProperty(target: ValueLike, propertyName: String, value: ValueLike): Unit = {
             val writeId = nextWriteId()
             target.asObject.foreach {
                 set(_, propertyName, value, writeId)
