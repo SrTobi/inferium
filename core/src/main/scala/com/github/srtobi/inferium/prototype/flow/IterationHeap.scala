@@ -55,43 +55,68 @@ object IterationHeap {
         override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
     }*/
 
-    type Properties = mutable.Map[String, Value]
+    type MemoryMap = mutable.Map[ObjectValue, Properties]
+    type Properties = mutable.Map[String, (Int, Value)]
 
-    class Memory(val idx: Int = 0, val prev: Option[Memory] = None) extends HeapMemory {
-        private val objects = mutable.Map.empty[ObjectValue, Properties]
+    class Memory(val idx: Int = 0, val prev: Option[Memory] = None, private val objects: MemoryMap = mutable.Map.empty) extends HeapMemory {
+
         private var ended = false
+        private var writeCount = 0
 
-        private def set(obj: ObjectValue, property: String, value: Value): Unit = {
-            assert(!ended)
-            objects.getOrElseUpdate(obj, mutable.Map.empty[String, Value]) += (property -> value)
+        private def nextWriteId(): Int = {
+            writeCount += 1
+            return writeCount
         }
 
-        private def getHere(obj: ObjectValue, property: String): Option[Value] = {
+        private def set(obj: ObjectValue, property: String, value: Value, writeId: Int): Unit = {
+            assert(!ended)
+            objects.getOrElseUpdate(obj, mutable.Map.empty) += (property -> (writeId, value))
+        }
+
+        private[this] def getHere(obj: ObjectValue, property: String): Option[(Int, Value)] = {
             return objects.get(obj).flatMap(_.get(property))
         }
 
-        private def getRec(obj: ObjectValue, property: String): Option[Value] = {
-            lazy val inPrev = prev.flatMap(_.getRec(obj, property))
-            return getHere(obj, property).orElse(inPrev)
-        }
-
-        private def get(obj: ObjectValue, property: String): Value = {
+        private def get(obj: ObjectValue, baseObjects: Set[ObjectValue], property: String, cache: Boolean): Value = {
             getHere(obj, property) match {
-                case Some(value) => value
+                case Some((id, value)) =>
+                    val overwritingProps = baseObjects.toSeq.flatMap(getHere(_, property)).filter(_._1 > id).map(_._2)
+                    if (baseObjects.nonEmpty && overwritingProps.size == baseObjects.size) {
+                        UnionValue(overwritingProps: _*)
+                    } else {
+                        UnionValue(value +: overwritingProps: _*)
+                    }
                 case None =>
-                    val value = prev.flatMap(_.getRec(obj, property)).getOrElse(UndefinedValue)
-                    set(obj, property, value)
-                    value
+                    val baseProps = baseObjects.flatMap(base => getHere(base, property).map{ case (_, v) => (v, base)})
+                    val restBaseObjects = baseObjects -- baseProps.map(_._2)
+                    val valuesFromBase = baseProps.map(_._1).toSeq
+                    val result = if (restBaseObjects.isEmpty && baseObjects.nonEmpty) {
+                        UnionValue(valuesFromBase: _*)
+                    } else {
+                        val recResult = prev.map(_.get(obj, restBaseObjects, property, cache = false)).getOrElse(UndefinedValue)
+                        UnionValue(recResult +: valuesFromBase: _*)
+                    }
+                    if (cache)
+                        set(obj, property, result, -1)
+                    result
             }
         }
 
-        override def readProperty(target: Value, propertyName: String): Value = {
-            val objs = target.asObjects.map(get(_, propertyName))
-            return if (objs.isEmpty) UndefinedValue else UnionValue(objs.toSeq: _*)
+        def readProperty(target: Value, property: String, cache: Boolean): Value = {
+            val result = target.asObject.map(get(_, target.baseObjects.toSet, property, cache = cache)).getOrElse(UndefinedValue)
+            if (target.propertyWriteMaybeNoOp) UnionValue.withUndefined(result) else result
         }
+
+        override def readProperty(target: Value, propertyName: String): Value = readProperty(target, propertyName, cache = true)
         override def writeProperty(target: Value, propertyName: String, value: Value): Unit = {
-            for(obj <- target.asObjects) {
-                set(obj, propertyName, value)
+            val writeId = nextWriteId()
+            target.asObject.foreach {
+                set(_, propertyName, value, writeId)
+            }
+
+            target.baseObjects foreach {
+                obj =>
+                    set(obj, propertyName, UnionValue(readProperty(obj, propertyName), value), writeId)
             }
         }
 
@@ -99,39 +124,42 @@ object IterationHeap {
             ended = true
             new Memory(idx + 1, if (objects.isEmpty) prev else Some(this))
         }
+
+        override def toString: String = s"Heap[$idx]"
     }
 
     object Memory {
 
-        private class Unifier(var memory: Memory) {
+        private class Unifier(iniMemory: Memory) {
+            var memory: Memory = iniMemory.prev.get
             def index: Int = memory.idx
-            val objects = mutable.Map.empty[ObjectValue, Properties]
+            val objects: MemoryMap = iniMemory.objects.map { case (prop, value) => (prop, value.clone())}
 
             def up(): Unit = {
                 assert(memory.prev.nonEmpty)
-                memory = memory.prev.get
                 for (pair@(obj, _) <- memory.objects) {
                     if (!objects.contains(obj)) {
                         objects += pair
                     }
                 }
+                memory = memory.prev.get
             }
 
-            def merge(otherObjs: mutable.Map[ObjectValue, Properties]): Unit = {
-                for (objPropPair@(obj, props) <- otherObjs) {
-                    objects.get(obj) match {
-                        case Some(properties) =>
-                            for (propValuePair@(prop, value) <- props) {
-                                properties.get(prop) match {
-                                    case Some(value2) =>
-                                        properties.update(prop, UnionValue(value, value2))
-                                    case None =>
-                                        properties += propValuePair
-                                }
-                            }
-                        case None =>
-                            objects += objPropPair
-                    }
+            def merge(other: Unifier): Unit = {
+                val objSet = objects.keySet ++ other.objects.keySet
+
+                objSet.foreach {
+                    obj =>
+                        val aProps = objects.getOrElseUpdate(obj, mutable.Map())
+                        val bProps = other.objects.getOrElse(obj, mutable.Map())
+                        val props = aProps.keySet ++ bProps.keySet
+                        props.foreach {
+                            prop =>
+                                lazy val default = memory.readProperty(obj, prop, cache = false)
+                                val aVal = aProps.get(prop).map(_._2).getOrElse(default)
+                                val bVal = bProps.get(prop).map(_._2).getOrElse(default)
+                                aProps.update(prop, (0, UnionValue(aVal, bVal)))
+                        }
                 }
             }
         }
@@ -143,33 +171,37 @@ object IterationHeap {
             memories match {
                 case Seq(mem) =>
                     return mem
+                case _ =>
             }
 
             memories.foreach(_.ended = true)
             val newIndex = memories.map(_.idx).max + 1
             val unifiers = mutable.Map.empty[Memory, Unifier]
-            unifiers ++= memories.map(mem => mem -> new Unifier(mem))
-
             // the greatest index must be front!
             val queue = mutable.PriorityQueue.empty[Unifier](Ordering.by(_.index))
-            queue ++= unifiers.values
+
+            def addToUnifiers(unifier: Unifier): Unit = {
+                unifiers.get(unifier.memory) match {
+                    case Some(equalUnifier) =>
+                        equalUnifier.merge(unifier)
+                    case None =>
+                        unifiers += (unifier.memory -> unifier)
+                        queue += unifier
+                }
+            }
+
+            memories.map(new Unifier(_)).foreach(addToUnifiers)
 
             while(true) {
                 val unifier = queue.dequeue()
 
                 if (queue.isEmpty) {
-                    return new Memory(newIndex, Some(unifier.memory))
+                    return new Memory(newIndex, Some(unifier.memory), unifier.objects)
                 }
 
                 unifiers -= unifier.memory
                 unifier.up()
-                unifiers.get(unifier.memory) match {
-                    case Some(equalUnifier) =>
-                        equalUnifier.merge(unifier.objects)
-                    case None =>
-                        unifiers += (unifier.memory -> unifier)
-                        queue += unifier
-                }
+                addToUnifiers(unifier)
             }
 
             throw new IllegalStateException("should not be reached")

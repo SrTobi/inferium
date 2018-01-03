@@ -130,7 +130,6 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             throw new IllegalArgumentException(s"$ast can not be assigned a value")
 
         case Ast.VarStmt(name, expr) =>
-            closure.makeNewLocalVariable(name)
             buildLocalAssignment(name, expr, newnode)
 
         case Ast.ReturnStmt(expr) =>
@@ -171,6 +170,19 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
         stmts.foreach(buildStatement(_, nodeBuilder))
     }
 
+    private[this] def hoistVars(stmts: Seq[Ast.Statement]): Unit = {
+        stmts.foreach {
+            case Ast.ExpressionStmt(_) =>
+            case Ast.IfStmt(_, success, fail) =>
+                hoistVars(success)
+                fail.foreach(hoistVars)
+            case Ast.AssignmentStmt(_, _) =>
+            case Ast.VarStmt(name, _) =>
+                closure.makeNewLocalVariable(name)
+            case Ast.ReturnStmt(expr) =>
+        }
+    }
+
     def build(): (Nodes.Node, Seq[ValueSourceProvider]) = {
         if (done) {
             throw new IllegalStateException("A builder can only be used once!")
@@ -184,6 +196,7 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             closure.makeNewLocalVariable(paramName)
             buildLocalAssignment(paramName, paramValue, newNode)
         }
+        hoistVars(body)
 
         buildStatements(body, newNode)
         val undefReturnValue = wrapValue(UndefinedValue)
@@ -216,15 +229,16 @@ object TemplateBuilder {
         override val closureIndex: Int = outer.map(_.closureIndex + 1).getOrElse(0)
         override def hasVar(name: String): Boolean = locals.contains(name)
         override def closureIndexForVar(name: String): Int =
-            if (hasVar(name)) closureIndex else outer.map(_.closureIndexForVar(name)).getOrElse(throw new IllegalArgumentException(s"$name is no local variable!"))
+            if (hasVar(name)) closureIndex else outer.map(_.closureIndexForVar(name)).getOrElse(0)
 
         def makeNewLocalVariable(name: String): Unit =
             if (hasVar(name)) throw new IllegalArgumentException(s"$name was already defined!") else locals += name
     }
 
     def buildScriptTemplate(script: Ast.Script): Templates.Script = new Templates.Script {
-        override def instantiate(flowAnalysis: FlowAnalysis, endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
-            val builder = new TemplateBuilder(script.main, Seq(), Seq(), None, endNode)(flowAnalysis)
+        override def instantiate(flowAnalysis: FlowAnalysis, global: ObjectValue, endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
+            val globalClosure = new Closure(None)
+            val builder = new TemplateBuilder(script.main, Seq(global), Seq(), Some(globalClosure), endNode)(flowAnalysis)
             return builder.build()
         }
     }

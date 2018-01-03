@@ -1,23 +1,28 @@
 package com.github.srtobi.inferium
 
 import com.github.srtobi.inferium.prototype.{Ast, LangParser}
-import com.github.srtobi.inferium.prototype.flow.{ForwardFlowAnalysis, IterationHeap, Solver}
+import com.github.srtobi.inferium.prototype.flow._
 import fastparse.core.Parsed
 
 
 object FlowAnalysisTest {
+    import ForwardFlowAnalysis.IniObject
     private def analyse(script: Ast.Script): Unit = {
-        val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap)
+
+        val global = IniObject("rand" -> BoolValue)
+
+        val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
         analysis.analyse()
     }
     def main(args: Array[String]): Unit = {
 
         val code =
             """
-              |var x = {}
-              |var y = x
-              |x.xxx = "test"
-              |return y.xxx.x
+              |if (rand) {
+              | return 5 - 9
+              |} else {
+              | return true
+              |}
             """.stripMargin
 
         LangParser.script.parse(code) match {
