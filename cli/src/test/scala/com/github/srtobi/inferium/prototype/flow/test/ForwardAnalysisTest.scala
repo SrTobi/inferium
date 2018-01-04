@@ -179,6 +179,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |return x.prop
             """.stripMargin)) { case (Some(_), res) => UnionSet("c", UndefinedValue) shouldBe res}
 
+
         inside(analyse(
             """
               |var a = { prop: "a" }
@@ -212,5 +213,125 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |return x.prop
             """.stripMargin)) { case (Some(_), res) => UnionSet(UndefinedValue, "a") shouldBe res}
+
+        inside(analyse(
+            """
+              |var x = { prop: "a" }
+              |var y = x
+              |if (rand) {
+              |  y = undefined
+              |}
+              |return y.prop
+            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+
+        inside(analyse(
+            """
+              |var x = { prop: "a" }
+              |var y = x
+              |if (rand) {
+              |  y = undefined
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+    }
+
+    it should "handle calls to pure functions correctly" in {
+
+        inside(analyse(
+            """
+              |var f = () => {
+              |  return 8
+              |}
+              |return f()
+            """.stripMargin)) { case (Some(_), res) => Value(8) shouldBe res}
+
+        inside(analyse(
+            """
+              |var f = (a) => {
+              |  return a
+              |}
+              |return f(9)
+            """.stripMargin)) { case (Some(_), res) => Value(9) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var f = (a, b) => {
+              |  return a - b
+              |}
+              |return f(11, 10)
+            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var f = (a, b) => {
+              |  return a - b
+              |}
+              |return f(11, 10)
+            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+    }
+
+    it should "handle accesses to other scopes correctly" in {
+
+        inside(analyse(
+            """
+              |var x = 0
+              |var f = () => {
+              |  return x
+              |}
+              |return f()
+            """.stripMargin)) { case (Some(_), res) => Value(0) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var x = 0
+              |var f = () => {
+              |  return x
+              |}
+              |x = 5
+              |return f()
+            """.stripMargin)) { case (Some(_), res) => Value(5) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var x = 0
+              |var f = (a) => {
+              |  return x - a
+              |}
+              |x = 9
+              |return f(x)
+            """.stripMargin)) { case (Some(_), res) => Value(0) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var x = 0
+              |var f = () => {
+              |  x = 5
+              |  return 12
+              |}
+              |return f() - x
+            """.stripMargin)) { case (Some(_), res) => Value(7) shouldBe res}
+    }
+
+    it should "handle merged functions correctly" in {
+
+        inside(analyse(
+            """
+              |var f = 0
+              |if(rand) {
+              |  f = () => {
+              |    return "a"
+              |  }
+              |} else {
+              |  f = () => {
+              |    return "b"
+              |  }
+              |}
+              |return f()
+            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
     }
 }

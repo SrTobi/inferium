@@ -5,20 +5,20 @@ trait Solver {
 
     def newEmptyObject(): ObjectValue
 
-    def boolean(): SpecificBoolValue
+    def boolean(): BoolValue
     def boolean(specific: Boolean): SpecificBoolValue
-    def number(): SpecificNumberValue
+    def number(): NumberValue
     def number(specific: String): SpecificNumberValue
-    def string(): SpecificStringValue
+    def string(): StringValue
     def string(specific: String): SpecificStringValue
 }
 
 object Solver extends Solver {
     override def newEmptyObject(): ObjectValue = new ObjectValue
-    override def boolean(): SpecificBoolValue = ???
+    override def boolean(): BoolValue = BoolValue
     override def boolean(specific: Boolean): SpecificBoolValue = SpecificBoolValue(specific)
-    override def number(): SpecificNumberValue = ???
+    override def number(): NumberValue = NumberValue
     override def number(specific: String): SpecificNumberValue = SpecificNumberValue(specific.toInt)
-    override def string(): SpecificStringValue = ???
+    override def string(): StringValue = StringValue
     override def string(specific: String): SpecificStringValue = SpecificStringValue(specific)
 }

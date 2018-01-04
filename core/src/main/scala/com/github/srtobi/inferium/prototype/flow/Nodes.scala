@@ -152,8 +152,8 @@ object Nodes {
         def result: ValueSourceProvider = _result
 
         override def onControlFlow(heap: HeapMemory): Unit = {
-            lazy val leftValue = left.get()
-            lazy val rightValue = right.get()
+            lazy val leftValue = left.get().asValue
+            lazy val rightValue = right.get().asValue
 
             (leftValue, rightValue) match {
                 case (SpecificNumberValue(leftNum), SpecificNumberValue(rightNum)) =>
