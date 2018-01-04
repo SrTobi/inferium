@@ -203,5 +203,14 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |return x.prop
             """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+
+        inside(analyse(
+            """
+              |var x = { prop: "a" }
+              |if (rand) {
+              |  x = 1
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet(UndefinedValue, "a") shouldBe res}
     }
 }

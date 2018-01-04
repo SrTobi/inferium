@@ -137,8 +137,7 @@ case class SpecificStringValue(value: String) extends StringValue {
     override def toString: String = "\"" + value + "\""
 }
 
-sealed class ObjectValue extends Value {
-    val internalId: Long = ObjectValue.nextObjId()
+sealed class ObjectValue(val internalId: Long = ObjectValue.nextObjId()) extends Value {
     override def asObject: Option[ObjectValue] = Some(this)
     override def propertyWriteMaybeNoOp: Boolean = false
 
@@ -163,7 +162,7 @@ object FunctionValue {
     def unapply(fv: FunctionValue): Option[(Templates.Function, Seq[ValueLike])] = Some((fv.template, fv.closures))
 }
 
-final class UnionValue(val values: Seq[ValueLike]) extends ObjectValue() {
+final class UnionValue(val values: Seq[ValueLike], id: Long = ObjectValue.nextObjId()) extends ObjectValue(id) {
 
     assert(values.size >= 2)
     assert(values.forall(v => !v.isInstanceOf[UnionValue]))
@@ -187,12 +186,20 @@ final class UnionValue(val values: Seq[ValueLike]) extends ObjectValue() {
     override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
 
-    override def withoutThrowingWhenWrittenOn: ValueLike = UnionValue(values.filter(!_.throwsWhenWrittenOrReadOn): _*)
+    override def withoutThrowingWhenWrittenOn: ValueLike = UnionValue(internalId, values.filter(!_.throwsWhenWrittenOrReadOn))
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
 
 object UnionValue {
+    def apply(id: Long, values: Seq[ValueLike]): ValueLike = {
+        return values match {
+            case Seq() => NeverValue
+            case Seq(value) => value
+            case all => new UnionValue(values, id)
+        }
+    }
+
     def apply(values: ValueLike*): ValueLike = {
         values match {
             case Seq(value) => return value
