@@ -8,7 +8,7 @@ import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
-    private def analyse(code: String): (Option[HeapMemory], ValueLike) = {
+    private def analyse(code: String): (Option[HeapMemory], Value) = {
         inside (LangParser.script.parse(code)) {
             case Parsed.Success(script, _) =>
 
@@ -16,7 +16,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
                 val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
                 analysis.analyse()
-                return (analysis.lastHeap, analysis.scriptReturn)
+                return (analysis.lastHeap, analysis.scriptReturn.asValue)
         }
     }
 

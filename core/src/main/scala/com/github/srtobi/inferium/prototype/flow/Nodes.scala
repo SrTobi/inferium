@@ -113,7 +113,8 @@ object Nodes {
         override def onControlFlow(heap: HeapMemory): Unit = {
             val targetValue = target.get()
             if (!targetValue.throwsWhenWrittenOrReadOn) {
-                _result.set(heap.readProperty(targetValue, propertyName))
+                val value = heap.readProperty(targetValue, propertyName)
+                _result.set(Reference(value, targetValue, propertyName))
                 controlFlowTo(next, heap)
             } else {
                 // program stops

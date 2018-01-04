@@ -107,8 +107,12 @@ object IterationHeap {
             if (target.propertyWriteMaybeNoOp) UnionValue.withUndefined(result) else result
         }
 
-        override def readProperty(target: ValueLike, propertyName: String): ValueLike = readProperty(target, propertyName, cache = true)
+        override def readProperty(target: ValueLike, propertyName: String): ValueLike = {
+            filterUnwritables(target)
+            readProperty(target, propertyName, cache = true)
+        }
         override def writeProperty(target: ValueLike, propertyName: String, value: ValueLike): Unit = {
+            filterUnwritables(target)
             val writeId = nextWriteId()
             target.asObject.foreach {
                 set(_, propertyName, value, writeId)
@@ -118,6 +122,22 @@ object IterationHeap {
                 obj =>
                     set(obj, propertyName, UnionValue(readProperty(obj, propertyName), value), writeId)
             }
+        }
+
+        private def filterUnwritables(target: ValueLike): Unit = target match {
+            case ref: Reference =>
+                manipulateReference(ref, (value) => {
+                    value.withoutThrowingWhenWrittenOn
+                })
+            case _ =>
+        }
+
+        private def manipulateReference(ref: Reference, manipulate: (ValueLike) => ValueLike): Unit = ref match {
+            case Reference(value, obj, property) =>
+                val org = readProperty(obj, property, cache = false)
+                if (org == value) {
+                    writeProperty(obj, property, manipulate(org))
+                }
         }
 
         override def split(): HeapMemory = {

@@ -12,18 +12,28 @@ abstract class ValueLike {
     def baseObjects: Traversable[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
 
+    def withoutThrowingWhenWrittenOn: ValueLike
+
     def throwsWhenWrittenOrReadOn: Boolean
+
+    def asReference: Option[Reference]
 }
 
 sealed abstract class Value extends ValueLike {
 
     override def asValue: Value = this
+    override def asBool: BoolLattice = BoolLattice.True
     override def asFunctions: Traversable[FunctionValue] = Seq.empty
-    override def throwsWhenWrittenOrReadOn: Boolean = false
     override def asObject: Option[ObjectValue] = None
     override def propertyWriteMaybeNoOp: Boolean = true
     override def baseObjects: Traversable[ObjectValue] = Traversable()
-    override def asBool: BoolLattice = BoolLattice.True
+
+    override def withoutThrowingWhenWrittenOn: ValueLike = this
+
+    override def throwsWhenWrittenOrReadOn: Boolean = false
+
+    def asReference: Option[Reference] = None
+
     /*def in: scala.collection.Set[Value] = inValues
     def out: scala.collection.Set[Value] = outValues
 
@@ -75,6 +85,7 @@ object NeverValue extends Value {
 object UndefinedValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
+    override def withoutThrowingWhenWrittenOn: ValueLike = NeverValue
 
     override def toString: String = "undefined"
 }
@@ -82,6 +93,7 @@ object UndefinedValue extends Value {
 object NullValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
+    override def withoutThrowingWhenWrittenOn: ValueLike = NeverValue
 
     override def toString: String = "null"
 }
@@ -175,6 +187,8 @@ final class UnionValue(val values: Seq[ValueLike]) extends ObjectValue() {
     override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
 
+    override def withoutThrowingWhenWrittenOn: ValueLike = UnionValue(values.filter(!_.throwsWhenWrittenOrReadOn): _*)
+
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
 
@@ -188,6 +202,7 @@ object UnionValue {
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
         val objectValues = mutable.Set.empty[ValueLike]
+        val conditionalValues = mutable.Set.empty[ConditionalValue]
         var hasUndefined = false
         var hasNull = false
 
@@ -214,6 +229,8 @@ object UnionValue {
             case obj: ObjectValue =>
                 objectValues.add(obj)
             case NeverValue =>
+            case value: ConditionalValue =>
+                conditionalValues.add(value)
         }
 
         val seq =
@@ -222,7 +239,8 @@ object UnionValue {
             Option(boolValue).toSeq ++
             Option(numberValue).toSeq ++
             Option(stringValues).getOrElse(Seq(StringValue)) ++
-            objectValues
+            objectValues ++
+            conditionalValues
 
         return seq match {
             case Seq() => NeverValue
@@ -254,9 +272,28 @@ case class UnionSet(values: Any*) {
     assert(values.size >= 2)
 
     override def equals(obj: scala.Any): Boolean = obj match {
-        case UnionValue(seq) => seq.toSet == values.map(Value(_)).toSet
+        case UnionValue(seq) => seq.map(_.asValue).toSet == values.map(Value(_)).toSet
         case _ => false
     }
 
     override def toString: String = values.mkString("[", " | ", "]")
+}
+
+sealed abstract class ConditionalValue extends ValueLike {
+    override def asBool: BoolLattice = asValue.asBool
+    override def asFunctions: Traversable[FunctionValue] = asValue.asFunctions
+    override def asObject: Option[ObjectValue] = asValue.asObject
+    override def baseObjects: Traversable[ObjectValue] = asValue.baseObjects
+    override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
+    override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
+
+    override def withoutThrowingWhenWrittenOn: ValueLike = if (throwsWhenWrittenOrReadOn) NeverValue else this
+}
+
+final case class Reference(value: ValueLike, baseObject: ValueLike, property: String) extends ConditionalValue {
+    override val asValue: Value = value.asValue
+
+    def asReference: Option[Reference] = Some(this)
+
+    override def toString: String = s"$value{$baseObject.$property}"
 }
