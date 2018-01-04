@@ -12,6 +12,7 @@ abstract class ValueLike {
     def baseObjects: Traversable[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
 
+    def without(filter: (ValueLike) => Boolean): ValueLike
     def withoutThrowingWhenWrittenOn: ValueLike
 
     def throwsWhenWrittenOrReadOn: Boolean
@@ -28,6 +29,7 @@ sealed abstract class Value extends ValueLike {
     override def propertyWriteMaybeNoOp: Boolean = true
     override def baseObjects: Traversable[ObjectValue] = Traversable()
 
+    override def without(filter: ValueLike => Boolean): ValueLike = if (filter(this)) this else NeverValue
     override def withoutThrowingWhenWrittenOn: ValueLike = this
 
     override def throwsWhenWrittenOrReadOn: Boolean = false
@@ -186,7 +188,8 @@ final class UnionValue(val values: Seq[ValueLike], id: Long = ObjectValue.nextOb
     override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
 
-    override def withoutThrowingWhenWrittenOn: ValueLike = UnionValue(internalId, values.filter(!_.throwsWhenWrittenOrReadOn))
+    override def without(filter: ValueLike => Boolean): ValueLike = UnionValue(internalId, values.filter(!filter(_)))
+    //override def withoutThrowingWhenWrittenOn: ValueLike = without(_.throwsWhenWrittenOrReadOn)
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
@@ -302,5 +305,6 @@ final case class Reference(value: ValueLike, baseObject: ValueLike, property: St
 
     def asReference: Option[Reference] = Some(this)
 
+    override def without(filter: ValueLike => Boolean): ValueLike = Reference(value.without(filter), baseObject, property)
     override def toString: String = s"$value{$baseObject.$property}"
 }

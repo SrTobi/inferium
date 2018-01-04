@@ -244,8 +244,13 @@ object Nodes {
 
             mergeNode.setNumBranchesToWaitFor(allReturns.length)
 
-            for (begin <- begins) {
-                controlFlowTo(begin, heap.split())
+
+            if (begins.isEmpty) {
+                noControlFlowTo(next)
+            } else {
+                for (begin <- begins) {
+                    controlFlowTo(begin, heap.split())
+                }
             }
         }
     }

@@ -8,10 +8,6 @@ import scala.collection.mutable
 class IterationHeap extends Heap {
     import IterationHeap._
 
-
-
-
-
     override def newEmptyHeapState(): HeapMemory = new Memory()
     override def unify(heaps: HeapMemory*): HeapMemory = Memory.unify(heaps.map(_.asInstanceOf[Memory]))
 }
@@ -86,15 +82,9 @@ object IterationHeap {
             }
         }
 
-        private def filterUnwritables(target: ValueLike): ValueLike = target match {
-            case ref: Reference =>
-                manipulateReference(ref, (value) => {
-                    value.withoutThrowingWhenWrittenOn
-                })
-            case _ => target
-        }
+        private def filterUnwritables(target: ValueLike): ValueLike = manipulateReference(target, (value) => value.withoutThrowingWhenWrittenOn)
 
-        private def manipulateReference(ref: Reference, manipulate: (ValueLike) => ValueLike): ValueLike = ref match {
+        override def manipulateReference(ref: ValueLike, manipulate: (ValueLike) => ValueLike): ValueLike = ref match {
             case Reference(value, obj, property) =>
                 val org = readProperty(obj, property, cache = false)
                 if (org == value) {
@@ -103,6 +93,7 @@ object IterationHeap {
                     return newValue
                 }
                 return ref
+            case _ => ref
         }
 
         override def split(): HeapMemory = {

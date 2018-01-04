@@ -334,4 +334,64 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |return f()
             """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
     }
+
+    it should "handle context correctly" in {
+
+        inside(analyse(
+            """
+              |var f = () => {
+              |  var x = undefined
+              |  return (a) => {
+              |    var old = x
+              |    x = a
+              |    return old
+              |  }
+              |}
+              |var a = f()
+              |var b = f()
+              |a("a")
+              |b("b")
+              |return a("c")
+            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+
+        inside(analyse(
+            """
+              |var f = () => {
+              |  var x = undefined
+              |  return (a) => {
+              |    var old = x
+              |    x = a
+              |    return old
+              |  }
+              |}
+              |var a = f()
+              |a("a")
+              |if (rand) {
+              |  a("b")
+              |}
+              |return a("c")
+            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+    }
+
+    it should "not call uncallable values" in {
+
+        inside(analyse(
+            """
+              |var a = 1
+              |return a()
+            """.stripMargin)) { case (None, res) => NeverValue shouldBe res}
+    }
+
+    it should "filter uncabbable values" in {
+        analyse(
+            """
+              |if (rand) {
+              |  f = () => {}
+              |} else {
+              |  f = "test"
+              |}
+              |f()
+              |return f
+            """.stripMargin) should matchPattern { case (Some(_), _: FunctionValue) =>}
+    }
 }
