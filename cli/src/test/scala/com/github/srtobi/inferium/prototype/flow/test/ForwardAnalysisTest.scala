@@ -272,6 +272,26 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
             """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
     }
 
+    it should "handle unmatching parameter numbers correctly" in {
+
+        inside(analyse(
+            """
+              |var f = (a, b) => {
+              |  return b
+              |}
+              |return f(11)
+            """.stripMargin)) { case (Some(_), res) => UndefinedValue shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var f = (a, b) => {
+              |  return a - b
+              |}
+              |return f(11, 10, "blub")
+            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+    }
+
     it should "handle accesses to other scopes correctly" in {
 
         inside(analyse(
@@ -333,5 +353,105 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |return f()
             """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+    }
+
+    it should "handle context correctly" in {
+
+        inside(analyse(
+            """
+              |var f = () => {
+              |  var x = undefined
+              |  return (a) => {
+              |    var old = x
+              |    x = a
+              |    return old
+              |  }
+              |}
+              |var a = f()
+              |var b = f()
+              |a("a")
+              |b("b")
+              |return a("c")
+            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+
+        inside(analyse(
+            """
+              |var f = () => {
+              |  var x = undefined
+              |  return (a) => {
+              |    var old = x
+              |    x = a
+              |    return old
+              |  }
+              |}
+              |var a = f()
+              |a("a")
+              |if (rand) {
+              |  a("b")
+              |}
+              |return a("c")
+            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+    }
+
+    it should "not call uncallable values" in {
+
+        inside(analyse(
+            """
+              |var a = 1
+              |return a()
+            """.stripMargin)) { case (None, res) => NeverValue shouldBe res}
+    }
+
+    it should "filter uncabbable values" in {
+        analyse(
+            """
+              |if (rand) {
+              |  var f = () => {}
+              |} else {
+              |  f = "test"
+              |}
+              |f()
+              |return f
+            """.stripMargin) should matchPattern { case (Some(_), _: FunctionValue) =>}
+    }
+
+    it should "filter depended references" in {
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 1
+              |} else {
+              |  a = undefined
+              |}
+              |var b = a
+              |b.prop
+              |return b
+            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 1
+              |} else {
+              |  a = undefined
+              |}
+              |var b = a
+              |b.prop
+              |return a
+            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 1
+              |} else {
+              |  a = undefined
+              |}
+              |var b = a
+              |a = "inbetween"
+              |b.prop
+              |return a
+            """.stripMargin)) { case (Some(_), res) => Value("inbetween") shouldBe res}
     }
 }

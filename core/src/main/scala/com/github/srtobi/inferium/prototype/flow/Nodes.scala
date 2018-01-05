@@ -224,6 +224,7 @@ object Nodes {
 
         override def onControlFlow(heap: HeapMemory): Unit = {
             val funcVal = target.get()
+            heap.manipulateReference(funcVal, _.without(!_.asValue.isInstanceOf[FunctionValue]))
             val functions = funcVal.asFunctions
 
             val allReturns = mutable.Buffer.empty[ValueSource]
@@ -244,8 +245,13 @@ object Nodes {
 
             mergeNode.setNumBranchesToWaitFor(allReturns.length)
 
-            for (begin <- begins) {
-                controlFlowTo(begin, heap.split())
+
+            if (begins.isEmpty) {
+                noControlFlowTo(next)
+            } else {
+                for (begin <- begins) {
+                    controlFlowTo(begin, heap.split())
+                }
             }
         }
     }

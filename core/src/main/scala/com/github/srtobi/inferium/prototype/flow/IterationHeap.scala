@@ -8,10 +8,6 @@ import scala.collection.mutable
 class IterationHeap extends Heap {
     import IterationHeap._
 
-
-
-
-
     override def newEmptyHeapState(): HeapMemory = new Memory()
     override def unify(heaps: HeapMemory*): HeapMemory = Memory.unify(heaps.map(_.asInstanceOf[Memory]))
 }
@@ -86,23 +82,21 @@ object IterationHeap {
             }
         }
 
-        private def filterUnwritables(target: ValueLike): ValueLike = target match {
-            case ref: Reference =>
-                manipulateReference(ref, (value) => {
-                    value.withoutThrowingWhenWrittenOn
-                })
-            case _ => target
-        }
+        private def filterUnwritables(target: ValueLike): ValueLike = manipulateReference(target, (value) => value.without(_.throwsWhenWrittenOrReadOn))
 
-        private def manipulateReference(ref: Reference, manipulate: (ValueLike) => ValueLike): ValueLike = ref match {
+        override def manipulateReference(ref: ValueLike, manipulate: (ValueLike) => ValueLike): ValueLike = ref match {
             case Reference(value, obj, property) =>
                 val org = readProperty(obj, property, cache = false)
                 if (org == value) {
-                    val newValue = manipulate(org)
+                    // we now know that the reference still applies and can now change it
+                    // but that might be another reference and we can trie to change that as well
+                    val innerRef = manipulateReference(org, manipulate)
+                    val newValue = if (innerRef == org) manipulate(org) else innerRef
                     writeProperty(obj, property, newValue)
-                    return newValue
+                    return Reference(newValue, obj, property)
                 }
                 return ref
+            case _ => ref
         }
 
         override def split(): HeapMemory = {

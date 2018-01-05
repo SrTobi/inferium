@@ -12,7 +12,7 @@ abstract class ValueLike {
     def baseObjects: Traversable[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
 
-    def withoutThrowingWhenWrittenOn: ValueLike
+    def without(filter: (ValueLike) => Boolean): ValueLike
 
     def throwsWhenWrittenOrReadOn: Boolean
 
@@ -28,7 +28,7 @@ sealed abstract class Value extends ValueLike {
     override def propertyWriteMaybeNoOp: Boolean = true
     override def baseObjects: Traversable[ObjectValue] = Traversable()
 
-    override def withoutThrowingWhenWrittenOn: ValueLike = this
+    override def without(filter: ValueLike => Boolean): ValueLike = if (filter(this)) NeverValue else this
 
     override def throwsWhenWrittenOrReadOn: Boolean = false
 
@@ -85,7 +85,6 @@ object NeverValue extends Value {
 object UndefinedValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
-    override def withoutThrowingWhenWrittenOn: ValueLike = NeverValue
 
     override def toString: String = "undefined"
 }
@@ -93,7 +92,6 @@ object UndefinedValue extends Value {
 object NullValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
-    override def withoutThrowingWhenWrittenOn: ValueLike = NeverValue
 
     override def toString: String = "null"
 }
@@ -186,7 +184,10 @@ final class UnionValue(val values: Seq[ValueLike], id: Long = ObjectValue.nextOb
     override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
 
-    override def withoutThrowingWhenWrittenOn: ValueLike = UnionValue(internalId, values.filter(!_.throwsWhenWrittenOrReadOn))
+    override def without(filter: ValueLike => Boolean): ValueLike = {
+        val newSeq = values.filter(!filter(_))
+        return if (newSeq.length == values.length) this else UnionValue(internalId, newSeq)
+    }
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
@@ -294,7 +295,7 @@ sealed abstract class ConditionalValue extends ValueLike {
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
     override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
 
-    override def withoutThrowingWhenWrittenOn: ValueLike = if (throwsWhenWrittenOrReadOn) NeverValue else this
+    override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
 }
 
 final case class Reference(value: ValueLike, baseObject: ValueLike, property: String) extends ConditionalValue {

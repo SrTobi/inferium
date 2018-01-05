@@ -9,6 +9,8 @@ abstract class HeapMemory {
     def readProperty(target: ValueLike, propertyName: String): ValueLike
     def writeProperty(target: ValueLike, propertyName: String, handle: ValueLike): Unit
 
+    def manipulateReference(ref: ValueLike, manipulate: (ValueLike) => ValueLike): ValueLike
+
     def split(): HeapMemory
 }
 
