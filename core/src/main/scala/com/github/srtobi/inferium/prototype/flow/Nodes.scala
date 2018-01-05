@@ -196,17 +196,27 @@ object Nodes {
 
             condValue.asBool match {
                 case BoolLattice.Top =>
-                    controlFlowTo(thenBegin, heap.split())
-                    controlFlowTo(elseBegin, heap.split())
+                    controlFlowTo(thenBegin, truthyfy(condValue, heap.split()))
+                    controlFlowTo(elseBegin, falsyfy(condValue, heap.split()))
 
                 case BoolLattice.True =>
-                    controlFlowTo(thenBegin, heap)
+                    controlFlowTo(thenBegin, truthyfy(condValue, heap))
                     noControlFlowTo(elseBegin)
 
                 case BoolLattice.False =>
-                    controlFlowTo(elseBegin, heap)
+                    controlFlowTo(elseBegin, falsyfy(condValue, heap))
                     noControlFlowTo(thenBegin)
             }
+        }
+
+        private def truthyfy(cond: ValueLike, heap: HeapMemory): HeapMemory = {
+            heap.manipulateReference(cond, _.truthy(heap))
+            heap
+        }
+
+        private def falsyfy(cond: ValueLike, heap: HeapMemory): HeapMemory = {
+            heap.manipulateReference(cond, _.falsy(heap))
+            heap
         }
 
         private def connectBranch(branch: (Node, Node)): Unit = branch match {

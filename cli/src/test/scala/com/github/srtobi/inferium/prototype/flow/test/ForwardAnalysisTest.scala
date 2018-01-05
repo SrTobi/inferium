@@ -170,6 +170,22 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
         inside(analyse(
             """
               |var a = { prop: "a" }
+              |var b = { prop: "b" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |var y = x
+              |if (rand) {
+              |  y.prop = "c"
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b", "c") shouldBe res}
+
+        inside(analyse(
+            """
+              |var a = { prop: "a" }
               |if (rand) {
               |  var x = a
               |} else {
@@ -453,5 +469,180 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |b.prop
               |return a
             """.stripMargin)) { case (Some(_), res) => Value("inbetween") shouldBe res}
+
+    }
+
+    it should "filter variables in if-conditions" in {
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 50
+              |} else {
+              |  a = undefined
+              |}
+              |if (a) {
+              | return a
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => Value(50) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 50
+              |} else {
+              |  a = undefined
+              |}
+              |if (a) {
+              | return a
+              |} else {
+              | if (a) {
+              |   return "incorrect"
+              | } else {
+              |   return "correct"
+              | }
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet(50, "correct") shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var o = {}
+              |if (rand) {
+              |  o.a = true
+              |} else {
+              |  o.a = false
+              |}
+              |var b = o.a
+              |if (b) {
+              |  return o.a
+              |} else {
+              |  return "bla"
+              |}
+            """.stripMargin)) { case (Some(_), res) => UnionSet(true, "bla") shouldBe res}
+
+        inside(analyse(
+            """
+              |var o = {}
+              |if (rand) {
+              |  o.a = true
+              |} else {
+              |  o.a = false
+              |}
+              |var b = o.a
+              |if (b) {
+              |  return "bla"
+              |} else {
+              |  return o.a
+              |}
+            """.stripMargin)) { case (Some(_), res) => UnionSet(false, "bla") shouldBe res}
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var a = 50
+              |} else {
+              |  a = undefined
+              |}
+              |if (a) {
+              | return a
+              |} else {
+              | if (a) {
+              |   return "incorrect"
+              | } else {
+              |   return "correct"
+              | }
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet(50, "correct") shouldBe res}
+    }
+
+    it should "filter objects according to their properties" in {
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |  return x.cond
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => Value(true) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |  undefined.prop
+              |} else {
+              |  return x.cond
+              |}
+            """.stripMargin)) { case (Some(_), res) => Value(false) shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |  return x
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => assert(res.isInstanceOf[ObjectValue]); assert(!res.isInstanceOf[UnionValue])}
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |  return x.prop
+              |}
+              |undefined.prop
+            """.stripMargin)) { case (Some(_), res) => Value("true") shouldBe res}
+
+        /*inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |  x.prop = "haha"
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}*/
     }
 }

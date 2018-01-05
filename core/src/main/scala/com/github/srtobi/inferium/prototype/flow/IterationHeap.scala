@@ -91,7 +91,7 @@ object IterationHeap {
                     // we now know that the reference still applies and can now change it
                     // but that might be another reference and we can trie to change that as well
                     val innerRef = manipulateReference(org, manipulate)
-                    val newValue = if (innerRef == org) manipulate(org) else innerRef
+                    val newValue = if (innerRef == org) manipulate(ref) else innerRef
                     writeProperty(obj, property, newValue)
                     return Reference(newValue, obj, property)
                 }

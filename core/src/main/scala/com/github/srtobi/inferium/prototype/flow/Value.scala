@@ -14,6 +14,9 @@ abstract class ValueLike {
 
     def without(filter: (ValueLike) => Boolean): ValueLike
 
+    def truthy(heap: HeapMemory): ValueLike
+    def falsy(heap: HeapMemory): ValueLike
+
     def throwsWhenWrittenOrReadOn: Boolean
 
     def asReference: Option[Reference]
@@ -70,6 +73,7 @@ object Value {
         case value: Value => value
         case number: Int => SpecificNumberValue(number)
         case string: String => SpecificStringValue(string)
+        case bool: Boolean => SpecificBoolValue(bool)
         case null => NullValue
         case _ => throw new IllegalArgumentException(s"Can not convert $any to a property value!")
     }
@@ -79,12 +83,18 @@ object NeverValue extends Value {
     override def throwsWhenWrittenOrReadOn: Boolean = true
     override def asBool: BoolLattice = BoolLattice.Top
 
+    override def truthy(heap: HeapMemory): ValueLike = NeverValue
+    override def falsy(heap: HeapMemory): ValueLike = NeverValue
+
     override def toString: String = "never"
 }
 
 object UndefinedValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
+
+    override def truthy(heap: HeapMemory): ValueLike = NeverValue
+    override def falsy(heap: HeapMemory): ValueLike = this
 
     override def toString: String = "undefined"
 }
@@ -93,31 +103,58 @@ object NullValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
 
+    override def truthy(heap: HeapMemory): ValueLike = NeverValue
+    override def falsy(heap: HeapMemory): ValueLike = this
+
     override def toString: String = "null"
 }
 
-sealed abstract class BoolValue extends Value
+sealed abstract class BoolValue extends Value {
+    override def truthy(heap: HeapMemory): ValueLike = SpecificBoolValue(true)
+    override def falsy(heap: HeapMemory): ValueLike = SpecificBoolValue(false)
+}
 object BoolValue extends BoolValue {
     override def asBool: BoolLattice = BoolLattice.Top
 
     override def toString: String = "boolean"
 }
 
-case class SpecificBoolValue(value: Boolean) extends BoolValue {
-    override def asBool: BoolLattice = BoolLattice(value)
-
+sealed abstract class SpecificBoolValue protected(val value: Boolean) extends BoolValue {
     override def toString: String = value.toString
+}
+
+object TrueValue extends SpecificBoolValue(true) {
+    override def asBool: BoolLattice = BoolLattice.True
+
+}
+
+object FalseValue extends SpecificBoolValue(false) {
+    override def asBool: BoolLattice = BoolLattice.False
+
+    override def toString: String = "false"
+}
+
+object SpecificBoolValue {
+    def apply(value: Boolean): SpecificBoolValue = if (value) TrueValue else FalseValue
+
+    def unapply(arg: SpecificBoolValue): Option[Boolean] = Some(arg.value)
 }
 
 sealed abstract class NumberValue extends Value
 object NumberValue extends NumberValue {
     override def asBool: BoolLattice = BoolLattice.Top
 
+    override def truthy(heap: HeapMemory): ValueLike = this
+    override def falsy(heap: HeapMemory): ValueLike = SpecificNumberValue(0)
+
     override def toString: String = "number"
 }
 
 case class SpecificNumberValue(value: Int) extends NumberValue {
     override def asBool: BoolLattice = BoolLattice(value != 0)
+
+    override def truthy(heap: HeapMemory): ValueLike = if (value == 0) NeverValue else this
+    override def falsy(heap: HeapMemory): ValueLike = if (value == 0) this else NeverValue
 
     override def toString: String = value.toString
 }
@@ -126,11 +163,17 @@ sealed abstract class StringValue extends Value
 object StringValue extends StringValue {
     override def asBool: BoolLattice = BoolLattice.Top
 
+    override def truthy(heap: HeapMemory): ValueLike = this
+    override def falsy(heap: HeapMemory): ValueLike = SpecificStringValue("")
+
     override def toString: String = "string"
 }
 
 case class SpecificStringValue(value: String) extends StringValue {
     override def asBool: BoolLattice = BoolLattice(value != "")
+
+    override def truthy(heap: HeapMemory): ValueLike = if (value == "") NeverValue else this
+    override def falsy(heap: HeapMemory): ValueLike = if (value == "") this else NeverValue
 
     override def toString: String = "\"" + value + "\""
 }
@@ -138,6 +181,9 @@ case class SpecificStringValue(value: String) extends StringValue {
 sealed class ObjectValue(val internalId: Long = ObjectValue.nextObjId()) extends Value {
     override def asObject: Option[ObjectValue] = Some(this)
     override def propertyWriteMaybeNoOp: Boolean = false
+
+    override def truthy(heap: HeapMemory): ValueLike = this
+    override def falsy(heap: HeapMemory): ValueLike = NeverValue
 
     override def toString: String = s"obj#$internalId"
 }
@@ -160,7 +206,7 @@ object FunctionValue {
     def unapply(fv: FunctionValue): Option[(Templates.Function, Seq[ValueLike])] = Some((fv.template, fv.closures))
 }
 
-final class UnionValue(val values: Seq[ValueLike], id: Long = ObjectValue.nextObjId()) extends ObjectValue(id) {
+final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends ObjectValue(id) {
 
     assert(values.size >= 2)
     assert(values.forall(v => !v.isInstanceOf[UnionValue]))
@@ -186,22 +232,34 @@ final class UnionValue(val values: Seq[ValueLike], id: Long = ObjectValue.nextOb
 
     override def without(filter: ValueLike => Boolean): ValueLike = {
         val newSeq = values.filter(!filter(_))
-        return if (newSeq.length == values.length) this else UnionValue(internalId, newSeq)
+        return if (newSeq.length == values.length) this else UnionValue.unionFromSeq(internalId, newSeq)
     }
+
+    override def truthy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(internalId, values.map(_.truthy(heap)))
+    override def falsy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(internalId, values.map(_.falsy(heap)))
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
 
 object UnionValue {
-    def apply(id: Long, values: Seq[ValueLike]): ValueLike = {
+    private def unionFromSeq(id: Long, values: Seq[ValueLike]): ValueLike = {
         return values match {
             case Seq() => NeverValue
             case Seq(value) => value
-            case all => new UnionValue(values, id)
+            case _ => new UnionValue(id, values)
         }
     }
 
     def apply(values: ValueLike*): ValueLike = {
+        return values match {
+            case Seq(value) => value
+            case Seq(u1:UnionValue, u2:UnionValue) if u1.internalId == u2.internalId => makeUnion(u1.internalId, values)
+            case all => makeUnion(ObjectValue.nextObjId(), all)
+        }
+    }
+
+
+    private def makeUnion(id: Long, values: Seq[ValueLike]): ValueLike = {
         values match {
             case Seq(value) => return value
             case _ =>
@@ -241,30 +299,24 @@ object UnionValue {
                 conditionalValues.add(value)
         }
 
-        val seq =
+        return unionFromSeq(id,
             (if (hasUndefined) Seq(UndefinedValue) else Seq()) ++
             (if (hasNull) Seq(NullValue) else Seq()) ++
             Option(boolValue).toSeq ++
             Option(numberValue).toSeq ++
             Option(stringValues).getOrElse(Seq(StringValue)) ++
             objectValues ++
-            conditionalValues
-
-        return seq match {
-            case Seq() => NeverValue
-            case Seq(value) => value
-            case all => new UnionValue(all)
-        }
+            conditionalValues)
     }
 
     def withUndefined(value: ValueLike): ValueLike = value match {
-        case UnionValue(values) => values match {
+        case u@UnionValue(values) => values match {
             case UndefinedValue +: _ => value
-            case seq => new UnionValue(UndefinedValue +: seq)
+            case seq => new UnionValue(u.internalId, UndefinedValue +: seq)
         }
         case UndefinedValue => UndefinedValue
         case NeverValue => UndefinedValue
-        case _ => new UnionValue(Seq(UndefinedValue, value))
+        case _ => UnionValue(UndefinedValue, value)
     }
 
     def unapply(arg: UnionValue): Option[Seq[ValueLike]] = Some(arg.values)
@@ -302,6 +354,15 @@ final case class Reference(value: ValueLike, baseObject: ValueLike, property: St
     override val asValue: Value = value.asValue
 
     def asReference: Option[Reference] = Some(this)
+
+    override def truthy(heap: HeapMemory): ValueLike = {
+        heap.manipulateReference(baseObject, _.without(heap.readProperty(_, property).asBool == BoolLattice.False))
+        return value.truthy(heap)
+    }
+    override def falsy(heap: HeapMemory): ValueLike = {
+        heap.manipulateReference(baseObject, _.without(heap.readProperty(_, property).asBool == BoolLattice.True))
+        return value.falsy(heap)
+    }
 
     override def toString: String = s"$value{$baseObject.$property}"
 }
