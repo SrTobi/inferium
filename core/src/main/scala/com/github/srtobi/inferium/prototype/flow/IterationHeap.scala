@@ -29,7 +29,12 @@ object IterationHeap {
 
         private def set(obj: ObjectValue, property: String, value: ValueLike, writeId: Int): Unit = {
             assert(!ended)
-            objects.getOrElseUpdate(obj.internalId, (obj, mutable.Map.empty))._2 += (property -> (writeId, value))
+            val id = obj.internalId
+            val (storedObj, properties) = objects.getOrElseUpdate(id, (obj, mutable.Map.empty))
+            properties += (property -> (writeId, value))
+            /*if (storedObj != obj) {
+                objects.update(id, (obj, properties))
+            }*/
         }
 
         private[this] def getHere(obj: ObjectValue, property: String): Option[(Int, ValueLike)] = {
@@ -37,6 +42,14 @@ object IterationHeap {
         }
 
         private def get(obj: ObjectValue, baseObjects: Set[ObjectValue], property: String, cache: Boolean): ValueLike = {
+            /*val entry = objects.get(obj.internalId) match {
+                case Some((storedObj, properties)) =>
+                    if (storedObj != obj) {
+                        objects.update(obj.internalId, (obj, properties))
+                    }
+                    properties.get(property)
+                case _ => None
+            }*/
             getHere(obj, property) match {
                 case Some((id, value)) =>
                     val overwritingProps = baseObjects.toSeq.flatMap(getHere(_, property)).filter(_._1 > id).map(_._2)
@@ -61,42 +74,44 @@ object IterationHeap {
             }
         }
 
-        def readProperty(target: ValueLike, property: String, cache: Boolean): ValueLike = {
+        override def readProperty(target: ValueLike, property: String, cache: Boolean): ValueLike = {
             val result = target.asObject.map(get(_, target.baseObjects.toSet, property, cache = cache)).getOrElse(UndefinedValue)
             if (target.propertyWriteMaybeNoOp) UnionValue.withUndefined(result) else result
         }
 
-        override def readProperty(target: ValueLike, propertyName: String): ValueLike = {
-            readProperty(filterUnwritables(target), propertyName, cache = true)
-        }
         override def writeProperty(target: ValueLike, propertyName: String, value: ValueLike): Unit = {
-            val realTarget = filterUnwritables(target)
             val writeId = nextWriteId()
-            realTarget.asObject.foreach {
+            target.asObject.foreach {
                 set(_, propertyName, value, writeId)
             }
 
-            realTarget.baseObjects foreach {
+            val baseObjects = target.baseObjects.toSeq
+            val mergeWithPrevious = baseObjects.length > 1
+            baseObjects foreach {
                 obj =>
-                    set(obj, propertyName, UnionValue(readProperty(obj, propertyName), value), writeId)
+                    val mergedValue = if (mergeWithPrevious) UnionValue(readProperty(obj, propertyName, cache = false), value) else value
+                    set(obj, propertyName, mergedValue, writeId)
             }
         }
 
-        private def filterUnwritables(target: ValueLike): ValueLike = manipulateReference(target, (value) => value.without(_.throwsWhenWrittenOrReadOn))
+        override def filterUnwritables(target: ValueLike): ValueLike = {
+            return target.remove(this, _.throwsWhenWrittenOrReadOn)
+        }
 
-        override def manipulateReference(ref: ValueLike, manipulate: (ValueLike) => ValueLike): ValueLike = ref match {
+        override def manipulateReference(ref: Reference, newValue: ValueLike): Unit = ref match {
             case Reference(value, obj, property) =>
-                val org = readProperty(obj, property, cache = false)
+                val org = readProperty(obj, property, cache = true)
                 if (org == value) {
                     // we now know that the reference still applies and can now change it
                     // but that might be another reference and we can trie to change that as well
-                    val innerRef = manipulateReference(org, manipulate)
-                    val newValue = if (innerRef == org) manipulate(ref) else innerRef
                     writeProperty(obj, property, newValue)
-                    return Reference(newValue, obj, property)
                 }
-                return ref
-            case _ => ref
+        }
+
+        override def manipulateIfReference(value: ValueLike, newValue: ValueLike): Unit = value match {
+            case ref: Reference =>
+                manipulateReference(ref, newValue)
+            case _ =>
         }
 
         override def split(): HeapMemory = {

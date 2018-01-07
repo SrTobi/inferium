@@ -13,6 +13,7 @@ abstract class ValueLike {
     def propertyWriteMaybeNoOp: Boolean
 
     def without(filter: (ValueLike) => Boolean): ValueLike
+    def remove(heap: HeapMemory, filter: (ValueLike) => Boolean): ValueLike
 
     def truthy(heap: HeapMemory): ValueLike
     def falsy(heap: HeapMemory): ValueLike
@@ -32,6 +33,7 @@ sealed abstract class Value extends ValueLike {
     override def baseObjects: Traversable[ObjectValue] = Traversable()
 
     override def without(filter: ValueLike => Boolean): ValueLike = if (filter(this)) NeverValue else this
+    override def remove(heap: HeapMemory, filter: (ValueLike) => Boolean): ValueLike = without(filter)
 
     override def throwsWhenWrittenOrReadOn: Boolean = false
 
@@ -110,10 +112,22 @@ object NullValue extends Value {
 }
 
 sealed abstract class BoolValue extends Value {
-    override def truthy(heap: HeapMemory): ValueLike = SpecificBoolValue(true)
-    override def falsy(heap: HeapMemory): ValueLike = SpecificBoolValue(false)
+    override def without(filter: ValueLike => Boolean): ValueLike = {
+        val trueValue = !filter(TrueValue)
+        val falseValue = !filter(TrueValue)
+        return BoolValue(BoolLattice(trueValue).unify(BoolLattice(falseValue)))
+    }
+
+    override def truthy(heap: HeapMemory): ValueLike = TrueValue
+    override def falsy(heap: HeapMemory): ValueLike = FalseValue
 }
 object BoolValue extends BoolValue {
+    def apply(value: BoolLattice): BoolValue = value match {
+        case BoolLattice.Top => BoolValue
+        case BoolLattice.False => FalseValue
+        case BoolLattice.True => TrueValue
+    }
+
     override def asBool: BoolLattice = BoolLattice.Top
 
     override def toString: String = "boolean"
@@ -178,7 +192,7 @@ case class SpecificStringValue(value: String) extends StringValue {
     override def toString: String = "\"" + value + "\""
 }
 
-sealed class ObjectValue(val internalId: Long = ObjectValue.nextObjId()) extends Value {
+sealed case class ObjectValue(internalId: Long = ObjectValue.nextObjId()) extends Value {
     override def asObject: Option[ObjectValue] = Some(this)
     override def propertyWriteMaybeNoOp: Boolean = false
 
@@ -208,7 +222,7 @@ object FunctionValue {
 
 final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends ObjectValue(id) {
 
-    assert(values.size >= 2)
+    //assert(values.size >= 2)
     assert(values.forall(v => !v.isInstanceOf[UnionValue]))
 
     override lazy val asBool: BoolLattice = asBoolImpl()
@@ -224,6 +238,7 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
         return result
     }
 
+    override def asValue: Value = values match { case Seq(value) => value.asValue; case _ => this}
     override def asObject: Option[ObjectValue] = Some(this)
     override def baseObjects: Traversable[ObjectValue] = values.flatMap(_.asObject)
     override def propertyWriteMaybeNoOp: Boolean = values.exists(_.propertyWriteMaybeNoOp)
@@ -232,36 +247,44 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
 
     override def without(filter: ValueLike => Boolean): ValueLike = {
         val newSeq = values.filter(!filter(_))
-        return if (newSeq.length == values.length) this else UnionValue.unionFromSeq(internalId, newSeq)
+        return if (newSeq.length == values.length) this else UnionValue.unionFromSeq(Some(internalId), newSeq)
     }
 
-    override def truthy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(internalId, values.map(_.truthy(heap)))
-    override def falsy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(internalId, values.map(_.falsy(heap)))
+    override def remove(heap: HeapMemory, filter: ValueLike => Boolean): ValueLike = {
+        if (values.length == 1) {
+            return UnionValue.makeUnion(Some(internalId), values.map(_.remove(heap, filter)))
+        } else {
+            return UnionValue.makeUnion(Some(internalId), values.map(_.without(filter)))
+        }
+    }
+
+    override def truthy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(Some(internalId), values.map(_.truthy(heap)))
+    override def falsy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(Some(internalId), values.map(_.falsy(heap)))
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
 }
 
 object UnionValue {
-    private def unionFromSeq(id: Long, values: Seq[ValueLike]): ValueLike = {
+    private def unionFromSeq(id: Option[Long], values: Seq[ValueLike]): ValueLike = {
         return values match {
             case Seq() => NeverValue
-            case Seq(value) => value
-            case _ => new UnionValue(id, values)
+            case Seq(value) => id.map(new UnionValue(_, values)).getOrElse(value)
+            case _ => new UnionValue(id.getOrElse(ObjectValue.nextObjId()), values)
         }
     }
 
     def apply(values: ValueLike*): ValueLike = {
         return values match {
             case Seq(value) => value
-            case Seq(u1:UnionValue, u2:UnionValue) if u1.internalId == u2.internalId => makeUnion(u1.internalId, values)
-            case all => makeUnion(ObjectValue.nextObjId(), all)
+            case Seq(u1:UnionValue, u2:UnionValue) if u1.internalId == u2.internalId => makeUnion(Some(u1.internalId), values)
+            case all => makeUnion(None, all)
         }
     }
 
 
-    private def makeUnion(id: Long, values: Seq[ValueLike]): ValueLike = {
+    private def makeUnion(id: Option[Long], values: Seq[ValueLike]): ValueLike = {
         values match {
-            case Seq(value) => return value
+            case Seq(value) => id.map(new UnionValue(_, values)).getOrElse(value)
             case _ =>
         }
         var boolValue: BoolValue = null
@@ -345,24 +368,42 @@ sealed abstract class ConditionalValue extends ValueLike {
     override def asObject: Option[ObjectValue] = asValue.asObject
     override def baseObjects: Traversable[ObjectValue] = asValue.baseObjects
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
-    override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
-
     override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
+    override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
 }
 
-final case class Reference(value: ValueLike, baseObject: ValueLike, property: String) extends ConditionalValue {
-    override val asValue: Value = value.asValue
+final case class Reference(resolved: ValueLike, baseObject: ValueLike, property: String) extends ConditionalValue {
+    override val asValue: Value = resolved.asValue
 
     def asReference: Option[Reference] = Some(this)
 
-    override def truthy(heap: HeapMemory): ValueLike = {
-        heap.manipulateReference(baseObject, _.without(heap.readProperty(_, property).asBool == BoolLattice.False))
-        return value.truthy(heap)
-    }
-    override def falsy(heap: HeapMemory): ValueLike = {
-        heap.manipulateReference(baseObject, _.without(heap.readProperty(_, property).asBool == BoolLattice.True))
-        return value.falsy(heap)
+    override def remove(heap: HeapMemory, filter: ValueLike => Boolean): Reference = {
+        val newValue = resolved.remove(heap, filter)
+        heap.manipulateReference(this, newValue)
+        return withResolved(newValue)
     }
 
-    override def toString: String = s"$value{$baseObject.$property}"
+    override def truthy(heap: HeapMemory): ValueLike = {
+        val newBaseObj = baseObject.remove(heap, heap.readProperty(_, property, cache = false).asBool == BoolLattice.False)
+        heap.manipulateIfReference(baseObject, newBaseObj)
+
+        val newResolved = resolved.truthy(heap)
+        heap.manipulateReference(Reference(resolved, newBaseObj, property), newResolved)
+
+        return Reference(newResolved, newBaseObj, property)
+    }
+
+    override def falsy(heap: HeapMemory): ValueLike = {
+        val newBaseObj = baseObject.remove(heap, heap.readProperty(_, property, cache = false).asBool == BoolLattice.True)
+        heap.manipulateIfReference(baseObject, newBaseObj)
+
+        val newResolved = resolved.falsy(heap)
+        heap.manipulateReference(Reference(resolved, newBaseObj, property), newResolved)
+
+        return Reference(newResolved, newBaseObj, property)
+    }
+
+    private def withResolved(value: ValueLike) = Reference(value, baseObject, property)
+
+    override def toString: String = s"$resolved{$baseObject.$property}"
 }

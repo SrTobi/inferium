@@ -113,7 +113,8 @@ object Nodes {
         override def onControlFlow(heap: HeapMemory): Unit = {
             val targetValue = target.get()
             if (!targetValue.throwsWhenWrittenOrReadOn) {
-                val value = heap.readProperty(targetValue, propertyName)
+                val realTargets = heap.filterUnwritables(targetValue)
+                val value = heap.readProperty(realTargets, propertyName)
                 _result.set(Reference(value, targetValue, propertyName))
                 controlFlowTo(next, heap)
             } else {
@@ -134,7 +135,8 @@ object Nodes {
             val targetValue = target.get()
             if (!targetValue.throwsWhenWrittenOrReadOn) {
                 val valueHandle = value.get()
-                heap.writeProperty(targetValue, propertyName, valueHandle)
+                val realTargets = heap.filterUnwritables(targetValue)
+                heap.writeProperty(realTargets, propertyName, valueHandle)
                 controlFlowTo(next, heap)
             } else {
                 // program stops
@@ -210,12 +212,12 @@ object Nodes {
         }
 
         private def truthyfy(cond: ValueLike, heap: HeapMemory): HeapMemory = {
-            heap.manipulateReference(cond, _.truthy(heap))
+            cond.truthy(heap)
             heap
         }
 
         private def falsyfy(cond: ValueLike, heap: HeapMemory): HeapMemory = {
-            heap.manipulateReference(cond, _.falsy(heap))
+            cond.falsy(heap)
             heap
         }
 
@@ -233,8 +235,7 @@ object Nodes {
         def result: ValueSourceProvider = _result
 
         override def onControlFlow(heap: HeapMemory): Unit = {
-            val funcVal = target.get()
-            heap.manipulateReference(funcVal, _.without(!_.asValue.isInstanceOf[FunctionValue]))
+            val funcVal = target.get().remove(heap, !_.asValue.isInstanceOf[FunctionValue])
             val functions = funcVal.asFunctions
 
             val allReturns = mutable.Buffer.empty[ValueSource]

@@ -6,10 +6,12 @@ package com.github.srtobi.inferium.prototype.flow
 abstract class HeapMemory {
     //def read(handle: HeapHandle): ValueLike
     //def write(handle: HeapHandle, value: ValueLike): Unit
-    def readProperty(target: ValueLike, propertyName: String): ValueLike
+    def readProperty(target: ValueLike, propertyName: String, cache: Boolean = true): ValueLike
     def writeProperty(target: ValueLike, propertyName: String, handle: ValueLike): Unit
 
-    def manipulateReference(ref: ValueLike, manipulate: (ValueLike) => ValueLike): ValueLike
+    def filterUnwritables(target: ValueLike): ValueLike
+    def manipulateReference(ref: Reference, value: ValueLike): Unit
+    def manipulateIfReference(ref: ValueLike, value: ValueLike): Unit
 
     def split(): HeapMemory
 }

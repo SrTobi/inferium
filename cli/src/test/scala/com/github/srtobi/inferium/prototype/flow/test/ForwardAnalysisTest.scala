@@ -418,7 +418,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
             """.stripMargin)) { case (None, res) => NeverValue shouldBe res}
     }
 
-    it should "filter uncabbable values" in {
+    it should "filter uncallable values" in {
         analyse(
             """
               |if (rand) {
@@ -629,7 +629,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |undefined.prop
             """.stripMargin)) { case (Some(_), res) => Value("true") shouldBe res}
 
-        /*inside(analyse(
+        inside(analyse(
             """
               |var a = { cond: true, prop: "true" }
               |var b = { cond: false, prop: "false" }
@@ -643,6 +643,6 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x.prop = "haha"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}*/
+            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}
     }
 }
