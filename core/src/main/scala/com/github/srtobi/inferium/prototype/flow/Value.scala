@@ -6,6 +6,7 @@ import scala.collection.mutable
 
 abstract class ValueLike {
     def asValue: Value
+    def normalized: Value
     def asBool: BoolLattice
     def asFunctions: Traversable[FunctionValue]
     def asObject: Option[ObjectValue]
@@ -26,6 +27,7 @@ abstract class ValueLike {
 sealed abstract class Value extends ValueLike {
 
     override def asValue: Value = this
+    override def normalized: Value = asValue
     override def asBool: BoolLattice = BoolLattice.True
     override def asFunctions: Traversable[FunctionValue] = Seq.empty
     override def asObject: Option[ObjectValue] = None
@@ -238,8 +240,8 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
         return result
     }
 
-    override def asValue: Value = values match { case Seq(value) => value.asValue; case _ => this}
     override def asObject: Option[ObjectValue] = Some(this)
+    override def normalized: Value = values match { case Seq(value) => value.normalized; case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized)).asValue}
     override def baseObjects: Traversable[ObjectValue] = values.flatMap(_.asObject)
     override def propertyWriteMaybeNoOp: Boolean = values.exists(_.propertyWriteMaybeNoOp)
     override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
@@ -291,7 +293,7 @@ object UnionValue {
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
         val objectValues = mutable.Set.empty[ValueLike]
-        val conditionalValues = mutable.Set.empty[ConditionalValue]
+        val conditionalValues = mutable.Map.empty[ConditionalValue, ConditionalValue]
         var hasUndefined = false
         var hasNull = false
 
@@ -318,8 +320,12 @@ object UnionValue {
             case obj: ObjectValue =>
                 objectValues.add(obj)
             case NeverValue =>
-            case value: ConditionalValue =>
-                conditionalValues.add(value)
+            case ref: Reference =>
+                val old = conditionalValues.getOrElseUpdate(ref, ref)
+                if (ref ne old) {
+                    conditionalValues.update(ref, ref.merge(old))
+                }
+
         }
 
         return unionFromSeq(id,
@@ -329,7 +335,7 @@ object UnionValue {
             Option(numberValue).toSeq ++
             Option(stringValues).getOrElse(Seq(StringValue)) ++
             objectValues ++
-            conditionalValues)
+            conditionalValues.map{case (_, ref) => ref})
     }
 
     def withUndefined(value: ValueLike): ValueLike = value match {
@@ -363,6 +369,7 @@ case class UnionSet(values: Any*) {
 }
 
 sealed abstract class ConditionalValue extends ValueLike {
+    override def normalized: Value = asValue.normalized
     override def asBool: BoolLattice = asValue.asBool
     override def asFunctions: Traversable[FunctionValue] = asValue.asFunctions
     override def asObject: Option[ObjectValue] = asValue.asObject
@@ -370,6 +377,8 @@ sealed abstract class ConditionalValue extends ValueLike {
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
     override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
     override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
+
+    def merge(other: ConditionalValue): ConditionalValue
 }
 
 final case class Reference(resolved: ValueLike, baseObject: ValueLike, property: String) extends ConditionalValue {
@@ -406,4 +415,9 @@ final case class Reference(resolved: ValueLike, baseObject: ValueLike, property:
     private def withResolved(value: ValueLike) = Reference(value, baseObject, property)
 
     override def toString: String = s"$resolved{$baseObject.$property}"
+
+    override def merge(otherRaw: ConditionalValue): ConditionalValue = {
+        val other = otherRaw.asInstanceOf[Reference]
+        return Reference(UnionValue(resolved, other.resolved), UnionValue(baseObject, other.baseObject), property)
+    }
 }

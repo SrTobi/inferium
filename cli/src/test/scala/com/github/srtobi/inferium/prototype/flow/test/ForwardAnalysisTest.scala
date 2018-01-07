@@ -16,7 +16,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
                 val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
                 analysis.analyse()
-                return (analysis.lastHeap, analysis.scriptReturn.asValue)
+                return (analysis.lastHeap, analysis.scriptReturn.normalized)
         }
     }
 
@@ -644,5 +644,56 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |return x.prop
             """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |
+              |if (x.cond) {
+              |} else {
+              |  x.prop = "haha"
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet("true", "haha") shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |var cond = x.cond
+              |if (cond) {
+              |  x.prop = "haha"
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}
+
+
+        inside(analyse(
+            """
+              |var a = { cond: true, prop: "true" }
+              |var b = { cond: false, prop: "false" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |if (x.cond) {
+              |  b.prop = "haha"
+              |}
+              |return x.prop
+            """.stripMargin)) { case (Some(_), res) => UnionSet("true", "false", "haha") shouldBe res}
     }
 }

@@ -127,7 +127,7 @@ object IterationHeap {
         private class Unifier(iniMemory: Memory) {
             var memory: Memory = iniMemory.prev.get
             def index: Int = memory.idx
-            val objects: MemoryMap = iniMemory.objects.map { case (obj, value) => (obj, value.clone())}
+            var objects: MemoryMap = iniMemory.objects.map { case (obj, value) => (obj, value.clone())}
 
             def up(): Unit = {
                 assert(memory.prev.nonEmpty)
@@ -140,21 +140,44 @@ object IterationHeap {
             }
 
             def merge(other: Unifier): Unit = {
-                val objSet = objects.keySet ++ other.objects.keySet
+                val a = this
+                val b = other
+                val objSet = mergeObjectSets(a.objects.keySet, b.objects.keySet)
+                val result: MemoryMap = mutable.Map()
 
                 objSet.foreach {
-                    obj =>
-                        val aProps = objects.getOrElseUpdate(obj, mutable.Map())
-                        val bProps = other.objects.getOrElse(obj, mutable.Map())
-                        val props = aProps.keySet ++ bProps.keySet
+                    case (obj, aObj, bObj) =>
+                        val resultProps = result.getOrElseUpdate(obj, mutable.Map())
+                        val aProps = a.objects.getOrElse(obj, mutable.Map())
+                        val bProps = b.objects.getOrElse(obj, mutable.Map())
+                        val props = aProps.keySet | bProps.keySet
                         props.foreach {
                             prop =>
-                                lazy val default = memory.readProperty(obj, prop, cache = false)
-                                val aVal = aProps.get(prop).map(_._2).getOrElse(default)
-                                val bVal = bProps.get(prop).map(_._2).getOrElse(default)
-                                aProps.update(prop, (0, UnionValue(aVal, bVal)))
+                                lazy val aDefault = a.memory.readProperty(aObj, prop, cache = false)
+                                lazy val bDefault = b.memory.readProperty(bObj, prop, cache = false)
+                                val aVal = aProps.get(prop).map(_._2).getOrElse(aDefault)
+                                val bVal = bProps.get(prop).map(_._2).getOrElse(bDefault)
+                                resultProps += (prop -> (0, UnionValue(aVal, bVal)))
                         }
                 }
+                objects = result
+            }
+
+            private def mergeObjectSets(a: scala.collection.Set[ObjectValue], b: scala.collection.Set[ObjectValue]): scala.collection.Set[(ObjectValue, ObjectValue, ObjectValue)] = {
+                val resultSet = mutable.Buffer.empty[(ObjectValue, ObjectValue, ObjectValue)]
+                val bMap = b.map(k => k -> k).toMap
+
+                for (aObj <- a) {
+                    resultSet += (bMap.get(aObj) match {
+                        case Some(bObj) =>
+                            val merged = UnionValue(aObj, bObj).asInstanceOf[ObjectValue]
+                            (merged, aObj, bObj)
+                        case _ =>
+                            (aObj, aObj, aObj)
+                    })
+                }
+
+                return resultSet ++: (b -- a).map(bObj => (bObj, bObj, bObj))
             }
         }
 
