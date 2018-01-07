@@ -14,8 +14,8 @@ class IterationHeap extends Heap {
 
 object IterationHeap {
 
-    type MemoryMap = mutable.Map[Long, Properties]
-    type Properties = (ObjectValue, mutable.Map[String, (Int, ValueLike)])
+    type MemoryMap = mutable.Map[ObjectValue, Properties]
+    type Properties = mutable.Map[String, (Int, ValueLike)]
 
     class Memory(val idx: Int = 0, val prev: Option[Memory] = None, private val objects: MemoryMap = mutable.Map.empty) extends HeapMemory {
 
@@ -30,7 +30,7 @@ object IterationHeap {
         private def set(obj: ObjectValue, property: String, value: ValueLike, writeId: Int): Unit = {
             assert(!ended)
             val id = obj.internalId
-            val (storedObj, properties) = objects.getOrElseUpdate(id, (obj, mutable.Map.empty))
+            val properties = objects.getOrElseUpdate(obj, mutable.Map.empty)
             properties += (property -> (writeId, value))
             /*if (storedObj != obj) {
                 objects.update(id, (obj, properties))
@@ -38,7 +38,7 @@ object IterationHeap {
         }
 
         private[this] def getHere(obj: ObjectValue, property: String): Option[(Int, ValueLike)] = {
-            return objects.get(obj.internalId).flatMap(_._2.get(property))
+            return objects.get(obj).flatMap(_.get(property))
         }
 
         private def get(obj: ObjectValue, baseObjects: Set[ObjectValue], property: String, cache: Boolean): ValueLike = {
@@ -127,7 +127,7 @@ object IterationHeap {
         private class Unifier(iniMemory: Memory) {
             var memory: Memory = iniMemory.prev.get
             def index: Int = memory.idx
-            val objects: MemoryMap = iniMemory.objects.map { case (obj, (prop, value)) => (obj, (prop, value.clone()))}
+            val objects: MemoryMap = iniMemory.objects.map { case (obj, value) => (obj, value.clone())}
 
             def up(): Unit = {
                 assert(memory.prev.nonEmpty)
@@ -143,13 +143,13 @@ object IterationHeap {
                 val objSet = objects.keySet ++ other.objects.keySet
 
                 objSet.foreach {
-                    id =>
-                        val (bObj, bProps): Properties = other.objects.getOrElse(id, (null, mutable.Map()))
-                        val (aObj, aProps) = objects.getOrElseUpdate(id, (bObj, mutable.Map()))
+                    obj =>
+                        val aProps = objects.getOrElseUpdate(obj, mutable.Map())
+                        val bProps = other.objects.getOrElse(obj, mutable.Map())
                         val props = aProps.keySet ++ bProps.keySet
                         props.foreach {
                             prop =>
-                                lazy val default = memory.readProperty(aObj, prop, cache = false)
+                                lazy val default = memory.readProperty(obj, prop, cache = false)
                                 val aVal = aProps.get(prop).map(_._2).getOrElse(default)
                                 val bVal = bProps.get(prop).map(_._2).getOrElse(default)
                                 aProps.update(prop, (0, UnionValue(aVal, bVal)))
