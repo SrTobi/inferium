@@ -7,14 +7,16 @@ import fastparse.core.Parsed
 import scala.collection.mutable
 
 
-class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override val solver: Solver, val heap: Heap, global: IniObject) extends FlowAnalysis {
+class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override val solver: Solver, val heapImpl: Heap, global: IniObject) extends FlowAnalysis {
 
     import Nodes.Node
 
     private var _scriptReturnValue: Value = _
-    private var globalHeapState = heap.newEmptyHeapState()
+    private var globalHeapState = heapImpl.newEmptyHeapState()
     private val globalObject = Heap.writeIniObjectToHeap(globalHeapState, global)
     private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
+    private val knownFunctions = mutable.Set.empty[FunctionValue]
+    private val knownObjects = mutable.Set.empty[ObjectValue]
 
 
     override def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit = {
@@ -57,6 +59,46 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         return changed
     }
 
+    private def garbageCollect(heap: HeapMemory, returnValue: ValueLike): HeapMemory = {
+        val result = heapImpl.newEmptyHeapState()
+        val objects = mutable.Set.empty[ObjectValue]
+        val queue = mutable.Queue.empty[ObjectValue]
+
+        def add(value: Value): Unit = value match {
+            case union: UnionValue => union.baseObjects.foreach(queue.enqueue(_))
+            case obj: ObjectValue =>
+                obj match {
+                    case func: FunctionValue =>
+                        knownFunctions += func
+                        func.closures.map(_.asValue).foreach(add)
+                    case _ =>
+                }
+                knownObjects += obj
+                queue.enqueue(obj)
+            case _ =>
+        }
+
+        queue += globalObject
+        queue ++= knownObjects
+        add(returnValue.normalized)
+
+        while (queue.nonEmpty) {
+            val obj = queue.dequeue()
+
+            if (!objects.contains(obj)) {
+                objects += obj
+                for (prop <- heap.listProperties(obj).iterator) {
+                    val value = heap.readProperty(obj, prop, cache = false).normalized
+                    result.writeProperty(obj, prop, value)
+
+                    add(value)
+                }
+            }
+        }
+
+        return result
+    }
+
     private def analyseInitialScriptExecution(): Unit = {
         // analyse initial code
         assert(nodesToPropagate.isEmpty)
@@ -82,9 +124,11 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         // analyse
         analyseFlow()
 
-        globalHeapState = resultingHeap.getOrElse(globalHeapState)
         _scriptReturnValue = UnionValue(returns.map(_.newSource().get()): _*).normalized
+
+        globalHeapState = resultingHeap.map(garbageCollect(_, _scriptReturnValue)).getOrElse(globalHeapState)
     }
+
 
     def globalHeap: HeapMemory = globalHeapState
     def scriptReturnValue: ValueLike = _scriptReturnValue
@@ -94,7 +138,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         analyseInitialScriptExecution()
     }
 
-    override def unify(heaps: HeapMemory*): HeapMemory = heap.unify(heaps: _*)
+    override def unify(heaps: HeapMemory*): HeapMemory = heapImpl.unify(heaps: _*)
 }
 
 object ForwardFlowAnalysis {
