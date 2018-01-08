@@ -99,8 +99,8 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
 object ForwardFlowAnalysis {
 
-    def create(script: Ast.Script, solver: Solver, heap: Heap, global: IniObject): ForwardFlowAnalysis = {
+    def create(script: Ast.Script, solver: Solver, heapImpl: Heap, global: IniObject): ForwardFlowAnalysis = {
         val scriptTemplate = TemplateBuilder.buildScriptTemplate(script)
-        return new ForwardFlowAnalysis(scriptTemplate, solver, heap, global)
+        return new ForwardFlowAnalysis(scriptTemplate, solver, heapImpl, global)
     }
 }
