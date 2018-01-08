@@ -8,7 +8,7 @@ abstract class ValueLike {
     def asValue: Value
     def normalized: Value
     def asBool: BoolLattice
-    def asFunctions: Seq[FunctionValue]
+    def asFunctions: Seq[FunctionLike]
     def asObject: Option[ObjectValue]
     def baseObjects: Seq[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
@@ -29,7 +29,7 @@ sealed abstract class Value extends ValueLike {
     override def asValue: Value = this
     override def normalized: Value = asValue
     override def asBool: BoolLattice = BoolLattice.True
-    override def asFunctions: Seq[FunctionValue] = Seq.empty
+    override def asFunctions: Seq[FunctionLike] = Seq.empty
     override def asObject: Option[ObjectValue] = None
     override def propertyWriteMaybeNoOp: Boolean = true
     override def baseObjects: Seq[ObjectValue] = Seq()
@@ -201,6 +201,9 @@ sealed case class ObjectValue(internalId: Long = ObjectValue.nextObjId()) extend
     override def truthy(heap: HeapMemory): ValueLike = this
     override def falsy(heap: HeapMemory): ValueLike = NeverValue
 
+    def defaultPropertyValue(property: String): ValueLike = UndefinedValue
+    def onWriteProperty(property: String, value: ValueLike): Unit = ()
+
     override def toString: String = s"obj#$internalId"
 }
 
@@ -212,8 +215,46 @@ object ObjectValue {
     }
 }
 
-final class FunctionValue(val template: Templates.Function, val closures: Seq[ValueLike]) extends ObjectValue() {
-    override def asFunctions: Seq[FunctionValue] = Seq(this)
+abstract class FunctionLike extends ObjectValue() {
+    override def asFunctions: Seq[FunctionLike] = Seq(this)
+}
+
+final class UserValueFunctionInfo {
+    private var _parameter: Seq[ValueLike] = Seq()
+    def parameter: Seq[ValueLike] = _parameter
+    val returnValue: UserValue = new UserValue
+
+    def onCall(arguments: Seq[ValueLike]): UserValue = {
+        _parameter = _parameter.zipAll(arguments, UndefinedValue, UndefinedValue).map {
+            case (a, b) => UnionValue(a, b)
+        }
+        return returnValue
+    }
+}
+
+final class UserValue extends FunctionLike {
+
+    private val propertyDefaults = mutable.Map.empty[String, UserValue]
+    private var _functionInfoOption: Option[UserValueFunctionInfo] = None
+    private lazy val _functionInfo: UserValueFunctionInfo = {
+        val info = new UserValueFunctionInfo
+        _functionInfoOption = Some(info)
+        info
+    }
+
+    def functionInfo: Option[UserValueFunctionInfo] = _functionInfoOption
+    def properties: collection.Map[String, UserValue] = propertyDefaults
+
+    def onCall(arguments: Seq[ValueLike]): UserValue = _functionInfo.onCall(arguments)
+
+    override def asBool: BoolLattice = BoolLattice.Top
+    override def propertyWriteMaybeNoOp: Boolean = false
+
+    override def defaultPropertyValue(property: String): ValueLike = propertyDefaults.getOrElseUpdate(property, new UserValue)
+    override def onWriteProperty(property: String, value: ValueLike): Unit = ()
+}
+
+final class FunctionValue(val template: Templates.Function, val closures: Seq[ValueLike]) extends FunctionLike {
 
     override def toString: String = s"func#$internalId"
 }
@@ -244,8 +285,11 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
     override def normalized: Value = values match { case Seq(value) => value.normalized; case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized)).asValue}
     override def baseObjects: Seq[ObjectValue] = values.flatMap(_.asObject)
     override def propertyWriteMaybeNoOp: Boolean = values.exists(_.propertyWriteMaybeNoOp)
-    override def asFunctions: Seq[FunctionValue] = values.flatMap(_.asFunctions)
+    override def asFunctions: Seq[FunctionLike] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
+
+    override def defaultPropertyValue(property: String): ValueLike = UnionValue(baseObjects.map(_.defaultPropertyValue(property)): _*)
+    override def onWriteProperty(property: String, value: ValueLike): Unit = baseObjects.foreach(_.onWriteProperty(property, value))
 
     override def without(filter: ValueLike => Boolean): ValueLike = {
         val newSeq = values.filter(!filter(_))
@@ -361,7 +405,7 @@ object UnionValue {
 sealed abstract class ConditionalValue extends ValueLike {
     override def normalized: Value = asValue.normalized
     override def asBool: BoolLattice = asValue.asBool
-    override def asFunctions: Seq[FunctionValue] = asValue.asFunctions
+    override def asFunctions: Seq[FunctionLike] = asValue.asFunctions
     override def asObject: Option[ObjectValue] = asValue.asObject
     override def baseObjects: Seq[ObjectValue] = asValue.baseObjects
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp

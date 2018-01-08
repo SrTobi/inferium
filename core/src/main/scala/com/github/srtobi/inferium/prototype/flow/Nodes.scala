@@ -24,10 +24,22 @@ class ValueSink extends ValueSourceProvider {
         }
     }
 }
+
+object ValueSink {
+    def wrap(value: ValueLike): ValueSourceProvider = {
+        val sink = new ValueSink
+        sink.set(value)
+        return sink
+    }
+}
+
 abstract class ValueSource {
     def get(): ValueLike
 }
 
+object ValueSource {
+    def wrap(value: ValueLike): ValueSource = ValueSink.wrap(value).newSource()
+}
 
 
 object Nodes {
@@ -231,27 +243,36 @@ object Nodes {
     }
 
     class FunctionCall(val target: ValueSource, val arguments: Seq[ValueSourceProvider])(implicit flowAnalysis: FlowAnalysis) extends Node {
+        private type CallContext = (Nodes.Node, Seq[ValueSourceProvider])
+        private val calls = mutable.Map.empty[FunctionValue, CallContext]
         private val _result = new ValueSink
+        private val allReturns = mutable.Buffer.empty[ValueSource]
         def result: ValueSourceProvider = _result
 
+        val mergeNode = new MergeNode(0, new Node() {
+            override def onControlFlow(heap: HeapMemory): Unit = {
+                _result.set(UnionValue(allReturns.map(_.get()): _*))
+                controlFlowTo(FunctionCall.this.next, heap)
+            }
+
+            override def onNoControlFlow(): Unit = noControlFlowTo(FunctionCall.this.next)
+        })
+
         override def onControlFlow(heap: HeapMemory): Unit = {
-            val funcVal = target.get().remove(heap, !_.asValue.isInstanceOf[FunctionValue])
+            val funcVal = target.get().remove(heap, !_.asValue.isInstanceOf[FunctionLike])
             val functions = funcVal.asFunctions
 
-            val allReturns = mutable.Buffer.empty[ValueSource]
-            val mergeNode = new MergeNode(0, new Node() {
-                override def onControlFlow(heap: HeapMemory): Unit = {
-                    _result.set(UnionValue(allReturns.map(_.get()): _*))
-                    controlFlowTo(FunctionCall.this.next, heap)
-                }
+            allReturns.clear()
+            lazy val argumentValues = arguments.map(_.newSource().get())
 
-                override def onNoControlFlow(): Unit = noControlFlowTo(FunctionCall.this.next)
-            })
-
-            val begins = for (FunctionValue(template, closures) <- functions) yield {
-                val (begin, returns) = template.instantiate(closures, arguments, mergeNode)
-                allReturns ++= returns.map(_.newSource())
-                begin
+            val begins = functions.map {
+                case uv: UserValue =>
+                    allReturns += ValueSource.wrap(uv.onCall(argumentValues))
+                    mergeNode
+                case func@FunctionValue(template, closures) =>
+                    val (begin, returns) = calls.getOrElseUpdate(func, template.instantiate(closures, arguments, mergeNode))
+                    allReturns ++= returns.map(_.newSource())
+                    begin
             }
 
             mergeNode.setNumBranchesToWaitFor(allReturns.length)

@@ -32,6 +32,7 @@ object IterationHeap {
             assert(!ended)
             val id = obj.internalId
             val properties = objects.getOrElseUpdate(obj, mutable.Map.empty)
+            obj.onWriteProperty(property, value)
             properties += (property -> (writeId, value))
             /*if (storedObj != obj) {
                 objects.update(id, (obj, properties))
@@ -66,7 +67,7 @@ object IterationHeap {
                     val result = if (restBaseObjects.isEmpty && baseObjects.nonEmpty) {
                         UnionValue(valuesFromBase: _*)
                     } else {
-                        val recResult = prev.map(_.get(obj, restBaseObjects, property, cache = false)).getOrElse(UndefinedValue)
+                        val recResult = prev.map(_.get(obj, restBaseObjects, property, cache = false)).getOrElse(obj.defaultPropertyValue(property))
                         UnionValue(recResult +: valuesFromBase: _*)
                     }
                     if (cache)
