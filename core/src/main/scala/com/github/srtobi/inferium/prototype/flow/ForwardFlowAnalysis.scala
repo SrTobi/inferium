@@ -1,6 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.ForwardFlowAnalysis.IniObject
+import com.github.srtobi.inferium.prototype.flow.Heap.IniObject
 import com.github.srtobi.inferium.prototype.{Ast, LangParser}
 import fastparse.core.Parsed
 
@@ -12,24 +12,22 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     import Nodes.Node
 
     private val endNode = new Node()(this) {
-        override def onControlFlow(heap: HeapMemory): Unit = {
-            lastMemory = heap
+        override def onControlFlow(newHeap: HeapMemory): Unit = {
+            globalHeapState = heap.unify(globalHeapState.split(), newHeap.split())
             assert(nodesToPropagate.isEmpty)
         }
         override def onNoControlFlow(): Unit = {
-            lastMemory = null
             assert(nodesToPropagate.isEmpty)
         }
     }
-    private val startHeapState = heap.newEmptyHeapState()
-    private var lastMemory: HeapMemory = startHeapState
-    private val globalObject = ForwardFlowAnalysis.writeIniObjectToHeap(startHeapState, global)
+    private var globalHeapState = heap.newEmptyHeapState()
+    private val globalObject = Heap.writeIniObjectToHeap(globalHeapState, global)
     private val mergeNode = new Nodes.MergeNode(0, endNode)(this)
     private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
     private val (beginNode, returns) = scriptTemplate.instantiate(this, globalObject, mergeNode)
 
     mergeNode.setNumBranchesToWaitFor(returns.length)
-    controlFlowTo(beginNode, startHeapState)
+    controlFlowTo(beginNode, globalHeapState)
 
 
     override def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit = {
@@ -72,7 +70,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         return changed
     }
 
-    def lastHeap: Option[HeapMemory] = Option(lastMemory)
+    def globalHeap: HeapMemory = globalHeapState
     def scriptReturn: ValueLike = UnionValue(returns.map(_.newSource().get()): _*)
 
     def analyse(): Unit = {
@@ -85,33 +83,6 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 }
 
 object ForwardFlowAnalysis {
-    class IniObject(val members: scala.collection.Map[String, PropertyValue])
-
-    object IniObject {
-        private def toPropertyValue(any: Any): PropertyValue = any match {
-            case obj: IniObject => Left(obj)
-            case anything => Right(Value(anything))
-        }
-        def apply(valueMembers: (String, Any)*): IniObject = new IniObject(Map(valueMembers.map { case (prop, value) => (prop, toPropertyValue(value))}: _*))
-    }
-
-    type PropertyValue = Either[IniObject, ValueLike]
-
-    private def writeIniObjectToHeap(heap: HeapMemory, obj: IniObject, objMap: mutable.Map[IniObject, ObjectValue] = mutable.Map.empty[IniObject, ObjectValue]): ObjectValue = {
-        return objMap.getOrElse(obj, {
-            val objValue = new ObjectValue
-            objMap += (obj -> objValue)
-            obj.members foreach {
-                case (prop, member) =>
-                    val value = member match {
-                        case Left(objMember) => writeIniObjectToHeap(heap, objMember, objMap)
-                        case Right(valueMember) => valueMember
-                    }
-                    heap.writeProperty(objValue, prop, value)
-            }
-            objValue
-        })
-    }
 
     def create(script: Ast.Script, solver: Solver, heap: Heap, global: IniObject): ForwardFlowAnalysis = {
         val scriptTemplate = TemplateBuilder.buildScriptTemplate(script)

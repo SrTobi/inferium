@@ -1,14 +1,15 @@
 package com.github.srtobi.inferium.prototype.flow.test
 
 import com.github.srtobi.inferium.prototype.LangParser
-import com.github.srtobi.inferium.prototype.flow.ForwardFlowAnalysis.IniObject
+import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniObject}
 import com.github.srtobi.inferium.prototype.flow._
 import fastparse.core.Parsed
 import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
+    import Heap.{IniEntity => E}
 
-    private def analyse(code: String): (Option[HeapMemory], Value) = {
+    private def analyse(code: String): (HeapMemory, IniEntity) = {
         inside (LangParser.script.parse(code)) {
             case Parsed.Success(script, _) =>
 
@@ -16,51 +17,55 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
                 val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
                 analysis.analyse()
-                return (analysis.lastHeap, analysis.scriptReturn.normalized)
+                val heap = analysis.globalHeap
+                val scriptValue = analysis.scriptReturn
+                val (_, result) = heap.toIniEntity(Seq(scriptValue)).head
+
+                return (heap, result)
         }
     }
 
     "ForwardAnalysis" should "handle basic return types" in {
-        analyse(
+        inside(analyse(
             """
               |return true
-            """.stripMargin) should matchPattern { case (Some(_), SpecificBoolValue(true)) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(TrueValue)}
 
-        analyse(
+        inside(analyse(
             """
               |return
-            """.stripMargin) should matchPattern { case (Some(_), UndefinedValue) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue)}
 
 
-        analyse(
+            inside(analyse(
             """
               |return 10 - 5
-            """.stripMargin) should matchPattern { case (Some(_), SpecificNumberValue(5)) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(5)}
 
-        analyse(
+            inside(analyse(
             """
               |return (1).xxx
-            """.stripMargin) should matchPattern { case (Some(_), UndefinedValue) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue)}
     }
 
     it should "unify return values" in {
-        analyse(
+        inside(analyse(
             """
               |if (rand) {
               |  return undefined
               |} else {
               |  return 5
               |}
-            """.stripMargin) should matchPattern { case (Some(_), UnionValue(Seq(UndefinedValue, SpecificNumberValue(5)))) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue, 5) }
 
-        analyse(
+        inside(analyse(
             """
               |if (rand) {
               |  return 6
               |} else {
               |  return 5
               |}
-            """.stripMargin) should matchPattern { case (Some(_), NumberValue) => }
+            """.stripMargin)) { case (_, res) => res shouldBe E(NumberValue) }
     }
 
 
@@ -74,7 +79,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x = "b"
               |}
               |return x
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b")}
 
         inside(analyse(
             """
@@ -83,7 +88,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x = "a"
               |}
               |return x
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b")}
 
 
         inside(analyse(
@@ -92,10 +97,10 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |if (rand) {
               |  x = "a"
               |} else {
-              |
+              |  x = "c"
               |}
               |return x
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "c")}
     }
 
     it should "unify objects and keep correct track of properties" in {
@@ -110,7 +115,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x = b
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b")}
 
 
         inside(analyse(
@@ -124,7 +129,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x.prop = "c"
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => Value("c") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("c")}
 
         inside(analyse(
             """
@@ -138,7 +143,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |x.prop = "c"
               |a.prop = "d"
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("c", "d") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("c", "d")}
 
         inside(analyse(
             """
@@ -151,7 +156,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x.prop = "c"
               |return a.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "c") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "c")}
 
 
         inside(analyse(
@@ -165,7 +170,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x.prop = "c"
               |return b.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("b", "c") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("b", "c")}
 
         inside(analyse(
             """
@@ -181,7 +186,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  y.prop = "c"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b", "c") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b", "c")}
 
         inside(analyse(
             """
@@ -193,7 +198,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x.prop = "c"
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("c", UndefinedValue) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("c", UndefinedValue)}
 
 
         inside(analyse(
@@ -207,7 +212,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |x.prop = "c"
               |a.prop = "d"
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("d", UndefinedValue) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("d", UndefinedValue)}
     }
 
     it should "filter Values which can not be property accessed" in {
@@ -219,7 +224,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x = undefined
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a")}
 
         inside(analyse(
             """
@@ -228,7 +233,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x = 1
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet(UndefinedValue, "a") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue, "a")}
 
         inside(analyse(
             """
@@ -238,7 +243,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  y = undefined
               |}
               |return y.prop
-            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a")}
 
         inside(analyse(
             """
@@ -248,7 +253,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  y = undefined
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a")}
     }
 
     it should "handle calls to pure functions correctly" in {
@@ -259,7 +264,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return 8
               |}
               |return f()
-            """.stripMargin)) { case (Some(_), res) => Value(8) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(8)}
 
         inside(analyse(
             """
@@ -267,7 +272,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return a
               |}
               |return f(9)
-            """.stripMargin)) { case (Some(_), res) => Value(9) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(9)}
 
 
         inside(analyse(
@@ -276,7 +281,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return a - b
               |}
               |return f(11, 10)
-            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(1)}
 
 
         inside(analyse(
@@ -285,7 +290,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return a - b
               |}
               |return f(11, 10)
-            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(1)}
     }
 
     it should "handle unmatching parameter numbers correctly" in {
@@ -296,7 +301,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return b
               |}
               |return f(11)
-            """.stripMargin)) { case (Some(_), res) => UndefinedValue shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue)}
 
 
         inside(analyse(
@@ -305,7 +310,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return a - b
               |}
               |return f(11, 10, "blub")
-            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(1)}
     }
 
     it should "handle accesses to other scopes correctly" in {
@@ -317,7 +322,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return x
               |}
               |return f()
-            """.stripMargin)) { case (Some(_), res) => Value(0) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(0)}
 
 
         inside(analyse(
@@ -328,7 +333,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x = 5
               |return f()
-            """.stripMargin)) { case (Some(_), res) => Value(5) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(5)}
 
 
         inside(analyse(
@@ -339,7 +344,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |x = 9
               |return f(x)
-            """.stripMargin)) { case (Some(_), res) => Value(0) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(0)}
 
 
         inside(analyse(
@@ -350,7 +355,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return 12
               |}
               |return f() - x
-            """.stripMargin)) { case (Some(_), res) => Value(7) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(7)}
     }
 
     it should "handle merged functions correctly" in {
@@ -368,7 +373,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  }
               |}
               |return f()
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b")}
     }
 
     it should "handle context correctly" in {
@@ -388,7 +393,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |a("a")
               |b("b")
               |return a("c")
-            """.stripMargin)) { case (Some(_), res) => Value("a") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a")}
 
         inside(analyse(
             """
@@ -406,7 +411,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  a("b")
               |}
               |return a("c")
-            """.stripMargin)) { case (Some(_), res) => UnionSet("a", "b") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("a", "b")}
     }
 
     it should "not call uncallable values" in {
@@ -415,11 +420,11 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
             """
               |var a = 1
               |return a()
-            """.stripMargin)) { case (None, res) => NeverValue shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(NeverValue)}
     }
 
     it should "filter uncallable values" in {
-        analyse(
+        inside(analyse(
             """
               |if (rand) {
               |  var f = () => {}
@@ -428,7 +433,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |f()
               |return f
-            """.stripMargin) should matchPattern { case (Some(_), _: FunctionValue) =>}
+            """.stripMargin)) { case (_, res) => res shouldBe IniObject()}
     }
 
     it should "filter depended references" in {
@@ -443,7 +448,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |var b = a
               |b.prop
               |return b
-            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(1)}
 
         inside(analyse(
             """
@@ -455,7 +460,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |var b = a
               |b.prop
               |return a
-            """.stripMargin)) { case (Some(_), res) => Value(1) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(1)}
 
         inside(analyse(
             """
@@ -468,7 +473,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |a = "inbetween"
               |b.prop
               |return a
-            """.stripMargin)) { case (Some(_), res) => Value("inbetween") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("inbetween")}
 
     }
 
@@ -485,7 +490,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               | return a
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => Value(50) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(50)}
 
 
         inside(analyse(
@@ -505,7 +510,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               | }
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet(50, "correct") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(50, "correct")}
 
 
         inside(analyse(
@@ -522,7 +527,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |} else {
               |  return "bla"
               |}
-            """.stripMargin)) { case (Some(_), res) => UnionSet(true, "bla") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(true, "bla")}
 
         inside(analyse(
             """
@@ -538,7 +543,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |} else {
               |  return o.a
               |}
-            """.stripMargin)) { case (Some(_), res) => UnionSet(false, "bla") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(false, "bla")}
 
         inside(analyse(
             """
@@ -557,7 +562,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               | }
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet(50, "correct") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(50, "correct")}
     }
 
     it should "filter objects according to their properties" in {
@@ -576,7 +581,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return x.cond
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => Value(true) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(true)}
 
 
         inside(analyse(
@@ -594,7 +599,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |} else {
               |  return x.cond
               |}
-            """.stripMargin)) { case (Some(_), res) => Value(false) shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E(false)}
 
 
         inside(analyse(
@@ -611,7 +616,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return x
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => assert(res.isInstanceOf[ObjectValue]); assert(!res.isInstanceOf[UnionValue])}
+            """.stripMargin)) { case (_, res) => res shouldBe IniObject("cond" -> true, "prop" -> "true") }
 
         inside(analyse(
             """
@@ -627,7 +632,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  return x.prop
               |}
               |undefined.prop
-            """.stripMargin)) { case (Some(_), res) => Value("true") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("true")}
 
         inside(analyse(
             """
@@ -643,7 +648,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x.prop = "haha"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("false", "haha")}
 
 
         inside(analyse(
@@ -661,7 +666,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x.prop = "haha"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("true", "haha") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("true", "haha")}
 
 
         inside(analyse(
@@ -678,7 +683,7 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  x.prop = "haha"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("false", "haha") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("false", "haha")}
 
 
         inside(analyse(
@@ -694,6 +699,6 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |  b.prop = "haha"
               |}
               |return x.prop
-            """.stripMargin)) { case (Some(_), res) => UnionSet("true", "false", "haha") shouldBe res}
+            """.stripMargin)) { case (_, res) => res shouldBe E("true", "false", "haha")}
     }
 }

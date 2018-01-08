@@ -8,9 +8,9 @@ abstract class ValueLike {
     def asValue: Value
     def normalized: Value
     def asBool: BoolLattice
-    def asFunctions: Traversable[FunctionValue]
+    def asFunctions: Seq[FunctionValue]
     def asObject: Option[ObjectValue]
-    def baseObjects: Traversable[ObjectValue]
+    def baseObjects: Seq[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
 
     def without(filter: (ValueLike) => Boolean): ValueLike
@@ -29,10 +29,10 @@ sealed abstract class Value extends ValueLike {
     override def asValue: Value = this
     override def normalized: Value = asValue
     override def asBool: BoolLattice = BoolLattice.True
-    override def asFunctions: Traversable[FunctionValue] = Seq.empty
+    override def asFunctions: Seq[FunctionValue] = Seq.empty
     override def asObject: Option[ObjectValue] = None
     override def propertyWriteMaybeNoOp: Boolean = true
-    override def baseObjects: Traversable[ObjectValue] = Traversable()
+    override def baseObjects: Seq[ObjectValue] = Seq()
 
     override def without(filter: ValueLike => Boolean): ValueLike = if (filter(this)) NeverValue else this
     override def remove(heap: HeapMemory, filter: (ValueLike) => Boolean): ValueLike = without(filter)
@@ -213,7 +213,7 @@ object ObjectValue {
 }
 
 final class FunctionValue(val template: Templates.Function, val closures: Seq[ValueLike]) extends ObjectValue() {
-    override def asFunctions: Traversable[FunctionValue] = Traversable(this)
+    override def asFunctions: Seq[FunctionValue] = Seq(this)
 
     override def toString: String = s"func#$internalId"
 }
@@ -242,9 +242,9 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
 
     override def asObject: Option[ObjectValue] = Some(this)
     override def normalized: Value = values match { case Seq(value) => value.normalized; case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized)).asValue}
-    override def baseObjects: Traversable[ObjectValue] = values.flatMap(_.asObject)
+    override def baseObjects: Seq[ObjectValue] = values.flatMap(_.asObject)
     override def propertyWriteMaybeNoOp: Boolean = values.exists(_.propertyWriteMaybeNoOp)
-    override def asFunctions: Traversable[FunctionValue] = values.flatMap(_.asFunctions)
+    override def asFunctions: Seq[FunctionValue] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
 
     override def without(filter: ValueLike => Boolean): ValueLike = {
@@ -357,23 +357,13 @@ object UnionValue {
     }
 }
 
-case class UnionSet(values: Any*) {
-    assert(values.size >= 2)
-
-    override def equals(obj: scala.Any): Boolean = obj match {
-        case UnionValue(seq) => seq.map(_.asValue).toSet == values.map(Value(_)).toSet
-        case _ => false
-    }
-
-    override def toString: String = values.mkString("[", " | ", "]")
-}
 
 sealed abstract class ConditionalValue extends ValueLike {
     override def normalized: Value = asValue.normalized
     override def asBool: BoolLattice = asValue.asBool
-    override def asFunctions: Traversable[FunctionValue] = asValue.asFunctions
+    override def asFunctions: Seq[FunctionValue] = asValue.asFunctions
     override def asObject: Option[ObjectValue] = asValue.asObject
-    override def baseObjects: Traversable[ObjectValue] = asValue.baseObjects
+    override def baseObjects: Seq[ObjectValue] = asValue.baseObjects
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
     override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
     override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn

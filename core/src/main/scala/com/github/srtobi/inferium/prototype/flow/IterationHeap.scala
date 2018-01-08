@@ -1,5 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
+import com.github.srtobi.inferium.prototype.flow.IterationHeap.Memory.Unifier
 import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
 import scala.collection.mutable
@@ -100,7 +101,7 @@ object IterationHeap {
 
         override def manipulateReference(ref: Reference, newValue: ValueLike): Unit = ref match {
             case Reference(value, obj, property) =>
-                val org = readProperty(obj, property, cache = true)
+                val org = readProperty(obj, property)
                 if (org == value) {
                     // we now know that the reference still applies and can now change it
                     // but that might be another reference and we can trie to change that as well
@@ -120,6 +121,26 @@ object IterationHeap {
         }
 
         override def toString: String = s"Heap[$idx]"
+
+        private def gatherPropertiesRec(targets: Seq[ObjectValue], result: mutable.Set[String]): Unit = {
+            targets.flatMap(objects.get).flatMap(_.keySet).foreach(result.add)
+            prev.foreach(_.gatherPropertiesRec(targets, result))
+        }
+
+        override def listProperties(target: ValueLike): collection.Set[String] = {
+            val result = mutable.Set.empty[String]
+            gatherPropertiesRec(target.asObject ++: target.baseObjects, result)
+            return result
+        }
+
+        override def squashed(): HeapMemory = {
+            val unifier = new Unifier(this)
+
+            while (unifier.canUp)
+                unifier.up()
+
+            return new Memory(0, None, unifier.objects)
+        }
     }
 
     object Memory {
@@ -128,6 +149,8 @@ object IterationHeap {
             var memory: Memory = iniMemory.prev.get
             def index: Int = memory.idx
             var objects: MemoryMap = iniMemory.objects.map { case (obj, value) => (obj, value.clone())}
+
+            def canUp: Boolean = memory.prev.isDefined
 
             def up(): Unit = {
                 assert(memory.prev.nonEmpty)

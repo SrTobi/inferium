@@ -6,7 +6,7 @@ import fastparse.core.Parsed
 
 
 object FlowAnalysisTest {
-    import ForwardFlowAnalysis.IniObject
+    import Heap.IniObject
     private def analyse(script: Ast.Script): Unit = {
 
         val global = IniObject("rand" -> BoolValue)

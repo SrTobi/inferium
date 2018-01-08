@@ -1,5 +1,9 @@
 package com.github.srtobi.inferium.prototype.flow
 
+import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniObject}
+
+import scala.collection.mutable
+
 
 //abstract class HeapHandle
 
@@ -8,18 +12,115 @@ abstract class HeapMemory {
     //def write(handle: HeapHandle, value: ValueLike): Unit
     def readProperty(target: ValueLike, propertyName: String, cache: Boolean = true): ValueLike
     def writeProperty(target: ValueLike, propertyName: String, handle: ValueLike): Unit
+    def listProperties(target: ValueLike): collection.Set[String]
 
     def filterUnwritables(target: ValueLike): ValueLike
     def manipulateReference(ref: Reference, value: ValueLike): Unit
     def manipulateIfReference(ref: ValueLike, value: ValueLike): Unit
 
     def split(): HeapMemory
+    def squashed(): HeapMemory
+
+    def toIniEntity(objects: Seq[ValueLike]): Seq[(ValueLike, IniEntity)] = {
+        val foundObjects = mutable.Map.empty[ValueLike, IniObject]
+        return objects.map(obj => (obj, toIniEntityRec(obj, foundObjects)))
+    }
+
+    private def toIniEntityRec(obj: ValueLike, objects: mutable.Map[ValueLike, IniObject]): IniEntity = {
+        objects.get(obj) match {
+            case Some(value) =>
+                return value
+            case _ =>
+        }
+
+        obj.normalized match {
+            case UnionValue(values) => IniEntity(values.map(toIniEntityRec(_, objects)): _*)
+            case obj: ObjectValue =>
+                val properties = mutable.Map.empty[String, IniEntity]
+                val iniObj = new IniObject(properties)(Some(obj.internalId))
+                objects.update(obj, iniObj)
+
+                for (prop <-listProperties(obj).iterator) {
+                    val value = readProperty(obj, prop, cache = false)
+                    properties += (prop -> toIniEntityRec(value, objects))
+                }
+                iniObj
+            case value => IniEntity(value)
+        }
+    }
 }
 
 abstract class Heap {
     def newEmptyHeapState(): HeapMemory
 
     def unify(heaps: HeapMemory*): HeapMemory
+}
+
+object Heap {
+    abstract class IniEntity {
+        def members: collection.Map[String, IniEntity]
+    }
+    class IniObject(override val members: collection.Map[String, IniEntity])(val id: Option[Long] = None) extends IniEntity {
+        override def equals(o: scala.Any): Boolean = o match {
+            case other: IniObject =>
+                if (id.isDefined && id == other.id) {
+                    return true
+                }
+                return members == other.members
+            case _ =>
+                false
+        }
+
+        override def hashCode(): Int = members.hashCode()
+        override def toString: String = s"#${id.getOrElse("")}{${members.take(5).map{ case (prop, value) => s"$prop -> $value"}.mkString(", ")}}"
+    }
+    case class IniValue(value: Value) extends IniEntity {
+        override lazy val members: collection.Map[String, IniEntity] = Map()
+    }
+    case class IniUnion(values: collection.Set[IniEntity]) extends IniEntity {
+        assert(values.size >= 2)
+
+        override lazy val members: collection.Map[String, IniEntity] = ???
+
+        override def toString: String = values.mkString("[", " | ", "]")
+    }
+
+    object IniEntity {
+        def apply(something: Any*): IniEntity = something match {
+            case Seq() => IniValue(NeverValue)
+            case Seq(value: IniEntity) => value
+            case Seq(value) => IniValue(Value(value))
+            case all =>
+                val set = all.map(IniEntity(_)).toSet
+                if (set.size == 1) set.head else IniUnion(set)
+        }
+    }
+
+    object IniObject {
+        private def toPropertyValue(any: Any): IniEntity = any match {
+            case obj: IniObject => obj
+            case anything => IniValue(Value(anything))
+        }
+        def apply(valueMembers: (String, Any)*): IniObject = new IniObject(Map(valueMembers.map { case (prop, value) => (prop, toPropertyValue(value))}: _*))()
+    }
+
+    type PropertyValue = Either[IniObject, ValueLike]
+
+    def writeIniObjectToHeap(heap: HeapMemory, obj: IniObject, objMap: mutable.Map[IniObject, ObjectValue] = mutable.Map.empty[IniObject, ObjectValue]): ObjectValue = {
+        return objMap.getOrElse(obj, {
+            val objValue = new ObjectValue
+            objMap += (obj -> objValue)
+            obj.members foreach {
+                case (prop, member) =>
+                    val value = member match {
+                        case memberObj: IniObject=> writeIniObjectToHeap(heap, memberObj, objMap)
+                        case IniValue(valueMember) => valueMember
+                    }
+                    heap.writeProperty(objValue, prop, value)
+            }
+            objValue
+        })
+    }
 }
 
 
