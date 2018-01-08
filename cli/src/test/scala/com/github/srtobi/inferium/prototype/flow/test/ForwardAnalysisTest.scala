@@ -17,11 +17,8 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
 
                 val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
                 analysis.analyse()
-                val heap = analysis.globalHeap
-                val scriptValue = analysis.scriptReturn
-                val (_, result) = heap.toIniEntity(Seq(scriptValue)).head
 
-                return (heap, result)
+                return (analysis.globalHeap, analysis.scriptReturn)
         }
     }
 

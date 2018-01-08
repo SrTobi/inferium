@@ -1,6 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.Heap.IniObject
+import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniObject}
 import com.github.srtobi.inferium.prototype.{Ast, LangParser}
 import fastparse.core.Parsed
 
@@ -11,23 +11,10 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
     import Nodes.Node
 
-    private val endNode = new Node()(this) {
-        override def onControlFlow(newHeap: HeapMemory): Unit = {
-            globalHeapState = heap.unify(globalHeapState.split(), newHeap.split())
-            assert(nodesToPropagate.isEmpty)
-        }
-        override def onNoControlFlow(): Unit = {
-            assert(nodesToPropagate.isEmpty)
-        }
-    }
+    private var _scriptReturnValue: Value = _
     private var globalHeapState = heap.newEmptyHeapState()
     private val globalObject = Heap.writeIniObjectToHeap(globalHeapState, global)
-    private val mergeNode = new Nodes.MergeNode(0, endNode)(this)
     private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
-    private val (beginNode, returns) = scriptTemplate.instantiate(this, globalObject, mergeNode)
-
-    mergeNode.setNumBranchesToWaitFor(returns.length)
-    controlFlowTo(beginNode, globalHeapState)
 
 
     override def controlFlowTo(node: Nodes.Node, heapState: HeapMemory): Unit = {
@@ -70,13 +57,41 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         return changed
     }
 
+    private def analyseInitialScriptExecution(): Unit = {
+        // analyse initial code
+        assert(nodesToPropagate.isEmpty)
+        propagateControlFlow()
+        var resultingHeap: Option[HeapMemory] = None
+
+        val endNode = new Node()(this) {
+            override def onControlFlow(heap: HeapMemory): Unit = {
+                resultingHeap = Some(heap)
+                assert(nodesToPropagate.isEmpty)
+            }
+            override def onNoControlFlow(): Unit = {
+                assert(nodesToPropagate.isEmpty)
+            }
+        }
+
+        val mergeNode = new Nodes.MergeNode(0, endNode)(this)
+        val (beginNode, returns) = scriptTemplate.instantiate(this, globalObject, mergeNode)
+
+        mergeNode.setNumBranchesToWaitFor(returns.length)
+        controlFlowTo(beginNode, globalHeapState)
+
+        // analyse
+        analyseFlow()
+
+        globalHeapState = resultingHeap.getOrElse(globalHeapState)
+        _scriptReturnValue = UnionValue(returns.map(_.newSource().get()): _*).normalized
+    }
+
     def globalHeap: HeapMemory = globalHeapState
-    def scriptReturn: ValueLike = UnionValue(returns.map(_.newSource().get()): _*)
+    def scriptReturnValue: ValueLike = _scriptReturnValue
+    def scriptReturn: IniEntity = globalHeapState.toIniEntity(Seq(scriptReturnValue)).head._2
 
     def analyse(): Unit = {
-        // analyse initial code
-        assert(nodesToPropagate.nonEmpty)
-        propagateControlFlow()
+        analyseInitialScriptExecution()
     }
 
     override def unify(heaps: HeapMemory*): HeapMemory = heap.unify(heaps: _*)
