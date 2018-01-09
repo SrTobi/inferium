@@ -5,7 +5,7 @@ import com.github.srtobi.inferium.prototype.flow._
 import fastparse.core.Parsed
 
 
-object FlowAnalysisTest {
+object Playground {
     import Heap.IniObject
     private def analyse(script: Ast.Script): Unit = {
 
@@ -13,15 +13,24 @@ object FlowAnalysisTest {
 
         val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
         analysis.analyse()
+        val result = analysis.scriptReturn
+        println(result)
     }
     def main(args: Array[String]): Unit = {
 
         val code =
             """
-              |if (rand) {
-              | return 5 - 9
-              |} else {
-              | return true
+              |return () => {
+              |  var next = undefined
+              |
+              |  return {
+              |    push: (e) => {
+              |      next = {
+              |        elem: e,
+              |        next: next
+              |      }
+              |    }
+              |  }
               |}
             """.stripMargin
 

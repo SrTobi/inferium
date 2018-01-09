@@ -11,11 +11,37 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
     import Nodes.Node
 
+    private class EndNode extends Nodes.Node()(ForwardFlowAnalysis.this) {
+        var resultingHeap: Option[HeapMemory] = None
+        override def onControlFlow(heap: HeapMemory): Unit = {
+            resultingHeap = Some(heap)
+            assert(nodesToPropagate.isEmpty)
+        }
+        override def onNoControlFlow(): Unit = {
+            assert(nodesToPropagate.isEmpty)
+        }
+    }
+
+    private class CallContext(function: FunctionValue) {
+        val arguments: Seq[UserValue] = Seq.fill(function.template.parameters.length)(new UserValue)
+        var returnValue: Value = NeverValue
+
+        def fetchResultingHeap(): Option[HeapMemory] = {
+            val res = endNode.resultingHeap
+            endNode.resultingHeap = None
+            return res
+        }
+        private val endNode = new EndNode
+        val callNode = new Nodes.FunctionCall(ValueSource.wrap(function), arguments.map(ValueSink.wrap))(ForwardFlowAnalysis.this)
+        val returnSource: ValueSource = callNode.result.newSource()
+        callNode.next = endNode
+    }
+
     private var _scriptReturnValue: Value = _
     private var globalHeapState = heapImpl.newEmptyHeapState()
     private val globalObject = Heap.writeIniObjectToHeap(globalHeapState, global)
     private val nodesToPropagate = mutable.Queue.empty[(Node, Option[HeapMemory])]
-    private val knownFunctions = mutable.Set.empty[FunctionValue]
+    private val knownFunctions = mutable.Map.empty[FunctionValue, CallContext]
     private val knownObjects = mutable.Set.empty[ObjectValue]
 
 
@@ -41,23 +67,6 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         }
     }
 
-    private def analyseControlFlowStep(): Boolean = {
-        var changed = false
-
-        propagateControlFlow()
-
-        return changed
-    }
-
-    private def analyseFlow(): Boolean = {
-        var changed = false
-
-        while(analyseControlFlowStep()) {
-            changed = true
-        }
-
-        return changed
-    }
 
     private def garbageCollect(heap: HeapMemory, returnValue: ValueLike): HeapMemory = {
         val result = heapImpl.newEmptyHeapState()
@@ -65,11 +74,13 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         val queue = mutable.Queue.empty[ObjectValue]
 
         def add(value: Value): Unit = value match {
-            case union: UnionValue => union.baseObjects.foreach(queue.enqueue(_))
+            case union: UnionValue => union.baseObjects.foreach(add)
             case obj: ObjectValue =>
                 obj match {
                     case func: FunctionValue =>
-                        knownFunctions += func
+                        if (!knownFunctions.contains(func)) {
+                            knownFunctions += (func -> new CallContext(func))
+                        }
                         func.closures.map(_.asValue).foreach(add)
                     case _ =>
                 }
@@ -102,19 +113,8 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     private def analyseInitialScriptExecution(): Unit = {
         // analyse initial code
         assert(nodesToPropagate.isEmpty)
-        propagateControlFlow()
-        var resultingHeap: Option[HeapMemory] = None
 
-        val endNode = new Node()(this) {
-            override def onControlFlow(heap: HeapMemory): Unit = {
-                resultingHeap = Some(heap)
-                assert(nodesToPropagate.isEmpty)
-            }
-            override def onNoControlFlow(): Unit = {
-                assert(nodesToPropagate.isEmpty)
-            }
-        }
-
+        val endNode = new EndNode
         val mergeNode = new Nodes.MergeNode(0, endNode)(this)
         val (beginNode, returns) = scriptTemplate.instantiate(this, globalObject, mergeNode)
 
@@ -122,11 +122,38 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         controlFlowTo(beginNode, globalHeapState)
 
         // analyse
-        analyseFlow()
+        propagateControlFlow()
 
+        val resultingHeap = endNode.resultingHeap
         _scriptReturnValue = UnionValue(returns.map(_.newSource().get()): _*).normalized
-
         globalHeapState = resultingHeap.map(garbageCollect(_, _scriptReturnValue)).getOrElse(globalHeapState)
+    }
+
+    private def analyseFunction(function: FunctionValue): Boolean = {
+        assert(nodesToPropagate.isEmpty)
+
+        val context = knownFunctions(function)
+        val callNode = context.callNode
+        val returnSource = context.returnSource
+
+        controlFlowTo(context.callNode, globalHeapState)
+
+        // analyse
+        propagateControlFlow()
+
+        return context.fetchResultingHeap().exists {
+            heap =>
+                val oldReturn = context.returnValue
+                val newReturn = UnionValue(context.returnValue, returnSource.get()).normalized
+                context.returnValue = newReturn
+
+                val oldHeap = globalHeapState
+                val mergedHeap = heapImpl.unify(heap.split(), globalHeapState.split())
+                val newHeap = garbageCollect(mergedHeap, context.returnValue)
+                globalHeapState = newHeap
+
+                oldReturn != newReturn || !oldHeap.structureEquals(newHeap)
+        }
     }
 
 
@@ -136,6 +163,21 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
     def analyse(): Unit = {
         analyseInitialScriptExecution()
+
+        val queue = mutable.Queue.empty[FunctionValue]
+        var changed = false
+
+        do {
+            queue ++= knownFunctions.keySet
+            changed = false
+            while (queue.nonEmpty) {
+                val func = queue.dequeue()
+                if (analyseFunction(func)) {
+                    changed = true
+                }
+            }
+
+        } while (changed)
     }
 
     override def unify(heaps: HeapMemory*): HeapMemory = heapImpl.unify(heaps: _*)

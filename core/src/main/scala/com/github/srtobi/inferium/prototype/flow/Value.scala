@@ -24,6 +24,8 @@ abstract class ValueLike {
     def throwsWhenWrittenOrReadOn: Boolean
 
     def asReference: Option[Reference]
+
+    def structureEquals(o: ValueLike): Boolean
 }
 
 sealed abstract class Value extends ValueLike {
@@ -43,7 +45,7 @@ sealed abstract class Value extends ValueLike {
 
     override def throwsWhenWrittenOrReadOn: Boolean = false
 
-    def asReference: Option[Reference] = None
+    override def asReference: Option[Reference] = None
 
     /*def in: scala.collection.Set[Value] = inValues
     def out: scala.collection.Set[Value] = outValues
@@ -74,6 +76,7 @@ sealed abstract class Value extends ValueLike {
     def onOutFlowRemoved(outValue: Value): Unit = {}*/
 
     //def getProperty(name: String): scala.collection.Set[HeapState.ValueHandle]
+    def structureEquals(o: ValueLike): Boolean = equals(o)
 }
 
 object Value {
@@ -210,6 +213,13 @@ sealed case class ObjectValue(internalId: Long = ObjectValue.nextObjId()) extend
     def onWriteProperty(property: String, value: ValueLike): Unit = ()
 
     override def toString: String = s"obj#$internalId"
+
+    override def structureEquals(o: ValueLike): Boolean = o match {
+        case uv: UnionValue =>
+            uv.structureEquals(this)
+        case _ =>
+            equals(o)
+    }
 }
 
 object ObjectValue {
@@ -321,6 +331,19 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
     override def falsy(heap: HeapMemory): ValueLike = UnionValue.makeUnion(Some(internalId), values.map(_.falsy(heap)))
 
     override def toString: String = s"#$internalId[${values.mkString(" | ")}]"
+
+    //private lazy val cachedHashCode = values.toSet.hashCode()
+    //override def hashCode(): Int = cachedHashCode
+    override def structureEquals(o: ValueLike): Boolean = o match {
+        case other: UnionValue =>
+            assert(this.isNormalized)
+            assert(other.isNormalized)
+            values.toSet == other.values.toSet
+        case _ =>
+            false
+    }
+
+
 }
 
 object UnionValue {
@@ -436,6 +459,7 @@ sealed abstract class ConditionalValue extends ValueLike {
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
     override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
     override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn
+    override def structureEquals(o: ValueLike): Boolean = throw new UnsupportedOperationException("Can not check structure of conditional variables")
 
     def merge(other: ConditionalValue): ConditionalValue
 }

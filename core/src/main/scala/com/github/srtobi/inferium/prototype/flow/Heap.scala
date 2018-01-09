@@ -21,6 +21,8 @@ abstract class HeapMemory {
     def split(): HeapMemory
     def squashed(): HeapMemory
 
+    def structureEquals(o: HeapMemory): Boolean
+
     def toIniEntity(objects: Seq[ValueLike]): Seq[(ValueLike, IniEntity)] = {
         val foundObjects = mutable.Map.empty[ValueLike, IniObject]
         return objects.map(obj => (obj, toIniEntityRec(obj, foundObjects)))
