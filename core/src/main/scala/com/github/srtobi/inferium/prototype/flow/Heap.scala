@@ -1,6 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniObject}
+import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniFunctionInfo, IniObject}
 
 import scala.collection.mutable
 
@@ -24,28 +24,40 @@ abstract class HeapMemory {
 
     def structureEquals(o: HeapMemory): Boolean
 
-    def toIniEntity(objects: Seq[ValueLike]): Seq[(ValueLike, IniEntity)] = {
+    def toIniEntity(objects: Seq[ValueLike], analysis: FlowAnalysis): Seq[(ValueLike, IniEntity)] = {
         val foundObjects = mutable.Map.empty[ValueLike, IniObject]
-        return objects.map(obj => (obj, toIniEntityRec(obj, foundObjects)))
+        return objects.map(obj => (obj, toIniEntityRec(obj, foundObjects, analysis)))
     }
 
-    private def toIniEntityRec(obj: ValueLike, objects: mutable.Map[ValueLike, IniObject]): IniEntity = {
+    private def toIniEntityRec(obj: ValueLike, objects: mutable.Map[ValueLike, IniObject], analysis: FlowAnalysis): IniEntity = {
         objects.get(obj) match {
             case Some(value) =>
                 return value
             case _ =>
         }
+        def toIni(obj: ValueLike) = toIniEntityRec(obj, objects, analysis)
 
         obj.normalized match {
-            case UnionValue(values) => IniEntity(values.map(toIniEntityRec(_, objects)): _*)
+            case UnionValue(values) => IniEntity(values.map(toIniEntityRec(_, objects, analysis)): _*)
             case obj: ObjectValue =>
                 val properties = mutable.Map.empty[String, IniEntity]
-                val iniObj = new IniObject(properties)(Some(obj.internalId))
+                val iniObj = new IniObject(properties)(Some(obj.internalId), obj.isInstanceOf[UserValue])
                 objects.update(obj, iniObj)
+
+                val functionInfo = obj match {
+                    case uv: UserValue =>
+                        uv.functionInfo.map(info => IniFunctionInfo(toIni(info.returnValue), info.parameter.map(toIni)))
+                    case f: FunctionValue =>
+                        val info = analysis.getFunctionInfo(f).get
+                        Some(IniFunctionInfo(toIni(info.returnValue), info.arguments.map(toIni)))
+                    case _ =>
+                        None
+                }
+                iniObj.functionInfo = functionInfo
 
                 for (prop <-listProperties(obj).iterator) {
                     val value = readProperty(obj, prop, cache = false)
-                    properties += (prop -> toIniEntityRec(value, objects))
+                    properties += (prop -> toIni(value))
                 }
                 iniObj
             case value => IniEntity(value)
@@ -63,16 +75,22 @@ object Heap {
     abstract class IniEntity {
         def members: collection.Map[String, IniEntity]
     }
-    class IniObject(override val members: collection.Map[String, IniEntity])(val id: Option[Long] = None) extends IniEntity {
+    case class IniFunctionInfo(returnValue: IniEntity, parameter: Seq[IniEntity]) {
+        override def toString: String = parameter.mkString("(", ", ", ") => " + returnValue)
+    }
+
+    class IniObject(override val members: collection.Map[String, IniEntity])(val id: Option[Long] = None, val isUserObject: Boolean = false) extends IniEntity {
         override def equals(o: scala.Any): Boolean = o match {
             case other: IniObject =>
-                if (id.isDefined && id == other.id) {
-                    return true
+                if (id.isDefined && other.id.isDefined) {
+                    return id == other.id
                 }
                 return members == other.members
             case _ =>
                 false
         }
+
+        var functionInfo: Option[IniFunctionInfo] = None
 
         override def hashCode(): Int = members.hashCode()
         override def toString: String = s"#${id.getOrElse("")}{${members.take(5).map{ case (prop, value) => s"$prop -> $value"}.mkString(", ")}}"

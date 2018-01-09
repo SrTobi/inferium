@@ -22,7 +22,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         }
     }
 
-    private class CallContext(function: FunctionValue) {
+    private class CallContext(override val function: FunctionValue) extends FunctionInfo{
         val arguments: Seq[UserValue] = Seq.fill(function.template.parameters.length)(new UserValue)
         var returnValue: Value = NeverValue
 
@@ -35,6 +35,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         val callNode = new Nodes.FunctionCall(ValueSource.wrap(function), arguments.map(ValueSink.wrap))(ForwardFlowAnalysis.this)
         val returnSource: ValueSource = callNode.result.newSource()
         callNode.next = endNode
+
     }
 
     private var _scriptReturnValue: Value = _
@@ -167,7 +168,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
     def globalHeap: HeapMemory = globalHeapState
     def scriptReturnValue: ValueLike = _scriptReturnValue
-    def scriptReturn: IniEntity = globalHeapState.toIniEntity(Seq(scriptReturnValue)).head._2
+    def scriptReturn: IniEntity = globalHeapState.toIniEntity(Seq(scriptReturnValue), this).head._2
 
     def analyse(): Unit = {
         analyseInitialScriptExecution()
@@ -189,6 +190,8 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     }
 
     override def unify(heaps: HeapMemory*): HeapMemory = heapImpl.unify(heaps: _*)
+
+    override def getFunctionInfo(function: FunctionValue): Option[FunctionInfo] = knownFunctions.get(function)
 }
 
 object ForwardFlowAnalysis {
