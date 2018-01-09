@@ -14,7 +14,9 @@ object Playground {
         val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
         analysis.analyse()
         val result = analysis.scriptReturn
-        println(result)
+
+        val printer = new TypeScriptPrinter(result, null)
+        println(printer.print())
     }
     def main(args: Array[String]): Unit = {
 
