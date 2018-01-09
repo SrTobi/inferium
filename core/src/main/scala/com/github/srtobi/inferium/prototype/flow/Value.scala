@@ -7,10 +7,12 @@ import scala.collection.mutable
 abstract class ValueLike {
     def asValue: Value
     def normalized: Value
+    def isNormalized: Boolean
     def asBool: BoolLattice
     def asFunctions: Seq[FunctionLike]
     def asObject: Option[ObjectValue]
     def baseObjects: Seq[ObjectValue]
+    def asBaseObjects: Seq[ObjectValue]
     def propertyWriteMaybeNoOp: Boolean
 
     def without(filter: (ValueLike) => Boolean): ValueLike
@@ -28,11 +30,13 @@ sealed abstract class Value extends ValueLike {
 
     override def asValue: Value = this
     override def normalized: Value = asValue
+    override def isNormalized: Boolean = true
     override def asBool: BoolLattice = BoolLattice.True
     override def asFunctions: Seq[FunctionLike] = Seq.empty
     override def asObject: Option[ObjectValue] = None
     override def propertyWriteMaybeNoOp: Boolean = true
     override def baseObjects: Seq[ObjectValue] = Seq()
+    override def asBaseObjects: Seq[ObjectValue] = Seq()
 
     override def without(filter: ValueLike => Boolean): ValueLike = if (filter(this)) NeverValue else this
     override def remove(heap: HeapMemory, filter: (ValueLike) => Boolean): ValueLike = without(filter)
@@ -78,7 +82,7 @@ object Value {
         case number: Int => SpecificNumberValue(number)
         case string: String => SpecificStringValue(string)
         case bool: Boolean => SpecificBoolValue(bool)
-        case null => NullValue
+        case null => ???
         case _ => throw new IllegalArgumentException(s"Can not convert $any to a property value!")
     }
 }
@@ -102,7 +106,7 @@ object UndefinedValue extends Value {
 
     override def toString: String = "undefined"
 }
-
+/*
 object NullValue extends Value {
     override def asBool: BoolLattice = BoolLattice.False
     override def throwsWhenWrittenOrReadOn: Boolean = true
@@ -111,7 +115,7 @@ object NullValue extends Value {
     override def falsy(heap: HeapMemory): ValueLike = this
 
     override def toString: String = "null"
-}
+}*/
 
 sealed abstract class BoolValue extends Value {
     override def without(filter: ValueLike => Boolean): ValueLike = {
@@ -196,6 +200,7 @@ case class SpecificStringValue(value: String) extends StringValue {
 
 sealed case class ObjectValue(internalId: Long = ObjectValue.nextObjId()) extends Value {
     override def asObject: Option[ObjectValue] = Some(this)
+    override def asBaseObjects: Seq[ObjectValue] = Seq(this)
     override def propertyWriteMaybeNoOp: Boolean = false
 
     override def truthy(heap: HeapMemory): ValueLike = this
@@ -266,7 +271,7 @@ object FunctionValue {
 final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends ObjectValue(id) {
 
     //assert(values.size >= 2)
-    assert(values.forall(v => !v.isInstanceOf[UnionValue]))
+    //assert(values.forall(v => !v.isInstanceOf[UnionValue]))
 
     override lazy val asBool: BoolLattice = asBoolImpl()
     private def asBoolImpl(): BoolLattice = {
@@ -282,8 +287,16 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
     }
 
     override def asObject: Option[ObjectValue] = Some(this)
-    override def normalized: Value = values match { case Seq(value) => value.normalized; case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized)).asValue}
-    override def baseObjects: Seq[ObjectValue] = values.flatMap(_.asObject)
+    override def normalized: Value = values match {
+        case Seq(value) => value.normalized
+        case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized).flatMap{
+            case UnionValue(vals) => vals
+            case value => Seq(value)
+        }).asValue
+    }
+    override def isNormalized: Boolean = values.length >= 2 && values.forall(v => !v.isInstanceOf[UnionValue] && v.isNormalized)
+    override def baseObjects: Seq[ObjectValue] = values.flatMap(_.asBaseObjects)
+    override def asBaseObjects: Seq[ObjectValue] = this +: baseObjects
     override def propertyWriteMaybeNoOp: Boolean = values.exists(_.propertyWriteMaybeNoOp)
     override def asFunctions: Seq[FunctionLike] = values.flatMap(_.asFunctions)
     override def throwsWhenWrittenOrReadOn: Boolean = values.forall(_.throwsWhenWrittenOrReadOn)
@@ -322,7 +335,7 @@ object UnionValue {
     def apply(values: ValueLike*): ValueLike = {
         return values match {
             case Seq(value) => value
-            case Seq(u1:UnionValue, u2:UnionValue) if u1.internalId == u2.internalId => makeUnion(Some(u1.internalId), values)
+            case Seq(u1:UnionValue, u2:UnionValue) if u1.internalId == u2.internalId => makeUnion(Some(u1.internalId), u1.values ++ u2.values)
             case all => makeUnion(None, all)
         }
     }
@@ -337,11 +350,12 @@ object UnionValue {
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
         val objectValues = mutable.Set.empty[ValueLike]
+        val unionValues = mutable.Map.empty[Long, UnionValue]
         val conditionalValues = mutable.Map.empty[ConditionalValue, ConditionalValue]
         var hasUndefined = false
         var hasNull = false
 
-        values.flatMap(unpackUnion) foreach {
+        values/*.flatMap(unpackUnion)*/ foreach {
             case bool: BoolValue =>
                 if (boolValue == null || boolValue == bool)
                     boolValue = bool
@@ -359,8 +373,16 @@ object UnionValue {
                     stringValues.add(string)
             case UndefinedValue =>
                 hasUndefined = true
-            case NullValue =>
-                hasNull = true
+            //case NullValue =>
+            //    hasNull = true
+            case uv: UnionValue =>
+                val id = uv.internalId
+                unionValues.get(uv.internalId) match {
+                    case Some(existingUV) =>
+                        unionValues.update(id, UnionValue.makeUnion(Some(id), uv.values ++ existingUV.values).asInstanceOf[UnionValue])
+                    case None =>
+                        unionValues.update(id, uv)
+                }
             case obj: ObjectValue =>
                 objectValues.add(obj)
             case NeverValue =>
@@ -374,10 +396,11 @@ object UnionValue {
 
         return unionFromSeq(id,
             (if (hasUndefined) Seq(UndefinedValue) else Seq()) ++
-            (if (hasNull) Seq(NullValue) else Seq()) ++
+            //(if (hasNull) Seq(NullValue) else Seq()) ++
             Option(boolValue).toSeq ++
             Option(numberValue).toSeq ++
             Option(stringValues).getOrElse(Seq(StringValue)) ++
+            unionValues.values ++
             objectValues ++
             conditionalValues.map{case (_, ref) => ref})
     }
@@ -404,10 +427,12 @@ object UnionValue {
 
 sealed abstract class ConditionalValue extends ValueLike {
     override def normalized: Value = asValue.normalized
+    override def isNormalized: Boolean = false
     override def asBool: BoolLattice = asValue.asBool
     override def asFunctions: Seq[FunctionLike] = asValue.asFunctions
     override def asObject: Option[ObjectValue] = asValue.asObject
     override def baseObjects: Seq[ObjectValue] = asValue.baseObjects
+    override def asBaseObjects: Seq[ObjectValue] = asValue.asBaseObjects
     override def propertyWriteMaybeNoOp: Boolean = asValue.propertyWriteMaybeNoOp
     override def without(filter: ValueLike => Boolean): ValueLike = asValue.without(filter)
     override def throwsWhenWrittenOrReadOn: Boolean = asValue.throwsWhenWrittenOrReadOn

@@ -212,6 +212,29 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
             """.stripMargin)) { case (_, res) => res shouldBe E("d", UndefinedValue)}
     }
 
+    it should "handle multiple layers of combined references correctly" in {
+
+        inside(analyse(
+            """
+              |var a = { prop: "a" }
+              |var b = { prop: "b" }
+              |if (rand) {
+              |  var x = a
+              |} else {
+              |  x = b
+              |}
+              |var c = { prop: "c" }
+              |if (rand) {
+              |  var y = x
+              |} else {
+              |  y = c
+              |}
+              |x.prop = "x"
+              |y.prop = "y"
+              |return x.prop
+            """.stripMargin)) { case (_, res) => res shouldBe E("x", "y")}
+    }
+
     it should "filter Values which can not be property accessed" in {
 
         inside(analyse(
