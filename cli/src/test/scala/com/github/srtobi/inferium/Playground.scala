@@ -29,6 +29,9 @@ object Playground {
               |        elem: e,
               |        next: next
               |      }
+              |    },
+              |    pop: () => {
+              |      return next.elem
               |    }
               |  }
               |}

@@ -68,10 +68,11 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     }
 
 
-    private def garbageCollect(heap: HeapMemory, returnValue: ValueLike): HeapMemory = {
+    private def garbageCollect(oldHeap: HeapMemory, newHeap: HeapMemory, returnValue: ValueLike): (HeapMemory, Boolean) = {
         val result = heapImpl.newEmptyHeapState()
         val objects = mutable.Set.empty[ObjectValue]
         val queue = mutable.Queue.empty[ObjectValue]
+        var changed = false
 
         def add(value: Value): Unit = value match {
             case union: UnionValue => union.baseObjects.foreach(add)
@@ -98,16 +99,24 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
             if (!objects.contains(obj)) {
                 objects += obj
-                for (prop <- heap.listProperties(obj).iterator) {
-                    val value = heap.readProperty(obj, prop, cache = false).normalized
-                    result.writeProperty(obj, prop, value)
+                for (prop <- newHeap.listProperties(obj).iterator) {
+                    val oldValue = oldHeap.readProperty(obj, prop, cache = false)
+                    assert(oldValue.isNormalized)
+                    val value = newHeap.readProperty(obj, prop, cache = false).normalized
+                    val resultValue = UnionValue(oldValue, value).normalized
 
-                    add(value)
+                    if (!oldValue.structureEquals(resultValue)) {
+                        changed = true
+                    }
+
+                    result.writeProperty(obj, prop, resultValue)
+
+                    add(resultValue)
                 }
             }
         }
 
-        return result
+        return (result, changed)
     }
 
     private def analyseInitialScriptExecution(): Unit = {
@@ -124,9 +133,10 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         // analyse
         propagateControlFlow()
 
+        val emptyHeap = heapImpl.newEmptyHeapState()
         val resultingHeap = endNode.resultingHeap
         _scriptReturnValue = UnionValue(returns.map(_.newSource().get()): _*).normalized
-        globalHeapState = resultingHeap.map(garbageCollect(_, _scriptReturnValue)).getOrElse(globalHeapState)
+        globalHeapState = resultingHeap.map(garbageCollect(emptyHeap, _, _scriptReturnValue)._1).getOrElse(globalHeapState)
     }
 
     private def analyseFunction(function: FunctionValue): Boolean = {
@@ -147,12 +157,10 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
                 val newReturn = UnionValue(context.returnValue, returnSource.get()).normalized
                 context.returnValue = newReturn
 
-                val oldHeap = globalHeapState
-                val mergedHeap = heapImpl.unify(heap.split(), globalHeapState.split())
-                val newHeap = garbageCollect(mergedHeap, context.returnValue)
+                val (newHeap, hasChanged) = garbageCollect(globalHeapState, heap, context.returnValue)
                 globalHeapState = newHeap
 
-                oldReturn != newReturn || !oldHeap.structureEquals(newHeap)
+                hasChanged || oldReturn != newReturn
         }
     }
 
