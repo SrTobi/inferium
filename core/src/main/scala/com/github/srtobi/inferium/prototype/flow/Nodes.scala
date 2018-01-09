@@ -182,7 +182,7 @@ object Nodes {
     /*
      * - the result has a lower bound on value
      */
-    class Literal(val literal: ValueLike)(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class Literal[T <: ValueLike](val literal: T)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private val _result = new ValueSink
         def result: ValueSourceProvider = _result
 
@@ -193,7 +193,12 @@ object Nodes {
         }
     }
 
-    class NewObject()(implicit flowAnalysis: FlowAnalysis) extends Literal(flowAnalysis.solver.newEmptyObject())
+    class NewObject()(implicit flowAnalysis: FlowAnalysis) extends Literal[ObjectValue](flowAnalysis.solver.newEmptyObject()) {
+        override def onControlFlow(heap: HeapMemory): Unit = {
+            heap.createObject(literal)
+            super.onControlFlow(heap)
+        }
+    }
 
     class Conditional(val cond: ValueSource, val thenBranch: (Node, Node), val elseBranch: Option[(Node, Node)])(implicit flowAnalysis: FlowAnalysis) extends Node {
 

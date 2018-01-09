@@ -10,6 +10,7 @@ import scala.collection.mutable
 abstract class HeapMemory {
     //def read(handle: HeapHandle): ValueLike
     //def write(handle: HeapHandle, value: ValueLike): Unit
+    def createObject(target: ObjectValue): Unit
     def readProperty(target: ValueLike, propertyName: String, cache: Boolean = true): ValueLike
     def writeProperty(target: ValueLike, propertyName: String, handle: ValueLike): Unit
     def listProperties(target: ValueLike): collection.Set[String]

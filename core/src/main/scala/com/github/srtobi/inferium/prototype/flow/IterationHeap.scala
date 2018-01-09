@@ -67,7 +67,10 @@ object IterationHeap {
                     val result = if (restBaseObjects.isEmpty && baseObjects.nonEmpty) {
                         UnionValue(valuesFromBase: _*)
                     } else {
-                        val recResult = prev.map(_.get(obj, restBaseObjects, property, cache = false)).getOrElse(obj.defaultPropertyValue(property))
+                        var recResult = prev.map(_.get(obj, restBaseObjects, property, cache = false)).getOrElse(NeverValue)
+                        if (recResult == NeverValue && objects.contains(obj)) {
+                           recResult = obj.defaultPropertyValue(property)
+                        }
                         UnionValue(recResult +: valuesFromBase: _*)
                     }
                     if (cache)
@@ -76,8 +79,13 @@ object IterationHeap {
             }
         }
 
+        override def createObject(target: ObjectValue): Unit = {
+            assert(!target.isInstanceOf[UnionValue])
+            objects.getOrElseUpdate(target, mutable.Map())
+        }
+
         override def readProperty(target: ValueLike, property: String, cache: Boolean): ValueLike = {
-            val result = target.asObject.map(get(_, target.baseObjects.toSet, property, cache = cache)).getOrElse(UndefinedValue)
+            val result = target.asObject.map(get(_, target.baseObjects.toSet, property, cache = cache)).getOrElse(NeverValue)
             if (target.propertyWriteMaybeNoOp) UnionValue.withUndefined(result) else result
         }
 

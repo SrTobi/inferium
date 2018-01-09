@@ -65,6 +65,14 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
             """.stripMargin)) { case (_, res) => res shouldBe E(NumberValue) }
     }
 
+    it should "return undefined for missing properties" in {
+        inside(analyse(
+            """
+              |var a = {}
+              |return a.prop
+            """.stripMargin)) { case (_, res) => res shouldBe E(UndefinedValue) }
+    }
+
 
     it should "unify object properties" in {
         inside(analyse(
@@ -720,5 +728,21 @@ class ForwardAnalysisTest extends FlatSpec with Inside with Matchers{
               |}
               |return x.prop
             """.stripMargin)) { case (_, res) => res shouldBe E("true", "false", "haha")}
+    }
+
+    it should "not create unify properties of newly created objects with undefined" in {
+
+        inside(analyse(
+            """
+              |if (rand) {
+              |  var x = {prop: "test"}
+              |} else {
+              |  x = undefined
+              |}
+              |if (x) {
+              |  return x.prop
+              |}
+              |undefined.exit
+            """.stripMargin)) { case (_, res) => res shouldBe E("test")}
     }
 }

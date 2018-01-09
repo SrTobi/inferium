@@ -299,10 +299,13 @@ final class UnionValue private (id: Long, val values: Seq[ValueLike]) extends Ob
     override def asObject: Option[ObjectValue] = Some(this)
     override def normalized: Value = values match {
         case Seq(value) => value.normalized
-        case _ => UnionValue.makeUnion(Some(internalId), values.map(_.normalized).flatMap{
-            case UnionValue(vals) => vals
-            case value => Seq(value)
-        }).asValue
+        case _ =>
+            val normalized = UnionValue.makeUnion(None, values.map(_.normalized).flatMap{
+                case UnionValue(vals) => vals
+                case value => Seq(value)
+            }).asValue
+            assert(normalized.isNormalized)
+            normalized
     }
     override def isNormalized: Boolean = values.length >= 2 && values.forall(v => !v.isInstanceOf[UnionValue] && v.isNormalized)
     override def baseObjects: Seq[ObjectValue] = values.flatMap(_.asBaseObjects)
