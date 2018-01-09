@@ -76,6 +76,8 @@ object Heap {
     }
     case class IniValue(value: Value) extends IniEntity {
         override lazy val members: collection.Map[String, IniEntity] = Map()
+
+        override def toString: String = value.toString
     }
     case class IniUnion(values: collection.Set[IniEntity]) extends IniEntity {
         assert(values.size >= 2)
