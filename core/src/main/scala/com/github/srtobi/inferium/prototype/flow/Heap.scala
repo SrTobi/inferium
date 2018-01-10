@@ -22,7 +22,7 @@ abstract class HeapMemory {
     def split(): HeapMemory
     def squashed(): HeapMemory
 
-    def structureEquals(o: HeapMemory): Boolean
+    //def structureEquals(o: HeapMemory): Boolean
 
     def toIniEntity(objects: Seq[ValueLike], analysis: FlowAnalysis): Seq[(ValueLike, IniEntity)] = {
         val foundObjects = mutable.Map.empty[ValueLike, IniObject]
@@ -74,6 +74,8 @@ abstract class Heap {
 object Heap {
     abstract class IniEntity {
         def members: collection.Map[String, IniEntity]
+
+        def hashCodeRec(deep: Int): Int = hashCode()
     }
     case class IniFunctionInfo(returnValue: IniEntity, parameter: Seq[IniEntity]) {
         override def toString: String = parameter.mkString("(", ", ", ") => " + returnValue)
@@ -92,7 +94,9 @@ object Heap {
 
         var functionInfo: Option[IniFunctionInfo] = None
 
-        override def hashCode(): Int = members.hashCode()
+        private lazy val _hashCode = hashCodeRec(0)
+        override def hashCode(): Int = _hashCode
+        override def hashCodeRec(deep: Int): Int = if (deep > 2) 0 else members.keySet.hashCode() ^ members.values.foldLeft(0){ case (acc, mem) => acc ^ mem.hashCodeRec(deep + 1) }
         override def toString: String = s"#${id.getOrElse("")}{${members.take(5).map{ case (prop, value) => s"$prop -> $value"}.mkString(", ")}}"
     }
     case class IniValue(value: Value) extends IniEntity {
@@ -106,6 +110,10 @@ object Heap {
         override lazy val members: collection.Map[String, IniEntity] = ???
 
         override def toString: String = values.mkString("[", " | ", "]")
+
+        private lazy val _hashCode = hashCodeRec(0)
+        override def hashCode(): Int = _hashCode
+        override def hashCodeRec(deep: Int): Int = if (deep > 2) 0 else values.foldLeft(0){ case (acc, mem) => acc ^ mem.hashCodeRec(deep + 1) }
     }
 
     object IniEntity {

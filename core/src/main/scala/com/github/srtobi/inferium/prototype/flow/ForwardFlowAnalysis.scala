@@ -161,7 +161,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
                 val (newHeap, hasChanged) = garbageCollect(globalHeapState, heap, context.returnValue)
                 globalHeapState = newHeap
 
-                hasChanged || oldReturn != newReturn
+                hasChanged || !oldReturn.structureEquals(newReturn)
         }
     }
 

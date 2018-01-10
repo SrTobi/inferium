@@ -34,6 +34,9 @@ object Playground {
               |    },
               |    pop: () => {
               |      return next.elem
+              |    },
+              |    inner: () => {
+              |      return next
               |    }
               |  }
               |}

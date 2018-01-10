@@ -151,7 +151,7 @@ object IterationHeap {
             return new Memory(0, None, unifier.objects)
         }
 
-        override def structureEquals(o: HeapMemory): Boolean = o match {
+        /*override def structureEquals(o: HeapMemory): Boolean = o match {
             case other: Memory =>
                 assert(prev.isEmpty)
                 assert(other.prev.isEmpty)
@@ -172,7 +172,7 @@ object IterationHeap {
                 }
             case _ =>
                 false
-        }
+        }*/
     }
 
     object Memory {
