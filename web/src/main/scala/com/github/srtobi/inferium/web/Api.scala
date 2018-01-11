@@ -7,6 +7,7 @@ import com.github.srtobi.inferium.prototype.flow.Heap.IniObject
 import com.github.srtobi.inferium.prototype.flow._
 import fastparse.core.Parsed
 
+import scala.scalajs.js
 import scala.scalajs.js.annotation.{JSExport, JSExportTopLevel}
 
 
@@ -26,7 +27,7 @@ object Api {
               val printer = new TypeScriptPrinter(result, null)
               printer.print()
             case f@Parsed.Failure(lastParser, _, extra) =>
-              throw new ParseException(f.toString(), 0)
+              throw js.JavaScriptException(f.toString())
         }
     }
 }
