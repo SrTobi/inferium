@@ -1,6 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
-import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniFunctionInfo, IniObject}
+import com.github.srtobi.inferium.prototype.flow.Heap.{IniEntity, IniFunctionInfo, IniObject, UserObjectInfo}
 
 import scala.collection.mutable
 
@@ -41,11 +41,13 @@ abstract class HeapMemory {
             case UnionValue(values) => IniEntity(values.map(toIniEntityRec(_, objects, analysis)): _*)
             case obj: ObjectValue =>
                 val properties = mutable.Map.empty[String, IniEntity]
-                val iniObj = new IniObject(properties)(Some(obj.internalId), obj.isInstanceOf[UserValue])
+                val iniObj = new IniObject(properties)(Some(obj.internalId))
                 objects.update(obj, iniObj)
 
                 val functionInfo = obj match {
                     case uv: UserValue =>
+                        val userInfo = UserObjectInfo(uv.properties.mapValues(toIni), Map())
+                        iniObj.userInfo = Some(userInfo)
                         uv.functionInfo.map(info => IniFunctionInfo(toIni(info.returnValue), info.parameter.map(toIni)))
                     case f: FunctionValue =>
                         val info = analysis.getFunctionInfo(f).get
@@ -81,7 +83,9 @@ object Heap {
         override def toString: String = parameter.mkString("(", ", ", ") => " + returnValue)
     }
 
-    class IniObject(override val members: collection.Map[String, IniEntity])(val id: Option[Long] = None, val isUserObject: Boolean = false) extends IniEntity {
+    case class UserObjectInfo(readProperties: collection.Map[String, IniEntity], writtenProperties: collection.Map[String, IniEntity])
+
+    class IniObject(override val members: collection.Map[String, IniEntity])(val id: Option[Long] = None) extends IniEntity {
         override def equals(o: scala.Any): Boolean = o match {
             case other: IniObject =>
                 if (id.isDefined && other.id.isDefined) {
@@ -93,6 +97,9 @@ object Heap {
         }
 
         var functionInfo: Option[IniFunctionInfo] = None
+        var userInfo: Option[UserObjectInfo] = None
+
+        def isUserObject: Boolean = userInfo.isDefined
 
         private lazy val _hashCode = hashCodeRec(0)
         override def hashCode(): Int = _hashCode

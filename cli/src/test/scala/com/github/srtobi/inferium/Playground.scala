@@ -22,24 +22,15 @@ object Playground {
 
         val code =
             """
-              |return () => {
-              |  var next = undefined
               |
-              |  return {
-              |    push: (e) => {
-              |      next = {
-              |        elem: e,
-              |        next: next
-              |      }
-              |    },
-              |    pop: () => {
-              |      return next.elem
-              |    },
-              |    inner: () => {
-              |      return next
-              |    }
-              |  }
+              |return (folder, list, init) => {
+              |    // there are no lists :) and also no loop and no recursion (yet)
+              |    // so do it kinda manually
+              |    var acc = folder(init, list)
+              |    return folder(acc, list)
               |}
+              |
+              |
             """.stripMargin
 
         LangParser.script.parse(code) match {

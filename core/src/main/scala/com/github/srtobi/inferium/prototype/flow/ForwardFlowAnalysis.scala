@@ -147,7 +147,10 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         val callNode = context.callNode
         val returnSource = context.returnSource
 
-        controlFlowTo(context.callNode, globalHeapState)
+        val heap = globalHeapState.split()
+        context.arguments.foreach(heap.createObject(_))
+
+        controlFlowTo(context.callNode, heap)
 
         // analyse
         propagateControlFlow()

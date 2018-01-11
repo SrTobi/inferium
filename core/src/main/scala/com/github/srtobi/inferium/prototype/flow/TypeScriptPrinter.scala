@@ -16,6 +16,7 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
     }
     private val builder = new StringBuilder()
     private val entries = mutable.Map.empty[IniEntity, Entry]
+    private val genericExtends = mutable.Map.empty[String, Entry]
 
     private def addLine(line: String): Unit = {
         builder.append(line)
@@ -56,19 +57,36 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
         }
     }
 
-    private def calcGenerics(generics: Seq[Entry]): (Set[String], Set[String]) = {
+    private class UndefinedGenericGatherer(thisEntry: Entry, generics: => Seq[Entry]) {
+        private var cache: Option[Set[String]] = None
+
+        def apply(seen: mutable.Set[Entry] = mutable.Set()): Set[String] = cache match{
+            case Some(res) => res
+            case None =>
+                if (seen(thisEntry)) {
+                    return Set()
+                }
+                val doCaching = seen.isEmpty
+                val gens = generics
+                seen += thisEntry
+                val result = calcGenerics(gens, seen)
+                if (doCaching)
+                    cache = Some(result)
+                result
+        }
+    }
+
+    private def calcGenerics(generics: Seq[Entry], seen: mutable.Set[Entry]): Set[String] = {
         val counter = mutable.Map.empty[String, Int]
 
-        val needToBeDefined = join(generics.map(_.undefinedGenerics))
+        val needToBeDefined = join(generics.map(_.undefinedGenerics(seen.clone())))
 
         for (gen <- generics.map(_.generics).flatMap(_.toSeq) ++ needToBeDefined ++ needToBeDefined) {
             val oldCount = counter.getOrElse(gen, 0)
             counter.update(gen, oldCount + 1)
         }
 
-        val multipleTimes = counter.filter { case (_, n) => n > 1}.keySet
-        val onlyOnce = counter.filter { case (_, n) => n == 1}.keySet
-        (onlyOnce, multipleTimes)
+        return counter.filter { case (_, n) => n > 1}.keySet
     }
 
     private abstract class Entry {
@@ -85,6 +103,18 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
         override def print(outerGenerics: Set[String]): String = value.toString
         override def generics: Set[String] = Set()
         override def undefinedGenerics: Set[String] = Set()
+    }
+
+    private def buildGenericDecl(generics: Set[String]): String = {
+        if (generics.isEmpty) {
+            return ""
+        } else {
+            //if (hereGenerics.nonEmpty) SortedSet(hereGenerics.toSeq: _*).mkString("<", ", ", ">") else ""
+            return generics.toSeq.sorted.map {
+                gen =>
+                    genericExtends.get(gen).map(_.print(generics.toSet)).map(superType => s"$gen extends $superType").getOrElse(gen)
+            }.mkString("<", ", ", ">")
+        }
     }
 
     private val argNames = "abcdefghijklmnopqrstuvwxyz".split("")
@@ -105,9 +135,9 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
 
         private def print(outerGenerics: Set[String], property: Option[String]): String = {
             val innerGenerics = hereGenerics | outerGenerics
-            val gens = SortedSet((hereGenerics -- outerGenerics).toSeq: _*)
+            val gens = hereGenerics -- outerGenerics
 
-            val genericPrefix = if (gens.nonEmpty) gens.mkString("<", ", ", ">") else ""
+            val genericPrefix = buildGenericDecl(gens)
             val paramTypes = params.map(_.print(innerGenerics))
             val returnString = ret.print(innerGenerics)
 
@@ -121,14 +151,14 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
             }
         }
 
-        private lazy val (singleGenerics, hereGenerics) = calcGenerics(ret +: params)
+        private lazy val hereGenerics = calcGenerics(ret +: params, mutable.Set())
         private val gatherer = new GenericGatherer(this, ret +: params)
         override def generics: Set[String] = gatherer()
         override def generics(seen: mutable.Set[Entry]): Set[String] = gatherer(seen)
         override def undefinedGenerics: Set[String] = Set()
     }
 
-    private class InterfaceEntry(_members: => Map[String, Entry], _function: => Option[FunctionEntry]) extends Entry {
+    private class InterfaceEntry(_members: => Map[String, Entry], _function: => Option[FunctionEntry], allGenericsUndefined: Boolean) extends Entry {
         private lazy val members = _members
         private lazy val function = _function
         private lazy val name = s"I${nextId()}"
@@ -137,7 +167,7 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
         override def print(outerGenerics: Set[String]): String = {
             printGlobal()
 
-            val gens = hereGenerics.toSeq.map(g => if (outerGenerics(g)) g else "any").sorted
+            val gens = hereGenerics.toSeq.sorted.map(g => if (outerGenerics(g)) g else "any")
             val genericPrefix = if (gens.nonEmpty) gens.mkString("<", ", ", ">") else ""
 
             return name + genericPrefix
@@ -152,7 +182,7 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
             val writer = new Writer()
             val inner = writer.indent(2)
 
-            val genPostfix = if (hereGenerics.nonEmpty) SortedSet(hereGenerics.toSeq: _*).mkString("<", ", ", ">") else ""
+            val genPostfix = buildGenericDecl(hereGenerics)
             writer.print(s"interface $name$genPostfix {")
 
             function.foreach {
@@ -170,15 +200,17 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
             writer.end()
         }
 
-        private lazy val (singleGenerics, hereGenerics) = calcGenerics(function.toSeq ++ members.values)
         private val gatherer = new GenericGatherer(this, function.toSeq ++ members.values)
         override def generics: Set[String] = gatherer()
         override def generics(seen: mutable.Set[Entry]): Set[String] = gatherer(seen)
-        override def undefinedGenerics: Set[String] = Set() // TODO: undefinedGenerics should be hereGenerics, but results in stackoverflow
+        private val undefinedGenericGatherer = new UndefinedGenericGatherer(this, function.toSeq ++ members.values)
+        override def undefinedGenerics: Set[String] = if (allGenericsUndefined) generics else undefinedGenericGatherer()
+        override def undefinedGenerics(seen: mutable.Set[Entry]): Set[String] = if (allGenericsUndefined) generics else undefinedGenericGatherer(seen)
+        private def hereGenerics = undefinedGenerics
     }
 
     private class GenericEntry() extends Entry {
-        private val name = s"T${nextId()}"
+        val name = s"T${nextId()}"
         override def print(outerGenerics: Set[String]): String = {
             if (outerGenerics.contains(name)) {
                 return name
@@ -187,19 +219,22 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
             }
         }
 
-        override def generics: Set[String] = Set(name)
-        override def undefinedGenerics: Set[String] = Set()
+        override def generics: Set[String] = Set(name) | genericExtends.get(name).map(_.generics).getOrElse(Set())
+        override def undefinedGenerics: Set[String] = genericExtends.get(name).map(_.generics + name).getOrElse(Set())
     }
 
     private class UnionEntry(_values: => Seq[Entry]) extends Entry {
         private lazy val values = _values
         override def print(outerGenerics: Set[String]): String = values.map(_.print(outerGenerics)).mkString(" | ")
-        private lazy val (singleGenerics, hereGenerics) = calcGenerics(values)
 
-        override lazy val undefinedGenerics: Set[String] = hereGenerics
         private val gatherer = new GenericGatherer(this, values)
         override def generics: Set[String] = gatherer()
         override def generics(seen: mutable.Set[Entry]): Set[String] = gatherer(seen)
+
+
+        private val undefinedGenericGatherer = new UndefinedGenericGatherer(this, values)
+        override def undefinedGenerics: Set[String] = undefinedGenericGatherer()
+        override def undefinedGenerics(seen: mutable.Set[Entry]): Set[String] = undefinedGenericGatherer(seen)
     }
 
 
@@ -224,9 +259,14 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
                     val isInterface = obj.functionInfo.isEmpty || obj.members.nonEmpty
                     if (isInterface) {
                         if (obj.isUserObject || obj.members.isEmpty) {
-                            new GenericEntry()
+                            val generic = new GenericEntry()
+                            val info = obj.userInfo.get
+                            if (info.readProperties.nonEmpty) {
+                                genericExtends += generic.name -> new InterfaceEntry(info.readProperties.mapValues(makeEntry), None, true)
+                            }
+                            generic
                         } else {
-                            new InterfaceEntry(obj.members.mapValues(makeEntry), obj.functionInfo.map(makeFunctionEntry))
+                            new InterfaceEntry(obj.members.mapValues(makeEntry), obj.functionInfo.map(makeFunctionEntry), false)
                         }
                     } else {
                         val info = obj.functionInfo.get
