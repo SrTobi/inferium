@@ -12,6 +12,8 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
                               outerClosureValues: Seq[ValueLike],
                               parameter: Seq[(String, ValueSourceProvider)],
                               outerClosure: Option[Templates.Closure],
+                              callStack: Templates.CallStack,
+                              innerFunctionDefinitions: mutable.Map[Ast.Function, FunctionTemplate],
                               endNode: Nodes.Node)(implicit val flowAnalysis: FlowAnalysis) {
 
     private class NodeBuilder(begin: Nodes.BeginNode) {
@@ -99,11 +101,11 @@ private class TemplateBuilder(body: Seq[Ast.Statement],
             val funcValue = buildExpression(func, newnode)
             val argValues = args.map(buildExpression(_, newnode))
 
-            val node = newnode(new Nodes.FunctionCall(funcValue.newSource(), argValues))
+            val node = newnode(new Nodes.FunctionCall(funcValue.newSource(), argValues, callStack))
             return node.result
 
         case func: Ast.Function =>
-            val templ = new FunctionTemplate(func, closure)
+            val templ = innerFunctionDefinitions.getOrElseUpdate(func, new FunctionTemplate(func, closure))
             val node = newnode(new Nodes.Literal(new FunctionValue(templ, closureValues)))
             return node.result
     }
@@ -214,10 +216,12 @@ object TemplateBuilder {
 
     private class FunctionTemplate(val ast: Ast.Function, override val closure: Templates.Closure)(implicit val flowAnalysis: FlowAnalysis) extends Templates.Function {
 
+        private val innerFunctionDefinitions = mutable.Map.empty[Ast.Function, FunctionTemplate]
+
         override def parameters: Seq[String] = ast.params
 
-        override def instantiate(closures: Seq[ValueLike], arguments: Seq[ValueSourceProvider], endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
-            val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), endNode)
+        override def instantiate(closures: Seq[ValueLike], arguments: Seq[ValueSourceProvider], callStack: Templates.CallStack, endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
+            val builder = new TemplateBuilder(ast.block, closures, parameters.zip(arguments), Some(closure), callStack, innerFunctionDefinitions, endNode)
             return builder.build()
         }
 
@@ -236,9 +240,11 @@ object TemplateBuilder {
     }
 
     def buildScriptTemplate(script: Ast.Script): Templates.Script = new Templates.Script {
+        private val innerFunctionDefinitions = mutable.Map.empty[Ast.Function, FunctionTemplate]
+
         override def instantiate(flowAnalysis: FlowAnalysis, global: ObjectValue, endNode: Nodes.Node): (Nodes.Node, Seq[ValueSourceProvider]) = {
             val globalClosure = new Closure(None)
-            val builder = new TemplateBuilder(script.main, Seq(global), Seq(), Some(globalClosure), endNode)(flowAnalysis)
+            val builder = new TemplateBuilder(script.main, Seq(global), Seq(), Some(globalClosure), Map(), innerFunctionDefinitions, endNode)(flowAnalysis)
             return builder.build()
         }
     }

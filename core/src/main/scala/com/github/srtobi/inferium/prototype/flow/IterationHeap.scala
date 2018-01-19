@@ -143,7 +143,10 @@ object IterationHeap {
         }
 
         override def squashed(): Memory = {
-            val unifier = new Unifier(this.split())
+            if (prev.isEmpty) {
+                return this
+            }
+            val unifier = new Unifier(this)
 
             while (unifier.canUp)
                 unifier.up()
@@ -151,7 +154,7 @@ object IterationHeap {
             return new Memory(0, None, unifier.objects)
         }
 
-        /*override def structureEquals(o: HeapMemory): Boolean = o match {
+        override def structureEquals(o: HeapMemory): Boolean = o match {
             case other: Memory =>
                 assert(prev.isEmpty)
                 assert(other.prev.isEmpty)
@@ -165,14 +168,14 @@ object IterationHeap {
                                     case (prop, (_, aValue)) =>
                                         bProps.get(prop).exists {
                                             case (_, bValue) =>
-                                                bValue.structureEquals(aValue)
+                                                bValue.normalized.structureEquals(aValue.normalized)
                                         }
                                 }
                         }
                 }
             case _ =>
                 false
-        }*/
+        }
     }
 
     object Memory {

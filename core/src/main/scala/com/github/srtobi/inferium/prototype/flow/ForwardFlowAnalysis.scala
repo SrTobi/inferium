@@ -24,6 +24,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
     private class CallContext(override val function: FunctionValue) extends FunctionInfo{
         val arguments: Seq[UserValue] = Seq.fill(function.template.parameters.length)(new UserValue)
+        knownObjects ++= arguments
         var returnValue: Value = NeverValue
 
         def fetchResultingHeap(): Option[HeapMemory] = {
@@ -32,7 +33,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
             return res
         }
         private val endNode = new EndNode
-        val callNode = new Nodes.FunctionCall(ValueSource.wrap(function), arguments.map(ValueSink.wrap))(ForwardFlowAnalysis.this)
+        val callNode = new Nodes.FunctionCall(ValueSource.wrap(function), arguments.map(ValueSink.wrap), Map())(ForwardFlowAnalysis.this)
         val returnSource: ValueSource = callNode.result.newSource()
         callNode.next = endNode
 
@@ -78,15 +79,19 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
         def add(value: Value): Unit = value match {
             case union: UnionValue => union.baseObjects.foreach(add)
             case obj: ObjectValue =>
+                knownObjects += obj
                 obj match {
                     case func: FunctionValue =>
                         if (!knownFunctions.contains(func)) {
                             knownFunctions += (func -> new CallContext(func))
                         }
                         func.closures.map(_.asValue).foreach(add)
+                    case uv: UserValue =>
+                        uv.functionInfo.foreach(info => {
+                            info.parameter.map(_.normalized).foreach(add)
+                        })
                     case _ =>
                 }
-                knownObjects += obj
                 queue.enqueue(obj)
             case _ =>
         }
@@ -100,13 +105,14 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
             if (!objects.contains(obj)) {
                 objects += obj
+
                 for (prop <- newHeap.listProperties(obj).iterator) {
                     val oldValue = oldHeap.readProperty(obj, prop, cache = false)
                     assert(oldValue.isNormalized)
                     val value = newHeap.readProperty(obj, prop, cache = false).normalized
                     val resultValue = UnionValue(oldValue, value).normalized
 
-                    if (!oldValue.structureEquals(resultValue)) {
+                    if (changed || !oldValue.structureEquals(resultValue)) {
                         changed = true
                     }
 
@@ -114,6 +120,9 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
 
                     add(resultValue)
                 }
+
+                // TODO: not good! only members should be added
+                add(obj)
             }
         }
 

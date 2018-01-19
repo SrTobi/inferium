@@ -1,5 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
+import com.github.srtobi.inferium.prototype.Ast
 import com.github.srtobi.inferium.prototype.flow.lattice.BoolLattice
 
 import scala.annotation.tailrec
@@ -247,37 +248,104 @@ object Nodes {
         }
     }
 
-    class FunctionCall(val target: ValueSource, val arguments: Seq[ValueSourceProvider])(implicit flowAnalysis: FlowAnalysis) extends Node {
+    class FunctionCall(val target: ValueSource, val arguments: Seq[ValueSourceProvider], val callStack: Templates.CallStack)(implicit flowAnalysis: FlowAnalysis) extends Node {
         private type CallContext = (Nodes.Node, Seq[ValueSourceProvider])
         private val calls = mutable.Map.empty[FunctionValue, CallContext]
         private val _result = new ValueSink
         private val allReturns = mutable.Buffer.empty[ValueSource]
         def result: ValueSourceProvider = _result
 
-        val mergeNode = new MergeNode(0, new Node() {
+        // recursion stuff
+        private var hasRecursion: Boolean = _
+        private var currentReturn: ValueLike = NeverValue
+        private var invariantHeap: HeapMemory = _
+        private var currentArguments: Option[Seq[ValueLike]] = None
+        private var mergedArguments: Seq[ValueSink] = arguments.map(_ => new ValueSink)
+        private var argsChanged = false
+
+        private val mergeNode = new MergeNode(0, new Node() {
+
             override def onControlFlow(heap: HeapMemory): Unit = {
-                _result.set(UnionValue(allReturns.map(_.get()): _*))
-                controlFlowTo(FunctionCall.this.next, heap)
+                val ret = UnionValue(allReturns.map(_.get()): _*)
+                _result.set(ret)
+
+                val retValue = ret.normalized
+
+                val heapAfterCall = if (hasRecursion) {
+                    val mergedHeap = flowAnalysis.unify(invariantHeap, heap)
+                    if (argsChanged || !mergedHeap.squashed().structureEquals(invariantHeap.squashed()) || !retValue.structureEquals(currentReturn)) {
+                        // invariant heap has changed... go again
+                        currentReturn = retValue
+                        controlFlowTo(FunctionCall.this, mergedHeap)
+                        return
+                    }
+                    mergedHeap
+                } else {
+                    heap
+                }
+
+                currentArguments = None
+                invariantHeap = null
+                if (retValue == NeverValue) {
+                    noControlFlowTo(FunctionCall.this.next)
+                } else {
+                    controlFlowTo(FunctionCall.this.next, heapAfterCall)
+                }
             }
 
-            override def onNoControlFlow(): Unit = noControlFlowTo(FunctionCall.this.next)
+            override def onNoControlFlow(): Unit = {
+                invariantHeap = null
+                noControlFlowTo(FunctionCall.this.next)
+            }
         })
 
         override def onControlFlow(heap: HeapMemory): Unit = {
             val funcVal = target.get().remove(heap, !_.asValue.isInstanceOf[FunctionLike])
             val functions = funcVal.asFunctions
 
+            hasRecursion = false
+            argsChanged = false
+            invariantHeap = heap.split()
+
+            val args = currentArguments match {
+                case Some(values) => values
+                case None =>
+                    val values = arguments.map(_.newSource().get())
+                    currentArguments = Some(values)
+                    values
+            }
+
+            // set arguments
+            mergedArguments.zip(args).foreach {
+                case (sink, arg) => sink.set(arg)
+            }
+
             allReturns.clear()
-            lazy val argumentValues = arguments.map(_.newSource().get())
+            lazy val argumentValues = mergedArguments.map(_.newSource().get())
 
             val begins = functions.map {
                 case uv: UserValue =>
                     allReturns += ValueSource.wrap(uv.onCall(argumentValues))
                     mergeNode
                 case func@FunctionValue(template, closures) =>
-                    val (begin, returns) = calls.getOrElseUpdate(func, template.instantiate(closures, arguments, mergeNode))
-                    allReturns ++= returns.map(_.newSource())
-                    begin
+                    callStack.get(template) match {
+                        case Some(prevCallNode) =>
+                            prevCallNode.hasRecursion = true
+                            prevCallNode.currentArguments = Some(prevCallNode.currentArguments.get.zipAll(argumentValues, UndefinedValue, UndefinedValue).map {
+                                case (old, a) =>
+                                    val merged = UnionValue(old, a).normalized
+                                    if (!merged.structureEquals(old.normalized)) {
+                                        prevCallNode.argsChanged = true
+                                    }
+                                    merged
+                            })
+                            allReturns += ValueSource.wrap(prevCallNode.currentReturn)
+                            mergeNode
+                        case None =>
+                            val (begin, returns) = calls.getOrElseUpdate(func, template.instantiate(closures, mergedArguments, callStack + (template -> this), mergeNode))
+                            allReturns ++= returns.map(_.newSource())
+                            begin
+                    }
             }
 
             mergeNode.setNumBranchesToWaitFor(allReturns.length)

@@ -18,18 +18,33 @@ object Playground {
         val printer = new TypeScriptPrinter(result, null)
         println(printer.print())
     }
+
     def main(args: Array[String]): Unit = {
+
+        val ycode =
+            """
+              |var Y = (f) => {
+              |    var y = (newP) => {
+              |        return Y(f)(newP)
+              |    }
+              |    return (p) => { return f(y, p) }
+              |}
+              |
+              |return Y
+            """.stripMargin
 
         val code =
             """
               |
-              |return (folder, list, init) => {
-              |    // there are no lists :) and also no loop and no recursion (yet)
-              |    // so do it kinda manually
-              |    var acc = folder(init, list)
-              |    return folder(acc, list)
+              |var fold = (folder, it, init) => {
+              |    if (it.hasNext()) {
+              |      return fold(folder, it, folder(init, it.next()))
+              |    } else {
+              |      return init
+              |    }
               |}
               |
+              |return fold
               |
             """.stripMargin
 
