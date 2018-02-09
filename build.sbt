@@ -16,6 +16,7 @@ lazy val core = crossProject.
     settings(
         name := "inferium-core",
         version := "0.1-SNAPSHOT",
+        libraryDependencies += "com.lihaoyi" %% "upickle" % "0.5.1",
         libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0"
     ).
     jvmSettings(
