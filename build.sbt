@@ -1,10 +1,16 @@
-name := "inferium"
-
 scalaVersion := "2.12.3"
 
+lazy val commonSettings = Seq(
+    organization := "de.srtobi",
+    version := "0.1-SNAPSHOT",
+    libraryDependencies += "com.lihaoyi" %% "upickle" % "0.5.1",
+    libraryDependencies += "de.srtobi" %% "escalima" % "0.1",
+    libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5" % Test,
+    libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
+)
 
 lazy val root = project.in(file(".")).
-    aggregate(cli, web).
+    aggregate(cli, web, coreJVM, coreJS).
     settings(
         publish := {},
         publishLocal := {}
@@ -13,15 +19,11 @@ lazy val root = project.in(file(".")).
 lazy val core = crossProject.
     crossType(CrossType.Pure).
     in(file("core")).
+    settings(commonSettings: _*).
     settings(
-        name := "inferium-core",
-        version := "0.1-SNAPSHOT",
-        libraryDependencies += "com.lihaoyi" %% "upickle" % "0.5.1",
-        libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0"
     ).
     jvmSettings(
         // Add JVM-specific settings here
-        //libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0"
     ).
     jsSettings(
         // Add JS-specific settings here
@@ -34,10 +36,7 @@ lazy val cli = project
     .in(file("cli"))
     .dependsOn(coreJVM)
     .settings(
-        name := "inferium-cli",
-        version := "0.1-SNAPSHOT",
-        libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.4",
-        libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.4" % Test
+        commonSettings: _*
     )
 
 
@@ -45,8 +44,7 @@ lazy val web = project
     .in(file("web"))
     .enablePlugins(ScalaJSPlugin)
     .dependsOn(coreJS)
+    .settings(commonSettings: _*)
     .settings(
-        name := "inferium-web",
-        version := "0.1-SNAPSHOT",
         scalaJSUseMainModuleInitializer := false,
     )
