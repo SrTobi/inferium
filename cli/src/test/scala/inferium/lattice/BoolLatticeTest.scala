@@ -2,13 +2,13 @@ package inferium.lattice
 
 import org.scalatest.{FlatSpec, Matchers}
 
-class BoolTest extends FlatSpec with Matchers {
-    import Bool.{False, Top, True}
-    import GeneralBool.Bottom
+class BoolLatticeTest extends FlatSpec with Matchers {
+    import BoolLattice.{False, Top, True}
+    import GeneralBoolLattice.Bottom
 
     "A Bool lattice" should "be constructable from Boolean" in {
-        Bool(true) shouldBe True
-        Bool(false) shouldBe False
+        BoolLattice(true) shouldBe True
+        BoolLattice(false) shouldBe False
     }
 
     it should "handle unification of equal values correct" in {
@@ -43,17 +43,17 @@ class BoolTest extends FlatSpec with Matchers {
     }
 
     "Bool.unify" should "return bool X when multiple X are unified" in {
-        Bool.unify(Seq(True, True, True, True, True)) shouldBe True
-        Bool.unify(Seq(False, False, False, False, False)) shouldBe False
-        Bool.unify(Seq(Top, Top, Top, Top, Top)) shouldBe Top
+        BoolLattice.unify(Seq(True, True, True, True, True)) shouldBe True
+        BoolLattice.unify(Seq(False, False, False, False, False)) shouldBe False
+        BoolLattice.unify(Seq(Top, Top, Top, Top, Top)) shouldBe Top
     }
 
     it should "return Top if different lattice member are unified" in {
-        Bool.unify(Seq(True, False, True)) shouldBe Top
-        Bool.unify(Seq(False, False, True)) shouldBe Top
-        Bool.unify(Seq(False, False, Top)) shouldBe Top
-        Bool.unify(Seq(Top, False, True)) shouldBe Top
-        Bool.unify(Seq(Top, Top, True)) shouldBe Top
-        Bool.unify(Seq(True, True, False)) shouldBe Top
+        BoolLattice.unify(Seq(True, False, True)) shouldBe Top
+        BoolLattice.unify(Seq(False, False, True)) shouldBe Top
+        BoolLattice.unify(Seq(False, False, Top)) shouldBe Top
+        BoolLattice.unify(Seq(Top, False, True)) shouldBe Top
+        BoolLattice.unify(Seq(Top, Top, True)) shouldBe Top
+        BoolLattice.unify(Seq(True, True, False)) shouldBe Top
     }
 }
