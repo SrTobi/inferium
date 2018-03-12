@@ -38,10 +38,12 @@ class Heap(val depth: Int = 0, val prev: Option[Heap] = None, private val handle
 
     def apply(handle: Handle): Entity = readHandle(handle)
 
-    def readHandle(handle: Handle): Entity = {
+    def readHandle(handle: Handle): Entity = getHandle(handle).getOrElse(throw new IllegalArgumentException(s"Handle $handle not defined"))
+
+    private def getHandle(handle: Handle): Option[Entity] = {
         assert(!corrupt)
-        lazy val parentResult = prev.getOrElse(throw new IllegalStateException(s"Couldn't find handle $handle")).readHandle(handle)
-        return handles.getOrElse(handle, parentResult)
+        lazy val parentResult = prev.flatMap(_.getHandle(handle))
+        return handles.get(handle).map(Some(_)).getOrElse(parentResult)
     }
 
     def writeHandle(handle: Handle, entity: Entity): Entity = {
@@ -104,8 +106,10 @@ object Heap {
 
             objSet.foreach {
                 handle =>
-                    val aVal = a.objects.get(handle)
-                    val bVal = b.objects.get(handle)
+                    lazy val aDefault = a.nextHeap.flatMap(_.getHandle(handle))
+                    lazy val bDefault = b.nextHeap.flatMap(_.getHandle(handle))
+                    val aVal = a.objects.get(handle).map(Some(_)).getOrElse(aDefault)
+                    val bVal = b.objects.get(handle).map(Some(_)).getOrElse(bDefault)
 
                     bVal.map(bv => aVal.map(av => av.unify(bv)).getOrElse(bv)).foreach(a.objects.put(handle, _))
             }

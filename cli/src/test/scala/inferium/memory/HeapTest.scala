@@ -53,15 +53,21 @@ class HeapTest extends FlatSpec with Matchers {
 
         val base = new Heap
         val h = new Handle
+        val hh = new Handle
+        val hhh = new Handle
 
         base.writeHandle(h, FalseValue)
+        base.writeHandle(hh, SpecificStringValue("test"))
 
         val h1 = base.split()
         val h2 = base.split()
 
         h1.writeHandle(h, TrueValue)
+        h2.writeHandle(hhh, SpecificNumberValue(3))
 
         val merged = h1.unify(h2)
         merged.readHandle(h) shouldBe BoolValue
+        merged.readHandle(hh) shouldBe SpecificStringValue("test")
+        merged.readHandle(hhh) shouldBe SpecificNumberValue(3)
     }
 }
