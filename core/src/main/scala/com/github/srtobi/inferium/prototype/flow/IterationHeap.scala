@@ -113,7 +113,7 @@ object IterationHeap {
                 val org = readProperty(obj, property)
                 if (org == value) {
                     // we now know that the reference still applies and can now change it
-                    // but that might be another reference and we can trie to change that as well
+                    // but that might be another reference and we can try to change that as well
                     writeProperty(obj, property, newValue)
                 }
         }

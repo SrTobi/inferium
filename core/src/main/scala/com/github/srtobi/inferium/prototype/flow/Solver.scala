@@ -1,5 +1,6 @@
 package com.github.srtobi.inferium.prototype.flow
 
+// not really needed :D
 trait Solver {
     //def newValue(): Value
 
