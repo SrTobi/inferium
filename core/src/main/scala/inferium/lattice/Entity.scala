@@ -1,20 +1,25 @@
 package inferium.lattice
 
 import scala.collection.mutable
+import scala.collection.immutable
 
 
 abstract class Entity {
 
-    def unify(other: Entity): Entity = Entity.unify(Seq(this, other))
+    def unify(other: Entity): Entity = Entity.unify(this, other)
+
+    def mightBe(entity: Entity): Boolean = this == entity
 }
 
 object Entity {
-    def unify(entities: Seq[Entity]): Entity = {
+    /*def unify(entities: Seq[Entity]): Entity = {
+        var hasUndefined = false
+        var hasNull = false
         var boolValue: BoolValue = null
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
-        var hasUndefined = false
-        var hasNull = false
+        var objLocations = mutable.Set.empty[ObjLocation]
+        var refs = mutable.Set.empty[]
 
         entities.flatMap(unpackUnion) foreach {
             case bool: BoolValue =>
@@ -48,17 +53,66 @@ object Entity {
                 Option(numberValue).toSeq ++
                 Option(stringValues).getOrElse(Seq(StringValue))
         )
-    }
+    }*/
 
-    private def unpackUnion(value: Entity): Seq[Entity] = value match {
-        case UnionValue(values) => values
-        case NeverValue => Seq()
-        case noUnion => Seq(noUnion)
-    }
+    def apply(entities: Entity*): Entity = unify(entities)
 
-    private def unionFromSeq(entites: Seq[Entity]): Entity = entites match {
+    private val emptyUnion = UnionValue(isUndef = false, isNull = false, None, Set.empty, Set.empty, Set.empty)
+    private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
+
+    def unify(entities: Seq[Entity]): Entity = entities match {
         case Seq() => NeverValue
-        case Seq(entity) => entity
-        case _ => new UnionValue(entites)
+        case fst +: rest => unify(fst, rest)
+    }
+
+    private def unify(entity: Entity, entities: Seq[Entity]): Entity = entities match {
+        case Seq() => entity
+        case fst +: rest => unify(unify(entity, fst), rest)
+    }
+
+    def unify(fst: Entity, snd: Entity): Entity = (fst, snd) match {
+        case (fst: UnionValue, snd: UnionValue) =>
+            return UnionValue(
+                fst.isUndef || snd.isUndef,
+                fst.isNull || snd.isNull,
+                if (fst.num.isEmpty)
+                    snd.num
+                else if (snd.num.isEmpty || fst.num == snd.num)
+                    fst.num
+                else
+                    Some(NumberValue)
+                ,
+                if (fst.strings == stringUnion || snd.strings == stringUnion) stringUnion else fst.strings ++ snd.strings,
+                fst.objs ++ snd.objs,
+                fst.refs ++ snd.refs
+            )
+        case (fst: UnionValue, _) =>
+            unifyUnionWithSingleEntity(fst, snd)
+
+        case (_, snd: UnionValue) =>
+            unify(snd, fst)
+
+        case _ =>
+            if (fst == snd || fst == NeverValue) {
+                return snd
+            } else {
+                val u = unifyUnionWithSingleEntity(emptyUnion, fst)
+                return unifyUnionWithSingleEntity(u, snd)
+            }
+
+    }
+
+    private def unifyUnionWithSingleEntity(union: UnionValue, entity: Entity): UnionValue = union match {
+        case UnionValue(undef, isNull, num, strings, objs, refs) => entity match {
+            case NeverValue => union
+            case UndefinedValue => UnionValue(isUndef = true, isNull, num, strings, objs, refs)
+            case NullValue => UnionValue(undef, isNull = true, num, strings, objs, refs)
+            case number: NumberValue => UnionValue(undef, isNull, if (num.contains(number)) num else Some(NumberValue), strings, objs, refs)
+            case str: SpecificStringValue => UnionValue(undef, isNull, num, if (strings == stringUnion) stringUnion else strings + str, objs, refs)
+            case StringValue => UnionValue(undef, isNull, num, stringUnion, objs, refs)
+            case obj: ObjLocation => UnionValue(undef, isNull, num, strings, objs + obj, refs)
+            case ref: Ref => UnionValue(undef, isNull, num, strings, objs, refs + ref)
+            case _ => throw new IllegalArgumentException(s"Unexpected entity $entity")
+        }
     }
 }

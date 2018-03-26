@@ -12,6 +12,7 @@ lazy val commonSettings = Seq(
 lazy val root = project.in(file(".")).
     aggregate(cli, web, coreJVM, coreJS).
     settings(
+        name := "inferium",
         publish := {},
         publishLocal := {}
     )
