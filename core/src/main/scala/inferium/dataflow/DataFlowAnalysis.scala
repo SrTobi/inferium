@@ -4,9 +4,13 @@ import scala.collection.mutable
 
 class DataFlowAnalysis(subject: Analysable) {
 
-    private val contextsToPropagate = mutable.Queue.empty[(ExecutionContext, graph.Node)]
+    private val contextsToPropagate = mutable.Queue.empty[(ExecutionState, graph.Node)]
 
-    def contextFlowsTo(ctx: ExecutionContext, node: graph.Node): Unit = {
+    def noStateFlowsTo(node: graph.Node): Unit = {
+
+    }
+
+    def stateFlowsTo(ctx: ExecutionState, node: graph.Node): Unit = {
         assert(ctx ne null)
         assert(node ne null)
         contextsToPropagate.enqueue(ctx -> node)
