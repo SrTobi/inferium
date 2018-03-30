@@ -1,23 +1,15 @@
 package inferium.dataflow.graph
+import inferium.dataflow.ExecutionState
 
-abstract class LinearNode extends Node {
-    private var _next: Node = _
+abstract class LinearNode extends Node with SingleSuccessor with SinglePredecessor {
+    private var _inState: ExecutionState = _
 
-    def hasNext: Boolean = _next != null
+    def inState: ExecutionState = _inState
 
-    def next: Node = {
-        assert(_next != null)
-        _next
-    }
-
-    def next_=(node: Node): Unit = {
-        assert(_next == null)
-        assert(node != null)
-        _next = node
-        node.addIncomingNode(node)
-    }
-
-    def connectToNext(node: LinearNode): Unit = {
-
+    override def setNewInState(state: ExecutionState): Unit = {
+        if (inState != state) {
+            _inState = state
+            state.flowTo(this)
+        }
     }
 }

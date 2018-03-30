@@ -1,7 +1,7 @@
 package inferium.dataflow.graph
 import inferium.dataflow.ExecutionState
 
-class JumpNode extends LinearNode {
+class JumpNode extends Node with SingleSuccessor with SinglePredecessor {
     private var _target: Node = _
 
     def target: Node = {
@@ -15,13 +15,11 @@ class JumpNode extends LinearNode {
         _target = node
     }
 
-    override def onControlFlow(state: ExecutionState): Unit = {
-        val analysis = state.dataFlowAnalysis
-        analysis.stateFlowsTo(state, target)
-        analysis.noStateFlowsTo(next)
+    override def setNewInState(state: ExecutionState): Unit = {
+        target.setNewInState(state)
     }
 
-    override def onNoControlFlow(): Unit = {
-
+    override def process(): Unit = {
+        throw new IllegalStateException("jump nodes should not be processed")
     }
 }

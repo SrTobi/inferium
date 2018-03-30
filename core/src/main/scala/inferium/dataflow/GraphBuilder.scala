@@ -1,180 +1,164 @@
 package inferium.dataflow
 import escalima.ast
-import inferium.dataflow.graph.{LinearNode, MergeNode, Node}
-import inferium.lattice.Entity
+import inferium.dataflow.graph._
+import inferium.lattice._
 
 import scala.collection.mutable
+import scala.util.Try
 
 
 object GraphBuilder {
 
-    private class LabelManager {
-        import LabelManager.Action
-        private val labels = mutable.Map.empty[String, mutable.Buffer[Action]]
-        private var loops: List[mutable.Buffer[Action]] = Nil
+    private case class JumpTarget(targetBlock: BlockInfo, entry: Option[MergeNode], exit: MergeNode)
 
-        def declareLabel(name: String): Unit = {
-            val prev = labels.put(name, mutable.Buffer.empty)
-            if (prev.isDefined) {
-                throw new BuildException(s"Label '$name' is already declared")
-            }
-        }
-
-        def defineLabel(name: String, g: Graph): Unit = {
-            val usages = labels.remove(name).get
-            usages foreach { _(g) }
-        }
-
-        def useLabel(name: String, action: Action): Unit = {
-            labels.get(name) match {
-                case None => throw new BuildException(s"Label '$name' was not declared")
-                case Some(usages) =>
-                    usages += action
-            }
-        }
-
-        def declareLoop(): Unit = {
-            loops ::= mutable.Buffer.empty
-        }
-
-        def defineLoop(g: Graph): Unit = {
-            if (loops.isEmpty) {
-                throw new BuildException("No loop defined")
-            }
-            val actions :: rest = loops
-            loops = rest
-            actions foreach { _(g) }
-        }
-
-        def useLoop(action: Action): Unit = {
-            if (loops.isEmpty) {
-                throw new BuildException("No loop defined")
-            }
-            loops.head += action
-        }
-    }
-
-    private object LabelManager {
-        type Action = (Graph) => Unit
-    }
-
-    private sealed abstract class Graph {
-
-        def embedInto(before: LinearNode, after: Node): Unit
-        def ++(graph: Graph): Graph
-        def begin_<~(node: LinearNode): Unit
-        def after_<~(node: LinearNode): Unit
-    }
-
-    private final case object EmptyGraph extends Graph {
-        override def embedInto(before: LinearNode, after: Node): Unit = {
-            before.next = after
-        }
-
-        override def ++(graph: Graph): Graph = graph
-
-        override def begin_<~(node: LinearNode): Unit = throw new IllegalArgumentException("can not connect to empty graph")
-        override def after_<~(node: LinearNode): Unit = throw new IllegalArgumentException("can not connect behind empty graph")
-
-    }
-    private final case class LinearGraph(begin: Node, end: LinearNode) extends Graph {
-        protected var after: Node = _
-        private var nodesToAfter: List[LinearNode] = Nil
-
-        override def embedInto(before: LinearNode, after: Node): Unit = {
-            before.next = begin
-            end.next = after
-            connectWaitingNodesToAfter(after)
-        }
-
-        override def ++(graph: Graph): Graph = {
-            graph match {
-                case EmptyGraph =>
-                    this
-                case LinearGraph(otherBegin, otherEnd) =>
-                    end.next = otherBegin
-                    connectWaitingNodesToAfter(otherBegin)
-                    Graph(begin, otherEnd)
-            }
-        }
-
-        override def begin_<~(node: LinearNode): Unit = {
-            node.next = begin
-        }
-
-
-        override def after_<~(node: LinearNode): Unit = {
-            if(after == null) {
-                nodesToAfter ::= node
-            } else {
-                node.next = after
-            }
-        }
-
-        private def connectWaitingNodesToAfter(after: Node): Unit = {
-            nodesToAfter foreach { _.next = after }
-            assert(this.after == null)
-            this.after = after
-        }
-    }
-
-    private object Graph {
-        def apply(begin: Node, end: LinearNode): LinearGraph = LinearGraph(begin, end)
-        def apply(beginAndEnd: LinearNode): LinearGraph = LinearGraph(beginAndEnd, beginAndEnd)
-    }
-
-    private implicit def convertNodeToGraph(node: LinearNode): LinearGraph = Graph(node)
-
-    private class BlockInfo(outer: Option[BlockInfo],
-                            labelTargets: Map[String, (MergeNode, MergeNode)],
-                            loopTarget: Option[(MergeNode, MergeNode)],
-                            catchTarget: Option[MergeNode],
-                            finallizer: Option[() => Graph]) {
+    private class BlockInfo(val outer: Option[BlockInfo],
+                            val labelTargets: Map[String, JumpTarget],
+                            val loopTarget: Option[JumpTarget],
+                            val catchEntry: Option[MergeNode],
+                            val finalizer: Option[() => Graph]) {
 
         val depth: Int = outer.map(_.depth + 1).getOrElse(0)
+
+        def inner(labelTargets: Map[String, JumpTarget] = this.labelTargets,
+                  loopTarget: Option[JumpTarget] = this.loopTarget,
+                  catchEntry: Option[MergeNode] = None,
+                  finalizer: Option[() => Graph] = None): BlockInfo = new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
     }
 
     private class BlockBuilder(var strict: Boolean = false,
-                               labels: LabelManager,
-                               exceptionTarget: Option[Node]) {
+                               block: BlockInfo) {
 
         private var done = false
         private val hoistables = mutable.Buffer.empty[Node]
 
-        private def labelConnector(label: Option[ast.Identifier]): (LabelManager.Action) => Unit = label match {
-            case None => labels.useLoop
-            case Some(ast.Identifier(name)) => labels.useLabel(name, _)
+        private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode): graph.JumpNode = {
+            def unroll(block: BlockInfo): Graph = {
+                if (block == targetBlock) {
+                    EmptyGraph
+                }
+                val finalizerGraph = block.finalizer.map(_()).getOrElse(EmptyGraph)
+                val restGraph = block.outer.map(unroll).getOrElse(EmptyGraph)
+                finalizerGraph ~> restGraph
+            }
+
+            val finalizers = unroll(block)
+            val jmp = new graph.JumpNode
+            jmp ~> finalizers ~> targetNode
+            jmp
         }
 
-        private def buildStatement(stmt: ast.Statement): Graph = stmt match {
+        private def resolveLoopTarget(label: Option[ast.Identifier], labels: Map[String, JumpTarget]): JumpTarget = {
+            label match {
+                case Some(ast.Identifier(name)) =>
+                    labels.get(name) match {
+                        case Some(target) => target
+                        case None => throw new BuildException(s"Label '$name' is not declared")
+                    }
+
+                case None =>
+                    block.loopTarget match {
+                        case Some(target) => target
+                        case None => throw new BuildException(s"There is no loop to jump to")
+                    }
+            }
+        }
+
+        private def buildLiteral(entity: Entity): Graph = {
+            new graph.LiteralNode(entity)
+        }
+
+        private def buildExpression(expr: ast.Expression): Graph = expr match {
+            case ast.BooleanLiteral(value) =>
+                buildLiteral(BoolValue(BoolLattice(value)))
+
+            case ast.StringLiteral(value) =>
+                buildLiteral(StringValue(value))
+
+            case num: ast.NumberLiteral =>
+                val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
+                buildLiteral(value)
+
+            case _: ast.NullLiteral =>
+                buildLiteral(NullValue)
+
+            case ast.Identifier("undefined") =>
+                buildLiteral(UndefinedValue)
+
+            case ast.Identifier(varName) =>
+                new graph.LexicalContextReadNode(varName)
+        }
+
+        private def buildStatement(stmt: ast.Statement, labels: Map[String, JumpTarget], here: Option[JumpTarget]): Graph = stmt match {
             case ast.LabeledStatement(ast.Identifier(name), body) =>
-                labels.declareLabel(name)
-                val bodyGraph = buildStatement(body)
-                labels.defineLabel(name, bodyGraph)
-                return bodyGraph
+                if (labels.contains(name)) {
+                    throw new BuildException(s"Label '$name' already declared")
+                }
+
+                val (target, merger) = here match {
+                    case Some(hereTarget) =>
+                        (hereTarget, EmptyGraph)
+                    case None =>
+                        val merger = new MergeNode(true)
+                        (JumpTarget(block, None, merger), Graph(merger))
+                }
+                val graph = buildStatement(body, labels + (name -> target), Some(target))
+                graph ~> merger
 
             case ast.BlockStatement(body) =>
-                val blockBuilder = new BlockBuilder(strict, labels, exceptionTarget)
-                return blockBuilder.build(body)
+                val innerBlock = block.inner(labelTargets = labels)
+                buildInnerBlock(innerBlock, body)
 
-            case ast.BreakStatement(label) =>
-                val connectLabel = labelConnector(label)
-                val jmp = new graph.JumpNode
-                connectLabel((g) => g.after_<~(jmp))
-                return jmp
+            case ast.BreakStatement(targetLabel) =>
+                val target = resolveLoopTarget(targetLabel, labels)
+                buildJump(target.targetBlock, target.exit)
 
-            case ast.ContinueStatement(label) =>
-                val connectLabel = labelConnector(label)
-                val jmp = new graph.JumpNode
-                connectLabel((g) => g.begin_<~(jmp))
-                return jmp
+            case ast.ContinueStatement(targetLabel) =>
+                val target = resolveLoopTarget(targetLabel, labels)
+                val loopEntry = target.entry.getOrElse(throw new BuildException(s"Can not continue the statement '${targetLabel.map(_.name).getOrElse("???")}'"))
+                buildJump(target.targetBlock, loopEntry)
 
-            case ast.TryStatement(body, catchHandler, finallyHandler) =>
+            case ast.ExpressionStatement(expr) =>
+                val exprGraph = buildExpression(expr)
+                exprGraph ~> new graph.PopNode
 
+            case ast.TryStatement(tryBody, catchHandler, finallyHandler) =>
+                val catchMerger = new graph.MergeNode
 
-            // ignore
+                val finallyBuilder = finallyHandler match {
+                    case Some(ast.BlockStatement(finallyBody)) =>
+                        () => buildInnerBlock(block.inner(), finallyBody)
+                    case None =>
+                        () => EmptyGraph
+                }
+
+                val tryBlock = block.inner(catchEntry = Some(catchMerger), finalizer = Some(finallyBuilder))
+                val tryGraph = buildInnerBlock(tryBlock, tryBody.body)
+
+                // build catch
+                val afterCatch = catchHandler match {
+                    case Some(ast.CatchClause(pattern, catchBody)) =>
+                        ???
+                    case None =>
+                        catchMerger
+                }
+
+                val tryCatchGraph = tryGraph ~> afterCatch
+
+                // build finally
+                val finallyGraph = finallyBuilder()
+
+                return tryCatchGraph ~> finallyGraph
+
             case _: ast.DebuggerStatement =>
                 return EmptyGraph
+            case _: ast.Directive =>
+                throw new AssertionError("Directives should not appear here")
+        }
+
+
+        private def buildInnerBlock(block: BlockInfo, statements: Seq[ast.Statement]): Graph = {
+            val builder = new BlockBuilder(strict, block)
+            builder.build(statements)
         }
 
         def build(statements: Seq[ast.Statement]): Graph = {
@@ -195,8 +179,10 @@ object GraphBuilder {
 
                 case stmt =>
                     visitedNonDirective = true
-                    graph ++= buildStatement(stmt)
+                    val stmtGraph = buildStatement(stmt, block.labelTargets, None)
+                    graph = graph ~> stmtGraph
             }
+            done = true
             graph
         }
     }

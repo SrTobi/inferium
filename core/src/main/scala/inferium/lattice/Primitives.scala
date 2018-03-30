@@ -71,6 +71,7 @@ case class SpecificNumberValue(value: Int) extends NumberValue {
 sealed abstract class StringValue extends Primitive
 object StringValue extends StringValue {
 
+    def apply(string: String): SpecificStringValue = SpecificStringValue(string)
     override def toString: String = "string"
 }
 

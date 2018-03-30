@@ -4,11 +4,11 @@ import inferium.lattice.Entity
 import inferium.memory.Heap
 
 
-case class ExecutionState(heap: Heap, stack: ExecutionState.Stack)(val dataFlowAnalysis: DataFlowAnalysis) {
+case class ExecutionState(heap: Heap, stack: ExecutionState.Stack, dataFlowAnalysis: DataFlowAnalysis) {
 
 
     def flowTo(node: graph.Node): Unit = {
-        dataFlowAnalysis.contextFlowsTo(this, node)
+        //dataFlowAnalysis.contextFlowsTo(this, node)
     }
 }
 

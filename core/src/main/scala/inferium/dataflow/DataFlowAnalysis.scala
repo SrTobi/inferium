@@ -17,9 +17,9 @@ class DataFlowAnalysis(subject: Analysable) {
     }
 
     def runAnalysis(): Unit = {
-        while (contextsToPropagate.nonEmpty) {
+        /*while (contextsToPropagate.nonEmpty) {
             val (ctx, node) = contextsToPropagate.dequeue()
             node.onControlFlow(ctx)
-        }
+        }*/
     }
 }

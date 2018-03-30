@@ -14,7 +14,6 @@ object BuildException {
             action
         } catch {
             case BuildException(msg, None) => throw new BuildException(msg, Some(where))
-            case e => throw e
         }
     }
 }
