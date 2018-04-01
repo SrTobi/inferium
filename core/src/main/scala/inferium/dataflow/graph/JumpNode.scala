@@ -1,22 +1,14 @@
 package inferium.dataflow.graph
 import inferium.dataflow.ExecutionState
 
-class JumpNode extends Node with SingleSuccessor with SinglePredecessor {
-    private var _target: Node = _
+class JumpNode(val target: Node)(implicit _info: Node.Info) extends Node with SingleSuccessor with SinglePredecessor {
+    assert(target != null)
+    target.addPredecessor(this)
 
-    def target: Node = {
-        assert(_target != null)
-        _target
-    }
-
-    def target_=(node: Node): Unit = {
-        assert(_target == null)
-        assert(node != null)
-        _target = node
-    }
+    override def successors: Traversable[Node] = super.successors ++ Seq(target)
 
     override def setNewInState(state: ExecutionState): Unit = {
-        target.setNewInState(state)
+        target <~ state
     }
 
     override def process(): Unit = {

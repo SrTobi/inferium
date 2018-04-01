@@ -12,13 +12,13 @@ trait SingleSuccessor extends Node {
 
     override def successors: Traversable[Node] = Option(_succ)
 
-    protected override def addSuccessor(node: Node): Unit = {
+    protected[graph] override def addSuccessor(node: Node): Unit = {
         assert(node != null)
         assert(_succ == null, s"${this} can only have one successor")
         _succ = node
     }
 
-    protected override def removeSuccessor(node: Node): Unit = {
+    protected[graph] override def removeSuccessor(node: Node): Unit = {
         assert(node != null)
         assert(node == _succ)
         _succ = null

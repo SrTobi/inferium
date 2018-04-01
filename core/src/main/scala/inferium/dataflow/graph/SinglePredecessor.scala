@@ -12,13 +12,13 @@ trait SinglePredecessor extends Node{
 
     override def predecessors: Traversable[Node] = Option(_pred)
 
-    protected override def addPredecessor(node: Node): Unit = {
+    protected[graph] override def addPredecessor(node: Node): Unit = {
         assert(node != null)
         assert(_pred == null, s"${this} can only have one predecessor")
         _pred = node
     }
 
-    protected override def removePredecessor(node: Node): Unit = {
+    protected[graph] override def removePredecessor(node: Node): Unit = {
         assert(node != null)
         assert(node == _pred)
         _pred = null

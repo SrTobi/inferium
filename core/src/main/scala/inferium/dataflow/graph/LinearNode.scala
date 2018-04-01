@@ -1,7 +1,7 @@
 package inferium.dataflow.graph
 import inferium.dataflow.ExecutionState
 
-abstract class LinearNode extends Node with SingleSuccessor with SinglePredecessor {
+abstract class LinearNode(implicit _info: Node.Info) extends Node with SinglePredecessor {
     private var _inState: ExecutionState = _
 
     def inState: ExecutionState = _inState
