@@ -1,7 +1,7 @@
 package inferium.dataflow.graph
 
 import scala.collection.mutable
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{ExecutionState, LexicalEnv}
 import inferium.lattice.Entity
 import inferium.utils.{Id, IdGenerator}
 
@@ -114,7 +114,7 @@ object Node extends IdGenerator[Node] {
     }
 
     type ExprStackInfo = List[ExprStackFrame]
-    case class Info(priority: Int, catchTarget: Option[Node], label: Option[String] = None)
+    case class Info(priority: Int, catchTarget: Option[Node], lexicalEnv: LexicalEnv, label: Option[String] = None)
 
     def isForwardEdge(from: Node, to: Node): Boolean = {
         to match {

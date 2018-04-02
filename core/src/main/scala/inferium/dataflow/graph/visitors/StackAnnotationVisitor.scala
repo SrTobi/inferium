@@ -42,6 +42,15 @@ class StackAnnotationVisitor extends Node.AllVisitor {
                         ExprStackFrame("|", left, right)
                 }
                 mergeFrame :: Nil
+
+            case _: graph.PushLexicalFrame =>
+                stack
+
+            case _: graph.LexicalWriteNode =>
+                stack.tail
+
+            case node: graph.LexicalReadNode =>
+                node.varName :: stack
         }
     }
 }

@@ -68,17 +68,23 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
 
             case node: LiteralNode =>
                 cmd(s"push ${node.literal}")
-                true
 
             case _: MergeNode =>
-                true
 
             case _: PopNode =>
                 cmd("pop")
-                true
+
+            case _: PushLexicalFrame =>
+                cmd("lexPush")
+
+            case node: LexicalReadNode =>
+                cmd(s"read ${node.varName}")
+
+            case node: LexicalWriteNode =>
+                cmd(s"write ${node.varName}")
         }
 
-        if (printStack) {
+        if (!printStack.equals(false)) {
             printStackInfo(node)
         }
         printGoto(node)

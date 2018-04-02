@@ -9,10 +9,9 @@ object Playground {
         
         val code =
             """
-              |if(4) {
-              | 5
-              |} else {
-              | 4
+              |var a = 5
+              |{
+              |const a = 9
               |}
             """.stripMargin
 
@@ -22,6 +21,6 @@ object Playground {
         val graph = new GraphBuilder(Config()).buildGraph(prog)
 
         new StackAnnotationVisitor().start(graph)
-        println(new PrintVisitor(showStackInfo = true).start(graph))
+        println(new PrintVisitor(showStackInfo = false).start(graph))
     }
 }

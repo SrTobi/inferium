@@ -10,7 +10,10 @@ import scala.util.Try
 
 object GraphBuilder {
 
+    private type VarMapping = Map[String, String]
     private case class JumpTarget(targetBlock: BlockInfo, entry: Option[MergeNode], exit: MergeNode)
+
+    private def smooth(graphs: Seq[Graph]): Graph = graphs.fold(EmptyGraph){(from, to) => from ~> to }
 
     private class BlockInfo(val outer: Option[BlockInfo],
                             val labelTargets: Map[String, JumpTarget],
@@ -23,7 +26,8 @@ object GraphBuilder {
         def inner(labelTargets: Map[String, JumpTarget] = this.labelTargets,
                   loopTarget: Option[JumpTarget] = this.loopTarget,
                   catchEntry: Option[MergeNode] = None,
-                  finalizer: Option[() => Graph] = None): BlockInfo = new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
+                  finalizer: Option[() => Graph] = None): BlockInfo =
+            new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
     }
 
     case class Config(bindLetAndConstToGlobal: Boolean)
@@ -40,197 +44,281 @@ object GraphBuilder {
 class GraphBuilder(config: GraphBuilder.Config) {
     import GraphBuilder._
 
-    private class BlockBuilder(var strict: Boolean = false,
-                               block: BlockInfo) {
+    private class FunctionBuilder(isScript: Boolean) {
+        private[this] var done = false
+        private val hoistables = mutable.Set.empty[String]
+        private var hoistableGraph: Graph = EmptyGraph
 
-        private var done = false
-        private val hoistables = mutable.Buffer.empty[Node]
+        private class BlockBuilder(var strict: Boolean = false,
+                                   block: BlockInfo,
+                                   hoistingEnv: LexicalEnv) {
 
-        private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode, priority: Int): graph.JumpNode = {
-            def unroll(block: BlockInfo): Graph = {
-                if (block == targetBlock) {
-                    EmptyGraph
+            private[this] var done = false
+
+            private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode, priority: Int, env: LexicalEnv): graph.JumpNode = {
+                def unroll(block: BlockInfo): Graph = {
+                    if (block == targetBlock) {
+                        EmptyGraph
+                    }
+                    val finalizerGraph = block.finalizer.map(_()).getOrElse(EmptyGraph)
+                    val restGraph = block.outer.map(unroll).getOrElse(EmptyGraph)
+                    finalizerGraph ~> restGraph
                 }
-                val finalizerGraph = block.finalizer.map(_()).getOrElse(EmptyGraph)
-                val restGraph = block.outer.map(unroll).getOrElse(EmptyGraph)
-                finalizerGraph ~> restGraph
+
+                val finalizers = unroll(block)
+                val unrollGraph = finalizers ~> targetNode
+                val jmp = new graph.JumpNode(unrollGraph.begin)(Node.Info(priority, targetBlock.catchEntry, env))
+                jmp
             }
 
-            val finalizers = unroll(block)
-            val unrollGraph = finalizers ~> targetNode
-            val jmp = new graph.JumpNode(unrollGraph.begin)(Node.Info(priority, targetBlock.catchEntry))
-            jmp
-        }
+            private def resolveLoopTarget(label: Option[ast.Identifier], labels: Map[String, JumpTarget]): JumpTarget = {
+                label match {
+                    case Some(ast.Identifier(name)) =>
+                        labels.get(name) match {
+                            case Some(target) => target
+                            case None => throw new BuildException(s"Label '$name' is not declared")
+                        }
 
-        private def resolveLoopTarget(label: Option[ast.Identifier], labels: Map[String, JumpTarget]): JumpTarget = {
-            label match {
-                case Some(ast.Identifier(name)) =>
-                    labels.get(name) match {
-                        case Some(target) => target
-                        case None => throw new BuildException(s"Label '$name' is not declared")
-                    }
+                    case None =>
+                        block.loopTarget match {
+                            case Some(target) => target
+                            case None => throw new BuildException(s"There is no loop to jump to")
+                        }
+                }
+            }
 
-                case None =>
-                    block.loopTarget match {
-                        case Some(target) => target
-                        case None => throw new BuildException(s"There is no loop to jump to")
-                    }
+            private def addVarsToLexicalEnv(lexicalEnv: LexicalEnv, vars: Seq[(String, String)]): LexicalEnv = lexicalEnv.behavior match {
+                case LexicalEnv.Behavior.Declarative(old) =>lexicalEnv.copy(behavior = LexicalEnv.Behavior.Declarative(old ++ vars))
+            }
+
+            private def buildLiteral(entity: Entity)(implicit info: Node.Info): Graph = {
+                new graph.LiteralNode(entity)
+            }
+
+            private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = {
+                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                expr match {
+                    case ast.BooleanLiteral(value) =>
+                        buildLiteral(BoolValue(BoolLattice(value)))
+
+                    case ast.StringLiteral(value) =>
+                        buildLiteral(StringValue(value))
+
+                    case num: ast.NumberLiteral =>
+                        val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
+                        buildLiteral(value)
+
+                    case _: ast.NullLiteral =>
+                        buildLiteral(NullValue)
+
+                    case ast.Identifier("undefined") =>
+                        buildLiteral(UndefinedValue)
+
+                    case ast.Identifier(varName) =>
+                        new graph.LexicalReadNode(varName)
+                }
+            }
+
+            private def buildExressionStatement(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = {
+                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+
+                val exprGraph = buildExpression(expr, priority, env)
+                new PopNode() ~> exprGraph
+            }
+
+            private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv): Graph = {
+                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+
+                pattern match {
+                    case ast.Identifier(name) =>
+                        new graph.LexicalWriteNode(name)
+
+                    case _ => ???
+                }
+            }
+
+            private def gatherBindingNamesFromPattern(pattern: ast.Pattern): Seq[String] = pattern match {
+                case ast.Identifier(name) => Seq(name)
+                case _ => ???
+            }
+
+            private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
+                case ast.VariableDeclarator(pattern, Some(init)) =>
+                    val initGrah = buildExpression(init, priority, env)
+                    val bindingGraph = buildPatternBinding(pattern, priority, env)
+                    initGrah ~> bindingGraph
+                case ast.VariableDeclarator(_, _) =>
+                    // nothing to do for empty initializer
+                    EmptyGraph
+            }
+
+            private def buildStatement(stmt: ast.Statement,
+                                       priority: Int,
+                                       labels: Map[String, JumpTarget],
+                                       here: Option[JumpTarget],
+                                       env: LexicalEnv): (Graph, LexicalEnv) = {
+                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
+                def innerBlock: BlockInfo = block.inner(labelTargets = labels)
+                var newEnv = env
+                val result: Graph = stmt match {
+                    case ast.LabeledStatement(ast.Identifier(name), body) =>
+                        if (labels.contains(name)) {
+                            throw new BuildException(s"Label '$name' already declared")
+                        }
+
+                        val (target, merger) = here match {
+                            case Some(hereTarget) =>
+                                (hereTarget, EmptyGraph)
+                            case None =>
+                                val merger = new MergeNode(true)
+                                (JumpTarget(block, None, merger), Graph(merger))
+                        }
+                        val (graph, resultEnv) = buildStatement(body, priority + 1, labels + (name -> target), Some(target), env)
+                        newEnv = resultEnv
+                        graph ~> merger
+
+                    case ast.BlockStatement(body) =>
+                        buildInnerBlock(innerBlock, body, priority + 1, newInnerBlockEnv())
+
+                    case ast.BreakStatement(targetLabel) =>
+                        val target = resolveLoopTarget(targetLabel, labels)
+                        buildJump(target.targetBlock, target.exit, priority, env)
+
+                    case ast.ContinueStatement(targetLabel) =>
+                        val target = resolveLoopTarget(targetLabel, labels)
+                        val loopEntry = target.entry.getOrElse(throw new BuildException(s"Can not continue the statement '${targetLabel.map(_.name).getOrElse("???")}'"))
+                        buildJump(target.targetBlock, loopEntry, priority, env)
+
+                    case ast.ExpressionStatement(expr) =>
+                        buildExressionStatement(expr, priority, env)
+
+                    case ast.TryStatement(tryBody, catchHandler, finallyHandler) =>
+                        val finallyBuilder = finallyHandler map {
+                            case ast.BlockStatement(finallyBody) =>
+                                () => buildInnerBlock(block.inner(), finallyBody, priority + 1, newInnerBlockEnv())
+                        }
+
+
+                        // build catch
+                        val tryCatchGraph = catchHandler match {
+                            case Some(ast.CatchClause(pattern, catchBody)) =>
+                                ???
+                                //val tryBlock = block.inner(catchEntry = Some(catchMerger), finalizer = finallyBuilder)
+                                //val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 1)
+                            case None =>
+                                buildInnerBlock(block.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())
+                        }
+
+                        // build finally
+                        val finallyGraph = finallyBuilder map { _() } getOrElse EmptyGraph
+
+                        tryCatchGraph ~> finallyGraph
+
+                    case ast.IfStatement(test, consequent, alternate) =>
+                        val testGraph = buildExpression(test, priority, env)
+                        val thenGraph = buildInnerBlock(innerBlock, Seq(consequent), priority + 1, newInnerBlockEnv())
+                        val elseGraph = alternate.map(a => buildInnerBlock(innerBlock, Seq(a), priority + 1, newInnerBlockEnv())).getOrElse(EmptyGraph)
+                        val merger = new graph.MergeNode
+                        val thenBegin = thenGraph.begin(merger)
+                        val elseBegin = elseGraph.begin(merger)
+                        val ifNode = new graph.CondJumpNode(thenBegin, elseBegin)
+                        testGraph ~> ifNode
+                        thenGraph ~> merger
+                        elseGraph ~> merger // <- this might do nothing
+                        Graph(testGraph.begin(ifNode), merger)
+
+                    case ast.VariableDeclaration(decls, kind) =>
+
+                        lazy val hoistingInfo = info.copy(lexicalEnv = hoistingEnv)
+                        val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
+                        newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
+                            hoistables ++= bindingNames
+                            if (isScript) {
+                                // if we are not in a function `var statements` directly modify the global object
+                                // so we have to write undefined into it even if there is no initializer
+                                // because of enumeration
+                                val hoistingGraphs = bindingNames map { name => buildLiteral(UndefinedValue)(hoistingInfo) ~> new LexicalWriteNode(name)(hoistingInfo) }
+                                hoistableGraph ~>= smooth(hoistingGraphs)
+                            }
+                            env
+                        } else {
+                            addVarsToLexicalEnv(env, bindingNames map { n => (n, ???)})
+                        }
+
+                        val declGraphs = decls map { buildVarDeclaration(_, priority, newEnv) }
+
+                        smooth(declGraphs)
+
+                    case _: ast.EmptyStatement =>
+                        EmptyGraph
+
+                    case _: ast.DebuggerStatement =>
+                        EmptyGraph
+
+                    case _: ast.Directive =>
+                        throw new AssertionError("Directives should not appear here")
+                }
+
+                return (result, newEnv)
+            }
+
+
+            private def buildInnerBlock(block: BlockInfo, statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
+                val builder = new BlockBuilder(strict, block, hoistingEnv)
+                builder.build(statements, priority, initialEnv)
+            }
+
+            def build(statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
+                assert(!done)
+
+                // check that directives only appear at the beginning
+                assert(statements.span(_.isInstanceOf[ast.Directive])._2.forall(!_.isInstanceOf[ast.Directive]))
+
+                var graph: Graph = EmptyGraph
+                var visitedNonDirective = false
+                var env = initialEnv
+
+                statements foreach {
+                    case ast.Directive(_, directive) =>
+                        assert(!visitedNonDirective)
+                        if (directive == "use strict;") {
+                            strict = true
+                        }
+
+                    case stmt =>
+                        visitedNonDirective = true
+                        val (stmtGraph, resultEnv) = buildStatement(stmt, priority, block.labelTargets, None, env)
+                        env = resultEnv
+                        graph = graph ~> stmtGraph
+                }
+                done = true
+                graph
             }
         }
 
-        private def buildLiteral(entity: Entity)(implicit info: Node.Info): Graph = {
-            new graph.LiteralNode(entity)
-        }
 
-        private def buildExpression(expr: ast.Expression, priority: Int): Graph = {
-            implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry)
-            expr match {
-                case ast.BooleanLiteral(value) =>
-                    buildLiteral(BoolValue(BoolLattice(value)))
-
-                case ast.StringLiteral(value) =>
-                    buildLiteral(StringValue(value))
-
-                case num: ast.NumberLiteral =>
-                    val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
-                    buildLiteral(value)
-
-                case _: ast.NullLiteral =>
-                    buildLiteral(NullValue)
-
-                case ast.Identifier("undefined") =>
-                    buildLiteral(UndefinedValue)
-
-                case ast.Identifier(varName) =>
-                    new graph.LexicalContextReadNode(varName)
-            }
-        }
-
-        private def buildExressionStatement(expr: ast.Expression, priority: Int): Graph = {
-            implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry)
-
-            val exprGraph = buildExpression(expr, priority)
-            new PopNode() ~> exprGraph
-        }
-
-        private def buildStatement(stmt: ast.Statement, priority: Int, labels: Map[String, JumpTarget], here: Option[JumpTarget]): Graph = {
-            implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry)
-            def innerBlock: BlockInfo = block.inner(labelTargets = labels)
-
-            stmt match {
-                case ast.LabeledStatement(ast.Identifier(name), body) =>
-                    if (labels.contains(name)) {
-                        throw new BuildException(s"Label '$name' already declared")
-                    }
-
-                    val (target, merger) = here match {
-                        case Some(hereTarget) =>
-                            (hereTarget, EmptyGraph)
-                        case None =>
-                            val merger = new MergeNode(true)
-                            (JumpTarget(block, None, merger), Graph(merger))
-                    }
-                    val graph = buildStatement(body, priority + 1, labels + (name -> target), Some(target))
-                    graph ~> merger
-
-                case ast.BlockStatement(body) =>
-                    buildInnerBlock(innerBlock, body, priority + 1)
-
-                case ast.BreakStatement(targetLabel) =>
-                    val target = resolveLoopTarget(targetLabel, labels)
-                    buildJump(target.targetBlock, target.exit, priority)
-
-                case ast.ContinueStatement(targetLabel) =>
-                    val target = resolveLoopTarget(targetLabel, labels)
-                    val loopEntry = target.entry.getOrElse(throw new BuildException(s"Can not continue the statement '${targetLabel.map(_.name).getOrElse("???")}'"))
-                    buildJump(target.targetBlock, loopEntry, priority)
-
-                case ast.ExpressionStatement(expr) =>
-                    buildExressionStatement(expr, priority)
-
-                case ast.TryStatement(tryBody, catchHandler, finallyHandler) =>
-                    val finallyBuilder = finallyHandler map {
-                        case ast.BlockStatement(finallyBody) =>
-                            () => buildInnerBlock(block.inner(), finallyBody, priority + 1)
-                    }
-
-
-                    // build catch
-                    val tryCatchGraph = catchHandler match {
-                        case Some(ast.CatchClause(pattern, catchBody)) =>
-                            ???
-                            //val tryBlock = block.inner(catchEntry = Some(catchMerger), finalizer = finallyBuilder)
-                            //val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 1)
-                        case None =>
-                            buildInnerBlock(block.inner(finalizer = finallyBuilder), tryBody.body, priority + 1)
-                    }
-
-                    // build finally
-                    val finallyGraph = finallyBuilder map { _() } getOrElse EmptyGraph
-
-                    return tryCatchGraph ~> finallyGraph
-
-                case ast.IfStatement(test, consequent, alternate) =>
-                    val testGraph = buildExpression(test, priority)
-                    val thenGraph = buildInnerBlock(innerBlock, Seq(consequent), priority + 1)
-                    val elseGraph = alternate.map(a => buildInnerBlock(innerBlock, Seq(a), priority + 1)).getOrElse(EmptyGraph)
-                    val merger = new graph.MergeNode
-                    val thenBegin = thenGraph.begin(merger)
-                    val elseBegin = elseGraph.begin(merger)
-                    val ifNode = new graph.CondJumpNode(thenBegin, elseBegin)
-                    testGraph ~> ifNode
-                    thenGraph ~> merger
-                    elseGraph ~> merger // <- this might do nothing
-                    Graph(testGraph.begin(ifNode), merger)
-
-                case _: ast.DebuggerStatement =>
-                    return EmptyGraph
-
-                case _: ast.Directive =>
-                    throw new AssertionError("Directives should not appear here")
-            }
-        }
-
-
-        private def buildInnerBlock(block: BlockInfo, statements: Seq[ast.Statement], priority: Int): Graph = {
-            val builder = new BlockBuilder(strict, block)
-            builder.build(statements, priority)
-        }
-
-        def build(statements: Seq[ast.Statement], priority: Int): Graph = {
+        def build(program: ast.Program, strict: Boolean): Graph = {
+            val priority = 0
             assert(!done)
-
-            // check that directives only appear at the beginning
-            assert(statements.span(_.isInstanceOf[ast.Directive])._2.forall(!_.isInstanceOf[ast.Directive]))
-
-            var graph: Graph = EmptyGraph
-            var visitedNonDirective = false
-
-            statements foreach {
-                case ast.Directive(_, directive) =>
-                    assert(!visitedNonDirective)
-                    if (directive == "use strict;") {
-                        strict = true
-                    }
-
-                case stmt =>
-                    visitedNonDirective = true
-                    val stmtGraph = buildStatement(stmt, priority, block.labelTargets, None)
-                    graph = graph ~> stmtGraph
-            }
+            val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
+            val firstVarsEnv = new LexicalEnv(Some(globalEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
+            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv)
+            val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt }, priority, firstVarsEnv)
             done = true
-            graph
+            val info: Node.Info = Node.Info(priority, None, globalEnv)
+            hoistableGraph ~> new PushLexicalFrame()(info) ~> graph
         }
     }
 
     private[inferium] def buildGraph(scriptAst: ast.Program): Graph = {
-        val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None))
-        builder.build(scriptAst.body collect { case stmt: ast.Statement => stmt }, 0)
+        val builder = new FunctionBuilder(isScript = false)
+        builder.build(scriptAst, strict = false)
     }
 
     def buildTemplate(scriptAst: ast.Program): Templates.Script =  new Templates.Script {
         override def instantiate(global: Entity): (Node, Node) = {
-            (null, null)
+            ???
         }
     }
 }
