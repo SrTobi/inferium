@@ -1,5 +1,6 @@
 package inferium.dataflow
 import escalima.ast
+import inferium.Config.ConfigKey
 import inferium.dataflow.graph._
 import inferium.lattice._
 
@@ -24,6 +25,20 @@ object GraphBuilder {
                   catchEntry: Option[MergeNode] = None,
                   finalizer: Option[() => Graph] = None): BlockInfo = new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
     }
+
+    case class Config(bindLetAndConstToGlobal: Boolean)
+    object Config {
+        val bindLetAndConstToGlobal: ConfigKey[Boolean] = ConfigKey(false)
+
+
+        implicit def configToGraphBuilder(config: inferium.Config): GraphBuilder.Config = GraphBuilder.Config(
+            bindLetAndConstToGlobal = config(bindLetAndConstToGlobal)
+        )
+    }
+}
+
+class GraphBuilder(config: GraphBuilder.Config) {
+    import GraphBuilder._
 
     private class BlockBuilder(var strict: Boolean = false,
                                block: BlockInfo) {
