@@ -69,7 +69,7 @@ object Config {
         val fullName: String = s"$section.$name"
 
         def :=(value: T): ConfigEntry = SpecificConfigEntry[T](this, value)
-        def :=(default: Default.type): ConfigEntry = this := default
+        def :=(defaultType: Default.type): ConfigEntry = this := default
     }
 
     object ConfigKey {

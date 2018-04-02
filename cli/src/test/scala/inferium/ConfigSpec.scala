@@ -65,6 +65,15 @@ class ConfigSpec extends FlatSpec with Matchers {
         config(stringOption) shouldBe "xxx"
     }
 
+    it should "correctly set default" in {
+        val config = Config(stringOption := "test")
+        config(stringOption) shouldBe "test"
+
+        config.set(stringOption := Default)
+
+        config(stringOption) shouldBe ""
+    }
+
     "GraphBuilder section" should "have all options" in {
         import GraphBuilder.Config._
         val ref = GraphBuilder.Config(bindLetAndConstToGlobal = true)
