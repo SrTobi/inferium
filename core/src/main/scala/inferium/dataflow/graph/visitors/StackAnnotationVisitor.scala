@@ -51,6 +51,10 @@ class StackAnnotationVisitor extends Node.AllVisitor {
 
             case node: graph.LexicalReadNode =>
                 node.varName :: stack
+
+            case node: graph.EndNode =>
+                assert(stack.tail.isEmpty)
+                stack
         }
     }
 }

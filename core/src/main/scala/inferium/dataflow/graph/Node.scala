@@ -1,13 +1,13 @@
 package inferium.dataflow.graph
 
 import scala.collection.mutable
-import inferium.dataflow.{ExecutionState, LexicalEnv}
-import inferium.lattice.Entity
-import inferium.utils.{Id, IdGenerator}
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
+import inferium.lattice.{Entity, Location}
 
 abstract class Node(implicit val info: Node.Info) {
     import Node._
-    val id: Id[Node] = newId()
+    val loc: Location = Location()
+    val id: Location = loc
     def label: String = info.label.getOrElse(s"L${id.id}")
 
     var exprStackInfo: ExprStackInfo = _
@@ -57,11 +57,13 @@ abstract class Node(implicit val info: Node.Info) {
     }
 
 
-    final def fail(state: ExecutionState, exception: Entity): Unit = {
+    final def fail(state: ExecutionState, exception: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
         info.catchTarget foreach {
             _ <~ state.copy(stack = exception :: Nil)
         }
     }
+
+    final def fixLexicalFrame(state: ExecutionState): ExecutionState = state.copy(lexicalFrame = info.lexicalEnv.fixLexicalStack(state.lexicalFrame))
 
     def priority: Int = info.priority
 
@@ -76,14 +78,14 @@ abstract class Node(implicit val info: Node.Info) {
     protected[graph] def addPredecessor(node: Node): Unit
     protected[graph] def addSuccessor(node: Node): Unit
 
-    final def <~(state: ExecutionState): Unit = setNewInState(state)
-    def setNewInState(state: ExecutionState): Unit
+    final def <~(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = setNewInState(state)
+    def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit
 
-    def process(): Unit
+    def process(implicit analysis: DataFlowAnalysis): Unit
 }
 
 
-object Node extends IdGenerator[Node] {
+object Node {
     sealed abstract class ExprStackFrame {
         //override def toString: String = super.toString
     }
@@ -141,7 +143,7 @@ object Node extends IdGenerator[Node] {
         }
 
         def start(graph: Graph): this.type = graph match {
-            case g@GraphPath(begin, end) => start(begin, Some(end), g.priority)
+            case Graph(begin, end, priority) => start(begin, Some(end), priority)
             case _ => this
         }
         def start(startNode: Node): this.type = start(startNode, None, startNode.priority)

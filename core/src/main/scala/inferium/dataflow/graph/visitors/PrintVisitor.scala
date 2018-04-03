@@ -36,7 +36,7 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
     private def printStackInfo(node: Node): Unit = {
         if (showStackInfo) {
             assert(node.exprStackInfo != null)
-            cmd(s"# Stack: ${node.exprStackInfo.mkString(" :: ")}")
+            cmd(s"# Stack: ${node.exprStackInfo.mkString("[", " :: ", "]")}")
         }
     }
 
@@ -47,14 +47,16 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
             return
         }
 
-        val printFirstStackInfo = lineCount == 0 && showStackInfo
+        val printLabel = needsLabel(node)
+        val printPreStackInfo = (printLabel || lineCount == 0) && showStackInfo
 
-        if (needsLabel(node)) {
+        if (printLabel) {
             line(s"${node.label}:")
         }
 
-        if (printFirstStackInfo) {
-            cmd("# Stack: unknown")
+        if (printPreStackInfo) {
+            lazy val Seq(pred) =  node.predecessors.toSeq
+            printStackInfo(if (lineCount == 0 || node.isInstanceOf[MergeNode]) node else pred)
         }
 
         val printStack = node match {
@@ -70,6 +72,7 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
                 cmd(s"push ${node.literal}")
 
             case _: MergeNode =>
+                false
 
             case _: PopNode =>
                 cmd("pop")
@@ -82,6 +85,9 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
 
             case node: LexicalWriteNode =>
                 cmd(s"write ${node.varName}")
+
+            case _: EndNode =>
+                false
         }
 
         if (!printStack.equals(false)) {

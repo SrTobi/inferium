@@ -2,6 +2,7 @@ package inferium.dataflow
 import escalima.ast
 import inferium.Config.ConfigKey
 import inferium.dataflow.graph._
+import inferium.dataflow.graph.visitors.StackAnnotationVisitor
 import inferium.lattice._
 
 import scala.collection.mutable
@@ -48,6 +49,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
         private[this] var done = false
         private val hoistables = mutable.Set.empty[String]
         private var hoistableGraph: Graph = EmptyGraph
+        private var varRenameIdx = 1
 
         private class BlockBuilder(var strict: Boolean = false,
                                    block: BlockInfo,
@@ -243,7 +245,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             }
                             env
                         } else {
-                            addVarsToLexicalEnv(env, bindingNames map { n => (n, ???)})
+                            def rename(name: String): String = name + {varRenameIdx += 1; varRenameIdx}
+                            addVarsToLexicalEnv(env, bindingNames map { n => (n, rename(n)) })
                         }
 
                         val declGraphs = decls map { buildVarDeclaration(_, priority, newEnv) }
@@ -298,7 +301,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
 
 
-        def build(program: ast.Program, strict: Boolean): Graph = {
+        def build(program: ast.Program, strict: Boolean): ScriptGraph = {
             val priority = 0
             assert(!done)
             val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
@@ -306,19 +309,19 @@ class GraphBuilder(config: GraphBuilder.Config) {
             val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv)
             val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt }, priority, firstVarsEnv)
             done = true
-            val info: Node.Info = Node.Info(priority, None, globalEnv)
-            hoistableGraph ~> new PushLexicalFrame()(info) ~> graph
+            implicit val info: Node.Info = Node.Info(priority, None, globalEnv)
+            val endNode = new EndNode
+            val scriptGraph = hoistableGraph ~> new PushLexicalFrame() ~> graph ~> endNode
+            ScriptGraph(scriptGraph.begin(endNode), endNode)
         }
     }
 
-    private[inferium] def buildGraph(scriptAst: ast.Program): Graph = {
-        val builder = new FunctionBuilder(isScript = false)
-        builder.build(scriptAst, strict = false)
-    }
-
     def buildTemplate(scriptAst: ast.Program): Templates.Script =  new Templates.Script {
-        override def instantiate(global: Entity): (Node, Node) = {
-            ???
+        override def instantiate(): ScriptGraph = {
+            val builder = new FunctionBuilder(isScript = false)
+            val graph = builder.build(scriptAst, strict = false)
+            new StackAnnotationVisitor().start(graph)
+            graph
         }
     }
 }

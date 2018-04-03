@@ -5,7 +5,7 @@ import inferium.lattice.Entity
 
 object Templates {
     trait Script {
-        def instantiate(global: Entity): (Node, Node)
+        def instantiate(): graph.ScriptGraph
     }
 
     /*trait Closure {

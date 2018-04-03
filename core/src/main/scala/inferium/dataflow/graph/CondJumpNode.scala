@@ -1,5 +1,5 @@
 package inferium.dataflow.graph
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.Info) extends LinearNode {
     assert(thenNode != null)
@@ -18,7 +18,7 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
         throw new IllegalAccessException("CondJumpNodes do not have normal successor")
     }
 
-    override def process(): Unit = {
+    override def process(implicit analysis: DataFlowAnalysis): Unit = {
         val cond :: rest = inState.stack
 
         // todo: handle cond

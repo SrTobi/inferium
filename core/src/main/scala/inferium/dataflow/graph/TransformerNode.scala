@@ -1,8 +1,8 @@
 package inferium.dataflow.graph
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 abstract class TransformerNode(implicit info: Node.Info) extends LinearNode with SingleSuccessor {
-    override final def process(): Unit = {
+    override final def process(implicit analysis: DataFlowAnalysis): Unit = {
         val outState = transform(inState)
         succ <~ outState
     }

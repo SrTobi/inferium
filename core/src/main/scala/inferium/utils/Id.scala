@@ -7,6 +7,6 @@ final class Id[T](val id: Long) extends AnyVal {
 }
 
 class IdGenerator[T] {
-    private val nextId = new AtomicLong(1)
-    def newId(): Id[T] = new Id[T](nextId.getAndIncrement())
+    private val counter = new Counter()
+    def newId(): Id[T] = new Id[T](counter.next())
 }

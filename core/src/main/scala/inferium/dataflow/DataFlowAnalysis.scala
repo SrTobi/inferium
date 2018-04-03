@@ -2,24 +2,26 @@ package inferium.dataflow
 
 import scala.collection.mutable
 
-class DataFlowAnalysis(subject: Analysable) {
+class DataFlowAnalysis(analysable: Analysable) {
 
-    private val contextsToPropagate = mutable.Queue.empty[(ExecutionState, graph.Node)]
+    private val nodesToProcess = mutable.PriorityQueue.empty[(graph.Node)](Ordering.by(_.priority))
 
-    def noStateFlowsTo(node: graph.Node): Unit = {
-
+    def enqueue(node: graph.Node): Unit = {
+        nodesToProcess.enqueue(node)
     }
 
-    def stateFlowsTo(ctx: ExecutionState, node: graph.Node): Unit = {
-        assert(ctx ne null)
-        assert(node ne null)
-        contextsToPropagate.enqueue(ctx -> node)
+    def runAnalysis(initialState: ExecutionState): Unit = {
+        analysable.begin.setNewInState(initialState)(this)
+        runAnalysis()
     }
 
     def runAnalysis(): Unit = {
-        /*while (contextsToPropagate.nonEmpty) {
-            val (ctx, node) = contextsToPropagate.dequeue()
-            node.onControlFlow(ctx)
-        }*/
+        nodesToProcess += analysable.begin
+
+        while (nodesToProcess.nonEmpty) {
+            val node = nodesToProcess.dequeue()
+            node.process(this)
+        }
+
     }
 }
