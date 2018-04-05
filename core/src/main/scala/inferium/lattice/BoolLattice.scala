@@ -21,15 +21,14 @@ object BoolLattice {
     def apply(value: Boolean): BoolLattice = if (value) True else False
 
     def unify(bools: Iterable[BoolLattice]): BoolLattice = {
-        val it = bools.iterator
-        var result: BoolLattice = it.next()
-        for (bool <- it) {
-            result = result.unify(bool)
-            if (result == BoolLattice.Top) {
-                return BoolLattice.Top
-            }
+
+        bools.reduce {
+            (a, b) =>
+                if (a == Top)
+                    return Top
+                else
+                    a.unify(b)
         }
-        return result
     }
 }
 
