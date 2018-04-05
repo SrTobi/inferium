@@ -4,7 +4,6 @@ import inferium.Config.{ConfigEntry, ConfigKey, SpecificConfigEntry}
 
 import scala.collection.generic.Growable
 import scala.collection.mutable
-import inferium.utils.Utils._
 
 import scala.util.Try
 
@@ -52,7 +51,7 @@ class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] {
 object Config {
     def apply(defs: ConfigEntry*): Config = new Config(defs: _*)
 
-    private def makeAliases(name: String): Seq[String] = Seq(name, name.splitCamelCase.mkString("-")) map { _.toLowerCase }
+    private def normalize(name: String): String = name.trim.toLowerCase.replaceAll("[-_]", "")
 
     abstract class ConfigEntry {
         def section: String
@@ -91,7 +90,7 @@ object Config {
 
     class ConfigKey[T] private (val default: T, val section: String, val name: String)(private val _parser: ConfigValueParsers.Parser[T]) {
         val fullName: String = s"$section.$name"
-        val aliases: Seq[String] = makeAliases(name)
+        val aliases: Seq[String] = Seq(name) map normalize
 
         def :=(value: T): ConfigEntry = SpecificConfigEntry[T](this, value)
         def :=(defaultType: Default.type): ConfigEntry = this := default
@@ -107,7 +106,7 @@ object Config {
 
         private val _keys = mutable.Buffer.empty[ConfigKey[_]]
 
-        val aliases: Seq[String] = makeAliases(name)
+        val aliases: Seq[String] = Seq(name) map normalize
         def keys: Seq[ConfigKey[_]] = _keys
         def registerKey(key: ConfigKey[_]): this.type = {
             assert(!(_keys contains key))
@@ -116,7 +115,7 @@ object Config {
         }
 
         def key(name: String): ConfigKey[_] = {
-            val normalizedName = name.trim.toLowerCase
+            val normalizedName = normalize(name)
             keys find { _.aliases contains normalizedName } getOrElse(throw new IllegalArgumentException(s"$name is not a known key name in section ${this.name}"))
         }
 
@@ -139,7 +138,7 @@ object Config {
         lazy val keys: Seq[ConfigKey[_]] = sections flatMap { _.keys }
 
         def section(name: String): Section = {
-            val normalizedName = name.trim.toLowerCase
+            val normalizedName = normalize(name)
             sections find { _.aliases contains normalizedName } getOrElse(throw new IllegalArgumentException(s"$name is not a known section name"))
         }
         def key(name: String): ConfigKey[_] = {
