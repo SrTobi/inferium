@@ -5,9 +5,13 @@ import inferium.dataflow.GraphBuilder
 import org.scalatest.{FlatSpec, Matchers}
 
 class ConfigSpec extends FlatSpec with Matchers {
-    object TestSection {
+    object TestSection extends Config.Section("TestSection") {
         val intOption: ConfigKey[Int] = ConfigKey(0)
         val stringOption: ConfigKey[String] = ConfigKey("")
+    }
+
+    object TestConfig extends Config.Definition {
+        override val sections: Seq[Section] = Seq(TestSection)
     }
 
     import TestSection._
@@ -29,6 +33,11 @@ class ConfigSpec extends FlatSpec with Matchers {
     it should "save default values" in {
         intOption.default shouldBe 0
         stringOption.default shouldBe ""
+    }
+
+    it should "parse string" in {
+        intOption.parse("1234").value shouldBe 1234
+        stringOption.parse("Test").value shouldBe "Test"
     }
 
     "Config" should "be comparable" in {
@@ -72,6 +81,33 @@ class ConfigSpec extends FlatSpec with Matchers {
         config.set(stringOption := Default)
 
         config(stringOption) shouldBe ""
+    }
+
+    it should "be queryable for sections" in {
+        TestConfig.section("TestSection") shouldBe TestSection
+        TestConfig.section("test-section") shouldBe TestSection
+    }
+
+    it should "be queryable for keys" in {
+        TestConfig.key("TestSection.intOption") shouldBe TestSection.intOption
+        TestConfig.key("Test-Section.int-option") shouldBe TestSection.intOption
+        TestConfig.key("TestSection.string-option") shouldBe TestSection.stringOption
+        TestConfig.key("test-section.stringoption") shouldBe TestSection.stringOption
+    }
+
+    it should "parse config lists" in {
+        val configSource = Seq(
+            "test-section.int-option" -> "234",
+            "testSection.stringOption" -> "Hello"
+        )
+
+        val ref = Config(
+            intOption := 234,
+            stringOption := "Hello"
+        )
+
+        val parsed = TestConfig.parse(configSource)
+        parsed shouldBe ref
     }
 
     "GraphBuilder section" should "have all options" in {

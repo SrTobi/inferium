@@ -32,7 +32,8 @@ object GraphBuilder {
     }
 
     case class Config(bindLetAndConstToGlobal: Boolean)
-    object Config {
+    object Config extends inferium.Config.Section("GraphBuilder") {
+
         val bindLetAndConstToGlobal: ConfigKey[Boolean] = ConfigKey(false)
 
 
@@ -91,6 +92,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
             private def addVarsToLexicalEnv(lexicalEnv: LexicalEnv, vars: Seq[(String, String)]): LexicalEnv = lexicalEnv.behavior match {
                 case LexicalEnv.Behavior.Declarative(old) =>lexicalEnv.copy(behavior = LexicalEnv.Behavior.Declarative(old ++ vars))
+                case _ => ???
             }
 
             private def buildLiteral(entity: Entity)(implicit info: Node.Info): Graph = {

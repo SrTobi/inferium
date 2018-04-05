@@ -20,4 +20,18 @@ object Utils {
         }
         result
     }
+
+    implicit class UtilsString(str: String) extends AnyRef {
+        def splitCamelCase: Seq[String] = {
+            return str.replaceAll(
+                String.format("%s|%s|%s",
+                    "(?<=[A-Z])(?=[A-Z][a-z])",
+                    "(?<=[^A-Z])(?=[A-Z])",
+                    "(?<=[A-Za-z])(?=[^A-Za-z])"
+                ),
+                "%"
+            ).split("%")
+        }
+
+    }
 }
