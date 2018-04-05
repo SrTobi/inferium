@@ -2,7 +2,7 @@ package inferium.dataflow
 
 import scala.collection.mutable
 
-class DataFlowAnalysis(analysable: Analysable) {
+class DataFlowAnalysis(analysable: Analysable, val debugAdapter: DebugAdapter = DebugAdapter.Empty) {
 
     private val nodesToProcess = mutable.PriorityQueue.empty[(graph.Node)](Ordering.by(_.priority))
 

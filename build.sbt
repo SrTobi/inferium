@@ -5,6 +5,7 @@ lazy val commonSettings = Seq(
     version := "0.1-SNAPSHOT",
     libraryDependencies += "com.lihaoyi" %% "upickle" % "0.5.1",
     libraryDependencies += "de.srtobi" %% "escalima" % "0.1",
+    libraryDependencies += "com.lihaoyi" %% "fastparse" % "1.0.0",
     libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.5" % Test,
     libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
@@ -49,3 +50,9 @@ lazy val web = project
     .settings(
         scalaJSUseMainModuleInitializer := false,
     )
+
+lazy val testTools = crossProject
+    .crossType(CrossType.Pure)
+    .in(file("extras/test-tools"))
+    .settings(commonSettings: _*)
+    .settings(name := "test-tools")

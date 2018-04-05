@@ -4,7 +4,7 @@ import inferium.dataflow.Analysable
 import inferium.dataflow.graph.visitors.PrintVisitor
 
 
-sealed abstract class Graph extends Analysable {
+sealed abstract class Graph {
 
     def ~>(graph: Graph): Graph
     def ~>(node: Node): Graph = this ~> Graph(node)
@@ -64,7 +64,7 @@ final case class GraphPath(override val begin: Node, override val end: Node)(ove
     override def beginOption: Option[Node] = Some(begin)
 }
 
-final case class ScriptGraph(override val begin: Node, override val end: EndNode) extends NonEmptyGraph {
+final case class ScriptGraph(override val begin: Node, override val end: EndNode) extends NonEmptyGraph with Analysable {
     override def priority: Int = 0
 
     override def ~>(graph: Graph): Graph = throw new IllegalAccessException("Can not connect script graph to another graph")

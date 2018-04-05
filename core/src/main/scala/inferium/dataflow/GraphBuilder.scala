@@ -35,6 +35,7 @@ object GraphBuilder {
     object Config extends inferium.Config.Section("GraphBuilder") {
 
         val bindLetAndConstToGlobal: ConfigKey[Boolean] = ConfigKey(false)
+        val buildDebugNodes: ConfigKey[Boolean] = ConfigKey(false)
 
 
         implicit def configToGraphBuilder(config: inferium.Config): GraphBuilder.Config = GraphBuilder.Config(
