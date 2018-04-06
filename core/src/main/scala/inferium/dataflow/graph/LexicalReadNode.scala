@@ -6,4 +6,6 @@ class LexicalReadNode(val varName: String)(implicit _info: Node.Info) extends Fa
         // do the read and push it onto the stack
         ???
     }
+
+    override def asAsmStmt: String = s"read $varName"
 }

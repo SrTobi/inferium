@@ -10,4 +10,6 @@ class LiteralNode(val literal: Entity)(implicit _info: Node.Info) extends Transf
     }
 
     override def toString: String = s"literal[$literal]"
+
+    override def asAsmStmt: String = s"push $literal"
 }

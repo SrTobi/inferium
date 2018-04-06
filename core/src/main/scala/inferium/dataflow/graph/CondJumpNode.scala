@@ -28,4 +28,5 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
     }
 
     override def toString: String = s"cond[${thenNode.label},${elseNode.label}]"
+    override def asAsmStmt: String = s"cond ${thenNode.label}, ${elseNode.label}"
 }

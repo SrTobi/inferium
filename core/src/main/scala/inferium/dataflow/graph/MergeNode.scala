@@ -44,4 +44,5 @@ class MergeNode(val fixpoint: Boolean = false, val removable: Boolean = false)(i
     }
 
     override def toString: String = s"${if (fixpoint) "fixpoint-" else ""}merge[${preds.size} nodes]"
+    override def asAsmStmt: String = toString
 }

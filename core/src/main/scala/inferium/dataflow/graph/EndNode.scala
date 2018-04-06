@@ -11,4 +11,6 @@ class EndNode(implicit _info: Node.Info) extends LinearNode {
     override def process(implicit analysis: DataFlowAnalysis): Unit = ()
 
     def result: ExecutionState = inState
+
+    override def asAsmStmt: String = "end"
 }

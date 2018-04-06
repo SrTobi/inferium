@@ -41,9 +41,9 @@ final case class GraphPath(override val begin: Node, override val end: Node)(ove
         graph match {
             case EmptyGraph =>
                 this
-            case g@GraphPath(otherBegin, otherEnd) =>
+            case g@Graph(otherBegin, otherEnd, priority) =>
                 end ~> otherBegin
-                GraphPath(begin, otherEnd)(Math.min(this.priority, g.priority))
+                GraphPath(begin, otherEnd)(Math.min(this.priority, priority))
         }
     }
 

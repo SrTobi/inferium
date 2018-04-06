@@ -7,4 +7,5 @@ class PopNode(implicit _info: Node.Info) extends TransformerNode {
     }
 
     override def toString: String = "pop"
+    override def asAsmStmt: String = toString
 }

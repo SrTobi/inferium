@@ -2,7 +2,7 @@ package inferium
 
 import escalima.ECMAScript
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, GraphBuilder, LexicalFrame}
-import inferium.dataflow.graph.visitors.{PrintVisitor, StackAnnotationVisitor}
+import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor, StackAnnotationVisitor}
 import inferium.lattice.{Location, ObjLocation, UndefinedValue}
 import inferium.lattice.heaps.SimpleHeap
 
@@ -11,10 +11,10 @@ object Playground {
         
         val code =
             """
-              |if (4) {
-              |  8
-              |} else {
-              |  4
+              |try {
+              | "a"
+              |} finally {
+              | "b"
               |}
             """.stripMargin
 
@@ -29,6 +29,8 @@ object Playground {
         val iniState = new ExecutionState(UndefinedValue :: Nil, new SimpleHeap(), LexicalFrame(globalObj))
         analysis.runAnalysis(iniState)
 
-        println(new PrintVisitor(showStackInfo = true).start(graph))
+        println(new PrintVisitor(showStackInfo = false).start(graph))
+        println("-------")
+        println(new DotPrintVisitor(showStackInfo = true).start(graph))
     }
 }

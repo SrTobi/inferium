@@ -9,6 +9,7 @@ abstract class Node(implicit val info: Node.Info) {
     val loc: Location = Location()
     val id: Location = loc
     def label: String = info.label.getOrElse(s"L${id.id}")
+    def catchTarget: Option[Node] = info.catchTarget
 
     var exprStackInfo: ExprStackInfo = _
 
@@ -82,6 +83,8 @@ abstract class Node(implicit val info: Node.Info) {
     def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit
 
     def process(implicit analysis: DataFlowAnalysis): Unit
+
+    def asAsmStmt: String
 }
 
 

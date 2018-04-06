@@ -59,38 +59,27 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
             printStackInfo(if (lineCount == 0 || node.isInstanceOf[MergeNode]) node else pred)
         }
 
-        val printStack = node match {
-            case jmp: JumpNode =>
-                cmd(s"jmp ${jmp.target.label}")
-                false
-
-            case jmp: CondJumpNode =>
-                cmd(s"cond ${jmp.thenNode.label}, ${jmp.elseNode.label}")
-                false
-
-            case node: LiteralNode =>
-                cmd(s"push ${node.literal}")
-
+        val printStmt = node match {
             case _: MergeNode =>
                 false
-
-            case _: PopNode =>
-                cmd("pop")
-
-            case _: PushLexicalFrame =>
-                cmd("lexPush")
-
-            case node: LexicalReadNode =>
-                cmd(s"read ${node.varName}")
-
-            case node: LexicalWriteNode =>
-                cmd(s"write ${node.varName}")
-
             case _: EndNode =>
                 false
+            case _ => true
         }
 
-        if (!printStack.equals(false)) {
+        if (printStmt) {
+            cmd(node.asAsmStmt)
+        }
+
+        val printStack = node match {
+            case jmp: JumpNode => false
+            case jmp: CondJumpNode => false
+            case _: MergeNode => false
+            case _: EndNode => false
+            case _ => true
+        }
+
+        if (printStack) {
             printStackInfo(node)
         }
         printGoto(node)
