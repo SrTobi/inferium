@@ -90,7 +90,7 @@ class TypeScriptPrinter(val returnObject: IniEntity, val globalObject: IniEntity
     }
 
     private abstract class Entry {
-        def printAsExport(): String = s"var exp: ${print(Set())}\nexport = exp"
+        def printAsExport(): String = s"declare var exp: ${print(Set())}\nexport = exp"
         def printAsProperty(property: String, outerGenerics: Set[String]): String = s"$property: ${print(outerGenerics)}"
         def print(outerGenerics: Set[String]): String
         def generics: Set[String]

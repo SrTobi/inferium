@@ -181,6 +181,7 @@ class ForwardFlowAnalysis private(val scriptTemplate: Templates.Script, override
     def globalHeap: HeapMemory = globalHeapState
     def scriptReturnValue: ValueLike = _scriptReturnValue
     def scriptReturn: IniEntity = globalHeapState.toIniEntity(Seq(scriptReturnValue), this).head._2
+    def globalObjectResult: IniEntity = globalHeapState.toIniEntity(Seq(globalObject), this).head._2
 
     def analyse(): Unit = {
         analyseInitialScriptExecution()

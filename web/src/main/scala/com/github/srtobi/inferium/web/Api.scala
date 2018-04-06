@@ -18,13 +18,13 @@ object Api {
 
         LangParser.script.parse(code) match {
             case Parsed.Success(script, _) =>
-              val global = IniObject("rand" -> BoolValue)
+              val global = IniObject("exports" -> IniObject())
 
               val analysis = ForwardFlowAnalysis.create(script, Solver, new IterationHeap, global)
               analysis.analyse()
-              val result = analysis.scriptReturn
+              val result = analysis.globalObjectResult
 
-              val printer = new TypeScriptPrinter(result, null)
+              val printer = new TypeScriptPrinter(result.members("exports"), null)
               printer.print()
             case f@Parsed.Failure(lastParser, _, extra) =>
               throw js.JavaScriptException(f.toString())
