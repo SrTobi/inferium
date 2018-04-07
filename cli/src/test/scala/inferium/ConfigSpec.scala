@@ -110,6 +110,35 @@ class ConfigSpec extends FlatSpec with Matchers {
         parsed shouldBe ref
     }
 
+    it should "parse config scripts" in {
+        val ref = Config(
+            intOption := 234,
+            stringOption := "Hello"
+        )
+
+        {
+            val configSource =
+                """
+                  |testSection.intoption := 234
+                  |testSection.string-option := "Hello"
+                """.stripMargin
+            val parsed = TestConfig.parse(configSource)
+            parsed shouldBe ref
+        }
+
+        {
+            val configSource =
+                """
+                  |test-section {
+                  |  intOption := "234"
+                  |  string-option := Hello
+                  |}
+                """.stripMargin
+            val parsed = TestConfig.parse(configSource)
+            parsed shouldBe ref
+        }
+    }
+
     "GraphBuilder section" should "have all options" in {
         import GraphBuilder.Config._
         val ref = GraphBuilder.Config(bindLetAndConstToGlobal = true)

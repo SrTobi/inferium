@@ -1,10 +1,11 @@
 package inferium
 
+import fastparse.core.Parsed
 import inferium.Config.{ConfigEntry, ConfigKey, SpecificConfigEntry}
+import inferium.utils.GrammarUtils
 
 import scala.collection.generic.Growable
 import scala.collection.mutable
-
 import scala.util.Try
 
 class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] {
@@ -155,5 +156,55 @@ object Config {
             val defs = for ((key, value) <- entries) yield Definition.this.key(key).parse(value)
             Config(defs: _*)
         }
+
+        def parse(source: String): Config = {
+            val Parsed.Success(entries, _) = Grammar.entries.parse(source)
+            parse(entries)
+        }
+
+        def parseWithFreeEntries(source: String): (Config, Map[String, String]) = {
+            val Parsed.Success(entries, _) = Grammar.entries.parse(source)
+            val (configEntries, freeEntries) = entries.partition(_._1.contains("."))
+            (parse(configEntries), Map(freeEntries: _*))
+        }
+    }
+
+    private object Grammar {
+
+        import fastparse.noApi._
+
+        private class LangWsWrapper(WL: P0) {
+            implicit def parserApi2[T, V](p0: T)(implicit c: T => P[V]): LangWhitespaceApi[V] =
+                new LangWhitespaceApi[V](p0, WL)
+        }
+
+        private object LangWsApi extends LangWsWrapper({
+            import fastparse.all._
+            GrammarUtils.ConfigStyle.ws.rep
+        })
+
+        private class LangWhitespaceApi[+T](p0: P[T], WL: P0) extends fastparse.WhitespaceApi[T](p0, WL) {
+
+            import fastparse.all._
+            import fastparse.core.Implicits.Sequencer
+            import fastparse.parsers.Combinators.Sequence
+
+            def ~~/[V, R](p: Parser[V])(implicit ev: Sequencer[T, V, R]): Parser[R] =
+                Sequence.flatten(Sequence(p0, p, cut = true).asInstanceOf[Sequence[R, R, R, Char, String]])
+        }
+
+        import LangWsApi._
+        import GrammarUtils._
+
+        lazy val key: Parser[String] = P(unicodeIdContinue | CharIn(".-_")).repX.!
+        lazy val value: Parser[String] = P(stringLiteral | CharPred(c => !c.isWhitespace && c != '#').repX.!)
+
+        lazy val entry: Parser[(String, String)] = key ~ P(":=") ~ value
+
+        //noinspection VariablePatternShadow
+        lazy val section: Parser[Seq[(String, String)]] = P(key ~ P("{") ~/ _entries ~ P("}")) map { case (sec, entries) => entries map { case (key, value) => sec + "." + key -> value }}
+
+        private lazy val _entries: Parser[Seq[(String, String)]] = P(section | entry.map {Seq(_)}).rep.map{_.flatten}
+        lazy val entries: Parser[Seq[(String, String)]] = Start ~ _entries ~ End
     }
 }
