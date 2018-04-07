@@ -18,6 +18,16 @@ class JSEvalSpec extends FlatSpec with Matchers {
 
     it should "return objects" in {
         jseval.eval("({})") shouldBe Js.Obj()
-        jseval.eval("({ test: 3 })") shouldBe Js.Obj(("test", Js.Num(2)))
+        jseval.eval("({ test: 3 })") shouldBe Js.Obj(("test", Js.Num(3)))
+    }
+
+    it should "relay exception" in {
+        assertThrows[JSEvalException] {
+            jseval.eval("throw new Error('test')")
+        }
+
+        assertThrows[JSEvalException] {
+            jseval.eval("{")
+        }
     }
 }
