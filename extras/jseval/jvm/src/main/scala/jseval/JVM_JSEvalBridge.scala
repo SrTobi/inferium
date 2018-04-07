@@ -1,9 +1,11 @@
 package jseval
 
-import javax.script.{Invocable, ScriptEngineManager, ScriptException}
+import javax.script.{Invocable, ScriptEngine, ScriptEngineManager, ScriptException}
 
 private class JVM_JSEvalBridge extends JSEvalBridge {
-    private val engine = new ScriptEngineManager().getEngineByName("js")
+    import JVM_JSEvalBridge._
+
+    private val engine = engineInstance
     assert(engine != null, "Could not initialize JavaScript engine")
 
     private val jsonObj = engine.get("JSON")
@@ -18,4 +20,8 @@ private class JVM_JSEvalBridge extends JSEvalBridge {
                 throw new JSEvalException(e.getMessage, e)
         }
     }
+}
+
+private object JVM_JSEvalBridge {
+    lazy val engineInstance: ScriptEngine = new ScriptEngineManager().getEngineByName("js")
 }
