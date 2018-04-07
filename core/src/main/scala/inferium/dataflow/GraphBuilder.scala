@@ -209,20 +209,20 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         // build catch
                         val tryCatchGraph = catchHandler match {
                             case Some(ast.CatchClause(pattern, catchBody)) =>
-                                val catchMerger = new graph.MergeNode(isCatchMerger = true)
+                                val catchMerger = new graph.MergeNode(isCatchMerger = true)(info.copy(priority = priority + 1))
 
                                 val tryBlock = block.inner(catchEntry = Some(catchMerger))
-                                val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 1, newInnerBlockEnv())
+                                val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 2, newInnerBlockEnv())
 
                                 val catchEnv = newInnerBlockEnv()
-                                val bindingGraph = buildPatternBinding(pattern, priority, catchEnv)
+                                val expBindingGraph = buildPatternBinding(pattern, priority + 1, catchEnv)
                                 val catchBlock = block.inner(finalizer = finallyBuilder)
                                 val catchGraph = buildInnerBlock(catchBlock, catchBody.body, priority + 1, catchEnv)
 
                                 val afterMerger = new graph.MergeNode
                                 // we need the jump or we wont find the catch branch with visitors
-                                val jmpInfo = info.copy(priority = info.priority + 1)
-                                tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> bindingGraph ~> catchGraph ~> afterMerger
+                                val jmpInfo = info.copy(priority = info.priority + 2)
+                                tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> expBindingGraph ~> catchGraph ~> afterMerger
 
                             case None =>
                                 buildInnerBlock(block.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())
