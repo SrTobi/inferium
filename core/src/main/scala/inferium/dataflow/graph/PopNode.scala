@@ -6,6 +6,5 @@ class PopNode(implicit _info: Node.Info) extends TransformerNode {
         state.copy(stack = state.stack.tail)
     }
 
-    override def toString: String = "pop"
-    override def asAsmStmt: String = toString
+    override def asAsmStmt: String = "pop"
 }

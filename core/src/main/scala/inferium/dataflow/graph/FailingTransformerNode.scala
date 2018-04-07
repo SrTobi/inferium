@@ -4,7 +4,7 @@ import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 abstract class FailingTransformerNode(implicit info: Node.Info) extends LinearNode with SingleSuccessor {
 
-    override def successors: Traversable[Node] = info.catchTarget ++ super.successors
+    override def successors: Seq[Node] = super.successors ++ info.catchTarget
 
     override final def process(implicit analysis: DataFlowAnalysis): Unit = {
         val outState = transform(inState)

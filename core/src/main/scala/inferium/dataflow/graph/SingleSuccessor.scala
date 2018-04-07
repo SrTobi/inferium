@@ -10,7 +10,7 @@ trait SingleSuccessor extends Node {
         _succ
     }
 
-    override def successors: Traversable[Node] = Option(_succ)
+    override def successors: Seq[Node] = Option(_succ).toSeq
 
     protected[graph] override def addSuccessor(node: Node): Unit = {
         assert(node != null)

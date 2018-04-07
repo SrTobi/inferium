@@ -3,10 +3,10 @@ import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 import scala.collection.mutable
 
-class MergeNode(val fixpoint: Boolean = false, val removable: Boolean = false)(implicit _info: Node.Info) extends Node with SingleSuccessor {
-    private val preds = mutable.Set.empty[Node]
+class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = false, val removable: Boolean = false)(implicit _info: Node.Info) extends Node with SingleSuccessor {
+    private val preds = mutable.Buffer.empty[Node]
     override def hasPred: Boolean = preds.nonEmpty
-    override def predecessors: Traversable[Node] = preds
+    override def predecessors: Seq[Node] = preds
 
     private var processed: Boolean = true
     private var mergeState: ExecutionState = _
@@ -35,7 +35,8 @@ class MergeNode(val fixpoint: Boolean = false, val removable: Boolean = false)(i
 
     protected[graph] override def addPredecessor(node: Node): Unit = {
         assert(node != null)
-        preds += node
+        if (!preds.contains(node))
+            preds += node
     }
 
     protected[graph] override def removePredecessor(node: Node): Unit = {
@@ -43,6 +44,5 @@ class MergeNode(val fixpoint: Boolean = false, val removable: Boolean = false)(i
         preds -= node
     }
 
-    override def toString: String = s"${if (fixpoint) "fixpoint-" else ""}merge[${preds.size} nodes]"
-    override def asAsmStmt: String = toString
+    override def asAsmStmt: String = s"${if (fixpoint) "fixpoint-" else ""}merge[${preds.size} nodes]"
 }

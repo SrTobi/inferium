@@ -10,7 +10,7 @@ trait SinglePredecessor extends Node{
         _pred
     }
 
-    override def predecessors: Traversable[Node] = Option(_pred)
+    override def predecessors: Seq[Node] = Option(_pred).toSeq
 
     protected[graph] override def addPredecessor(node: Node): Unit = {
         assert(node != null)

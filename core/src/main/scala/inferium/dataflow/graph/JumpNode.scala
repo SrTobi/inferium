@@ -5,7 +5,7 @@ class JumpNode(val target: Node)(implicit _info: Node.Info) extends Node with Si
     assert(target != null)
     target.addPredecessor(this)
 
-    override def successors: Traversable[Node] = super.successors ++ Seq(target)
+    override def successors: Seq[Node] = super.successors ++ Seq(target)
 
     override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
         target <~ state

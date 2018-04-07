@@ -32,8 +32,8 @@ abstract class Node(implicit val info: Node.Info) {
     }
 
     final def remove(): Unit = {
-        val preds = predecessors.toSeq
-        val succs = successors.toSeq
+        val preds = predecessors
+        val succs = successors
 
         erase()
 
@@ -43,8 +43,8 @@ abstract class Node(implicit val info: Node.Info) {
     }
 
     final def replace(nodes: Node*): Unit = {
-        val preds = predecessors.toSeq
-        val succs = successors.toSeq
+        val preds = predecessors
+        val succs = successors
 
         erase()
 
@@ -71,8 +71,8 @@ abstract class Node(implicit val info: Node.Info) {
     def hasPred: Boolean
     def hasSucc: Boolean
 
-    def predecessors: Traversable[Node]
-    def successors: Traversable[Node]
+    def predecessors: Seq[Node]
+    def successors: Seq[Node]
 
     protected[graph] def removePredecessor(node: Node): Unit
     protected[graph] def removeSuccessor(node: Node): Unit
@@ -84,6 +84,7 @@ abstract class Node(implicit val info: Node.Info) {
 
     def process(implicit analysis: DataFlowAnalysis): Unit
 
+    override def toString: String = s"[$id]$asAsmStmt"
     def asAsmStmt: String
 }
 

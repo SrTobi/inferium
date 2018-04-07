@@ -3,7 +3,7 @@ package inferium.dataflow.graph.visitors
 import inferium.dataflow.graph._
 import inferium.utils.{Id, IdGenerator}
 
-import scala.collection.mutable
+import scala.collection.{Traversable, mutable}
 
 class DotPrintVisitor(val showStackInfo: Boolean = false) extends Node.AllVisitor {
 
@@ -42,18 +42,43 @@ class DotPrintVisitor(val showStackInfo: Boolean = false) extends Node.AllVisito
 
     private val idGen = new IdGenerator[SubGraphMember]
 
-    private abstract class SubGraphMember(catchTarget: =>Option[Node], top: Boolean = false) {
+    private abstract class SubGraphMember(catchTarget: Option[Node], isTop: Boolean = false) {
         val id: Id[SubGraphMember] = idGen.newId()
 
-        val subGraph: SubGraphMember = (catchTarget map { target => nodeTarget.getOrElseUpdate(catchTarget, new SubGraph(target.catchTarget)) }) getOrElse (if (top) null else TopGraph)
+        val subGraph: Option[SubGraphMember] = if (isTop) {
+            None
+        } else {
+            catchTarget map {
+                target =>
+                    nodeTarget.getOrElseUpdate(target, new SubGraph(target))
+            } orElse Some(TopGraph)
+        }
 
         val members: mutable.Buffer[SubGraphMember] = mutable.Buffer.empty
 
-        if (subGraph != null) {
-            subGraph.members += this
-        }
+        subGraph foreach { _.members += this }
 
         def print(printer: Printer): Unit
+    }
+
+    private class SubGraph(targetNode: Node, isTop: Boolean = false) extends SubGraphMember(targetNode.catchTarget, isTop) {
+        override def print(printer: Printer): Unit = {
+            val subGraphId = s"cluster_${id.id}"
+            printer.line(s"subgraph $subGraphId {")
+            val p = printer.indented()
+            //p.line("color=lightgrey;")
+            for (member <- members) {
+                member.print(p)
+            }
+            p.finish()
+            printer.line("}")
+
+            // exception edge
+            nodesToBlock get targetNode foreach {
+                block =>
+                    printer.line(s"${members.collect{ case blk: BlockNode => blk}.last.blockId} -> ${block.blockId} [ltail=$subGraphId,color=red]")
+            }
+        }
     }
 
     private object TopGraph extends SubGraphMember(None, true) {
@@ -64,38 +89,55 @@ class DotPrintVisitor(val showStackInfo: Boolean = false) extends Node.AllVisito
         }
     }
 
-    private class SubGraph(catchTarget: =>Option[Node]) extends SubGraphMember(catchTarget) {
-        override def print(printer: Printer): Unit = {
-            printer.line(s"subgraph sub${id.id} {")
-            val p = printer.indented()
-            for (member <- members) {
-                member.print(p)
-            }
-            p.finish()
-            printer.line("}")
-        }
-    }
-
     private class BlockNode(catchTarget: Option[Node]) extends SubGraphMember(catchTarget) {
         val nodes: mutable.Buffer[Node] = mutable.Buffer.empty
-        def nodeId: String = s"node${id.id}"
+        def blockId: String = s"node${id.id}"
 
         override def print(printer: Printer): Unit = {
             assert(nodes.nonEmpty)
-            nodes.last.successors map nodesToBlock foreach {
+            val succs = nodes.last match {
+                case node: JumpNode => Seq(node.target)
+                case node => node.successors.filter(!node.catchTarget.contains(_))
+            }
+
+            succs map nodesToBlock foreach {
                 succ =>
-                    printer.line(s"$nodeId -> ${succ.nodeId} [label=${succ.nodes.head.label}]")
+                    printer.line(s"$blockId -> ${succ.blockId} [label=${succ.nodes.head.label}]")
+            }
+        }
+
+        private def nodeToText(node: Node, builder: mutable.StringBuilder): Unit = {
+            def appendStack(node: Node): Unit = {
+                if (showStackInfo ) {
+                    builder.append(s"# Stack: ${node.exprStackInfo.mkString("[", " :: ", "]")}\n")
+                }
+            }
+
+            if (!node.isInstanceOf[MergeNode]) {
+                node.predecessors match {
+                    case Seq(pred) if nodesToBlock(pred) != this =>
+                        appendStack(pred)
+                    case _ =>
+                }
+            }
+
+            builder.append(node.asAsmStmt + "\n")
+
+            if (node.successors.length == 1) {
+                appendStack(node)
             }
         }
 
         def printLabel(printer: Printer): Unit = {
-            val nodeText = nodes.map(_.asAsmStmt.replace("\"", "\\\"")).mkString("", "\\l", "\\l")
-            printer.line(nodeId + "[label=\"" + nodeText +"\"]")
+            val builder = new mutable.StringBuilder
+            nodes foreach { n => nodeToText(n, builder) }
+            val nodeText = builder.toString.replace("""\""", """\\""").replace("\"", "\\\"").replace("\n", "\\l")
+            printer.line(blockId + " [label=\"" + nodeText +"\"]")
         }
     }
 
     private val nodesToBlock = mutable.Map.empty[Node, BlockNode]
-    private val nodeTarget = mutable.Map.empty[Option[Node], SubGraphMember]
+    private val nodeTarget = mutable.Map.empty[Node, SubGraph]
 
 
     override protected def visit(node: Node): Unit = {
@@ -116,6 +158,7 @@ class DotPrintVisitor(val showStackInfo: Boolean = false) extends Node.AllVisito
         val printer = new Printer()
         printer.line("digraph G {")
         val inner = printer.indented()
+        inner.line("compound=true")
         inner.line("node [shape=box]")
         TopGraph.print(inner)
         nodesToBlock.values.toSeq.distinct foreach { _.printLabel(inner) }

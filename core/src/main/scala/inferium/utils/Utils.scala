@@ -33,5 +33,6 @@ object Utils {
             ).split("%")
         }
 
+        def ?: (cond: Boolean): String = if (cond) str else ""
     }
 }

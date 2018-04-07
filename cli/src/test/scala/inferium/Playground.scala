@@ -12,9 +12,17 @@ object Playground {
         val code =
             """
               |try {
-              | "a"
-              |} finally {
+              |  try {
+              |    test
+              |  } catch (e2) {
+              |    catc
+              |  } finally {
+              |    fin
+              |  }
+              |} catch (e) {
               | "b"
+              |} finally {
+              | "c"
               |}
             """.stripMargin
 
@@ -27,10 +35,10 @@ object Playground {
 
         val globalObj = ObjLocation(Location())
         val iniState = new ExecutionState(UndefinedValue :: Nil, new SimpleHeap(), LexicalFrame(globalObj))
-        analysis.runAnalysis(iniState)
+        //analysis.runAnalysis(iniState)
 
-        println(new PrintVisitor(showStackInfo = false).start(graph))
+        println(new PrintVisitor(showStackInfo = true).start(graph))
         println("-------")
-        println(new DotPrintVisitor(showStackInfo = true).start(graph))
+        println(new DotPrintVisitor(showStackInfo = false).start(graph))
     }
 }

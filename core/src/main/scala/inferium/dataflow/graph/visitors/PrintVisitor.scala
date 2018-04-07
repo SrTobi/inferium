@@ -18,7 +18,7 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
     }
 
     private def needsLabel(node: Node): Boolean = {
-        node.predecessors.size > 1 || (node.predecessors.toSeq match {
+        node.predecessors.size > 1 || (node.predecessors match {
             case Seq(pred) if pred.priority > node.priority => true
             case Seq(_: JumpNode)  => true
             case Seq(_: CondJumpNode) => true
@@ -55,7 +55,7 @@ class PrintVisitor(val showStackInfo: Boolean = false, val maxLines: Int = 1000)
         }
 
         if (printPreStackInfo) {
-            lazy val Seq(pred) =  node.predecessors.toSeq
+            lazy val Seq(pred) =  node.predecessors
             printStackInfo(if (lineCount == 0 || node.isInstanceOf[MergeNode]) node else pred)
         }
 

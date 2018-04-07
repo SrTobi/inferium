@@ -26,7 +26,7 @@ object GraphBuilder {
 
         def inner(labelTargets: Map[String, JumpTarget] = this.labelTargets,
                   loopTarget: Option[JumpTarget] = this.loopTarget,
-                  catchEntry: Option[MergeNode] = None,
+                  catchEntry: Option[MergeNode] = catchEntry,
                   finalizer: Option[() => Graph] = None): BlockInfo =
             new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
     }
@@ -165,6 +165,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
                 def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
                 def innerBlock: BlockInfo = block.inner(labelTargets = labels)
+
                 var newEnv = env
                 val result: Graph = stmt match {
                     case ast.LabeledStatement(ast.Identifier(name), body) =>
@@ -208,9 +209,21 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         // build catch
                         val tryCatchGraph = catchHandler match {
                             case Some(ast.CatchClause(pattern, catchBody)) =>
-                                ???
-                                //val tryBlock = block.inner(catchEntry = Some(catchMerger), finalizer = finallyBuilder)
-                                //val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 1)
+                                val catchMerger = new graph.MergeNode(isCatchMerger = true)
+
+                                val tryBlock = block.inner(catchEntry = Some(catchMerger))
+                                val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 1, newInnerBlockEnv())
+
+                                val catchEnv = newInnerBlockEnv()
+                                val bindingGraph = buildPatternBinding(pattern, priority, catchEnv)
+                                val catchBlock = block.inner(finalizer = finallyBuilder)
+                                val catchGraph = buildInnerBlock(catchBlock, catchBody.body, priority + 1, catchEnv)
+
+                                val afterMerger = new graph.MergeNode
+                                // we need the jump or we wont find the catch branch with visitors
+                                val jmpInfo = info.copy(priority = info.priority + 1)
+                                tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> bindingGraph ~> catchGraph ~> afterMerger
+
                             case None =>
                                 buildInnerBlock(block.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())
                         }

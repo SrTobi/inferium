@@ -2,7 +2,9 @@ package inferium.lattice
 
 import inferium.utils.Counter
 
-final class Location private (val id: Long) extends AnyVal
+final class Location private (val id: Long) extends AnyVal {
+    override def toString: String = s"#$id"
+}
 
 object Location {
     def unapply(arg: Location): Option[Long] = Some(arg.id)
