@@ -20,7 +20,9 @@ object NullValue extends Primitive {
     override def toString: String = "null"
 }
 
-sealed abstract class BoolValue extends Primitive
+sealed abstract class BoolValue extends Primitive {
+    def toLattice: BoolLattice
+}
 object BoolValue extends BoolValue {
     def apply(value: BoolLattice): BoolValue = value match {
         case BoolLattice.Top => BoolValue
@@ -28,13 +30,17 @@ object BoolValue extends BoolValue {
         case BoolLattice.True => TrueValue
     }
 
+    def unapply(arg: BoolValue): Option[BoolLattice] = Some(arg.toLattice)
+
     override def toString: String = "boolean"
+    override val toLattice: BoolLattice = BoolLattice.Top
 }
 
 
 
 sealed abstract class SpecificBoolValue protected(val value: Boolean) extends BoolValue {
     override def toString: String = value.toString
+    override val toLattice: BoolLattice = BoolLattice(false)
 }
 
 object TrueValue extends SpecificBoolValue(true) {

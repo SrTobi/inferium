@@ -35,7 +35,7 @@ class HeapTest extends FlatSpec with Matchers {
         heap.readHandle(h) shouldBe TrueValue
     }
 
-    it should "unify handle values from different heaps when unified" in {
+    /*it should "unify handle values from different heaps when unified" in {
         val base = new Heap
         val h = new Handle
 
@@ -69,5 +69,5 @@ class HeapTest extends FlatSpec with Matchers {
         merged.readHandle(h) shouldBe BoolValue
         merged.readHandle(hh) shouldBe SpecificStringValue("test")
         merged.readHandle(hhh) shouldBe SpecificNumberValue(3)
-    }
+    }*/
 }

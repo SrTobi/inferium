@@ -8,7 +8,7 @@ abstract class Entity {
 
     def unify(other: Entity): Entity = Entity.unify(this, other)
 
-    def mightBe(entity: Entity): Boolean = this == entity
+    def mightBe(entity: Entity): Boolean = ??? //this == entity
 }
 
 object Entity {
@@ -57,7 +57,7 @@ object Entity {
 
     def apply(entities: Entity*): Entity = unify(entities)
 
-    private val emptyUnion = UnionValue(isUndef = false, isNull = false, None, Set.empty, Set.empty, Set.empty)
+    private val emptyUnion = UnionValue(isUndef = false, isNull = false, GeneralBoolLattice.Bottom, None, Set.empty, Set.empty, Set.empty)
     private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
 
     def unify(entities: Seq[Entity]): Entity = entities match {
@@ -75,6 +75,7 @@ object Entity {
             return UnionValue(
                 fst.isUndef || snd.isUndef,
                 fst.isNull || snd.isNull,
+                fst.bool unify snd.bool,
                 if (fst.num.isEmpty)
                     snd.num
                 else if (snd.num.isEmpty || fst.num == snd.num)
@@ -103,15 +104,16 @@ object Entity {
     }
 
     private def unifyUnionWithSingleEntity(union: UnionValue, entity: Entity): UnionValue = union match {
-        case UnionValue(undef, isNull, num, strings, objs, refs) => entity match {
+        case UnionValue(undef, isNull, bool, num, strings, objs, refs) => entity match {
             case NeverValue => union
-            case UndefinedValue => UnionValue(isUndef = true, isNull, num, strings, objs, refs)
-            case NullValue => UnionValue(undef, isNull = true, num, strings, objs, refs)
-            case number: NumberValue => UnionValue(undef, isNull, if (num.contains(number)) num else Some(NumberValue), strings, objs, refs)
-            case str: SpecificStringValue => UnionValue(undef, isNull, num, if (strings == stringUnion) stringUnion else strings + str, objs, refs)
-            case StringValue => UnionValue(undef, isNull, num, stringUnion, objs, refs)
-            case obj: ObjLocation => UnionValue(undef, isNull, num, strings, objs + obj, refs)
-            case ref: Ref => UnionValue(undef, isNull, num, strings, objs, refs + ref)
+            case UndefinedValue => union.copy(isUndef = true)
+            case NullValue => union.copy(isNull = true)
+            case BoolValue(lattice) => union.copy(bool = bool unify lattice)
+            case number: NumberValue => union.copy(num = if (num.contains(number)) num else Some(NumberValue))
+            case str: SpecificStringValue => union.copy(strings = if (strings == stringUnion) stringUnion else strings + str)
+            case StringValue => union.copy(strings = stringUnion)
+            case obj: ObjLocation => union.copy(objs = objs + obj)
+            case ref: Ref => union.copy(refs = refs + ref)
             case _ => throw new IllegalArgumentException(s"Unexpected entity $entity")
         }
     }
