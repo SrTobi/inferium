@@ -1,4 +1,3 @@
-import org.scalajs.sbtplugin.cross
 
 scalaVersion := "2.12.2"
 
@@ -12,6 +11,8 @@ lazy val commonSettings = Seq(
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % Test
 )
 
+lazy val updateResources = taskKey[Unit]("Updates resources of cross projects")
+
 
 lazy val root = project.in(file("."))
     .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS)
@@ -19,6 +20,14 @@ lazy val root = project.in(file("."))
         name := "inferium",
         publish := {},
         publishLocal := {}
+    )
+    .settings(
+        updateResources := {
+            val base = baseDirectory.value / "extras/testtools"
+            val main = base / "src/main"
+            println("update...")
+            ResourceCompiler.bundle(main / "resources", main / "scala", "inferium.testtools", "Resources")
+        },
     )
 
 lazy val core = crossProject
