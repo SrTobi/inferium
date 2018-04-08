@@ -1,6 +1,7 @@
 
 scalaVersion := "2.12.2"
 
+//--------------------- common settings ---------------------//
 lazy val commonSettings = Seq(
     organization := "de.srtobi",
     version := "0.1-SNAPSHOT",
@@ -11,11 +12,14 @@ lazy val commonSettings = Seq(
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % Test
 )
 
+
+//--------------------- task keys ---------------------//
 lazy val updateResources = taskKey[Unit]("Updates resources of cross projects")
 
 
+//--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS)
+    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator)
     .settings(
         name := "inferium",
         publish := {},
@@ -30,6 +34,8 @@ lazy val root = project.in(file("."))
         },
     )
 
+
+//--------------------- core ---------------------//
 lazy val core = crossProject
     .crossType(CrossType.Pure)
     .in(file("core"))
@@ -38,12 +44,15 @@ lazy val core = crossProject
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
+
+//--------------------- cli ---------------------//
 lazy val cli = project
     .in(file("cli"))
     .dependsOn(coreJVM)
     .settings(commonSettings)
 
 
+//--------------------- web ---------------------//
 lazy val web = project
     .in(file("web"))
     .enablePlugins(ScalaJSPlugin)
@@ -53,6 +62,8 @@ lazy val web = project
     )
     .settings(commonSettings)
 
+
+//--------------------- jsEval tools ---------------------//
 lazy val jsEval = crossProject
     .crossType(CrossType.Full)
     .in(file("extras/jseval"))
@@ -64,6 +75,8 @@ lazy val jsEval = crossProject
 lazy val jsEvalJVM = jsEval.jvm
 lazy val jsEvalJS = jsEval.js
 
+
+//--------------------- test tools ---------------------//
 lazy val testTools = crossProject
     .crossType(CrossType.Pure)
     .in(file("extras/testtools"))
@@ -72,3 +85,14 @@ lazy val testTools = crossProject
 
 lazy val testToolsJVM = testTools.jvm
 lazy val testToolsJS = testTools.js
+
+
+//--------------------- test creator ---------------------//
+lazy val testCreator = project
+    .in(file("extras/testcreator"))
+    .dependsOn(testToolsJVM, jsEvalJVM, coreJVM)
+    .settings(commonSettings)
+    .settings(
+        fork := true,
+        baseDirectory in Test := file("./extras/testcreator")
+    )
