@@ -1,9 +1,11 @@
-package inferium.testcreator
+package inferium.testcreator.cli
 
-import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
+import java.nio.file.{Files, Paths}
 
-object Cli {
+import inferium.testcreator.{FixtureGatherer, FixtureTestBuilder}
+
+object BundleFixtures {
     def main(args: Array[String]): Unit = {
 
         args match {

@@ -39,7 +39,7 @@ lazy val root = project.in(file("."))
             val base = file("tests")
             val target = file("cli/src/test/scala")
             val pkg = "inferium.dataflow"
-            (runMain in Compile).toTask(s" inferium.testcreator.Cli ${base / "working"} $target $pkg WorkingFixturesSpec")
+            (runMain in Compile).toTask(s" inferium.testcreator.cli.BundleFixtures ${base / "working"} $target $pkg WorkingFixturesSpec")
         }.value
     )
 
