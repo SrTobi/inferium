@@ -161,7 +161,7 @@ object Node {
                 val cur = nextNode.getOrElse(nodesToVisit.dequeue())
                 nextNode = None
                 if (!visited(cur)) {
-                    println(cur.priority + " -> " + cur)
+                    //println(cur.priority + " -> " + cur)
                     visited += cur
                     cur.successors.filter(_.priority >= minPriority) match {
                         case Seq(first) if first.priority == cur.priority =>
