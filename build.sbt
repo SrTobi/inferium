@@ -15,11 +15,13 @@ lazy val commonSettings = Seq(
 
 //--------------------- task keys ---------------------//
 lazy val updateResources = taskKey[Unit]("Updates resources of cross projects")
+lazy val updateTests = taskKey[Unit]("Updates tests")
 
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
     .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator)
+    .dependsOn(testCreator)
     .settings(
         name := "inferium",
         publish := {},
@@ -29,9 +31,16 @@ lazy val root = project.in(file("."))
         updateResources := {
             val base = baseDirectory.value / "extras/testtools"
             val main = base / "src/main"
-            println("update...")
             ResourceCompiler.bundle(main / "resources", main / "scala", "inferium.testtools", "Resources")
-        },
+        }
+    )
+    .settings(
+        updateTests := {
+            val base = file("tests")
+            val target = file("cli/src/test/scala")
+            val pkg = "inferium.dataflow"
+            (runMain in Compile).toTask(s" inferium.testcreator.Cli ${base / "working"} $target $pkg WorkingFixturesSpec")
+        }.value
     )
 
 
@@ -40,6 +49,9 @@ lazy val core = crossProject
     .crossType(CrossType.Pure)
     .in(file("core"))
     .settings(commonSettings)
+    .jvmSettings(
+        fork in Test := true
+    )
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
@@ -50,6 +62,7 @@ lazy val cli = project
     .in(file("cli"))
     .dependsOn(coreJVM)
     .settings(commonSettings)
+    .settings(fork in Test := true)
 
 
 //--------------------- web ---------------------//
@@ -94,5 +107,5 @@ lazy val testCreator = project
     .settings(commonSettings)
     .settings(
         fork := true,
-        baseDirectory in Test := file("./extras/testcreator")
+        //baseDirectory in Test := file("./extras/testcreator")
     )

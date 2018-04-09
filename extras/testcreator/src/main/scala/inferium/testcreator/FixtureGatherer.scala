@@ -16,7 +16,7 @@ object FixtureGatherer {
         val filename: String = if (path == "/") "/" else Paths.get(path).getFileName.toString
     }
 
-    case class FixtureFile(path: String)(val fixture: Fixture) extends PathEntity(path)
+    case class FixtureFile(path: String)(val content: String, val fixture: Fixture) extends PathEntity(path)
 
     case class Directory(path: String)(_subdirs: Seq[Directory], _fixtures: Seq[FixtureFile]) extends PathEntity(path) {
         val subdirs = ListSet(_subdirs.sortBy(_.filename): _*)
@@ -25,25 +25,6 @@ object FixtureGatherer {
         def allFixtures: Seq[FixtureFile] = _fixtures.view ++ _subdirs.view.flatMap{ _.allFixtures }
     }
 
-    def readFixture(path: Path): Fixture = {
-        val content = scala.io.Source.fromFile(path.toFile).mkString
-
-        val commentBegin = content.indexOf("/*")
-        require(commentBegin >= 0, "Could not find prolog begin")
-
-        val commentEnd = content.indexOf("*/", commentBegin)
-        require(commentBegin >= 0, "Could not find prolog end")
-
-        val prolog = content.substring(commentBegin + 2, commentEnd - commentBegin - 2)
-        val code = content.substring(commentEnd + 2)
-
-        val (config, localSettings) = InferiumConfig.parseWithFreeEntries(prolog)
-
-        val name = localSettings getOrElse("name", throw new Exception("Fixture prolog does not specify a name"))
-        val description = localSettings getOrElse("desc", throw new Exception("Fixture prolog does not specify a description"))
-
-        Fixture(name, description, config, code)
-    }
 
     def gatherFixtures(_rootPath: Path): Directory = {
         val rootPath = _rootPath.toAbsolutePath
@@ -53,8 +34,9 @@ object FixtureGatherer {
 
         def readFixtureFile(path: Path): FixtureFile = {
             try {
-                val fixture = readFixture(path)
-                FixtureFile(rel(path))(fixture)
+                val content = scala.io.Source.fromFile(path.toFile).mkString
+                val fixture = Fixture.fromSource(content)
+                FixtureFile(rel(path))(content, fixture)
             } catch {
                 case e: Exception =>
                     throw new Exception(s"Failed to read fixture '$path'", e)
