@@ -1,6 +1,6 @@
 /*
-    name := Hi
-    desc := "Ich bin ein test"
+    name: Hi
+    desc: "Ich bin ein test"
 
  */
 

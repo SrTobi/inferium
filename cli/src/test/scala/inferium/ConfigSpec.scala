@@ -113,14 +113,14 @@ class ConfigSpec extends FlatSpec with Matchers {
     it should "parse config scripts" in {
         val ref = Config(
             intOption := 234,
-            stringOption := "Hello"
+            stringOption := "Hello test"
         )
 
         {
             val configSource =
                 """
-                  |testSection.intoption := 234
-                  |testSection.string-option := "Hello"
+                  |testSection.intoption: 234
+                  |testSection.string-option: "Hello test"
                 """.stripMargin
             val parsed = TestConfig.parse(configSource)
             parsed shouldBe ref
@@ -130,8 +130,8 @@ class ConfigSpec extends FlatSpec with Matchers {
             val configSource =
                 """
                   |test-section {
-                  |  intOption := "234"
-                  |  string-option := Hello
+                  |  intOption: "234"
+                  |  string-option: Hello test
                   |}
                 """.stripMargin
             val parsed = TestConfig.parse(configSource)

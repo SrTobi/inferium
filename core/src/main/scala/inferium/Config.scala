@@ -197,9 +197,9 @@ object Config {
         import GrammarUtils._
 
         lazy val key: Parser[String] = P(unicodeIdContinue | CharIn(".-_")).repX.!
-        lazy val value: Parser[String] = P(stringLiteral | CharPred(c => !c.isWhitespace && c != '#').repX.!)
+        lazy val value: Parser[String] = P(stringLiteral | (!lineTerminator ~ AnyChar).repX.!.map {_.trim})
 
-        lazy val entry: Parser[(String, String)] = key ~ P(":=") ~ value
+        lazy val entry: Parser[(String, String)] = key ~ P(":") ~ value
 
         //noinspection VariablePatternShadow
         lazy val section: Parser[Seq[(String, String)]] = P(key ~ P("{") ~/ _entries ~ P("}")) map { case (sec, entries) => entries map { case (key, value) => sec + "." + key -> value }}
