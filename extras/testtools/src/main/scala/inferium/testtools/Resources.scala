@@ -35,6 +35,8 @@ object Resources {
 {
     // <$$test-case$$>
 }
-""",
+
+// noinspection BadExpressionStatementJS
+"ok";""",
     )
 }

@@ -16,6 +16,7 @@ lazy val commonSettings = Seq(
 //--------------------- task keys ---------------------//
 lazy val updateResources = taskKey[Unit]("Updates resources of cross projects")
 lazy val updateTests = taskKey[Unit]("Updates tests")
+lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when executed normally")
 
 
 //--------------------- root ---------------------//
@@ -25,7 +26,8 @@ lazy val root = project.in(file("."))
     .settings(
         name := "inferium",
         publish := {},
-        publishLocal := {}
+        publishLocal := {},
+        fork := true
     )
     .settings(
         updateResources := {
@@ -40,6 +42,12 @@ lazy val root = project.in(file("."))
             val target = file("cli/src/test/scala")
             val pkg = "inferium.dataflow"
             (runMain in Compile).toTask(s" inferium.testcreator.cli.BundleFixtures ${base / "working"} $target $pkg WorkingFixturesSpec")
+        }.value
+    )
+    .settings(
+        checkFixtures := {
+            val base = file("tests")
+            (runMain in Compile).toTask(s" inferium.testcreator.cli.CheckFixtures $base")
         }.value
     )
 
@@ -62,7 +70,9 @@ lazy val cli = project
     .in(file("cli"))
     .dependsOn(coreJVM)
     .settings(commonSettings)
-    .settings(fork in Test := true)
+    .settings(
+        fork in Test := true
+    )
 
 
 //--------------------- web ---------------------//
@@ -95,6 +105,9 @@ lazy val testTools = crossProject
     .in(file("extras/testtools"))
     .dependsOn(jsEval)
     .settings(commonSettings)
+    .jvmSettings(
+        fork := true
+    )
 
 lazy val testToolsJVM = testTools.jvm
 lazy val testToolsJS = testTools.js
