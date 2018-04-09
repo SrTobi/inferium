@@ -1,3 +1,7 @@
+# ignore js and jvm hidden folders of CrossProjects
+.jvm/
+.js/
+
 
 # Created by https://www.gitignore.io/api/sbt,intellij
 
