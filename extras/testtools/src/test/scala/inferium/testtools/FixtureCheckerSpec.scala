@@ -1,4 +1,4 @@
-package intferium.testtools
+package inferium.testtools
 
 import inferium.testtools.FixtureChecker
 import org.scalatest.{FlatSpec, Matchers}
