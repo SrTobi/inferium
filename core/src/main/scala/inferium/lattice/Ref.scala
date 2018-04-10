@@ -1,3 +1,3 @@
 package inferium.lattice
 
-case class Ref(base: Slot, property: String, target: Set[Slot]) extends Entity
+case class Ref(base: ValueLocation, property: String, target: Set[ValueLocation], mightBeAbsent: AbsentLattice) extends Entity

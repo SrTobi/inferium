@@ -1,10 +1,10 @@
 package inferium.dataflow
 
-import inferium.lattice.Entity
+import inferium.lattice.{Entity, ObjectEntity}
 
-case class LexicalFrame(obj: Entity, outer: Option[LexicalFrame] = None) {
+case class LexicalFrame(obj: ObjectEntity, outer: Option[LexicalFrame] = None) {
     val depth: Int = outer map { _.depth + 1 } getOrElse 0
-    val objects: Vector[Entity] = outer map { _.objects } getOrElse Vector() :+ obj
+    val objects: Vector[ObjectEntity] = outer map { _.objects } getOrElse Vector() :+ obj
 
-    def ::(obj: Entity): LexicalFrame = LexicalFrame(obj, Some(this))
+    def ::(obj: ObjectEntity): LexicalFrame = LexicalFrame(obj, Some(this))
 }

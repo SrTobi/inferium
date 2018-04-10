@@ -1,10 +1,10 @@
 package inferium.lattice
 
-import inferium.lattice.Heap.HeapMutator
+import inferium.lattice.Heap.Mutator
 
 abstract class Heap {
-    def begin(location: Location): HeapMutator
-    def end(actor: HeapMutator): Heap
+    def begin(location: Location): Mutator
+    def end(actor: Mutator): Heap
 
     def split(): Heap
     def unify(heap: Heap): Heap = unify(Seq(heap))
@@ -15,11 +15,18 @@ abstract class Heap {
 
 
 object Heap {
-    abstract class HeapMutator {
-        def createObject(location: Location): ObjLocation
-        def writeProperty(obj: Entity, property: String, value: Entity): Entity
-        def readProperty(obj: Entity, property: String): Entity
-        //def listProperties(obj: ObjLocation): Seq[Entity]
+    sealed class PropertyMutationResult
+    case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
+
+    abstract class Mutator {
+        def allocObject(location: ObjectEntity): Unit
+        def defineProperty(obj: ObjectEntity, property: String, descriptor: Property)
+        def setProperty(obj: ObjectEntity, propertyName: String, property: Property)
+        def getProperty(obj: ObjectEntity, propertyName: String): AbstractProperty
+        //def listProperties(obj: ObjectEntity): Seq[Entity]
+
+        def getValue(loc: ValueLocation): Entity
+        def setValue(loc: ValueLocation, value: Entity): Unit
     }
 
     abstract class Factory {

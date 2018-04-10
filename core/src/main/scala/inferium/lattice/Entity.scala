@@ -18,7 +18,7 @@ object Entity {
         var boolValue: BoolValue = null
         var numberValue: NumberValue = null
         var stringValues = mutable.Set.empty[StringValue]
-        var objLocations = mutable.Set.empty[ObjLocation]
+        var objLocations = mutable.Set.empty[ObjectEntity]
         var refs = mutable.Set.empty[]
 
         entities.flatMap(unpackUnion) foreach {
@@ -112,7 +112,7 @@ object Entity {
             case number: NumberValue => union.copy(num = if (num.contains(number)) num else Some(NumberValue))
             case str: SpecificStringValue => union.copy(strings = if (strings == stringUnion) stringUnion else strings + str)
             case StringValue => union.copy(strings = stringUnion)
-            case obj: ObjLocation => union.copy(objs = objs + obj)
+            case obj: ObjectEntity => union.copy(objs = objs + obj)
             case ref: Ref => union.copy(refs = refs + ref)
             case _ => throw new IllegalArgumentException(s"Unexpected entity $entity")
         }

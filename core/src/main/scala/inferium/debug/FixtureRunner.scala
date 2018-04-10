@@ -4,7 +4,7 @@ import escalima.ECMAScript
 import escalima.ast.Program
 import inferium.dataflow.graph.ScriptGraph
 import inferium.dataflow._
-import inferium.lattice.{Location, ObjLocation, UndefinedValue}
+import inferium.lattice.{Location, ObjectEntity, UndefinedValue}
 import inferium.lattice.heaps.SimpleHeap
 
 class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScript) {
@@ -16,7 +16,7 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
 
     val graph: ScriptGraph = new GraphBuilder(fixture.config).buildTemplate(prog).instantiate()
 
-    val globalObj: ObjLocation = ObjLocation(Location())
+    val globalObj: ObjectEntity = ObjectEntity.ordinary(Location())
     val iniState: ExecutionState = new ExecutionState(UndefinedValue :: Nil, new SimpleHeap(), LexicalFrame(globalObj))
     val debugAdapter: DebugAdapter.Empty.type = DebugAdapter.Empty
 
