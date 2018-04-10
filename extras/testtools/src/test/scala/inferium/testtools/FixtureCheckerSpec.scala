@@ -1,6 +1,5 @@
 package inferium.testtools
 
-import inferium.testtools.FixtureChecker
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Success, Failure}
