@@ -79,11 +79,15 @@ lazy val cli = project
 lazy val web = project
     .in(file("web"))
     .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(WorkbenchPlugin)
     .dependsOn(coreJS)
+    .settings(commonSettings)
     .settings(
         scalaJSUseMainModuleInitializer := false,
+        workbenchStartMode := WorkbenchStartModes.OnCompile,
+        workbenchDefaultRootObject := Some(("web/index.html", "web/")),  // (defaultRootObject, rootDirectory)
+        libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "latest.release"
     )
-    .settings(commonSettings)
 
 
 //--------------------- jsEval tools ---------------------//
