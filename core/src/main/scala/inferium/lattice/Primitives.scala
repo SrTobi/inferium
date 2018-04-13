@@ -20,6 +20,8 @@ object NullValue extends Primitive {
     override def toString: String = "null"
 }
 
+
+/************************ String ************************/
 sealed abstract class BoolValue extends Primitive {
     def toLattice: BoolLattice
 }
@@ -31,6 +33,11 @@ object BoolValue extends BoolValue {
     }
 
     def unapply(arg: BoolValue): Option[BoolLattice] = Some(arg.toLattice)
+
+    override def mightBe(entity: Entity): Boolean = entity match {
+        case _: BoolValue => true
+        case _ => super.mightBe(entity)
+    }
 
     override def toString: String = "boolean"
     override val toLattice: BoolLattice = BoolLattice.Top
@@ -61,8 +68,14 @@ object SpecificBoolValue {
 
 
 
+/************************ Number ************************/
 sealed abstract class NumberValue extends Primitive
 object NumberValue extends NumberValue {
+
+    override def mightBe(entity: Entity): Boolean = entity match {
+        case _: NumberValue => true
+        case _ => super.mightBe(entity)
+    }
 
     override def toString: String = "number"
 }
@@ -73,9 +86,15 @@ case class SpecificNumberValue(value: Int) extends NumberValue {
 }
 
 
-
+/************************ String ************************/
 sealed abstract class StringValue extends Primitive
+
 object StringValue extends StringValue {
+
+    override def mightBe(entity: Entity): Boolean = entity match {
+        case _: StringValue => true
+        case _ => super.mightBe(entity)
+    }
 
     def apply(string: String): SpecificStringValue = SpecificStringValue(string)
     override def toString: String = "string"

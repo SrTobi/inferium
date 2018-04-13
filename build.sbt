@@ -9,7 +9,8 @@ lazy val commonSettings = Seq(
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.5.1",
     libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0",
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5" % Test,
-    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % Test
+    libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % Test,
+    libraryDependencies += "org.scalacheck" %%% "scalacheck" % "1.13.4" % Test
 )
 
 

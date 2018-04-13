@@ -8,7 +8,7 @@ abstract class Entity {
 
     def unify(other: Entity): Entity = Entity.unify(this, other)
 
-    def mightBe(entity: Entity): Boolean = ??? //this == entity
+    def mightBe(entity: Entity): Boolean = this == entity || entity == NeverValue
 }
 
 object Entity {
