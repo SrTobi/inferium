@@ -1,0 +1,56 @@
+/* Tree view stuff */
+div.tree, div.tree ul, div.tree li {
+    position: relative;
+}
+div.tree label::before {
+    padding-right: 5px;
+}
+div.tree label {
+    cursor:pointer;
+}
+div.tree label:hover {
+    color: dodgerblue;
+}
+div.tree label.selected-file {
+    color: limegreen;
+}
+div.tree ul {
+    list-style: none;
+    padding-left: 20px;
+}
+.tree li::before, .tree li::after {
+    content: "";
+    position: absolute;
+    left: -12px;
+}
+.tree li::before {
+    border-top: 1px solid #000;
+    top: 11px;
+    width: 8px;
+    height: 0;
+}
+.tree li::after {
+    border-left: 1px solid #000;
+    height: 100%;
+    width: 0;
+    top: 2px;
+}
+.tree ul > li:last-child::after {
+    height: 10px;
+}
+
+/* stuff */
+.editor-area, .settings-area, .tab-container{
+    margin-top: 15px;
+}
+
+
+#graph-output {
+    width: 100%;
+    height: 600px;
+}
+
+#graph-output svg {
+    width: 100%;
+    height: 100%;
+}
