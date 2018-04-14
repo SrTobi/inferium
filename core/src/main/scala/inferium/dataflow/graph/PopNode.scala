@@ -1,8 +1,8 @@
 package inferium.dataflow.graph
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class PopNode(implicit _info: Node.Info) extends TransformerNode {
-    override def transform(state: ExecutionState): ExecutionState = {
+    override def transform(state: ExecutionState, analysis: DataFlowAnalysis): ExecutionState = {
         state.copy(stack = state.stack.tail)
     }
 

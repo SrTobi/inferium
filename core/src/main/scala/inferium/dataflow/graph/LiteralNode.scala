@@ -1,10 +1,10 @@
 package inferium.dataflow.graph
 
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice.Entity
 
 class LiteralNode(val literal: Entity)(implicit _info: Node.Info) extends TransformerNode {
-    override def transform(state: ExecutionState): ExecutionState = {
+    override def transform(state: ExecutionState, analysis: DataFlowAnalysis): ExecutionState = {
         val newStack = literal :: state.stack
         return state.copy(stack = newStack)
     }

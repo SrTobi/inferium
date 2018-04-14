@@ -32,6 +32,8 @@ object BoolValue extends BoolValue {
         case BoolLattice.True => TrueValue
     }
 
+    def apply(value: Boolean): BoolValue = apply(BoolLattice(value))
+
     def unapply(arg: BoolValue): Option[BoolLattice] = Some(arg.toLattice)
 
     override def mightBe(entity: Entity): Boolean = entity match {

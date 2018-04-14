@@ -31,15 +31,18 @@ object GraphBuilder {
             new BlockInfo(Some(this), labelTargets, loopTarget, catchEntry, finalizer)
     }
 
-    case class Config(bindLetAndConstToGlobal: Boolean)
+    case class Config(bindLetAndConstToGlobal: Boolean, buildDebugNodes: Boolean, debugObjectName: String)
     object Config extends inferium.Config.Section("GraphBuilder") {
 
         val bindLetAndConstToGlobal: ConfigKey[Boolean] = ConfigKey(false)
         val buildDebugNodes: ConfigKey[Boolean] = ConfigKey(false)
+        val debugObjectName: ConfigKey[String] = ConfigKey("debug")
 
 
         implicit def configToGraphBuilder(config: inferium.Config): GraphBuilder.Config = GraphBuilder.Config(
-            bindLetAndConstToGlobal = config(bindLetAndConstToGlobal)
+            bindLetAndConstToGlobal = config(bindLetAndConstToGlobal),
+            buildDebugNodes = config(buildDebugNodes),
+            debugObjectName = config(debugObjectName)
         )
     }
 }
@@ -100,9 +103,112 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 new graph.LiteralNode(entity)
             }
 
+
+            private def parseDebugLiteral(expr: ast.SpreadableExpression): Either[Primitive, String] = expr match {
+                case ast.BooleanLiteral(value) =>
+                    Left(BoolValue(value))
+
+                case ast.StringLiteral(value) =>
+                    Left(StringValue(value))
+
+                case num: ast.NumberLiteral =>
+                    val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
+                    Left(value)
+
+                case _: ast.NullLiteral =>
+                    Left(NullValue)
+
+                case ast.Identifier("undefined") =>
+                    Left(UndefinedValue)
+
+                case ast.Identifier(varName) =>
+                    Right(varName)
+
+                case ast.MemberExpression(ast.Identifier(base), ast.Identifier(name), false) if base == config.debugObjectName =>
+                    Left(name match {
+                        case "never" => NeverValue
+                        case "string" => StringValue
+                        case "boolean" => BoolValue
+                        case "number" => NumberValue
+                    })
+            }
+
+            private def parseDebugExpression(expr: ast.Expression, needExpression: Boolean, needSubject: Boolean = false, hadExpression: Boolean = false): Option[(Seq[DebugNode.Operation], Option[ast.Expression])] = {
+                expr match {
+                        // base
+                    case ast.Identifier(base) if base == config.debugObjectName =>
+                        if (needExpression || needSubject) {
+                            throw new BuildException("Debug expression needed an expression")
+                        } else {
+                            Some(Seq(DebugNode.CheckLiveCode), None)
+                        }
+
+                    case ast.MemberExpression(ast.Identifier(base), ast.Identifier("ans"), false) if base == config.debugObjectName =>
+                        if (!needSubject) {
+                            throw new BuildException("ans debug expression needs tester")
+                        } else if (needExpression) {
+                            throw new BuildException("An expression is needed. ans can only be used in debug statements")
+                        } else if (hadExpression) {
+                            throw new BuildException("Debug can have only one main expression")
+                        } else {
+                            Some(Seq(DebugNode.CheckLiveCode), None)
+                        }
+
+                    case ast.CallExpression(ast.Identifier(base), Seq(innerExpr: ast.Expression)) if base == config.debugObjectName =>
+                        if (hadExpression) {
+                            throw new BuildException("Debug can have only one main expression")
+                        } else {
+                            Some(Seq(DebugNode.CheckLiveCode), Some(innerExpr))
+                        }
+
+                        // liveCode
+                    case ast.CallExpression(ast.MemberExpression(callee: ast.Expression, ast.Identifier("liveCode"), false), Seq()) =>
+                        parseDebugExpression(callee, needExpression, needSubject, hadExpression) map {
+                            case (ops, innerExpr) => (ops :+ DebugNode.CheckLiveCode, innerExpr)
+                        }
+
+                        // deadCode
+                    case ast.CallExpression(ast.MemberExpression(callee: ast.Expression, ast.Identifier("deadCode"), false), Seq()) =>
+                        parseDebugExpression(callee, needExpression, needSubject, hadExpression) map {
+                            case (ops, innerExpr) => (ops :+ DebugNode.CheckDeadCode, innerExpr)
+                        }
+
+                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("isOneOf"), false), args) =>
+                        parseDebugExpression(source, needExpression, needSubject = true) map {
+                            case (ops, innerExpr) =>
+                                val op = DebugNode.OneOf(args map parseDebugLiteral)
+                                (ops :+ op, innerExpr)
+                        }
+
+                    case _ =>
+                        None
+                }
+            }
+
+
+            private object DebugExpression {
+                def unapply(expr: ast.Expression): Option[(Seq[DebugNode.Operation], Option[ast.Expression])] = if (!config.buildDebugNodes) None else {
+                    parseDebugExpression(expr, needExpression = true)
+                }
+            }
+
+            private object DebugStatement {
+                def unapply(arg: ast.Statement): Option[(Seq[DebugNode.Operation], Option[ast.Expression])] = if (!config.buildDebugNodes) None else arg match {
+                    case ast.ExpressionStatement(expr) =>
+                        parseDebugExpression(expr, needExpression = false)
+                    case _ =>
+                        None
+                }
+            }
+
             private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
                 expr match {
+                    case DebugExpression(ops, innerExprOpt) =>
+                        val innerExpr = innerExprOpt getOrElse (throw new BuildException("debug within expressions need a base expression"))
+                        val exprGraph = buildExpression(innerExpr, priority, env)
+                        exprGraph ~> new DebugNode(ops)
+
                     case ast.BooleanLiteral(value) =>
                         buildLiteral(BoolValue(BoolLattice(value)))
 
@@ -120,15 +226,11 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         buildLiteral(UndefinedValue)
 
                     case ast.Identifier(varName) =>
+                        if (config.buildDebugNodes && config.debugObjectName == varName) {
+                            throw new BuildException(s"The identifier '${config.debugObjectName}' may solely be used in debug expressions!")
+                        }
                         new graph.LexicalReadNode(varName)
                 }
-            }
-
-            private def buildExressionStatement(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = {
-                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
-
-                val exprGraph = buildExpression(expr, priority, env)
-                new PopNode() ~> exprGraph
             }
 
             private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv): Graph = {
@@ -196,8 +298,19 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val loopEntry = target.entry.getOrElse(throw new BuildException(s"Can not continue the statement '${targetLabel.map(_.name).getOrElse("???")}'"))
                         buildJump(target.targetBlock, loopEntry, priority, env)
 
+                    case DebugStatement(ops, innerExprOpt) =>
+                        def debugNode = new DebugNode(ops)
+                        innerExprOpt match {
+                            case Some(expr) =>
+                                val exprGraph = buildExpression(expr, priority, env)
+                                exprGraph ~> debugNode ~> new PopNode()
+                            case None =>
+                                debugNode
+                        }
+
                     case ast.ExpressionStatement(expr) =>
-                        buildExressionStatement(expr, priority, env)
+                        val exprGraph = buildExpression(expr, priority, env)
+                        new PopNode() ~> exprGraph
 
                     case ast.TryStatement(tryBody, catchHandler, finallyHandler) =>
                         val finallyBuilder = finallyHandler map {

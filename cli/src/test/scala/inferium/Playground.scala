@@ -11,14 +11,13 @@ object Playground {
 
         val code =
             """
-              |var a = 4
-              |a
+              |debug.ans.isOneOf(2)
             """.stripMargin
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
-        val graph = new GraphBuilder(Config()).buildTemplate(prog).instantiate()
+        val graph = new GraphBuilder(Config(GraphBuilder.Config.buildDebugNodes := true)).buildTemplate(prog).instantiate()
 
         val analysis = new DataFlowAnalysis(graph)
 

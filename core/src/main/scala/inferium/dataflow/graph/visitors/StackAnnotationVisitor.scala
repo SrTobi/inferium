@@ -54,6 +54,8 @@ class StackAnnotationVisitor extends Node.AllVisitor {
                     mergeFrame :: restStack
                 }
 
+            case _: graph.DebugNode =>
+                stack
 
             case _: graph.PushLexicalFrame =>
                 stack

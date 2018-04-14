@@ -141,9 +141,17 @@ class ConfigSpec extends FlatSpec with Matchers {
 
     "GraphBuilder section" should "have all options" in {
         import GraphBuilder.Config._
-        val ref = GraphBuilder.Config(bindLetAndConstToGlobal = true)
+        val ref = GraphBuilder.Config(
+            bindLetAndConstToGlobal = true,
+            debugObjectName = "blub",
+            buildDebugNodes = true
+        )
         val empty = Config()
-        val config = Config(bindLetAndConstToGlobal := ref.bindLetAndConstToGlobal)
+        val config = Config(
+            bindLetAndConstToGlobal := ref.bindLetAndConstToGlobal,
+            debugObjectName := "blub",
+            buildDebugNodes := true
+        )
 
         // check that config does not contain default values
         empty(bindLetAndConstToGlobal) shouldNot be (config(bindLetAndConstToGlobal))

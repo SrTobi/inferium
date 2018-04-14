@@ -5,10 +5,8 @@ import inferium.dataflow.LexicalEnv.{LookupItem, LookupType}
 import inferium.lattice.ObjectEntity
 
 trait LexicalLookup extends Node{
-    def lookupName: String
-    private lazy val lookupChain = info.lexicalEnv.buildLookupSeq(lookupName)
 
-    def lookup(state: ExecutionState): (ObjectEntity, String, ExecutionState) = {
+    def lookup(state: ExecutionState, lookupChain: List[LookupItem]): (ObjectEntity, String, ExecutionState) = {
         val lexObjs = state.lexicalFrame.objects
 
         lookupChain.view.flatMap {
