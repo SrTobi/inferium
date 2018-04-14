@@ -55,17 +55,14 @@ object Entity {
         )
     }*/
 
-    def apply(entities: Entity*): Entity = unify(entities)
+    def unify(entity: Entity, entities: Entity*): Entity = unify(entity +: entities)
 
-    private val emptyUnion = UnionValue(isUndef = false, isNull = false, GeneralBoolLattice.Bottom, None, Set.empty, Set.empty, Set.empty)
-    private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
+    //private val emptyUnion = UnionValue(isUndef = false, isNull = false, GeneralBoolLattice.Bottom, None, Set.empty, Set.empty, Set.empty)
+    //private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
 
-    def unify(entities: Seq[Entity]): Entity = entities match {
-        case Seq() => NeverValue
-        case fst +: rest => unify(fst, rest)
-    }
+    def unify(entities: Seq[Entity]): Entity = UnionValue(entities)
 
-    private def unify(entity: Entity, entities: Seq[Entity]): Entity = entities match {
+    /*private def unify(entity: Entity, entities: Seq[Entity]): Entity = entities match {
         case Seq() => entity
         case fst +: rest => unify(unify(entity, fst), rest)
     }
@@ -116,5 +113,5 @@ object Entity {
             case ref: Ref => union.copy(refs = refs + ref)
             case _ => throw new IllegalArgumentException(s"Unexpected entity $entity")
         }
-    }
+    }*/
 }

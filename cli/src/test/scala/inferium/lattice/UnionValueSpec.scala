@@ -32,11 +32,23 @@ class UnionValueSpec extends PropSpec with Assertions with Matchers with Generat
     private val latticeMemberSeqGen = Gen.containerOf[Seq, Entity](latticeMemberGen)
 
     property("union(a, a) == a") {
-        forAll(latticeMemberGen, minSuccessful(1000)) {
-            (entity) =>
-                val union = Entity.unify(Seq(entity, entity, entity))
+        forAll(latticeMemberGen, Gen.chooseNum(1, 5), minSuccessful(1000)) {
+            (entity, times) =>
+                val union = Entity.unify(Seq.fill(times){ entity })
                 union shouldBe entity
         }
+
+        (TrueValue unify FalseValue) shouldBe BoolValue
+        (TrueValue unify BoolValue) shouldBe BoolValue
+        (BoolValue unify FalseValue) shouldBe BoolValue
+
+        (SpecificNumberValue(3) unify SpecificNumberValue(10)) shouldBe NumberValue
+        (SpecificNumberValue(3) unify NumberValue) shouldBe NumberValue
+        (NumberValue unify SpecificNumberValue(3)) shouldBe NumberValue
+
+        (StringValue unify SpecificStringValue("test")) shouldBe StringValue
+        (SpecificStringValue("xxx") unify SpecificStringValue("blub") unify StringValue) shouldBe StringValue
+
     }
 
     property("Single Entity.unify and multiple unifies create the same entity") {
@@ -50,6 +62,12 @@ class UnionValueSpec extends PropSpec with Assertions with Matchers with Generat
     }
 
     property("mightBe") {
+        forAll(latticeMemberGen, minSuccessful(500)) {
+            (entity) =>
+                assert(entity mightBe entity)
+                assert(entity mightBe NeverValue)
+        }
+
         forAll (latticeMemberSeqGen, minSuccessful(500)) {
             (entities) =>
                 val union = Entity.unify(entities)
@@ -57,6 +75,13 @@ class UnionValueSpec extends PropSpec with Assertions with Matchers with Generat
                 entities foreach { entity =>
                     assert(union mightBe entity, s"$union might not be $entity")
                 }
+        }
+
+        forAll(latticeMemberSeqGen, latticeMemberSeqGen, minSuccessful(500)) {
+            (fst, snd) =>
+                val subUnion = Entity.unify(fst)
+                val superUnion = Entity.unify(fst ++ snd)
+                assert(superUnion mightBe subUnion)
         }
     }
 }
