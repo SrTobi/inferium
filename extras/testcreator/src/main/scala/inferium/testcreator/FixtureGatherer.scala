@@ -26,7 +26,7 @@ object FixtureGatherer {
     }
 
 
-    def gatherFixtures(_rootPath: Path): Directory = {
+    def gatherFixtures(_rootPath: Path, baseConfig: Config): Directory = {
         val rootPath = _rootPath.toAbsolutePath
         require(Files.isDirectory(rootPath))
 
@@ -35,7 +35,7 @@ object FixtureGatherer {
         def readFixtureFile(path: Path): FixtureFile = {
             try {
                 val content = scala.io.Source.fromFile(path.toFile).mkString
-                val fixture = Fixture.fromSource(content)
+                val fixture = Fixture.fromSource(content, baseConfig)
                 FixtureFile(rel(path))(content, fixture)
             } catch {
                 case e: Exception =>
@@ -63,5 +63,5 @@ object FixtureGatherer {
         gatherRecursive(rootPath)
     }
 
-    def gatherFixtures(path: String): Directory = gatherFixtures(Paths.get(path))
+    def gatherFixtures(path: String, baseConfig: Config): Directory = gatherFixtures(Paths.get(path), baseConfig)
 }

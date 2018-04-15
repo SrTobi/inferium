@@ -1,11 +1,11 @@
 package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.dataflow.graph.DebugNode.{CheckDeadCode, CheckLiveCode, OneOf, Operation}
-import inferium.lattice.{Primitive, ValueLocation}
+import inferium.lattice.{Entity, Primitive, ValueLocation}
 
 class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
     override protected def transform(state: ExecutionState, analysis: DataFlowAnalysis): Option[ExecutionState] = {
-        lazy val subject = state.stack.head
+        lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
         val error = analysis.debugAdapter.error(this, _: String)
 
         operations foreach {
@@ -22,11 +22,11 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
                         val lookupChain = info.lexicalEnv.buildLookupSeq(name)
                         val (obj, propertyName, _) = lookup(state, lookupChain)
                         val Some((result, _)) = read(Seq(obj), ValueLocation.Scope, propertyName, state)
-                        result
+                        result.normalized(state.heap.begin(loc))
                 }
 
-                if (!normalizedEntities.exists(subject.mightBe)) {
-                    error(s"debugged expression was none of [${normalizedEntities.mkString(", ")}]")
+                if (!(Entity.unify(normalizedEntities) mightBe subject)) {
+                    error(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
                 }
         }
 

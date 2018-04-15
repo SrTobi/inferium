@@ -201,7 +201,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 }
             }
 
-            private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = {
+            private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = BuildException.enrich(expr) {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
                 expr match {
                     case DebugExpression(ops, innerExprOpt) =>
@@ -263,7 +263,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                        priority: Int,
                                        labels: Map[String, JumpTarget],
                                        here: Option[JumpTarget],
-                                       env: LexicalEnv): (Graph, LexicalEnv) = {
+                                       env: LexicalEnv): (Graph, LexicalEnv) =  BuildException.enrich(stmt) {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
                 def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
                 def innerBlock: BlockInfo = block.inner(labelTargets = labels)
@@ -414,6 +414,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 statements foreach {
                     case ast.Directive(_, directive) =>
                         assert(!visitedNonDirective)
+                        // TODO: use strict is non the less an expression statement
                         if (directive == "use strict;") {
                             strict = true
                         }

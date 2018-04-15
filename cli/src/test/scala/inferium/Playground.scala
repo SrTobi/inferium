@@ -1,37 +1,51 @@
 package inferium
 
 import escalima.ECMAScript
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState, GraphBuilder, LexicalFrame}
-import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor, StackAnnotationVisitor}
-import inferium.lattice.{Location, ObjectEntity, UndefinedValue}
-import inferium.lattice.heaps.SimpleHeap
+import inferium.dataflow._
+import inferium.dataflow.graph.Node
+import inferium.dataflow.graph.visitors.PrintVisitor
+import inferium.prelude.NodeJs
 
 object Playground {
+
+    class TestDebugAdapter extends DebugAdapter {
+        override def error(node: Node, message: String): Unit = println("Error: " + message)
+
+        override def warn(node: Node, message: String): Unit = println("Warn: " + message)
+
+        override def hasError: Boolean = ???
+    }
+
     def main(args: Array[String]): Unit = {
 
         val code =
             """
-              |debug.ans.isOneOf(2)
+              |/*
+              |    name: lexical scopes
+              |    desc: Lexical read and write should respect scopes
+              | */
+              |
+              |var a = "a"
+              |a
+              |debug.ans.isOneOf("a")
+              |
+              |var b = "b"
+              |
+              |debug(a).isOneOf("a")
+              |debug(b).isOneOf("b")
+              |
+              |debug(c).isOneOf(undefined)
+              |var c = "c"
+              |debug(c).isOneOf("c")
             """.stripMargin
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
-        val graph = new GraphBuilder(Config(GraphBuilder.Config.buildDebugNodes := true)).buildTemplate(prog).instantiate()
+        val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
-        val analysis = new DataFlowAnalysis(graph)
-
-        val globalObj = ObjectEntity.ordinary(Location())
-        val heap = {
-            val initialHeap = new SimpleHeap()
-            val mutator = initialHeap.begin(Location())
-            mutator.allocObject(globalObj)
-            initialHeap.end(mutator)
-        }
-
-
-        val iniState = new ExecutionState(UndefinedValue :: Nil, heap, LexicalFrame(globalObj))
-        analysis.runAnalysis(iniState)
+        val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
+        analysis.runAnalysis(NodeJs.initialState)
 
         println(new PrintVisitor(showStackInfo = true).start(graph))
         //println("-------")

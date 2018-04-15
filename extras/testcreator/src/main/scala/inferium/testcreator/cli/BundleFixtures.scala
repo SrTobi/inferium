@@ -3,6 +3,7 @@ package inferium.testcreator.cli
 import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
+import inferium.InferiumConfig
 import inferium.testcreator.{FixtureGatherer, FixtureTestBuilder}
 
 object BundleFixtures {
@@ -14,7 +15,7 @@ object BundleFixtures {
                 val targetFile = Paths.get(targetRoot, packageName.split('.').toSeq :+ s"$name.scala": _*)
 
                 println(s"Read from ${Paths.get(inputDir).toAbsolutePath}")
-                val dir = FixtureGatherer.gatherFixtures(inputDir)
+                val dir = FixtureGatherer.gatherFixtures(inputDir, InferiumConfig.Env.NodeDebug)
 
                 println(s"${dir.allFixtures.length} fixtures found")
 

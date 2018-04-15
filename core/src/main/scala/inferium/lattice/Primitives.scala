@@ -2,7 +2,10 @@ package inferium.lattice
 
 import scala.collection.mutable
 
-sealed abstract class Primitive extends Entity
+sealed abstract class Primitive extends Entity {
+    override def isNormalized: Boolean = true
+    override def normalized(heap: Heap.Mutator): Entity = this
+}
 
 
 object NeverValue extends Primitive {

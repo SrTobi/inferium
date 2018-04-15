@@ -8,7 +8,7 @@ import scala.collection.generic.Growable
 import scala.collection.mutable
 import scala.util.Try
 
-class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] {
+class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] with Cloneable {
     private val entries = mutable.Map.empty[String, ConfigEntry]
 
     set(defs: _*)
@@ -34,6 +34,8 @@ class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] {
         this
     }
 
+    def <+ (other: Config): Config = this.clone() <+= other
+
     override def +=(entry: ConfigEntry): this.type = {
         entries += (entry.fullName -> entry)
         this
@@ -47,6 +49,8 @@ class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] {
     }
 
     override def hashCode(): Int = entries.hashCode()
+
+    override def clone(): Config = Config(entries.toSeq.map(_._2): _*)
 }
 
 object Config {

@@ -2,6 +2,7 @@ package inferium.testcreator.cli
 
 import java.nio.file.{Files, Paths}
 
+import inferium.InferiumConfig
 import inferium.testcreator.{FixtureGatherer, FixtureTestBuilder}
 import inferium.testtools.FixtureChecker
 
@@ -13,7 +14,7 @@ object CheckFixtures {
         args match {
             case Array(fixtureDir) =>
                 println(s"Read from ${Paths.get(fixtureDir).toAbsolutePath}")
-                val dir = FixtureGatherer.gatherFixtures(fixtureDir)
+                val dir = FixtureGatherer.gatherFixtures(fixtureDir, InferiumConfig.Env.NodeDebug)
 
                 println(s"${dir.allFixtures.length} fixtures found")
 

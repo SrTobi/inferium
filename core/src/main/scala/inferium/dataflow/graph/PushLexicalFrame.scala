@@ -10,8 +10,9 @@ class PushLexicalFrame(implicit _info: Node.Info) extends TransformerNode {
         val heap = state.heap
         val mutator = heap.begin(loc)
         mutator.allocObject(lexObj)
-        heap.end(mutator)
-        state.copy(lexicalFrame = lexObj :: state.lexicalFrame)
+        val newHeap = heap.end(mutator)
+        val newLexFrame = lexObj :: state.lexicalFrame
+        state.copy(heap = newHeap, lexicalFrame = newLexFrame)
     }
 
     override def asAsmStmt: String = "lexPush"

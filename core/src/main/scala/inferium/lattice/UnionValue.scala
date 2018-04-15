@@ -13,6 +13,9 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
         //case _ => throw new IllegalArgumentException(s"Unexpected entity $entity")
     }
 
+    override def isNormalized: Boolean = entities.forall(_.isNormalized)
+    override def normalized(heap: Heap.Mutator): Entity = UnionValue(entities map { _.normalized(heap) })
+
     override def toString: String = entities.mkString("{", " | ", "}")
 }
 

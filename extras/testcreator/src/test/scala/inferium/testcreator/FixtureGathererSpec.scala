@@ -2,12 +2,13 @@ package inferium.testcreator
 
 import java.nio.file.{Path, Paths}
 
+import inferium.Config
 import org.scalatest.{FlatSpec, Inside, Matchers}
 
 class FixtureGathererSpec extends FlatSpec with Matchers with Inside {
 
     "FixtureGatherer" should "gather all files in test folder" in {
-        val root = FixtureGatherer.gatherFixtures(Paths.get("samples"))
+        val root = FixtureGatherer.gatherFixtures(Paths.get("samples"), Config())
 
         root.filename shouldBe "/"
         root.path shouldBe "/"

@@ -2,10 +2,12 @@ package inferium.debug
 
 import escalima.ECMAScript
 import escalima.ast.Program
-import inferium.dataflow.graph.ScriptGraph
+import inferium.Config
+import inferium.dataflow.graph.{Node, ScriptGraph}
 import inferium.dataflow._
 import inferium.lattice.{Location, ObjectEntity, UndefinedValue}
 import inferium.lattice.heaps.SimpleHeap
+import inferium.prelude.NodeJs
 
 class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScript) {
 
@@ -16,9 +18,16 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
 
     val graph: ScriptGraph = new GraphBuilder(fixture.config).buildTemplate(prog).instantiate()
 
-    val globalObj: ObjectEntity = ObjectEntity.ordinary(Location())
-    val iniState: ExecutionState = new ExecutionState(UndefinedValue :: Nil, new SimpleHeap(), LexicalFrame(globalObj))
-    val debugAdapter: DebugAdapter.Empty.type = DebugAdapter.Empty
+    val iniState: ExecutionState = NodeJs.initialState
+    val debugAdapter: DebugAdapter = new DebugAdapter {
+        private var _hasError = false
+        override def error(node: Node, message: String): Unit = {
+            _hasError = true
+            println("Error: " + message)
+        }
+        override def warn(node: Node, message: String): Unit = println("Warn: " + message)
+        override def hasError: Boolean = _hasError
+    }
 
     def run(): Boolean = {
         val analysis = new DataFlowAnalysis(graph, debugAdapter)
@@ -28,9 +37,13 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
 }
 
 object FixtureRunner {
+    private lazy val bridge = new ECMAScript
     def test(code: String): Unit = {
-        val fixture = Fixture.fromSource(code)
-        val runner = new FixtureRunner(fixture)
+        val baseConfig = Config(
+            GraphBuilder.Config.buildDebugNodes := true
+        )
+        val fixture = Fixture.fromSource(code, baseConfig)
+        val runner = new FixtureRunner(fixture, bridge)
         val runResult = runner.run()
         assert(runResult)
     }
