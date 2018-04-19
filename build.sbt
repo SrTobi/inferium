@@ -87,7 +87,7 @@ lazy val web = project
         scalaJSUseMainModuleInitializer := false,
         workbenchStartMode := WorkbenchStartModes.OnCompile,
         workbenchDefaultRootObject := Some(("web/index.html", "web/")),  // (defaultRootObject, rootDirectory)
-        libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "latest.release"
+        libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "11.0.1"
     )
 
 
