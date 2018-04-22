@@ -230,18 +230,51 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             throw new BuildException(s"The identifier '${config.debugObjectName}' may solely be used in debug expressions!")
                         }
                         new graph.LexicalReadNode(varName)
+
+                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
+                        val objGraph = buildExpression(obj, priority, env)
+                        objGraph ~> ???
+
+                    case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
+                        buildAssignment(left, Some(right), priority, env, pushInitToStack = true)
+
+                    case ast.ObjectExpression(properties) =>
+                        properties.foldLeft[Graph](EmptyGraph) {
+                            case (prev, property) =>
+                                val propertyInitGraph = property match {
+                                    case ast.SpreadElement(arg) =>
+                                        ???
+
+                                    case ast.Property(key, value, kind, isMethod, isShorthand, isComputed) =>
+                                        ???
+                                }
+
+                                prev ~> propertyInitGraph
+                        }
                 }
             }
 
-            private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv): Graph = {
+            private def buildAssignment(pattern: ast.Pattern, init: Option[ast.Expression], priority: Int, env: LexicalEnv, pushInitToStack: Boolean): Graph = {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
 
-                pattern match {
+                def buildExpr(expr: ast.Expression) = buildExpression(expr, priority, env)
+                def initGraph: Graph = init map { buildExpr } getOrElse { new graph.LiteralNode(UndefinedValue) }
+                def consumeResult: Graph = if (pushInitToStack) EmptyGraph else { new graph.PopNode }
+
+                val assignmentGraph = pattern match {
                     case ast.Identifier(name) =>
-                        new graph.LexicalWriteNode(name)
+                        initGraph ~> new graph.LexicalWriteNode(name)
+
+                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
+                        val objGraph = buildExpr(obj)
+
+                        objGraph ~> initGraph ~> ???
+
 
                     case _ => ???
                 }
+
+                assignmentGraph ~> consumeResult
             }
 
             private def gatherBindingNamesFromPattern(pattern: ast.Pattern): Seq[String] = pattern match {
@@ -250,10 +283,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
-                case ast.VariableDeclarator(pattern, Some(init)) =>
-                    val initGrah = buildExpression(init, priority, env)
-                    val bindingGraph = buildPatternBinding(pattern, priority, env)
-                    initGrah ~> bindingGraph
+                case ast.VariableDeclarator(pattern, init) =>
+                    buildAssignment(pattern, init, priority, env, pushInitToStack = false)
                 case ast.VariableDeclarator(_, _) =>
                     // nothing to do for empty initializer
                     EmptyGraph
