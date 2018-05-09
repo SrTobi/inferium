@@ -1,5 +1,7 @@
 package inferium.lattice
 
+import inferium.utils.macros.blockRec
+
 import scala.collection.mutable
 
 case class UnionValue(entities: Seq[Entity]) extends Entity {
@@ -14,7 +16,9 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
     }
 
     override def isNormalized: Boolean = entities.forall(_.isNormalized)
+    @blockRec(nonrec = true)
     override def normalized(heap: Heap.Mutator): Entity = UnionValue(entities map { _.normalized(heap) })
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = entities flatMap { _.coerceToObjects(heap) }
 
     override def toString: String = entities.mkString("{", " | ", "}")
 }
@@ -27,7 +31,7 @@ object UnionValue {
         var boolValue: BoolValue = null
         var numberValue: NumberValue = null
         var stringValues = mutable.SortedSet.empty[SpecificStringValue](Ordering.by(_.value))
-        var objLocations = mutable.Set.empty[ObjectEntity]
+        var objLocations = mutable.Map.empty[Location, (Boolean, Long)]
         var refs = mutable.Set.empty[Ref]
 
         entities.flatMap(unpackUnion) foreach {
@@ -51,16 +55,36 @@ object UnionValue {
             case NullValue =>
                 hasNull = true
             case NeverValue =>
+            case obj: ObjectEntity =>
+                val v = objLocations.get(obj.loc) match {
+                    case Some((hadAbstract, max)) =>
+                        (hadAbstract || obj.abstractCount != max, Math.max(max, obj.abstractCount))
+
+                    case None =>
+                        (false, obj.abstractCount)
+                }
+                objLocations += obj.loc -> v
+            case ref: Ref =>
+                refs += ref
             case entity =>
                 throw new IllegalArgumentException(s"Unknown entity $entity")
         }
 
+        def objLocationSeq = objLocations.toSeq flatMap {
+            case (loc, (hadAbstract, max)) =>
+                val create = ObjectEntity(loc, ObjectType.OrdinaryObject)(_)
+
+                create(max) +: (if (hadAbstract) Seq(create(0)) else Seq())
+        }
+
         return unionFromSeq(
             (if (hasUndefined) Seq(UndefinedValue) else Seq()) ++
-                (if (hasNull) Seq(NullValue) else Seq()) ++
-                Option(boolValue).toSeq ++
-                Option(numberValue).toSeq ++
-                Option(stringValues).getOrElse(Seq(StringValue))
+            (if (hasNull) Seq(NullValue) else Seq()) ++
+            Option(boolValue).toSeq ++
+            Option(numberValue).toSeq ++
+            Option(stringValues).getOrElse(Seq(StringValue)) ++
+            objLocationSeq ++
+            refs.toSeq
         )
     }
 

@@ -7,9 +7,9 @@ abstract class FailingTransformerNode(implicit info: Node.Info) extends LinearNo
     override def successors: Seq[Node] = super.successors ++ info.catchTarget
 
     override final def process(implicit analysis: DataFlowAnalysis): Unit = {
-        val outState = transform(inState, analysis)
+        val outState = transform(inState)
         outState foreach { succ <~ _ }
     }
 
-    protected def transform(state: ExecutionState, analysis: DataFlowAnalysis): Option[ExecutionState]
+    protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState]
 }

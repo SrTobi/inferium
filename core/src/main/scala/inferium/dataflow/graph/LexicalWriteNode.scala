@@ -7,12 +7,14 @@ class LexicalWriteNode(val varName: String)(implicit _info: Node.Info) extends F
 
     private lazy val lookupChain = info.lexicalEnv.buildLookupSeq(varName)
 
-    override protected def transform(state: ExecutionState, analysis: DataFlowAnalysis): Option[ExecutionState] = {
+    override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
 
         val writeValue :: restStack = state.stack
         val (obj, propertyName, stateAfterLookup) = lookup(state.copy(stack = restStack), lookupChain)
-        write(Seq(obj), ValueLocation.Scope, propertyName, writeValue, stateAfterLookup)
+        write(obj, propertyName, writeValue, stateAfterLookup) map {
+            case (result, resultState) => resultState.copy(stack = result :: resultState.stack)
+        }
     }
 
-    override def asAsmStmt: String = s"write $varName"
+    override def asAsmStmt: String = s"writeL $varName"
 }

@@ -7,12 +7,12 @@ class LexicalReadNode(val varName: String)(implicit _info: Node.Info) extends Fa
 
     private lazy val lookupChain = info.lexicalEnv.buildLookupSeq(varName)
 
-    override protected def transform(state: ExecutionState, analysis: DataFlowAnalysis): Option[ExecutionState] = {
+    override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
 
         val (obj, propertyName, stateAfterLookup) = lookup(state, lookupChain)
-        for((result, stateAfterRead) <- read(Seq(obj), ValueLocation.Scope, propertyName, stateAfterLookup))
+        for((result, stateAfterRead) <- read(obj, propertyName, stateAfterLookup))
             yield stateAfterRead.copy(stack = result :: stateAfterRead.stack)
     }
 
-    override def asAsmStmt: String = s"read $varName"
+    override def asAsmStmt: String = s"readL $varName"
 }

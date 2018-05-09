@@ -4,10 +4,14 @@ import scala.collection.mutable
 
 class DataFlowAnalysis(analysable: Analysable, val debugAdapter: DebugAdapter = DebugAdapter.Empty) {
 
-    private val nodesToProcess = mutable.PriorityQueue.empty[(graph.Node)](Ordering.by(_.priority))
+    private val enquedNodes = mutable.Set.empty[graph.Node]
+    private val nodesToProcess = mutable.PriorityQueue.empty[graph.Node](Ordering.by(_.priority))
 
     def enqueue(node: graph.Node): Unit = {
-        nodesToProcess.enqueue(node)
+        if (!enquedNodes(node)) {
+            nodesToProcess.enqueue(node)
+            enquedNodes += node
+        }
     }
 
     def runAnalysis(initialState: ExecutionState): Unit = {
@@ -16,10 +20,11 @@ class DataFlowAnalysis(analysable: Analysable, val debugAdapter: DebugAdapter = 
     }
 
     def runAnalysis(): Unit = {
-        nodesToProcess += analysable.begin
+        enqueue(analysable.begin)
 
         while (nodesToProcess.nonEmpty) {
             val node = nodesToProcess.dequeue()
+            enquedNodes -= node
             node.process(this)
         }
 

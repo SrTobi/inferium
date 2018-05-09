@@ -5,6 +5,9 @@ import inferium.dataflow._
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.PrintVisitor
 import inferium.prelude.NodeJs
+import inferium.utils.macros.blockRec
+
+
 
 object Playground {
 
@@ -17,38 +20,55 @@ object Playground {
     }
 
     def main(args: Array[String]): Unit = {
-
         val code =
             """
-              |/*
-              |    name: lexical scopes
-              |    desc: Lexical read and write should respect scopes
-              | */
+              |var lastObj
+              |//var someObj
+              |while (debug.boolean) {
+              |    lastObj = { prop: "init" }
+              |    debug(lastObj).print()
+              |    if (debug.boolean) {
+              |        //someObj = lastObj
+              |    }
               |
-              |var a = "a"
-              |a
-              |debug.ans.isOneOf("a")
+              |    debug(lastObj).print()
+              |    debug(lastObj.prop).isOneOf("init").print()
               |
-              |var b = "b"
+              |    /*if (debug.boolean) {
+              |        someObj.prop = "blub"
+              |    }*/
+              |}
               |
-              |debug(a).isOneOf("a")
-              |debug(b).isOneOf("b")
-              |
-              |debug(c).isOneOf(undefined)
-              |var c = "c"
-              |debug(c).isOneOf("c")
+              |//debug(lastObj.prop).isOneOf("init", "blub")
+              |//debug(someObj.prop).isOneOf("init", "blub")
             """.stripMargin
+
+        /*val code =
+            """
+              |var a = "test"
+              |while(debug.boolean) {
+              |  a = "1"
+              |  while(debug.boolean) {
+              |    a = "2"
+              |    debug(a).print()
+              |  }
+              |  debug(a).print()
+              |}
+              |debug(a).print()
+            """.stripMargin*/
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
         val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
+        println(new PrintVisitor(showStackInfo = false).start(graph))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
+
         analysis.runAnalysis(NodeJs.initialState)
 
-        println(new PrintVisitor(showStackInfo = true).start(graph))
         //println("-------")
         //println(new DotPrintVisitor(showStackInfo = false).start(graph))
     }
+
 }

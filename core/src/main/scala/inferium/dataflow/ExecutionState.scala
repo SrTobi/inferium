@@ -5,7 +5,7 @@ import inferium.lattice.Heap
 
 
 case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, lexicalFrame: LexicalFrame) {
-    def merge(others: Seq[ExecutionState]): ExecutionState = {
+    def merge(others: Seq[ExecutionState], fixpoint: Boolean): ExecutionState = {
         // merge stack
         val stacks = others map { _.stack }
         assert(stacks forall { _.length == stack.length })
@@ -14,10 +14,11 @@ case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, lexicalFrame:
             Entity.unify(stack.head +: stacks.map(_.head)) :: stack.tail
         } else Nil
 
-        val resultHeap = heap.unify(others map { _.heap })
+        def otherHeaps = others map { _.heap }
+        val resultHeap = if (fixpoint) heap.fixpointUnify(otherHeaps) else heap.unify(otherHeaps)
 
         val lexFrames = others.iterator map { _.lexicalFrame }
-        assert(lexFrames forall { _ eq lexicalFrame})
+        assert(lexFrames forall { _ == lexicalFrame})
         ExecutionState(resultStack, resultHeap, lexicalFrame)
     }
 }

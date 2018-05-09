@@ -18,7 +18,13 @@ class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = fals
             mergeState = fixedState
         } else {
             // merge
-            mergeState = mergeState.merge(Seq(fixedState))
+            val newMergeState = mergeState.merge(Seq(fixedState), fixpoint)
+
+            if (mergeState == newMergeState) {
+                return
+            }
+
+            mergeState = newMergeState
         }
 
         if (processed) {
@@ -30,6 +36,8 @@ class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = fals
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         processed = true
         succ <~ mergeState
+        if (!fixpoint)
+            mergeState = null
     }
 
 

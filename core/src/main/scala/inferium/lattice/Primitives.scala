@@ -1,25 +1,33 @@
 package inferium.lattice
 
+import inferium.utils.macros.blockRec
+
 import scala.collection.mutable
 
 sealed abstract class Primitive extends Entity {
     override def isNormalized: Boolean = true
+    @blockRec(nonrec = true)
     override def normalized(heap: Heap.Mutator): Entity = this
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = ???
 }
 
 
 object NeverValue extends Primitive {
 
     override def unify(other: Entity): Entity = other
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = ???
 
     override def toString: String = "never"
 }
 
 object UndefinedValue extends Primitive {
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
+
     override def toString: String = "undefined"
 }
 
 object NullValue extends Primitive {
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
     override def toString: String = "null"
 }
 

@@ -1,5 +1,7 @@
 package inferium.lattice
 
+import inferium.utils.macros.blockRec
+
 import scala.collection.mutable
 import scala.collection.immutable
 
@@ -10,7 +12,9 @@ abstract class Entity {
 
     def mightBe(entity: Entity): Boolean = this == entity || entity == NeverValue
     def isNormalized: Boolean
+    @blockRec
     def normalized(heap: Heap.Mutator): Entity
+    def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity]
 }
 
 object Entity {

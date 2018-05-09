@@ -1,6 +1,6 @@
 /*
     name: ans from statement
-    desc: After an statement, ans should have the correct value
+    desc: After a statement, ans should have the correct value
  */
 
 debug.ans.isOneOf(undefined);

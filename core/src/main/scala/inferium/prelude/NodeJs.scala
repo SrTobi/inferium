@@ -6,14 +6,13 @@ import inferium.lattice.heaps.SimpleHeap
 
 object NodeJs {
     def initialState: ExecutionState = {
-        val globalObj = ObjectEntity.ordinary(Location())
-        val heap = {
+        val (heap, globalObj) = {
             val initialHeap = new SimpleHeap()
             val mutator = initialHeap.begin(Location())
 
-            mutator.allocObject(globalObj)
+            val gObj = mutator.allocObject(Location())
 
-            initialHeap.end(mutator)
+            (initialHeap.end(mutator), gObj)
         }
 
 

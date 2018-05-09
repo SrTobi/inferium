@@ -5,12 +5,16 @@ scalaVersion := "2.12.2"
 lazy val commonSettings = Seq(
     organization := "de.srtobi",
     version := "0.1-SNAPSHOT",
-    libraryDependencies += "de.srtobi" %%% "escalima" % "0.2",
-    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.5.1",
+    libraryDependencies += "de.srtobi" %%% "escalima" % "0.3",
+    libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.6.4",
     libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0",
+    libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+    libraryDependencies += "org.scala-lang" % "scala-compiler" % scalaVersion.value,
     libraryDependencies += "org.scalactic" %%% "scalactic" % "3.0.5" % Test,
     libraryDependencies += "org.scalatest" %%% "scalatest" % "3.0.5" % Test,
-    libraryDependencies += "org.scalacheck" %%% "scalacheck" % "1.13.4" % Test
+    libraryDependencies += "org.scalacheck" %%% "scalacheck" % "1.13.4" % Test,
+
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 )
 
 
@@ -22,7 +26,7 @@ lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when exec
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator)
+    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS)
     .dependsOn(testCreator)
     .settings(
         name := "inferium",
@@ -52,11 +56,26 @@ lazy val root = project.in(file("."))
         }.value
     )
 
+//--------------------- macros ---------------------//
+lazy val macros = crossProject
+    .crossType(CrossType.Pure)
+    .in(file("extras/macros"))
+    .settings(commonSettings)
+    .settings(
+        libraryDependencies ++= Seq(
+            "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+            "org.scala-lang" % "scala-compiler" % scalaVersion.value
+        )
+    )
+
+lazy val macrosJVM = macros.jvm
+lazy val macrosJS = macros.js
 
 //--------------------- core ---------------------//
 lazy val core = crossProject
     .crossType(CrossType.Pure)
     .in(file("core"))
+    .dependsOn(macros)
     .settings(commonSettings)
     .jvmSettings(
         fork in Test := true
@@ -127,3 +146,8 @@ lazy val testCreator = project
         fork := true,
         //baseDirectory in Test := file("./extras/testcreator")
     )
+
+lazy val macroTest = project
+    .in(file("extras/macros-test"))
+    .dependsOn(macrosJVM)
+    .settings(commonSettings)

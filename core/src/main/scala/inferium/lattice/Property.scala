@@ -5,6 +5,8 @@ final class AbsentLattice(val mightBeAbsent: Boolean) extends AnyVal {
     def asBool: Boolean = mightBeAbsent
 
     def unify(other: AbsentLattice): AbsentLattice = AbsentLattice(mightBeAbsent || other.mightBeAbsent)
+
+    override def toString: String = if (mightBeAbsent) "MightBeAbsent" else "NeverAbsent"
 }
 
 object AbsentLattice {
@@ -38,7 +40,7 @@ sealed case class Property(configurable: BoolLattice,
                            writable: GeneralBoolLattice,
                            getter: Set[ValueLocation],
                            setter: Set[ValueLocation]) extends AbstractProperty {
-    override def unify(other: AbstractProperty): AbstractProperty = other match {
+    override def unify(other: AbstractProperty): Property = other match {
         case AbsentProperty => withAbsent
         case other: Property =>
             Property(
@@ -52,7 +54,7 @@ sealed case class Property(configurable: BoolLattice,
             )
     }
 
-    override def withAbsent: AbstractProperty = if (mightBeAbsent) this else copy(mightBeAbsent = AbsentLattice.MightBeAbsent)
+    override def withAbsent: Property = if (mightBeAbsent) this else copy(mightBeAbsent = AbsentLattice.MightBeAbsent)
 }
 
 object Property {

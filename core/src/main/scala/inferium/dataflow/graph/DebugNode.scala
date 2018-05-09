@@ -1,10 +1,10 @@
 package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
-import inferium.dataflow.graph.DebugNode.{CheckDeadCode, CheckLiveCode, OneOf, Operation}
+import inferium.dataflow.graph.DebugNode._
 import inferium.lattice.{Entity, Primitive, ValueLocation}
 
 class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
-    override protected def transform(state: ExecutionState, analysis: DataFlowAnalysis): Option[ExecutionState] = {
+    override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
         lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
         val error = analysis.debugAdapter.error(this, _: String)
 
@@ -21,13 +21,16 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
                     case Right(name) =>
                         val lookupChain = info.lexicalEnv.buildLookupSeq(name)
                         val (obj, propertyName, _) = lookup(state, lookupChain)
-                        val Some((result, _)) = read(Seq(obj), ValueLocation.Scope, propertyName, state)
+                        val Some((result, _)) = read(obj, propertyName, state)
                         result.normalized(state.heap.begin(loc))
                 }
 
                 if (!(Entity.unify(normalizedEntities) mightBe subject)) {
                     error(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
                 }
+
+            case PrintExpr =>
+                println(subject)
         }
 
         Some(state)
@@ -48,5 +51,7 @@ object DebugNode {
     case class OneOf(entities: Seq[Either[Primitive, String]]) extends Operation {
         override def toString: String = s"oneOf(${entities map { case Left(p) => p.toString case Right(s) => s} mkString ", "})"
     }
-
+    case object PrintExpr extends Operation {
+        override def toString: String = "print"
+    }
 }

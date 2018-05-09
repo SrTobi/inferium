@@ -35,3 +35,14 @@ debug.ans.isOneOf(debug.boolean);
 false;
 debug.ans.isOneOf(false);
 debug.ans.isOneOf(debug.boolean);
+
+
+// test the debug helpers
+debug.boolean;
+debug.ans.isOneOf(debug.boolean);
+
+debug.number;
+debug.ans.isOneOf(debug.number);
+
+debug.string;
+debug.ans.isOneOf(debug.string);

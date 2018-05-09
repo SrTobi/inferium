@@ -7,6 +7,7 @@ import scala.util.control.NonFatal
 
 
 class BuildException(message: String, private var _where: Option[ast.Node] = None) extends Exception(message) {
+
     def this(message: String, _where: Option[ast.Node], cause: Throwable) = {
         this(message, _where)
         initCause(cause)

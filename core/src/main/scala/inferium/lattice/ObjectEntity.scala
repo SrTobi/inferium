@@ -1,15 +1,15 @@
 package inferium.lattice
 
 import inferium.lattice.ObjectType.OrdinaryObject
+import inferium.utils.macros.blockRec
 
-case class ObjectEntity(loc: Location, objectType: ObjectType) extends Entity {
+case class ObjectEntity(loc: Location, objectType: ObjectType)(val abstractCount: Long) extends Entity {
     override def isNormalized: Boolean = true
+    @blockRec(nonrec = true)
     override def normalized(heap: Heap.Mutator): Entity = this
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq(this)
 }
 
-object ObjectEntity {
-    def ordinary(loc: Location): ObjectEntity = ObjectEntity(loc, OrdinaryObject)
-}
 
 
 sealed abstract class ObjectType

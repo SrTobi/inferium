@@ -43,7 +43,7 @@ class StackAnnotationVisitor extends Node.AllVisitor {
                     "exception" :: undefined :: Nil
                 } else {
                     val restStack = preds.head.exprStackInfo.tail
-                    assert(predecesors forall {
+                    assert(preds forall {
                         _.exprStackInfo.tail eq restStack
                     })
                     val mergeFrame = predecesors map { p => if (p.exprStackInfo == null) ExprStackFrame(p.toString) else p.exprStackInfo.head } reduce[ExprStackFrame] {
@@ -61,7 +61,7 @@ class StackAnnotationVisitor extends Node.AllVisitor {
                 stack
 
             case _: graph.LexicalWriteNode =>
-                stack.tail
+                stack
 
             case node: graph.LexicalReadNode =>
                 node.varName :: stack
@@ -69,6 +69,21 @@ class StackAnnotationVisitor extends Node.AllVisitor {
             case node: graph.EndNode =>
                 assert(stack.tail.isEmpty)
                 stack
+
+            case node: graph.AllocateObjectNode =>
+                s"obj#${node.id}" :: stack
+
+            case node: graph.PropertyWriteNode =>
+                val writeValue :: _ :: rest = stack
+                writeValue :: rest
+
+            case node: graph.PropertyReadNode =>
+                val obj :: rest = stack
+                ExprStackFrame("read", obj, node.propertyName) :: rest
+
+            case node: graph.DupNode =>
+                val top :: _ = stack
+                List.fill(node.times)(top) ++ stack
         }
     }
 }

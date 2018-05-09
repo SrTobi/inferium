@@ -103,6 +103,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 new graph.LiteralNode(entity)
             }
 
+            private def parseAbstractDebugLiteral(name: String): Primitive = name match {
+                case "never" => NeverValue
+                case "string" => StringValue
+                case "boolean" => BoolValue
+                case "number" => NumberValue
+            }
 
             private def parseDebugLiteral(expr: ast.SpreadableExpression): Either[Primitive, String] = expr match {
                 case ast.BooleanLiteral(value) =>
@@ -125,12 +131,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     Right(varName)
 
                 case ast.MemberExpression(ast.Identifier(base), ast.Identifier(name), false) if base == config.debugObjectName =>
-                    Left(name match {
-                        case "never" => NeverValue
-                        case "string" => StringValue
-                        case "boolean" => BoolValue
-                        case "number" => NumberValue
-                    })
+                    Left(parseAbstractDebugLiteral(name))
             }
 
             private def parseDebugExpression(expr: ast.Expression, needExpression: Boolean, needSubject: Boolean = false, hadExpression: Boolean = false): Option[(Seq[DebugNode.Operation], Option[ast.Expression])] = {
@@ -180,11 +181,34 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 (ops :+ op, innerExpr)
                         }
 
+                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("print"), false), Seq()) =>
+                        parseDebugExpression(source, needExpression, needSubject = true) map {
+                            case (ops, innerExpr) =>
+                                (ops :+ DebugNode.PrintExpr, innerExpr)
+                        }
+
+                    case ast.MemberExpression(source: ast.Expression, member, _) =>
+                        // do not throw the exception if we check for an debug STATEMENT
+                        if (needSubject) {
+                            parseDebugExpression(source, needExpression = false) foreach {
+                                _ => throw new BuildException(s"Member $member is not a known debug function")
+                            }
+                        }
+
+                        None
                     case _ =>
                         None
                 }
             }
 
+            private object AbstractDebugLiteral {
+                def unapply(arg: ast.Expression): Option[Primitive] = if (!config.buildDebugNodes) None else arg match {
+                    case ast.MemberExpression(ast.Identifier(base), ast.Identifier(lit), false) if base == config.debugObjectName =>
+                        Try(parseAbstractDebugLiteral(lit)).toOption
+                    case _ =>
+                        None
+                }
+            }
 
             private object DebugExpression {
                 def unapply(expr: ast.Expression): Option[(Seq[DebugNode.Operation], Option[ast.Expression])] = if (!config.buildDebugNodes) None else {
@@ -204,6 +228,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
             private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = BuildException.enrich(expr) {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
                 expr match {
+                    case AbstractDebugLiteral(literal) =>
+                        buildLiteral(literal)
+
                     case DebugExpression(ops, innerExprOpt) =>
                         val innerExpr = innerExprOpt getOrElse (throw new BuildException("debug within expressions need a base expression"))
                         val exprGraph = buildExpression(innerExpr, priority, env)
@@ -232,49 +259,73 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         new graph.LexicalReadNode(varName)
 
                     case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
-                        val objGraph = buildExpression(obj, priority, env)
-                        objGraph ~> ???
+                        // read static member (base.propertyName)
+                        val baseGraph = buildExpression(obj, priority, env)
+                        baseGraph ~> new graph.PropertyReadNode(propertyName)
 
                     case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
-                        buildAssignment(left, Some(right), priority, env, pushInitToStack = true)
+                        buildAssignment(left, Some(right), priority, env, pushWrittenValueToStack = true)
 
                     case ast.ObjectExpression(properties) =>
-                        properties.foldLeft[Graph](EmptyGraph) {
-                            case (prev, property) =>
-                                val propertyInitGraph = property match {
-                                    case ast.SpreadElement(arg) =>
-                                        ???
+                        val propertyInitGraphs = properties map {
+                            case ast.SpreadElement(arg) =>
+                                ???
 
-                                    case ast.Property(key, value, kind, isMethod, isShorthand, isComputed) =>
-                                        ???
+                            case ast.Property(key, value, kind, isMethod, isShorthand, isComputed) =>
+                                if (kind != ast.PropertyKind.init) ???
+                                if (isMethod) ???
+
+                                def valueGraph: Graph = buildExpression(value, priority, env)
+
+                                (isComputed, key) match {
+                                    case (false, ast.Identifier(name)) =>
+                                        valueGraph ~> new graph.PropertyWriteNode(name) ~> new graph.PopNode
+                                    case _ =>
+                                        // todo: write dynamic property
+                                        buildExpression(key, priority, env) ~> ???
                                 }
-
-                                prev ~> propertyInitGraph
                         }
+
+                        val dupGraph: Graph = if (propertyInitGraphs.isEmpty) EmptyGraph else new graph.DupNode(propertyInitGraphs.length)
+                        val propertyInitGraph = propertyInitGraphs.foldLeft[Graph](EmptyGraph) { _ ~> _}
+
+                        new graph.AllocateObjectNode ~> dupGraph ~> propertyInitGraph//propertyInitGraph
                 }
             }
 
-            private def buildAssignment(pattern: ast.Pattern, init: Option[ast.Expression], priority: Int, env: LexicalEnv, pushInitToStack: Boolean): Graph = {
+            private def buildAssignment(pattern: ast.Pattern, init: Option[ast.Expression], priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
                 implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
 
                 def buildExpr(expr: ast.Expression) = buildExpression(expr, priority, env)
                 def initGraph: Graph = init map { buildExpr } getOrElse { new graph.LiteralNode(UndefinedValue) }
-                def consumeResult: Graph = if (pushInitToStack) EmptyGraph else { new graph.PopNode }
+                def consumeResult: Graph = if (pushWrittenValueToStack) EmptyGraph else { new graph.PopNode }
 
                 val assignmentGraph = pattern match {
-                    case ast.Identifier(name) =>
-                        initGraph ~> new graph.LexicalWriteNode(name)
-
                     case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
                         val objGraph = buildExpr(obj)
 
-                        objGraph ~> initGraph ~> ???
+                        objGraph ~> initGraph ~> new graph.PropertyWriteNode(propertyName)
 
+                    case _ =>
+                        initGraph ~> buildPatternBinding(pattern, priority, env, pushWrittenValueToStack = true)
+                }
+
+                assignmentGraph ~> consumeResult
+            }
+
+            private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
+                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+
+                def consumeResult: Graph = if (pushWrittenValueToStack) EmptyGraph else { new graph.PopNode }
+
+                val bindingGraph = pattern match {
+                    case ast.Identifier(name) =>
+                        new graph.LexicalWriteNode(name)
 
                     case _ => ???
                 }
 
-                assignmentGraph ~> consumeResult
+                bindingGraph ~> consumeResult
             }
 
             private def gatherBindingNamesFromPattern(pattern: ast.Pattern): Seq[String] = pattern match {
@@ -284,7 +335,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
             private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
                 case ast.VariableDeclarator(pattern, init) =>
-                    buildAssignment(pattern, init, priority, env, pushInitToStack = false)
+                    buildAssignment(pattern, init, priority, env, pushWrittenValueToStack = false)
                 case ast.VariableDeclarator(_, _) =>
                     // nothing to do for empty initializer
                     EmptyGraph
@@ -310,7 +361,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             case Some(hereTarget) =>
                                 (hereTarget, EmptyGraph)
                             case None =>
-                                val merger = new MergeNode(true)
+                                val merger = new MergeNode
                                 (JumpTarget(block, None, merger), Graph(merger))
                         }
                         val (graph, resultEnv) = buildStatement(body, priority + 1, labels + (name -> target), Some(target), env)
@@ -359,7 +410,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 2, newInnerBlockEnv())
 
                                 val catchEnv = newInnerBlockEnv()
-                                val expBindingGraph = buildPatternBinding(pattern, priority + 1, catchEnv)
+                                val expBindingGraph = buildPatternBinding(pattern, priority + 1, catchEnv, pushWrittenValueToStack = false)
                                 val catchBlock = block.inner(finalizer = finallyBuilder)
                                 val catchGraph = buildInnerBlock(catchBlock, catchBody.body, priority + 1, catchEnv)
 
@@ -389,6 +440,18 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         thenGraph ~> merger
                         elseGraph ~> merger // <- this might do nothing
                         Graph(testGraph.begin(ifNode), merger)
+
+                    case ast.WhileStatement(test, body) =>
+                        val testerInfo = Node.Info(priority + 1, block.catchEntry, env)
+                        val loopMerger = new graph.MergeNode(fixpoint = true)(testerInfo)
+                        val afterMerger = new graph.MergeNode
+                        val testGraph = buildExpression(test, priority + 1, env)
+                        val bodyGraph = buildInnerBlock(innerBlock, Seq(body), priority + 2, newInnerBlockEnv())
+                        val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)
+
+                        loopMerger ~> testGraph ~> cond
+                        bodyGraph ~> loopMerger
+                        Graph(loopMerger, afterMerger)
 
                     case ast.VariableDeclaration(decls, kind) =>
 
@@ -438,26 +501,31 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 // check that directives only appear at the beginning
                 assert(statements.span(_.isInstanceOf[ast.Directive])._2.forall(!_.isInstanceOf[ast.Directive]))
 
-                var graph: Graph = EmptyGraph
+                var bodyGraph: Graph = EmptyGraph
                 var visitedNonDirective = false
                 var env = initialEnv
 
                 statements foreach {
                     case ast.Directive(_, directive) =>
                         assert(!visitedNonDirective)
-                        // TODO: use strict is non the less an expression statement
-                        if (directive == "use strict;") {
+
+                        if (directive == "use strict") {
                             strict = true
                         }
+
+                        // build expression
+                        implicit val info: Node.Info = Node.Info(priority, block.catchEntry, env, None)
+                        val stringExpr = new graph.PopNode ~> buildLiteral(StringValue(directive))
+                        bodyGraph = bodyGraph ~> stringExpr
 
                     case stmt =>
                         visitedNonDirective = true
                         val (stmtGraph, resultEnv) = buildStatement(stmt, priority, block.labelTargets, None, env)
                         env = resultEnv
-                        graph = graph ~> stmtGraph
+                        bodyGraph = bodyGraph ~> stmtGraph
                 }
                 done = true
-                graph
+                bodyGraph
             }
         }
 

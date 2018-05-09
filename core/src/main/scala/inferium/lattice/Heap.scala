@@ -10,7 +10,7 @@ abstract class Heap {
     def unify(heap: Heap): Heap = unify(Seq(heap))
     def unify(heaps: Seq[Heap]): Heap
 
-    def fixpointUnify(futureHeap: Heap): Heap
+    def fixpointUnify(futureHeap: Seq[Heap]): Heap
 }
 
 
@@ -19,7 +19,7 @@ object Heap {
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
 
     abstract class Mutator {
-        def allocObject(location: ObjectEntity): Unit
+        def allocObject(location: Location): ObjectEntity
         def defineProperty(obj: ObjectEntity, property: String, descriptor: Property)
         def setProperty(obj: ObjectEntity, propertyName: String, property: Property)
         def getProperty(obj: ObjectEntity, propertyName: String): AbstractProperty
