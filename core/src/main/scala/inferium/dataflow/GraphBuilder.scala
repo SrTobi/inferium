@@ -334,7 +334,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
-                case ast.VariableDeclarator(pattern, init) =>
+                case ast.VariableDeclarator(pattern, init@Some(_)) =>
                     buildAssignment(pattern, init, priority, env, pushWrittenValueToStack = false)
                 case ast.VariableDeclarator(_, _) =>
                     // nothing to do for empty initializer

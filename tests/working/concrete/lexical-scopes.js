@@ -13,7 +13,9 @@ debug(a).isOneOf("a")
 debug(b).isOneOf("b")
 
 debug(c).isOneOf(undefined)
-var c = "c"
+c = "c"
+debug(c).isOneOf("c")
+var c
 debug(c).isOneOf("c")
 
 debug(d).isOneOf(undefined)
@@ -36,3 +38,11 @@ debug(d).isOneOf("d")
     debug(d).isOneOf("not d")
 }
 debug(d).isOneOf("d")
+
+var e = "e"
+{
+    debug(e).isOneOf("e")
+    let e = "e-inner"
+    debug(e).isOneOf("e-inner")
+}
+debug(e).isOneOf("e")

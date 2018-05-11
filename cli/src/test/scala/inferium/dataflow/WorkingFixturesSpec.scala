@@ -6,7 +6,7 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class WorkingFixturesSpec extends FreeSpec with Matchers {
             
-    "/branching-cf/abstract/objects" - {
+    "/abstract/objects" - {
         "Object instances should become abstract in iteration" in {
             val code =
                 """
@@ -35,6 +35,9 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |debug(lastObj.prop).isOneOf("next", "blub")
                   |debug(someObj.prop).isOneOf("next", "blub")
+                  |
+                  |someObj.absProp = "abs"
+                  |debug(someObj.absProp).isOneOf("abs", undefined)
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -117,7 +120,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
     }
 
 
-    "/nonbranching-cf" - {
+    "/concrete" - {
         "After a statement, ans should have the correct value" in {
             val code =
                 """
@@ -267,7 +270,9 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |debug(b).isOneOf("b")
                   |
                   |debug(c).isOneOf(undefined)
-                  |var c = "c"
+                  |c = "c"
+                  |debug(c).isOneOf("c")
+                  |var c
                   |debug(c).isOneOf("c")
                   |
                   |debug(d).isOneOf(undefined)
@@ -290,6 +295,14 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    debug(d).isOneOf("not d")
                   |}
                   |debug(d).isOneOf("d")
+                  |
+                  |var e = "e"
+                  |{
+                  |    debug(e).isOneOf("e")
+                  |    let e = "e-inner"
+                  |    debug(e).isOneOf("e-inner")
+                  |}
+                  |debug(e).isOneOf("e")
                 """.stripMargin
 
             FixtureRunner.test(code)

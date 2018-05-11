@@ -23,3 +23,6 @@ while (debug.boolean) {
 
 debug(lastObj.prop).isOneOf("next", "blub")
 debug(someObj.prop).isOneOf("next", "blub")
+
+someObj.absProp = "abs"
+debug(someObj.absProp).isOneOf("abs", undefined)
