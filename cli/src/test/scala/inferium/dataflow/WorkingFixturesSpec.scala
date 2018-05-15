@@ -252,6 +252,41 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
+        "If the condition is concrete, if should disregard the false branch" in {
+            val code =
+                """
+                  |/*
+                  |    name: if control flow
+                  |    desc: If the condition is concrete, if should disregard the false branch
+                  | */
+                  |
+                  |var t = true
+                  |var f = false
+                  |var b = debug.boolean
+                  |var result
+                  |
+                  |if(t) {
+                  |    debug.liveCode()
+                  |} else {
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |if(f) {
+                  |    debug.deadCode()
+                  |} else {
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |if(b) {
+                  |    debug.liveCode()
+                  |} else {
+                  |    debug.liveCode()
+                  |}
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
         "Lexical read and write should respect scopes" in {
             val code =
                 """
@@ -357,6 +392,41 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    a.prop = "written by a"
                   |}
                   |debug(o.prop).isOneOf("written by a")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "If the condition is concrete, while should disregard the respective branch" in {
+            val code =
+                """
+                  |/*
+                  |    name: while control flow
+                  |    desc: If the condition is concrete, while should disregard the respective branch
+                  | */
+                  |
+                  |
+                  |var t = true
+                  |var f = false
+                  |var b = debug.boolean
+                  |
+                  |while(f) {
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |while(b) {
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |while(t) {
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.deadCode()
                 """.stripMargin
 
             FixtureRunner.test(code)

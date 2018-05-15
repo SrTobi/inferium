@@ -21,10 +21,14 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         val cond :: rest = inState.stack
 
-        // todo: handle cond
+        val condBool = cond.asBoolLattice(inState.heap.begin(loc))
         val newState = inState.copy(stack = rest)
-        thenNode <~ newState
-        elseNode <~ newState
+
+        if (condBool.mightBeTrue)
+            thenNode <~ newState
+
+        if (condBool.mightBeFalse)
+            elseNode <~ newState
     }
 
     override def asAsmStmt: String = s"cond ${thenNode.label}, ${elseNode.label}"

@@ -8,7 +8,6 @@ import inferium.prelude.NodeJs
 import inferium.utils.macros.blockRec
 
 
-
 object Playground {
 
     class TestDebugAdapter extends DebugAdapter {
@@ -22,25 +21,10 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |var lastObj
-              |//var someObj
-              |while (debug.boolean) {
-              |    lastObj = { prop: "init" }
-              |    debug(lastObj).print()
-              |    if (debug.boolean) {
-              |        //someObj = lastObj
-              |    }
-              |
-              |    debug(lastObj).print()
-              |    debug(lastObj.prop).isOneOf("init").print()
-              |
-              |    /*if (debug.boolean) {
-              |        someObj.prop = "blub"
-              |    }*/
+              |while(debug.boolean) {
+              |  debug("test").print()
               |}
-              |
-              |//debug(lastObj.prop).isOneOf("init", "blub")
-              |//debug(someObj.prop).isOneOf("init", "blub")
+              |debug("end").print()
             """.stripMargin
 
         /*val code =

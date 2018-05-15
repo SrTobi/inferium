@@ -17,17 +17,27 @@ object NeverValue extends Primitive {
     override def unify(other: Entity): Entity = other
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = ???
 
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = GeneralBoolLattice.Bottom
+
     override def toString: String = "never"
 }
 
 object UndefinedValue extends Primitive {
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
 
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
+
     override def toString: String = "undefined"
 }
 
 object NullValue extends Primitive {
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
+
     override def toString: String = "null"
 }
 
@@ -52,8 +62,12 @@ object BoolValue extends BoolValue {
         case _ => super.mightBe(entity)
     }
 
-    override def toString: String = "boolean"
     override val toLattice: BoolLattice = BoolLattice.Top
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
+
+    override def toString: String = "boolean"
 }
 
 
@@ -65,10 +79,16 @@ sealed abstract class SpecificBoolValue protected(val value: Boolean) extends Bo
 
 object TrueValue extends SpecificBoolValue(true) {
 
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.True
+
     override def toString: String = "true"
 }
 
 object FalseValue extends SpecificBoolValue(false) {
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
 
     override def toString: String = "false"
 }
@@ -90,10 +110,16 @@ object NumberValue extends NumberValue {
         case _ => super.mightBe(entity)
     }
 
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
+
     override def toString: String = "number"
 }
 
 case class SpecificNumberValue(value: Int) extends NumberValue {
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice(value != 0)
 
     override def toString: String = value.toString
 }
@@ -110,10 +136,17 @@ object StringValue extends StringValue {
     }
 
     def apply(string: String): SpecificStringValue = SpecificStringValue(string)
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
+
     override def toString: String = "string"
 }
 
 class SpecificStringValue private (val value: String) extends StringValue {
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice(value != "")
 
     override def toString: String = "\"" + value + "\""
 }

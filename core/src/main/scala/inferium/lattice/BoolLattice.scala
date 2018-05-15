@@ -1,9 +1,13 @@
 package inferium.lattice
 
+import inferium.lattice.BoolLattice.Top
+
 
 sealed abstract class GeneralBoolLattice {
-
     def unify(other: GeneralBoolLattice): GeneralBoolLattice
+
+    def mightBeTrue: Boolean
+    def mightBeFalse: Boolean
 }
 
 sealed abstract class BoolLattice extends GeneralBoolLattice {
@@ -14,9 +18,20 @@ sealed abstract class BoolLattice extends GeneralBoolLattice {
 }
 
 object BoolLattice {
-    case object Top extends BoolLattice
-    case object True extends BoolLattice
-    case object False extends BoolLattice
+    case object Top extends BoolLattice {
+        override def mightBeTrue: Boolean = true
+        override def mightBeFalse: Boolean = true
+    }
+
+    case object True extends BoolLattice {
+        override def mightBeTrue: Boolean = true
+        override def mightBeFalse: Boolean = false
+    }
+
+    case object False extends BoolLattice {
+        override def mightBeTrue: Boolean = false
+        override def mightBeFalse: Boolean = true
+    }
 
     def apply(value: Boolean): BoolLattice = if (value) True else False
 
@@ -35,5 +50,19 @@ object BoolLattice {
 object GeneralBoolLattice {
     case object Bottom extends GeneralBoolLattice {
         override def unify(other: GeneralBoolLattice): GeneralBoolLattice = other
+
+        override def mightBeTrue: Boolean = false
+        override def mightBeFalse: Boolean = false
+    }
+
+    def unify(bools: Iterable[GeneralBoolLattice]): GeneralBoolLattice = {
+
+        bools.reduce {
+            (a, b) =>
+                if (a == Top)
+                    return Top
+                else
+                    a.unify(b)
+        }
     }
 }

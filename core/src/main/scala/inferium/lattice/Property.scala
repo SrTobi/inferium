@@ -15,7 +15,7 @@ object AbsentLattice {
     val MightBeAbsent: AbsentLattice = AbsentLattice(true)
     val NeverAbsent: AbsentLattice = AbsentLattice(false)
 
-    implicit def toBoolean(lattice: AbsentLattice): Boolean = lattice.mightBeAbsent
+    implicit def toBoolean(lattice: AbsentLattice): Boolean = lattice.asBool
 }
 
 

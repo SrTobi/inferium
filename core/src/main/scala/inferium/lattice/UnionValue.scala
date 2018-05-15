@@ -16,8 +16,15 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
     }
 
     override def isNormalized: Boolean = entities.forall(_.isNormalized)
+
     @blockRec(nonrec = true)
     override def normalized(heap: Heap.Mutator): Entity = UnionValue(entities map { _.normalized(heap) })
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = {
+        GeneralBoolLattice.unify(entities.view.map(_.asBoolLattice(heap)))
+    }
+
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = entities flatMap { _.coerceToObjects(heap) }
 
     override def toString: String = entities.mkString("{", " | ", "}")

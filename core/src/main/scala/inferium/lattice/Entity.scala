@@ -14,6 +14,8 @@ abstract class Entity {
     def isNormalized: Boolean
     @blockRec
     def normalized(heap: Heap.Mutator): Entity
+    @blockRec
+    def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice
     def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity]
 }
 
