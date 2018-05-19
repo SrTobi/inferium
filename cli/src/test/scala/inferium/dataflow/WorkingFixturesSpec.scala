@@ -6,6 +6,129 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class WorkingFixturesSpec extends FreeSpec with Matchers {
             
+    "/abstract" - {
+        "Checks if conditional branching filters the condition" in {
+            val code =
+                """
+                  |/*
+                  |    name: filtering
+                  |    desc: Checks if conditional branching filters the condition
+                  | */
+                  |
+                  |var a = debug.boolean
+                  |
+                  |if (a) {
+                  |    debug(a).isOneOf(true)
+                  |} else {
+                  |    debug(a).isOneOf(false)
+                  |}
+                  |
+                  |debug(a).isOneOf(debug.boolean)
+                  |
+                  |
+                  |var b = debug.number
+                  |
+                  |if (b) {
+                  |    debug(b).isOneOf(debug.number)
+                  |} else {
+                  |    debug(b).isOneOf(0)
+                  |}
+                  |
+                  |debug(b).isOneOf(debug.number)
+                  |
+                  |
+                  |var c = debug.string
+                  |
+                  |if (c) {
+                  |    debug(c).isOneOf(debug.string)
+                  |} else {
+                  |    debug(c).isOneOf("")
+                  |}
+                  |
+                  |debug(c).isOneOf(debug.string)
+                  |
+                  |
+                  |var d = undefined
+                  |
+                  |if (debug.boolean) {
+                  |    d = debug.number
+                  |}
+                  |
+                  |if (debug.boolean) {
+                  |    d = "test"
+                  |} else {
+                  |    d = ""
+                  |}
+                  |
+                  |debug(d).isOneOf(undefined, debug.number, "test", "")
+                  |if (d) {
+                  |    debug(d).isOneOf(debug.number, "test")
+                  |} else {
+                  |    debug(d).isOneOf(undefined, 0, "")
+                  |}
+                  |
+                  |debug(d).isOneOf(undefined, debug.number, "test", "")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "Checks if conditional branching filters the base object of references" in {
+            val code =
+                """
+                  |/*
+                  |    name: Object filtering
+                  |    desc: Checks if conditional branching filters the base object of references
+                  | */
+                  |
+                  |var t = { cond: true }
+                  |var f = { cond: false }
+                  |var b = { cond: debug.boolean }
+                  |
+                  |if (debug.boolean) {
+                  |    var test = t
+                  |} else {
+                  |    test = f
+                  |}
+                  |
+                  |debug(test).isOneOf(t, f)
+                  |debug(test.cond).isOneOf(debug.boolean)
+                  |
+                  |if (test.cond) {
+                  |    debug(test).isOneOf(t)
+                  |    debug(t.cond).isOneOf(true)
+                  |    debug(f.cond).isOneOf(false)
+                  |} else {
+                  |    debug(test).isOneOf(f)
+                  |    debug(t.cond).isOneOf(true)
+                  |    debug(f.cond).isOneOf(false)
+                  |}
+                  |
+                  |debug(test).isOneOf(t, f)
+                  |
+                  |if (debug.boolean) {
+                  |    test = b
+                  |}
+                  |
+                  |debug(test).isOneOf(t, f, b)
+                  |
+                  |if (test.cond) {
+                  |    debug(test).isOneOf(t, b)
+                  |    debug(t.cond).isOneOf(true)
+                  |    debug(f.cond).isOneOf(false)
+                  |} else {
+                  |    debug(test).isOneOf(f, b)
+                  |    debug(t.cond).isOneOf(true)
+                  |    debug(f.cond).isOneOf(false)
+                  |}
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+    }
+
+
     "/abstract/objects" - {
         "Object instances should become abstract in iteration" in {
             val code =

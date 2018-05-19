@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.lattice.assertions.Assertion
 import inferium.utils.macros.blockRec
 
 import scala.collection.mutable
@@ -11,11 +12,21 @@ abstract class Entity {
     def unify(other: Entity): Entity = Entity.unify(this, other)
 
     def mightBe(entity: Entity): Boolean = this == entity || entity == NeverValue
+
     def isNormalized: Boolean
+
     @blockRec
     def normalized(heap: Heap.Mutator): Entity
+
     @blockRec
     def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice
+
+    //@blockRec
+    //def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity
+
+    @blockRec
+    def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean = true): Entity
+
     def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity]
 }
 

@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.lattice.assertions.Assertion
 import inferium.utils.macros.blockRec
 
 import scala.collection.mutable
@@ -23,6 +24,11 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = {
         GeneralBoolLattice.unify(entities.view.map(_.asBoolLattice(heap)))
+    }
+
+    @blockRec(nonrec = true)
+    override def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean): Entity = {
+        UnionValue(entities map { _.instituteAssertion(assertion, heap, alone = false) })
     }
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = entities flatMap { _.coerceToObjects(heap) }

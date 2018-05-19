@@ -27,6 +27,13 @@ object Heap {
 
         def getValue(loc: ValueLocation): Entity
         def setValue(loc: ValueLocation, value: Entity): Unit
+
+        def getPropertyValueIgnoringGetter(obj: ObjectEntity, propertyName: String): Entity = getProperty(obj, propertyName) match {
+            case AbsentProperty => UndefinedValue
+            case Property(_, _, mightBeAbsent, value, _, getter, _) =>
+                val result = value.toSeq map getValue
+                if (mightBeAbsent) UnionValue(UndefinedValue, result: _*) else UnionValue(result)
+        }
     }
 
     abstract class Factory {

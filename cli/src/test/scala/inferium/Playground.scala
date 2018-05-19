@@ -21,10 +21,29 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |while(debug.boolean) {
-              |  debug("test").print()
+              |var t = { cond: true }
+              |var f = { cond: false }
+              |var b = { cond: debug.boolean }
+              |
+              |if (debug.boolean) {
+              |    var test = t
+              |} else {
+              |    test = f
               |}
-              |debug("end").print()
+              |
+              |debug(test).isOneOf(t, f).print()
+              |debug(test.cond).isOneOf(debug.boolean).print()
+              |
+              |if (test.cond) {
+              |    debug(test).isOneOf(t)
+              |    debug(t.cond).isOneOf(true).print()
+              |    debug(f.cond).isOneOf(false).print()
+              |} else {
+              |    debug(test).isOneOf(f)
+              |    debug(t.cond).isOneOf(true).print()
+              |    debug(f.cond).isOneOf(false).print()
+              |}
+              |
             """.stripMargin
 
         /*val code =

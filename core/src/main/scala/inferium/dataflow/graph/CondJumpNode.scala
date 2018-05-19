@@ -1,5 +1,7 @@
 package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.lattice.Location
+import inferium.lattice.assertions.{Assertion, Falsyfied, Truthyfied}
 
 class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.Info) extends LinearNode {
     assert(thenNode != null)
@@ -7,6 +9,9 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
 
     thenNode.addPredecessor(this)
     elseNode.addPredecessor(this)
+
+    private val truthyfyLoc: Location = Location()
+    private val falsyfyLoc: Location = Location()
 
     override def hasSucc: Boolean = true
     override val successors: Seq[Node] = Seq(thenNode, elseNode)
@@ -20,15 +25,21 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
 
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         val cond :: rest = inState.stack
+        val heap = inState.heap
 
-        val condBool = cond.asBoolLattice(inState.heap.begin(loc))
-        val newState = inState.copy(stack = rest)
+        val condBool = cond.asBoolLattice(heap.begin(loc))
+
+        def afterAssert(assertion: Assertion, l: Location) = {
+            val mutator = heap.begin(l)
+            cond.instituteAssertion(assertion, mutator, true)
+            inState.copy(stack = rest, heap = heap.end(mutator))
+        }
 
         if (condBool.mightBeTrue)
-            thenNode <~ newState
+            thenNode <~ afterAssert(Truthyfied, truthyfyLoc)
 
         if (condBool.mightBeFalse)
-            elseNode <~ newState
+            elseNode <~ afterAssert(Falsyfied, falsyfyLoc)
     }
 
     override def asAsmStmt: String = s"cond ${thenNode.label}, ${elseNode.label}"
