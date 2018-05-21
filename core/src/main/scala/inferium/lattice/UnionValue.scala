@@ -27,8 +27,9 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
     }
 
     @blockRec(nonrec = true)
-    override def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean): Entity = {
-        UnionValue(entities map { _.instituteAssertion(assertion, heap, alone = false) })
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = {
+        val (es, its) = entities.map(_.gatherAssertionEffects(assertion, heap)).unzip
+            (UnionValue(es), its.iterator.flatten)
     }
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = entities flatMap { _.coerceToObjects(heap) }

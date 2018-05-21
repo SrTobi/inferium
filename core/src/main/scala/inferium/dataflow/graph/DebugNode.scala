@@ -1,5 +1,5 @@
 package inferium.dataflow.graph
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.dataflow.{DataFlowAnalysis, DebugAdapter, ExecutionState}
 import inferium.dataflow.graph.DebugNode._
 import inferium.lattice.{Entity, Primitive, ValueLocation}
 
@@ -15,7 +15,32 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
             case CheckLiveCode =>
                 // nothing to do
 
+            case OneOf(_) =>
+
+            case PrintExpr(name) =>
+                println(s"$name: $subject")
+        }
+
+        Some(state)
+    }
+
+    def executeChecks(debugAdapter: DebugAdapter)(implicit analysis: DataFlowAnalysis): Unit = {
+        val error = debugAdapter.error(this, _: String)
+        val state = inState
+        lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
+
+        operations foreach {
+            case CheckDeadCode =>
+                // nothing to do
+
+            case CheckLiveCode =>
+                if (state == null) {
+                    error("LiveCode check failed. There is reachable, but unanalyzed, code")
+                    return
+                }
+
             case OneOf(entites) =>
+                assert(state != null)
                 val normalizedEntities = entites map {
                     case Left(p) => p
                     case Right(name) =>
@@ -29,11 +54,9 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
                     error(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
                 }
 
-            case PrintExpr =>
-                println(subject)
+            case PrintExpr(_) =>
+                // nothing to do
         }
-
-        Some(state)
     }
 
     override def asAsmStmt: String = s"debug [${operations.mkString(", ")}]"
@@ -51,7 +74,7 @@ object DebugNode {
     case class OneOf(entities: Seq[Either[Primitive, String]]) extends Operation {
         override def toString: String = s"oneOf(${entities map { case Left(p) => p.toString case Right(s) => s} mkString ", "})"
     }
-    case object PrintExpr extends Operation {
+    case class PrintExpr(name: String) extends Operation {
         override def toString: String = "print"
     }
 }

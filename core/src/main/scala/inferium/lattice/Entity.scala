@@ -24,8 +24,14 @@ abstract class Entity {
     //@blockRec
     //def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity
 
+    def instituteAssertion(assertion: Assertion, heap: Heap.Mutator): Entity = {
+        val (result, effects) = gatherAssertionEffects(assertion, heap)
+        effects foreach { _() }
+        result
+    }
+
     @blockRec
-    def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean = true): Entity
+    protected[lattice] def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit])
 
     def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity]
 }

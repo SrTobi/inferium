@@ -28,5 +28,6 @@ class DataFlowAnalysis(analysable: Analysable, val debugAdapter: DebugAdapter = 
             node.process(this)
         }
 
+        debugAdapter.finalizeAnalysis(analysable.begin)(this)
     }
 }

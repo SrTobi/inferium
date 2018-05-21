@@ -171,7 +171,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         // deadCode
                     case ast.CallExpression(ast.MemberExpression(callee: ast.Expression, ast.Identifier("deadCode"), false), Seq()) =>
                         parseDebugExpression(callee, needExpression, needSubject, hadExpression) map {
-                            case (ops, innerExpr) => (ops :+ DebugNode.CheckDeadCode, innerExpr)
+                            case (ops, innerExpr) => (ops.filter(_ != DebugNode.CheckLiveCode) :+ DebugNode.CheckDeadCode, innerExpr)
                         }
 
                     case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("isOneOf"), false), args) =>
@@ -181,10 +181,18 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 (ops :+ op, innerExpr)
                         }
 
-                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("print"), false), Seq()) =>
+                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("print"), false), args) =>
+                        val name = args match {
+                            case Seq(ast.StringLiteral(value)) =>
+                                value
+                            case Seq() =>
+                                "unknown"
+                            case _ =>
+                                throw new BuildException("debug.print() can only take one string argument")
+                        }
                         parseDebugExpression(source, needExpression, needSubject = true) map {
                             case (ops, innerExpr) =>
-                                (ops :+ DebugNode.PrintExpr, innerExpr)
+                                (ops :+ DebugNode.PrintExpr(name), innerExpr)
                         }
 
                     case ast.MemberExpression(source: ast.Expression, member, _) =>
@@ -204,7 +212,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             private object AbstractDebugLiteral {
                 def unapply(arg: ast.Expression): Option[Primitive] = if (!config.buildDebugNodes) None else arg match {
                     case ast.MemberExpression(ast.Identifier(base), ast.Identifier(lit), false) if base == config.debugObjectName =>
-                        Try(parseAbstractDebugLiteral(lit)).toOption
+                        Some(parseAbstractDebugLiteral(lit))
                     case _ =>
                         None
                 }
@@ -235,6 +243,14 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val innerExpr = innerExprOpt getOrElse (throw new BuildException("debug within expressions need a base expression"))
                         val exprGraph = buildExpression(innerExpr, priority, env)
                         exprGraph ~> new DebugNode(ops)
+
+                    case ast.CallExpression(ast.MemberExpression(ast.Identifier("debug"), ast.Identifier("squash"), false), args) if config.buildDebugNodes =>
+                        if (args.length < 2) {
+                            throw new BuildException(s"debug.squash needs at least 2 arguments")
+                        }
+
+                        val argGraph = args map { _.asInstanceOf[ast.Expression] } map { buildExpression(_, priority, env) } reduce { _ ~> _}
+                        argGraph ~> new graph.DebugSquashNode(args.length)
 
                     case ast.BooleanLiteral(value) =>
                         buildLiteral(BoolValue(BoolLattice(value)))

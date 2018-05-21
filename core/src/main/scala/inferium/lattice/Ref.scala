@@ -1,51 +1,64 @@
 package inferium.lattice
 
-import inferium.lattice.assertions.{Assertion, HasProperty}
+import inferium.lattice.assertions.{Assertion, Propertyfied}
 import inferium.utils.macros.blockRec
 
-case class Ref(base: Entity, property: String, target: Option[ValueLocation], mightBeAbsent: AbsentLattice) extends Entity {
-    assert(target.isDefined || mightBeAbsent == AbsentLattice.MightBeAbsent)
+case class Ref(base: Entity, property: String, target: Set[ValueLocation]) extends Entity {
+    assert(target.nonEmpty)
 
     override def isNormalized: Boolean = false
 
     @blockRec(NeverValue)
     override def normalized(heap: Heap.Mutator): Entity = {
-        target map {
-            t =>
-                val inner = heap.getValue(t).normalized(heap)
-                if (mightBeAbsent.asBool) UnionValue(inner, UndefinedValue) else inner
-        } getOrElse UndefinedValue
+        UnionValue(target.toSeq map { heap.getValue(_).normalized(heap) })
     }
 
 
     @blockRec(GeneralBoolLattice.Bottom)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = {
-        lazy val absent = if(mightBeAbsent) BoolLattice.False else GeneralBoolLattice.Bottom
-        target map { t => heap.getValue(t).asBoolLattice(heap) } map { _ unify absent } getOrElse BoolLattice.False
+        GeneralBoolLattice.unify(target map { t => heap.getValue(t).asBoolLattice(heap) })
     }
 
     //@blockRec(nonrec = true)
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Ref = ???
 
     @blockRec(nonrec = true)
-    override def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean): Ref = {
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = {
 
-        // todo: assert that the base has the property
         //def filterBase(obj: Entity): Boolean = true
         //base.instituteAssertion(filterBase, heap)
-        base.instituteAssertion(HasProperty(property), heap, alone = true)
-
-        for (loc <- target) {
-            val value = heap.getValue(loc)
-            val assertedValue = value.instituteAssertion(assertion, heap, alone)
-            if (value ne assertedValue) {
-                heap.setValue(loc, assertedValue)
-            }
+        assertion match {
+            case assertions.Propertyfied(_, _) =>
+            case assertions.Truthyfied =>
+                base.instituteAssertion(Propertyfied(property, has = true), heap)
+            case assertions.Falsyfied =>
+                base.instituteAssertion(Propertyfied(property, has = false), heap)
         }
 
+        val (results, hereEffects) = target.toSeq.map { loc =>
+            val oldValue = heap.getValue(loc)
+            val (assertedValue, effects) = oldValue.gatherAssertionEffects(assertion, heap)
+            val changed = oldValue ne assertedValue
 
-        if (mightBeAbsent) copy(mightBeAbsent = AbsentLattice.NeverAbsent) else this
+            (assertedValue, () => {
+                effects.foreach(_())
+
+                if (changed) {
+                    heap.setValue(loc, assertedValue)
+                }
+            })
+        }.unzip
+
+        val result = UnionValue(results)
+
+        if (result == NeverValue) {
+            (NeverValue, Iterator())
+        } else {
+            (this, hereEffects.iterator)
+        }
     }
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = normalized(heap).coerceToObjects(heap)
+
+    override def toString: String = s"Ref[$base.$property -> {${target.mkString(", ")}}]"
 }

@@ -41,21 +41,12 @@ trait HeapReading extends FailingTransformerNode {
 
     private final def read(base: Entity, obj: ObjectEntity, propertyName: String, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Entity = {
 
-        val result =
-            mutator.getProperty(obj, propertyName) match {
-                case AbsentProperty =>
-                    Ref(base, propertyName, None, AbsentLattice.MightBeAbsent)
+        val Property(_, _, target, _, getter, _) = mutator.getProperty(obj, propertyName)
+        if (getter.nonEmpty) {
+            // todo: implement getters
+            ???
+        }
 
-                case Property(_, _, mightBeAbsent, targets, _, getter, _) =>
-
-                    if (getter.nonEmpty) {
-                        // todo: implement getters
-                        ???
-                    }
-
-                    Entity.unify(targets.toSeq map { target => Ref(base, propertyName, Some(target), mightBeAbsent) })
-            }
-
-        result
+        Ref(base, propertyName, target)
     }
 }

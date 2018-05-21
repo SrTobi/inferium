@@ -22,17 +22,16 @@ object Heap {
         def allocObject(location: Location): ObjectEntity
         def defineProperty(obj: ObjectEntity, property: String, descriptor: Property)
         def setProperty(obj: ObjectEntity, propertyName: String, property: Property)
-        def getProperty(obj: ObjectEntity, propertyName: String): AbstractProperty
+        def getProperty(obj: ObjectEntity, propertyName: String): Property
         //def listProperties(obj: ObjectEntity): Seq[Entity]
 
         def getValue(loc: ValueLocation): Entity
         def setValue(loc: ValueLocation, value: Entity): Unit
 
-        def getPropertyValueIgnoringGetter(obj: ObjectEntity, propertyName: String): Entity = getProperty(obj, propertyName) match {
-            case AbsentProperty => UndefinedValue
-            case Property(_, _, mightBeAbsent, value, _, getter, _) =>
-                val result = value.toSeq map getValue
-                if (mightBeAbsent) UnionValue(UndefinedValue, result: _*) else UnionValue(result)
+        def getPropertyValueIgnoringGetter(obj: ObjectEntity, propertyName: String): Entity = {
+            val Property(_, _, value, _, getter, _) = getProperty(obj, propertyName)
+            val result = value.toSeq map getValue
+            UnionValue(result)
         }
     }
 

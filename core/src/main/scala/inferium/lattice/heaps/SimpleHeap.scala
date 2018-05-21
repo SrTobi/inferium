@@ -83,6 +83,7 @@ object SimpleHeap {
         }
 
         override def setProperty(obj: ObjectEntity, propertyName: String, property: Property): Unit = {
+            assert(property != Property.absentProperty)
             objects.get(obj.loc) match {
                 case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
                     // we found the object, now set the property
@@ -100,7 +101,7 @@ object SimpleHeap {
             }
         }
 
-        override def getProperty(obj: ObjectEntity, propertyName: String): AbstractProperty = {
+        override def getProperty(obj: ObjectEntity, propertyName: String): Property = {
             objects.get(obj.loc) match {
                 case Some(objDesc) =>
 
@@ -111,7 +112,7 @@ object SimpleHeap {
 
                         case None =>
                             // TODO: search prototypes
-                            AbsentProperty
+                            Property.absentProperty
                     }
 
                 case None =>
@@ -122,7 +123,13 @@ object SimpleHeap {
 
         override def defineProperty(obj: ObjectEntity, property: String, descriptor: Property): Unit = ???
 
-        override def getValue(valueLocation: ValueLocation): Entity = boxedValues(valueLocation)
-        override def setValue(loc: ValueLocation, value: Entity): Unit = boxedValues += loc -> value
+        override def getValue(valueLocation: ValueLocation): Entity = valueLocation match {
+            case ValueLocation.AbsentLocation => UndefinedValue
+            case _ => boxedValues(valueLocation)
+        }
+        override def setValue(loc: ValueLocation, value: Entity): Unit = {
+            assert(loc != ValueLocation.AbsentLocation)
+            boxedValues += loc -> value
+        }
     }
 }

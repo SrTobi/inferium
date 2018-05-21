@@ -6,6 +6,7 @@ import inferium.lattice.BoolLattice.Top
 sealed abstract class GeneralBoolLattice {
     def unify(other: GeneralBoolLattice): GeneralBoolLattice
 
+    def mightBe(bool: Boolean): Boolean = if (bool) mightBeTrue else mightBeFalse
     def mightBeTrue: Boolean
     def mightBeFalse: Boolean
 }

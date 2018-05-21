@@ -17,22 +17,22 @@ case class ObjectEntity(loc: Location, objectType: ObjectType)(val abstractCount
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity = if (cond(this)) this else NeverValue
 
     @blockRec(nonrec = true)
-    override def instituteAssertion(assertion: Assertion, heap: Heap.Mutator, alone: Boolean): Entity = assertion match {
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = (assertion match {
         case Truthyfied => this
         case Falsyfied => NeverValue
-        case HasProperty(name) =>
-            if (alone)
-                this
-            else {
-                val propBool = heap.getPropertyValueIgnoringGetter(this, name).asBoolLattice(heap)
-                if (propBool.mightBeTrue) this else NeverValue
-            }
-    }
+        case Propertyfied(name, has) =>
+            val propBool = heap.getPropertyValueIgnoringGetter(this, name).asBoolLattice(heap)
+            if (propBool mightBe has) this else NeverValue
+    }, Iterator())
 
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq(this)
-}
 
+    override def toString: String = objectType match {
+        case OrdinaryObject =>
+            s"Obj($loc)"
+    }
+}
 
 
 sealed abstract class ObjectType

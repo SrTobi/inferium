@@ -1,27 +1,8 @@
 package inferium.lattice
 
 
-final class AbsentLattice(val mightBeAbsent: Boolean) extends AnyVal {
-    def asBool: Boolean = mightBeAbsent
 
-    def unify(other: AbsentLattice): AbsentLattice = AbsentLattice(mightBeAbsent || other.mightBeAbsent)
-
-    override def toString: String = if (mightBeAbsent) "MightBeAbsent" else "NeverAbsent"
-}
-
-object AbsentLattice {
-    def apply(mightBeAbsent: Boolean): AbsentLattice = new AbsentLattice(mightBeAbsent)
-
-    val MightBeAbsent: AbsentLattice = AbsentLattice(true)
-    val NeverAbsent: AbsentLattice = AbsentLattice(false)
-
-    implicit def toBoolean(lattice: AbsentLattice): Boolean = lattice.asBool
-}
-
-
-
-
-
+/*
 sealed abstract class AbstractProperty {
     def unify(other: AbstractProperty): AbstractProperty
     def withAbsent: AbstractProperty
@@ -31,42 +12,48 @@ object AbsentProperty extends AbstractProperty {
     override def unify(other: AbstractProperty): AbstractProperty = other.withAbsent
     override def withAbsent: AbstractProperty = this
 }
+*/
 
-
-sealed case class Property(configurable: BoolLattice,
-                           enumerable: BoolLattice,
-                           mightBeAbsent: AbsentLattice,
+sealed case class Property(configurable: GeneralBoolLattice,
+                           enumerable: GeneralBoolLattice,
                            value: Set[ValueLocation],
                            writable: GeneralBoolLattice,
                            getter: Set[ValueLocation],
-                           setter: Set[ValueLocation]) extends AbstractProperty {
-    override def unify(other: AbstractProperty): Property = other match {
-        case AbsentProperty => withAbsent
-        case other: Property =>
-            Property(
-                this.configurable.unify(other.configurable),
-                this.enumerable.unify(other.enumerable),
-                this.mightBeAbsent unify other.mightBeAbsent,
-                this.value | other.value,
-                this.writable.unify(other.writable),
-                this.getter | other.getter,
-                this.setter | other.setter,
-            )
-    }
+                           setter: Set[ValueLocation]) {
+    def unify(other: Property): Property =
+        Property(
+            this.configurable.unify(other.configurable),
+            this.enumerable.unify(other.enumerable),
+            this.value | other.value,
+            this.writable.unify(other.writable),
+            this.getter | other.getter,
+            this.setter | other.setter,
+        )
 
-    override def withAbsent: Property = if (mightBeAbsent) this else copy(mightBeAbsent = AbsentLattice.MightBeAbsent)
+    def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
+    //def withAbsent: Property = if (mightBeAbsent) this else copy(value = value + ValueLocation.AbsentLocation)
 }
 
 object Property {
-    def defaultWriteToObject(value: Set[ValueLocation], mightBeAbsent: Boolean = false): Property = Property(
-        configurable = BoolLattice.True,
-        enumerable = BoolLattice.True,
-        mightBeAbsent = AbsentLattice(mightBeAbsent),
-        value = value,
-        writable = BoolLattice.True,
-        getter = Set.empty,
-        setter = Set.empty
-    )
+    def defaultWriteToObject(value: Set[ValueLocation], mightBeAbsent: Boolean = false): Property =
+        Property(
+            configurable = BoolLattice.True,
+            enumerable = BoolLattice.True,
+            value = if (mightBeAbsent) value + ValueLocation.AbsentLocation else value,
+            writable = BoolLattice.True,
+            getter = Set.empty,
+            setter = Set.empty
+        )
+
+    val absentProperty: Property =
+        Property(
+            configurable = GeneralBoolLattice.Bottom,
+            enumerable = GeneralBoolLattice.Bottom,
+            value = Set(ValueLocation.AbsentLocation),
+            writable = GeneralBoolLattice.Bottom,
+            getter = Set.empty,
+            setter = Set.empty
+        )
 }
 
 

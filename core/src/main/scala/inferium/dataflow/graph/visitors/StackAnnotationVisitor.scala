@@ -57,6 +57,10 @@ class StackAnnotationVisitor extends Node.AllVisitor {
             case _: graph.DebugNode =>
                 stack
 
+            case node: graph.DebugSquashNode =>
+                val (args, rest) = stack.splitAt(node.squashNum)
+                ExprStackFrame("|", args) :: rest
+
             case _: graph.PushLexicalFrame =>
                 stack
 

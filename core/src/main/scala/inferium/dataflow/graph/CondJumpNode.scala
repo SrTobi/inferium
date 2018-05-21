@@ -31,7 +31,7 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
 
         def afterAssert(assertion: Assertion, l: Location) = {
             val mutator = heap.begin(l)
-            cond.instituteAssertion(assertion, mutator, true)
+            cond.instituteAssertion(assertion, mutator)
             inState.copy(stack = rest, heap = heap.end(mutator))
         }
 

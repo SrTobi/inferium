@@ -21,43 +21,17 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |var t = { cond: true }
-              |var f = { cond: false }
-              |var b = { cond: debug.boolean }
               |
-              |if (debug.boolean) {
-              |    var test = t
-              |} else {
-              |    test = f
-              |}
-              |
-              |debug(test).isOneOf(t, f).print()
-              |debug(test.cond).isOneOf(debug.boolean).print()
-              |
-              |if (test.cond) {
-              |    debug(test).isOneOf(t)
-              |    debug(t.cond).isOneOf(true).print()
-              |    debug(f.cond).isOneOf(false).print()
-              |} else {
-              |    debug(test).isOneOf(f)
-              |    debug(t.cond).isOneOf(true).print()
-              |    debug(f.cond).isOneOf(false).print()
-              |}
+              |var a = debug.squash(true, false, 0, 1)
+              |debug(a).print()
               |
             """.stripMargin
 
         /*val code =
             """
-              |var a = "test"
-              |while(debug.boolean) {
-              |  a = "1"
-              |  while(debug.boolean) {
-              |    a = "2"
-              |    debug(a).print()
-              |  }
-              |  debug(a).print()
+              |if (false) {
+              |  debug.liveCode()
               |}
-              |debug(a).print()
             """.stripMargin*/
 
         val bridge = new ECMAScript
@@ -65,7 +39,7 @@ object Playground {
 
         val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
-        println(new PrintVisitor(showStackInfo = false).start(graph))
+        //println(new PrintVisitor(showStackInfo = false).start(graph))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState)

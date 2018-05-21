@@ -36,7 +36,8 @@ trait HeapWriting extends FailingTransformerNode {
         val resultHeap = heapAfterCoersion.end(writeMutator)
 
         val resultState = state.copy(heap = resultHeap)
-        val result = Ref(target, propertyName, if(propertyChanged) Some(valueLocation) else None, AbsentLattice.NeverAbsent)
+        val result = if (propertyChanged) Ref(target, propertyName, Set(valueLocation)) else value
+
         Some((result, resultState))
     }
 
@@ -48,26 +49,17 @@ trait HeapWriting extends FailingTransformerNode {
     private def write(base: Entity, obj: ObjectEntity, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
         val isCertainWrite = onlyOneTarget && true // todo: the object might be abstrict so it wouldn't be a certain write
 
-        val result =
-            mutator.getProperty(obj, propertyName) match {
-                case AbsentProperty =>
-                    val absent = if (isCertainWrite) AbsentLattice.NeverAbsent else AbsentLattice.MightBeAbsent
-                    Property.defaultWriteToObject(Set(valueLocation), absent)
-                    //Ref(base, propertyName, None, AbsentLattice.MightBeAbsent)
+        val p@Property(_, _, oldValues, _, _, setter) = mutator.getProperty(obj, propertyName)
+        if (setter.nonEmpty) {
+            // todo: implement setter
+            ???
+        }
 
-                case p@Property(_, _, oldAbsent, oldValues, _, _, setter) =>
-
-                    if (setter.nonEmpty) {
-                        // todo: implement setter
-                        ???
-                    }
-
-                    if (isCertainWrite) {
-                        Property.defaultWriteToObject(Set(valueLocation), AbsentLattice.NeverAbsent)
-                    } else {
-                        p.copy(value = oldValues + valueLocation)
-                    }
-            }
+        val result = if (isCertainWrite) {
+            Property.defaultWriteToObject(Set(valueLocation))
+        } else {
+            p.copy(value = oldValues + valueLocation)
+        }
 
         mutator.setProperty(obj, propertyName, result)
 
