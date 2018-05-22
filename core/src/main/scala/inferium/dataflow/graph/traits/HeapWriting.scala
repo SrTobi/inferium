@@ -1,4 +1,4 @@
-package inferium.dataflow.graph
+package inferium.dataflow.graph.traits
 
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice._

@@ -1,6 +1,7 @@
 package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, DebugAdapter, ExecutionState}
 import inferium.dataflow.graph.DebugNode._
+import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading, LexicalLookup}
 import inferium.lattice.{Entity, Primitive, ValueLocation}
 
 class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {

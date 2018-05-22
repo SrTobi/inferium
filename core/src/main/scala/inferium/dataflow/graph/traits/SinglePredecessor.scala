@@ -1,4 +1,6 @@
-package inferium.dataflow.graph
+package inferium.dataflow.graph.traits
+
+import inferium.dataflow.graph.Node
 
 trait SinglePredecessor extends Node{
     private var _pred: Node = _

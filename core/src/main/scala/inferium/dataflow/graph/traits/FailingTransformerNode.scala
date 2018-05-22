@@ -1,5 +1,6 @@
-package inferium.dataflow.graph
+package inferium.dataflow.graph.traits
 
+import inferium.dataflow.graph.{LinearNode, Node}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 abstract class FailingTransformerNode(implicit info: Node.Info) extends LinearNode with SingleSuccessor {

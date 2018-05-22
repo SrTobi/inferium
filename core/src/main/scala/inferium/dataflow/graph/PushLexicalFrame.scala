@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.TransformerNode
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice.ObjectEntity
 

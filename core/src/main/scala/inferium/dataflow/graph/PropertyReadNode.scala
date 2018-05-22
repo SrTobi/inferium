@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class PropertyReadNode(val propertyName: String)(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading {

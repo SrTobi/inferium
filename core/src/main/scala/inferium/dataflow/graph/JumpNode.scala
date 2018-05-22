@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.{SinglePredecessor, SingleSuccessor}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class JumpNode(val target: Node)(implicit _info: Node.Info) extends Node with SingleSuccessor with SinglePredecessor {

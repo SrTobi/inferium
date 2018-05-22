@@ -1,5 +1,6 @@
 package inferium.dataflow.graph
 
+import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapWriting, LexicalLookup}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice.ValueLocation
 

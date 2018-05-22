@@ -1,7 +1,8 @@
-package inferium.dataflow.graph
+package inferium.dataflow.graph.traits
 
 import inferium.dataflow.ExecutionState
 import inferium.dataflow.LexicalEnv.{LookupItem, LookupType}
+import inferium.dataflow.graph.Node
 import inferium.lattice.ObjectEntity
 
 trait LexicalLookup extends Node{

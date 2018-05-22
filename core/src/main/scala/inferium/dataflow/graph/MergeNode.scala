@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.SingleSuccessor
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 import scala.collection.mutable

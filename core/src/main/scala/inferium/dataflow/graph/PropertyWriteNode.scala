@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapWriting}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class PropertyWriteNode(propertyName: String)(implicit _info: Node.Info) extends FailingTransformerNode with HeapWriting {

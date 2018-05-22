@@ -1,4 +1,6 @@
-package inferium.dataflow.graph
+package inferium.dataflow.graph.traits
+
+import inferium.dataflow.graph.Node
 
 trait SingleSuccessor extends Node {
     private var _succ: Node = _
