@@ -1,9 +1,10 @@
 package inferium.dataflow.graph.traits
 
+import inferium.dataflow.graph.Node
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice._
 
-trait HeapWriting extends FailingTransformerNode {
+trait HeapWriting extends Node {
     private val heapWritingLoc = Location()
     private val heapResolveLoc = Location()
     private val valueLocation = ValueLocation(Location())
@@ -41,12 +42,12 @@ trait HeapWriting extends FailingTransformerNode {
         Some((result, resultState))
     }
 
-    /*protected def write(target: ObjectEntity, propertyName: String, value: Entity): Entity = {
+    /*protected def write(target: ObjectLike, propertyName: String, value: Entity): Entity = {
 
     }*/
 
     // returns whether a property was changed
-    private def write(base: Entity, obj: ObjectEntity, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
+    private def write(base: Entity, obj: ObjectLike, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
         val isCertainWrite = onlyOneTarget && true // todo: the object might be abstrict so it wouldn't be a certain write
 
         val p@Property(_, _, oldValues, _, _, setter) = mutator.getProperty(obj, propertyName)

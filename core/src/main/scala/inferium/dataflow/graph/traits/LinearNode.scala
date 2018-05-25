@@ -1,5 +1,6 @@
-package inferium.dataflow.graph
-import inferium.dataflow.graph.traits.SinglePredecessor
+package inferium.dataflow.graph.traits
+
+import inferium.dataflow.graph.Node
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 abstract class LinearNode(implicit _info: Node.Info) extends Node with SinglePredecessor {

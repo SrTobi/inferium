@@ -1,20 +1,22 @@
 package inferium.dataflow
 import escalima.ast
 import inferium.Config.ConfigKey
+import inferium.dataflow.calls.{CallInstance, InlinedCallInstance}
+import inferium.dataflow.graph.MergeNode.MergeType
 import inferium.dataflow.graph._
 import inferium.dataflow.graph.visitors.StackAnnotationVisitor
 import inferium.lattice._
 
+import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
+import scala.language.implicitConversions
 
 
 object GraphBuilder {
 
     private type VarMapping = Map[String, String]
     private case class JumpTarget(targetBlock: BlockInfo, entry: Option[MergeNode], exit: MergeNode)
-
-    private def smooth(graphs: Seq[Graph]): Graph = graphs.fold(EmptyGraph){(from, to) => from ~> to }
 
     private class BlockInfo(val outer: Option[BlockInfo],
                             val labelTargets: Map[String, JumpTarget],
@@ -47,20 +49,46 @@ object GraphBuilder {
     }
 }
 
+
 class GraphBuilder(config: GraphBuilder.Config) {
     import GraphBuilder._
 
-    private class FunctionBuilder(isScript: Boolean) {
+    private class FunctionBuilder(isTopLevel: Boolean, val functionFrame: Node.CallFrame) {
         private[this] var done = false
         private val hoistables = mutable.Set.empty[String]
         private var hoistableGraph: Graph = EmptyGraph
         private var varRenameIdx = 1
+        private var returnBlockInfo: BlockInfo = _
+        private var returnMergeNode: MergeNode = _
+
+
+        private def makeLocalNameUnique(name: String): String = name + "~" + {varRenameIdx += 1; varRenameIdx}
+
+        private def gatherBindingNamesFromPattern(pattern: ast.Pattern): Seq[String] = pattern match {
+            case ast.Identifier(name) => Seq(name)
+            case _ => ???
+        }
 
         private class BlockBuilder(var strict: Boolean = false,
                                    block: BlockInfo,
-                                   hoistingEnv: LexicalEnv) {
+                                   hoistingEnv: LexicalEnv,
+                                   blockLexicalEnv: LexicalEnv) {
 
+            private var blockHoistableGraph: Graph = EmptyGraph
+            private val blockHoistables = if (isTopLevel) null else mutable.Map.empty[String, String]
+            private val blockHoistingEnv = if (isTopLevel) hoistingEnv else new LexicalEnv(Some(blockLexicalEnv), false, LexicalEnv.Behavior.BlockHoisted(blockHoistables))
+            private def initialBlockEnv: LexicalEnv = if (isTopLevel) blockLexicalEnv else blockHoistingEnv
             private[this] var done = false
+
+            private def addBlockHoistable(name: String, initGraph: Graph): Unit = {
+                if (isTopLevel) {
+                    hoistables += name
+                    hoistableGraph ~>= initGraph
+                } else {
+                    blockHoistables += name -> makeLocalNameUnique(name)
+                    blockHoistableGraph ~>= initGraph
+                }
+            }
 
             private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode, priority: Int, env: LexicalEnv): graph.JumpNode = {
                 def unroll(block: BlockInfo): Graph = {
@@ -74,7 +102,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                 val finalizers = unroll(block)
                 val unrollGraph = finalizers ~> targetNode
-                val jmp = new graph.JumpNode(unrollGraph.begin)(Node.Info(priority, targetBlock.catchEntry, env))
+                val jmp = new graph.JumpNode(unrollGraph.begin)(Node.Info(priority, env, functionFrame, targetBlock.catchEntry))
                 jmp
             }
 
@@ -94,9 +122,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 }
             }
 
+            @tailrec
             private def addVarsToLexicalEnv(lexicalEnv: LexicalEnv, vars: Seq[(String, String)]): LexicalEnv = lexicalEnv.behavior match {
-                case LexicalEnv.Behavior.Declarative(old) =>lexicalEnv.copy(behavior = LexicalEnv.Behavior.Declarative(old ++ vars))
-                case _ => ???
+                case LexicalEnv.Behavior.Declarative(old) => lexicalEnv.copy(behavior = LexicalEnv.Behavior.Declarative(old ++ vars))
+                case _ =>
+                    val outer = lexicalEnv.outer.getOrElse(throw new AssertionError("Expected to find a declarative lexical environment"))
+                    addVarsToLexicalEnv(outer, vars)
             }
 
             private def buildLiteral(entity: Entity)(implicit info: Node.Info): Graph = {
@@ -234,7 +265,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = BuildException.enrich(expr) {
-                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
                 expr match {
                     case AbstractDebugLiteral(literal) =>
                         buildLiteral(literal)
@@ -249,7 +280,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             throw new BuildException(s"debug.squash needs at least 2 arguments")
                         }
 
-                        val argGraph = args map { _.asInstanceOf[ast.Expression] } map { buildExpression(_, priority, env) } reduce { _ ~> _}
+                        val argGraph = Graph.concat(args map { _.asInstanceOf[ast.Expression] } map { buildExpression(_, priority, env) })
                         argGraph ~> new graph.DebugSquashNode(args.length)
 
                     case ast.BooleanLiteral(value) =>
@@ -274,10 +305,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
                         new graph.LexicalReadNode(varName)
 
-                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
-                        // read static member (base.propertyName)
-                        val baseGraph = buildExpression(obj, priority, env)
-                        baseGraph ~> new graph.PropertyReadNode(propertyName)
+                    case memberExpr: ast.MemberExpression =>
+                        buildMemberAccess(memberExpr, priority, env)
 
                     case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
                         buildAssignment(left, Some(right), priority, env, pushWrittenValueToStack = true)
@@ -303,14 +332,78 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         val dupGraph: Graph = if (propertyInitGraphs.isEmpty) EmptyGraph else new graph.DupNode(propertyInitGraphs.length)
-                        val propertyInitGraph = propertyInitGraphs.foldLeft[Graph](EmptyGraph) { _ ~> _}
+                        val propertyInitGraph = Graph.concat(propertyInitGraphs)
 
                         new graph.AllocateObjectNode ~> dupGraph ~> propertyInitGraph//propertyInitGraph
+
+                    case expr: ast.FunctionExpression =>
+                        buildFunction(expr)
+
+                    case ast.ArrowFunctionExpression(id, params, body, isAsync) =>
+                        val tmpl = FunctionTemplate(id map { _.name }, params, body, env)
+                        buildFunction(tmpl, isGenerator = false, isAsync, captureThis = true)
+
+                    case ast.CallExpression(callee, arguments) =>
+                        // Stack for a function call: this, func, args...
+                        val (thisAndFuncGraph, hasThis) = callee match {
+                            case sup: ast.Super =>
+                                // todo: implement super call
+                                ???
+                            case memberAccess: ast.MemberExpression =>
+                                val accessGraph = buildMemberAccess(memberAccess, priority, env, needThis = true)
+                                (accessGraph, true)
+
+                            case other: ast.Expression =>
+                                val funcGraph = buildExpression(other, priority, env)
+                                (funcGraph, false)
+                        }
+
+                        val argGraphs = arguments map {
+                            case ast.SpreadElement(element) =>
+                                element
+                            case expr: ast.Expression =>
+                                expr
+                        } map {
+                            buildExpression(_, priority, env)
+                        }
+
+                        val spreadArguments = arguments map { _.isInstanceOf[ast.SpreadElement] }
+
+                        thisAndFuncGraph ~> Graph.concat(argGraphs) ~> new graph.CallNode(hasThis, spreadArguments)
                 }
             }
 
+            private def buildMemberAccess(node: ast.MemberExpression, priority: Int, env: LexicalEnv, needThis: Boolean = false)(implicit nodeInfo: Node.Info): Graph = {
+                lazy val dupGraph: Graph = if (needThis) new graph.DupNode(2) else EmptyGraph
+                node match {
+                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
+                        // read static member (base.propertyName)
+                        val baseGraph = buildExpression(obj, priority, env)
+                        baseGraph ~> dupGraph ~> new graph.PropertyReadNode(propertyName)
+
+                }
+            }
+
+            private def buildFunction(tmpl: FunctionTemplate, isGenerator: Boolean, isAsync: Boolean, captureThis: Boolean)(implicit nodeInfo: Node.Info): Graph = {
+                if (isGenerator) {
+                    throw new BuildException("Inferium doesn't support generators at the moment!")
+                }
+
+                if (isAsync) {
+                    throw new BuildException("Inferium doesn't support async functions at the moment!")
+                }
+
+                new graph.AllocateFunctionNode(tmpl, captureThis)
+            }
+
+            private def buildFunction(func: ast.Function)(implicit nodeInfo: Node.Info): Graph = {
+                val ast.Function(id, params, body, isGenerator, isAsync) = func
+                val tmpl = FunctionTemplate(id map { _.name }, params, body, nodeInfo.lexicalEnv)
+                buildFunction(tmpl, isGenerator, isAsync, captureThis = false)
+            }
+
             private def buildAssignment(pattern: ast.Pattern, init: Option[ast.Expression], priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
-                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
 
                 def buildExpr(expr: ast.Expression) = buildExpression(expr, priority, env)
                 def initGraph: Graph = init map { buildExpr } getOrElse { new graph.LiteralNode(UndefinedValue) }
@@ -330,7 +423,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
-                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
 
                 def consumeResult: Graph = if (pushWrittenValueToStack) EmptyGraph else { new graph.PopNode }
 
@@ -342,11 +435,6 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 }
 
                 bindingGraph ~> consumeResult
-            }
-
-            private def gatherBindingNamesFromPattern(pattern: ast.Pattern): Seq[String] = pattern match {
-                case ast.Identifier(name) => Seq(name)
-                case _ => ???
             }
 
             private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
@@ -362,7 +450,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                        labels: Map[String, JumpTarget],
                                        here: Option[JumpTarget],
                                        env: LexicalEnv): (Graph, LexicalEnv) =  BuildException.enrich(stmt) {
-                implicit lazy val info: Node.Info = Node.Info(priority, block.catchEntry, env)
+                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
                 def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
                 def innerBlock: BlockInfo = block.inner(labelTargets = labels)
 
@@ -420,7 +508,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         // build catch
                         val tryCatchGraph = catchHandler match {
                             case Some(ast.CatchClause(pattern, catchBody)) =>
-                                val catchMerger = new graph.MergeNode(isCatchMerger = true)(info.copy(priority = priority + 1))
+                                val catchMerger = new graph.MergeNode(MergeType.CatchMerger)(info.copy(priority = priority + 1))
 
                                 val tryBlock = block.inner(catchEntry = Some(catchMerger))
                                 val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 2, newInnerBlockEnv())
@@ -458,8 +546,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         Graph(testGraph.begin(ifNode), merger)
 
                     case ast.WhileStatement(test, body) =>
-                        val testerInfo = Node.Info(priority + 1, block.catchEntry, env)
-                        val loopMerger = new graph.MergeNode(fixpoint = true)(testerInfo)
+                        val testerInfo = info.copy(priority = priority + 1)
+                        val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(testerInfo)
                         val afterMerger = new graph.MergeNode
                         val testGraph = buildExpression(test, priority + 1, env)
                         val bodyGraph = buildInnerBlock(innerBlock, Seq(body), priority + 2, newInnerBlockEnv())
@@ -474,23 +562,33 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         lazy val hoistingInfo = info.copy(lexicalEnv = hoistingEnv)
                         val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
                         newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
-                            hoistables ++= bindingNames
-                            if (isScript) {
-                                // if we are not in a function `var statements` directly modify the global object
-                                // so we have to write undefined into it even if there is no initializer
-                                // because of enumeration
-                                val hoistingGraphs = bindingNames map { name => buildLiteral(UndefinedValue)(hoistingInfo) ~> new LexicalWriteNode(name)(hoistingInfo) }
-                                hoistableGraph ~>= smooth(hoistingGraphs)
+                            for (name <- bindingNames if !hoistables.contains(name)) {
+                                hoistables += name
+                                if (isTopLevel) {
+                                    // if we are not in a function `var statements` directly modify the global object
+                                    // so we have to write undefined into it even if there is no initializer
+                                    // because of enumeration
+                                    val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingInfo) ~> new LexicalWriteNode(name)(hoistingInfo) ~> new PopNode()(hoistingInfo)
+                                    hoistableGraph ~>= hoistingGraphs
+                                }
                             }
                             env
                         } else {
-                            def rename(name: String): String = name + {varRenameIdx += 1; varRenameIdx}
-                            addVarsToLexicalEnv(env, bindingNames map { n => (n, rename(n)) })
+                            // kind == let | const
+                            addVarsToLexicalEnv(env, bindingNames map { n => (n, makeLocalNameUnique(n)) })
                         }
 
                         val declGraphs = decls map { buildVarDeclaration(_, priority, newEnv) }
 
-                        smooth(declGraphs)
+                        Graph.concat(declGraphs)
+
+                    case decl: ast.FunctionDeclaration =>
+                        //lazy val hoistingInfo: Node.Info = info.copy(lexicalEnv = blockHoistingEnv)
+                        val name = decl.id.getOrElse(throw new AssertionError("Expected id on function declaration")).name
+                        val funcGraph = buildFunction(decl)
+                        val hoistingGraph = funcGraph ~> new LexicalWriteNode(name) ~> new PopNode()
+                        addBlockHoistable(name, hoistingGraph)
+                        EmptyGraph
 
                     case _: ast.EmptyStatement =>
                         EmptyGraph
@@ -500,18 +598,38 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                     case _: ast.Directive =>
                         throw new AssertionError("Directives should not appear here")
+
+                    case ast.ReturnStatement(returnExpr) =>
+                        assert(returnBlockInfo != null, "Can't return in top level block")
+
+                        val returnExprGraph = returnExpr match {
+                            case Some(expr) =>
+                                buildExpression(expr, priority, env)
+
+                            case None =>
+                                buildLiteral(UndefinedValue)
+                        }
+
+                        val returnJumpGraph = buildJump(returnBlockInfo, returnMergeNode, priority, env)
+
+                        returnExprGraph ~> returnJumpGraph ~> new PopNode()
                 }
 
                 return (result, newEnv)
             }
 
-
             private def buildInnerBlock(block: BlockInfo, statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
-                val builder = new BlockBuilder(strict, block, hoistingEnv)
-                builder.build(statements, priority, initialEnv)
+                val builder = new BlockBuilder(strict, block, hoistingEnv, initialEnv)
+                builder.build(statements, priority)
             }
 
-            def build(statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
+            private def buildInnerBlockWithNewLexObj(block: BlockInfo, statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
+                val newDeclEnv = new LexicalEnv(Some(initialEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
+                val builder = new BlockBuilder(strict, block, hoistingEnv, newDeclEnv)
+                builder.build(statements, priority)
+            }
+
+            def build(statements: Seq[ast.Statement], priority: Int): Graph = {
                 assert(!done)
 
                 // check that directives only appear at the beginning
@@ -519,7 +637,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                 var bodyGraph: Graph = EmptyGraph
                 var visitedNonDirective = false
-                var env = initialEnv
+                var env = initialBlockEnv
 
                 statements foreach {
                     case ast.Directive(_, directive) =>
@@ -530,7 +648,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         // build expression
-                        implicit val info: Node.Info = Node.Info(priority, block.catchEntry, env, None)
+                        implicit val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry, None)
                         val stringExpr = new graph.PopNode ~> buildLiteral(StringValue(directive))
                         bodyGraph = bodyGraph ~> stringExpr
 
@@ -541,32 +659,104 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         bodyGraph = bodyGraph ~> stmtGraph
                 }
                 done = true
-                bodyGraph
+                blockHoistableGraph ~> bodyGraph
             }
         }
 
 
-        def build(program: ast.Program, strict: Boolean): ScriptGraph = {
+        def buildTopLevel(program: ast.Program, strict: Boolean): ScriptGraph = {
             val priority = 0
             assert(!done)
             val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
             val firstVarsEnv = new LexicalEnv(Some(globalEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
-            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv)
-            val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt }, priority, firstVarsEnv)
-            done = true
-            implicit val info: Node.Info = Node.Info(priority, None, globalEnv)
+            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv, firstVarsEnv)
+            val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt }, priority)
+            implicit val info: Node.Info = Node.Info(priority, globalEnv, functionFrame, None)
             val endNode = new EndNode
-            val scriptGraph = hoistableGraph ~> new PushLexicalFrame() ~> graph ~> endNode
+            val scriptGraph = new PushLexicalFrameNode("main-block", takeFromStack = false) ~> hoistableGraph ~> graph ~> endNode
+
+            done = true
             ScriptGraph(scriptGraph.begin(endNode), endNode)
+        }
+
+        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, priority: Int, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
+            assert(!done)
+            val hasPatternMatching = params.exists(!_.isInstanceOf[ast.Identifier])
+
+            val initialNodeInfo = Node.Info(priority, initialEnv, functionFrame, catchTarget, None)
+            var prologGraph: Graph = EmptyGraph
+
+            val (argEnv, argNodeInfo) = if (!hasPatternMatching) {
+                // the parameter-names are bound to the arguments object
+                val paramNames = params.map { _.asInstanceOf[ast.Identifier].name }
+                val paramNamesMap = paramNames.zipWithIndex.toMap
+                prologGraph ~>= new DupNode(1)(initialNodeInfo)
+                prologGraph ~>= new PushLexicalFrameNode("args", takeFromStack = true)(initialNodeInfo)
+                val argEnv = LexicalEnv(Some(initialEnv), pushesObject = true, LexicalEnv.Behavior.Argument(paramNamesMap))
+                (argEnv, initialNodeInfo.copy(lexicalEnv = argEnv))
+            } else (initialEnv, initialNodeInfo)
+
+
+            // create hoisting env and object
+            prologGraph ~>= new PushLexicalFrameNode("func", false)(argNodeInfo)
+            val funcHoistingEnv = LexicalEnv(Some(argEnv), pushesObject = true, LexicalEnv.Behavior.Hoisted(hoistables))
+            val hoistingInfo = initialNodeInfo.copy(lexicalEnv = funcHoistingEnv)
+
+            // first write arguments object to hoisting object
+            val argumentNames = params.flatMap(gatherBindingNamesFromPattern).toSet
+            if (argumentNames.contains("arguments")) {
+                prologGraph ~>= new DupNode(1)(hoistingInfo)
+                prologGraph ~>= new LexicalWriteNode("arguments")(hoistingInfo)
+            }
+
+            if (hasPatternMatching) {
+                // the parameter-names are not bound to the arguments object
+                // write the arguments into the hoistingGraph
+                ???
+            }
+
+            prologGraph ~>= new graph.PopNode()(hoistingInfo)
+
+            val normalizedBody = body match {
+                case ast.FunctionBody(stmts) =>
+                    // this is a normal function definition... nothing to do
+                    stmts
+
+                case expr: ast.Expression =>
+                    // this is an arrow function which has only one expression which is then returned
+                    // e.g.: (arg) => arg + 1
+                    // wrap it into a return statement and use that as body
+                    Seq(ast.ReturnStatement(Some(expr), expr.loc))
+            }
+            returnBlockInfo = new BlockInfo(None, Map.empty, None, catchTarget, None)
+            returnMergeNode = new MergeNode()(initialNodeInfo)
+            val builder = new BlockBuilder(false, returnBlockInfo, funcHoistingEnv, funcHoistingEnv)
+            val bodyGraph = builder.build(normalizedBody, priority + 1)
+
+            // build default return
+            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
+
+            // put everything together
+            prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph
         }
     }
 
     def buildTemplate(scriptAst: ast.Program): Templates.Script =  new Templates.Script {
         override def instantiate(): ScriptGraph = {
-            val builder = new FunctionBuilder(isScript = false)
-            val graph = builder.build(scriptAst, strict = false)
-            new StackAnnotationVisitor().start(graph)
+            val builder = new FunctionBuilder(isTopLevel = true, new Node.CallFrame(None, None))
+            val graph = builder.buildTopLevel(scriptAst, strict = false)
+            new StackAnnotationVisitor(isFunction = false).start(graph)
             graph
+        }
+    }
+
+    private case class FunctionTemplate(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, lexicalEnv: LexicalEnv) extends CallableInfo {
+        override def instantiate(returnMerger: MergeNode, priority: Int, catchTarget: Option[MergeNode], callFrame: Node.CallFrame): CallInstance = {
+            val functionBuilder = new FunctionBuilder(isTopLevel = false, callFrame)
+            val funcGraph: Graph = functionBuilder.buildFunction(name, params, body, priority, catchTarget, lexicalEnv)
+            funcGraph ~> returnMerger
+            new StackAnnotationVisitor(isFunction = true).start(funcGraph)
+            new InlinedCallInstance(funcGraph.begin)
         }
     }
 }

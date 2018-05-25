@@ -11,6 +11,8 @@ abstract class Node(implicit val info: Node.Info) {
     def label: String = info.label.getOrElse(s"L${id.id}")
     def catchTarget: Option[Node] = info.catchTarget
 
+    def additionalInfos: Seq[AdditionalInfo] = Seq()
+
     var exprStackInfo: ExprStackInfo = _
 
     final def ~>(node: Node): Graph = {
@@ -64,7 +66,19 @@ abstract class Node(implicit val info: Node.Info) {
         }
     }
 
-    final def fixLexicalFrame(state: ExecutionState): ExecutionState = state.copy(lexicalFrame = info.lexicalEnv.fixLexicalStack(state.lexicalFrame))
+    final def fixState(state: ExecutionState): ExecutionState = {
+        var frame = state.callFrame
+        val targetDepth = info.callFrame.depth
+        assert(frame.depth >= targetDepth)
+
+        while (frame.depth > targetDepth) {
+            frame = frame.next.get
+        }
+
+        val fixedLexicalFrame = info.lexicalEnv.fixLexicalStack(frame.lexicalFrame)
+        val fixedCallFrame = frame.copy(lexicalFrame = fixedLexicalFrame)
+        state.withCallFrame(fixedCallFrame)
+    }
 
     def priority: Int = info.priority
 
@@ -120,11 +134,23 @@ object Node {
     }
 
     type ExprStackInfo = List[ExprStackFrame]
-    case class Info(priority: Int, catchTarget: Option[Node], lexicalEnv: LexicalEnv, label: Option[String] = None)
+
+    class CallFrame(val outer: Option[CallFrame], val callSite: Option[CallNode]) {
+        assert(callSite.isDefined == outer.isDefined)
+        val depth: Int = outer map { _.depth + 1 } getOrElse 0
+
+        def ::(callSite: CallNode): CallFrame = new CallFrame(Some(this), Some(callSite))
+
+        override def toString: String = s"CallFrame:$depth"
+    }
+
+    case class Info(priority: Int, lexicalEnv: LexicalEnv, callFrame: CallFrame, catchTarget: Option[MergeNode], label: Option[String] = None)
+
+    case class AdditionalInfo(key: String, name: String)
 
     def isForwardEdge(from: Node, to: Node): Boolean = {
         to match {
-            case to: MergeNode if to.fixpoint =>
+            case to: MergeNode if to.isFixpoint =>
                 from.info.priority <= to.info.priority
             case _ =>
                 true

@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.LinearNode
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 class EndNode(implicit _info: Node.Info) extends LinearNode {

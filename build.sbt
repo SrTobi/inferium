@@ -5,7 +5,10 @@ scalaVersion := "2.12.2"
 lazy val commonSettings = Seq(
     organization := "de.srtobi",
     version := "0.1-SNAPSHOT",
-    libraryDependencies += "de.srtobi" %%% "escalima" % "0.4",
+
+    scalacOptions ++= Seq("-feature", "-Xfatal-warnings", "-deprecation", "-unchecked"),
+
+    libraryDependencies += "de.srtobi" %%% "escalima" % "0.5",
     libraryDependencies += "com.lihaoyi" %%% "upickle" % "0.6.6",
     libraryDependencies += "com.lihaoyi" %%% "fastparse" % "1.0.0",
     libraryDependencies += "org.scala-lang" % "scala-reflect" % scalaVersion.value,

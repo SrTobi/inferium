@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.dataflow.CallableInfo
 import inferium.lattice.assertions.{Assertion, Propertyfied}
 import inferium.utils.macros.blockRec
 
@@ -8,9 +9,11 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
 
     override def isNormalized: Boolean = false
 
+    private def resolve(heap: Heap.Mutator): Seq[Entity] = target.toSeq map { heap.getValue(_).normalized(heap) }
+
     @blockRec(NeverValue)
     override def normalized(heap: Heap.Mutator): Entity = {
-        UnionValue(target.toSeq map { heap.getValue(_).normalized(heap) })
+        UnionValue(resolve(heap))
     }
 
 
@@ -58,7 +61,9 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
         }
     }
 
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = normalized(heap).coerceToObjects(heap)
+    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = normalized(heap).coerceToFunctions(heap, fail)
+
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = normalized(heap).coerceToObjects(heap)
 
     override def toString: String = s"Ref[$base.$property -> {${target.mkString(", ")}}]"
 }

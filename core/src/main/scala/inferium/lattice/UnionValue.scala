@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.dataflow.CallableInfo
 import inferium.lattice.assertions.Assertion
 import inferium.utils.macros.blockRec
 
@@ -32,7 +33,9 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
             (UnionValue(es), its.iterator.flatten)
     }
 
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = entities flatMap { _.coerceToObjects(heap) }
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = entities flatMap { _.coerceToObjects(heap) }
+
+    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = entities flatMap { _.coerceToFunctions(heap, fail) }
 
     override def toString: String = entities.mkString("{", " | ", "}")
 }
@@ -45,7 +48,7 @@ object UnionValue {
         var boolValue: BoolValue = null
         var numberValue: NumberValue = null
         var stringValues = mutable.SortedSet.empty[SpecificStringValue](Ordering.by(_.value))
-        var objLocations = mutable.Map.empty[Location, (Boolean, Long)]
+        var objLocations = mutable.Map.empty[Location, (Boolean, ObjectLike)]
         var refs = mutable.Set.empty[Ref]
 
         entities.flatMap(unpackUnion) foreach {
@@ -69,13 +72,14 @@ object UnionValue {
             case NullValue =>
                 hasNull = true
             case NeverValue =>
-            case obj: ObjectEntity =>
+            case obj: ObjectLike =>
                 val v = objLocations.get(obj.loc) match {
                     case Some((hadAbstract, max)) =>
-                        (hadAbstract || obj.abstractCount != max, Math.max(max, obj.abstractCount))
+                        lazy val newMax = if (obj.abstractCount > max.abstractCount) obj else max
+                        (hadAbstract || obj.abstractCount != max.abstractCount, newMax)
 
                     case None =>
-                        (false, obj.abstractCount)
+                        (false, obj)
                 }
                 objLocations += obj.loc -> v
             case ref: Ref =>
@@ -86,9 +90,8 @@ object UnionValue {
 
         def objLocationSeq = objLocations.toSeq flatMap {
             case (loc, (hadAbstract, max)) =>
-                val create = ObjectEntity(loc, ObjectType.OrdinaryObject)(_)
 
-                create(max) +: (if (hadAbstract) Seq(create(0)) else Seq())
+                max +: (if (hadAbstract) Seq(max.withAbstractCount(0)) else Seq())
         }
 
         return unionFromSeq(

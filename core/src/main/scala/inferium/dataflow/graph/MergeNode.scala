@@ -1,25 +1,29 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.MergeNode.MergeType
+import inferium.dataflow.graph.MergeNode.MergeType.MergeType
 import inferium.dataflow.graph.traits.SingleSuccessor
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 
 import scala.collection.mutable
 
-class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = false, val removable: Boolean = false)(implicit _info: Node.Info) extends Node with SingleSuccessor {
+class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Boolean = false)(implicit _info: Node.Info) extends Node with SingleSuccessor {
     private val preds = mutable.Buffer.empty[Node]
     override def hasPred: Boolean = preds.nonEmpty
     override def predecessors: Seq[Node] = preds
 
+    def isFixpoint: Boolean = mergeType == MergeType.Fixpoint
+    def isCatchMerger: Boolean = mergeType == MergeType.CatchMerger
     private var processed: Boolean = true
     private var mergeState: ExecutionState = _
 
     override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
-        val fixedState = fixLexicalFrame(state)
+        val fixedState = fixState(state)
 
         if (mergeState == null) {
             mergeState = fixedState
         } else {
             // merge
-            val newMergeState = mergeState.merge(Seq(fixedState), fixpoint)
+            val newMergeState = mergeState.merge(Seq(fixedState), isFixpoint)
 
             if (mergeState == newMergeState) {
                 return
@@ -37,7 +41,7 @@ class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = fals
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         processed = true
         succ <~ mergeState
-        if (!fixpoint)
+        if (!isFixpoint)
             mergeState = null
     }
 
@@ -53,5 +57,20 @@ class MergeNode(val fixpoint: Boolean = false, val isCatchMerger: Boolean = fals
         preds -= node
     }
 
-    override def asAsmStmt: String = s"${if (fixpoint) "fixpoint-" else ""}merge[${preds.size} nodes]"
+    override def asAsmStmt: String = {
+        val prefix = mergeType match {
+            case MergeType.Normal => ""
+            case MergeType.Fixpoint => "fixpoint-"
+            case MergeType.CallMerger => "call-"
+            case MergeType.CatchMerger => "catch-"
+        }
+        s"${prefix}merge[${preds.size} nodes]"
+    }
+}
+
+object MergeNode {
+    object MergeType extends Enumeration {
+        type MergeType = Value
+        val Normal, Fixpoint, CatchMerger, CallMerger = Value
+    }
 }

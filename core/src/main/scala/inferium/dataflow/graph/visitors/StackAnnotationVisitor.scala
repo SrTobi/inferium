@@ -4,8 +4,9 @@ import inferium.dataflow.graph
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.Node.ExprStackFrame
 import inferium.lattice.UndefinedValue
+import scala.language.implicitConversions
 
-class StackAnnotationVisitor extends Node.AllVisitor {
+class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
     override protected def visit(node: Node): Unit = {
         implicit def everythingToStackFrame(any: Any): ExprStackFrame = ExprStackFrame(any.toString)
 
@@ -13,7 +14,7 @@ class StackAnnotationVisitor extends Node.AllVisitor {
         val preds = predecesors.filter(Node.isForwardEdge(_, node))
         val undefined: ExprStackFrame = UndefinedValue
         lazy val Seq(pred) = preds
-        lazy val startStack: List[ExprStackFrame] = "unknown" :: Nil
+        lazy val startStack: List[ExprStackFrame] = if (isFunction) "arguments" :: Nil else "unknown" :: Nil
         lazy val stack = if (preds.isEmpty) startStack else pred.exprStackInfo
 
 
@@ -61,8 +62,8 @@ class StackAnnotationVisitor extends Node.AllVisitor {
                 val (args, rest) = stack.splitAt(node.squashNum)
                 ExprStackFrame("|", args) :: rest
 
-            case _: graph.PushLexicalFrame =>
-                stack
+            case node: graph.PushLexicalFrameNode =>
+                if (node.takeFromStack) stack.tail else stack
 
             case _: graph.LexicalWriteNode =>
                 stack
@@ -88,6 +89,18 @@ class StackAnnotationVisitor extends Node.AllVisitor {
             case node: graph.DupNode =>
                 val top :: _ = stack
                 List.fill(node.times)(top) ++ stack
+
+            case node: graph.AllocateFunctionNode =>
+                s"func(${node.name})" :: stack
+
+            case node: graph.CallNode =>
+                // drop arguments
+                // drop function
+                // drop this
+                val stackWithoutArgs = stack.drop(node.argumentCount)
+                val func :: stackWithThis = stackWithoutArgs
+                val restStack = if (node.thisIsOnStack) stackWithThis.tail else stackWithThis
+                ExprStackFrame("ret:", func) :: restStack
         }
     }
 }

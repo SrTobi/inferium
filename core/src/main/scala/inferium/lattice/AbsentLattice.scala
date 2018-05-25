@@ -1,5 +1,7 @@
 package inferium.lattice
 
+import scala.language.implicitConversions
+
 final class AbsentLattice(val mightBeAbsent: Boolean) extends AnyVal {
     def asBool: Boolean = mightBeAbsent
 

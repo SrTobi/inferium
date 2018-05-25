@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.dataflow.CallableInfo
 import inferium.lattice.assertions.{Assertion, Falsyfied, Propertyfied, Truthyfied}
 import inferium.utils.macros.blockRec
 
@@ -17,14 +18,19 @@ sealed abstract class Primitive extends Entity {
     @blockRec(nonrec = true)
     protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = withAssertion(assertion, heap) -> Iterator()
 
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = ???
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = ???
+
+    def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
+        fail()
+        Seq()
+    }
 }
 
 
 object NeverValue extends Primitive {
 
     override def unify(other: Entity): Entity = other
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq()
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = GeneralBoolLattice.Bottom
@@ -39,7 +45,7 @@ object NeverValue extends Primitive {
 }
 
 object UndefinedValue extends Primitive {
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq()
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
@@ -55,7 +61,7 @@ object UndefinedValue extends Primitive {
 }
 
 object NullValue extends Primitive {
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectEntity] = Seq()
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq()
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False

@@ -5,7 +5,7 @@ import escalima.ast.Program
 import inferium.Config
 import inferium.dataflow.graph.{Node, ScriptGraph}
 import inferium.dataflow._
-import inferium.lattice.{Location, ObjectEntity, UndefinedValue}
+import inferium.lattice.{Location, ObjectLike, UndefinedValue}
 import inferium.lattice.heaps.SimpleHeap
 import inferium.prelude.NodeJs
 

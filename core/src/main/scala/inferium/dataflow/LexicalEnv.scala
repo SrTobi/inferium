@@ -8,13 +8,44 @@ import scala.collection.mutable
 
 
 case class LexicalEnv(outer: Option[LexicalEnv], pushesObject: Boolean, behavior: Behavior) {
+
     val depth: Int = outer map { _.depth + 1 } getOrElse 0
-    val objIdx: Int = (outer map { _.objIdx } getOrElse -1) + (if (pushesObject) 1 else 0)
+    val objDepth: Int = {
+        val outerObjIdx = outer map { _.objIdx } getOrElse (-1)
+        assert(outerObjIdx >= 0 || pushesObject, "Lexical environment has not one object")
+        outerObjIdx + (if (pushesObject) 1 else 0)
+    }
+    def objIdx: Int = objDepth
+    assert(objIdx <= objDepth)
     assert(objIdx >= 0)
+
+    def toString(envNames: Boolean): String = {
+        val objOffset = objIdx - depth
+
+        def behaviorWithNames(behaviorType: String, names: TraversableOnce[String]): String = {
+            if (envNames) {
+                s"$behaviorType[$objOffset](${names.mkString(", ")})"
+            } else {
+                s"$behaviorType[$objOffset]"
+            }
+        }
+
+        val thisString = behavior match {
+            case Behavior.Hoisted(names) => behaviorWithNames("Hoisted", names)
+            case Behavior.BlockHoisted(names) => behaviorWithNames("BlockHoisted", names.keys)
+            case Behavior.Argument(names) => behaviorWithNames("Argument", names.keys)
+            case Behavior.Declarative(names) => behaviorWithNames("Decl", names.keys)
+            case Behavior.Computed => behaviorWithNames("Computed", Seq())
+        }
+
+        thisString + outer.map(" :: " + _.toString(envNames)).getOrElse("")
+    }
+
+    override def toString: String = toString(false)
 
     @tailrec
     final def fixLexicalStack(lexicalFrame: LexicalFrame): LexicalFrame = {
-        val targetDepth = objIdx
+        val targetDepth = objDepth
         assert(targetDepth <= lexicalFrame.depth)
 
         if (lexicalFrame.depth == targetDepth) {
@@ -52,10 +83,26 @@ case class LexicalEnv(outer: Option[LexicalEnv], pushesObject: Boolean, behavior
                 } else {
                     superChain
                 }
+
+            case BlockHoisted(mappings) =>
+                mappings.get(varName) match {
+                    case Some(mapsTo) =>
+                        LookupItem(LookupType.Declarative, mapsTo, objIdx) :: Nil
+                    case None =>
+                        superChain
+                }
+
             case Declarative(mappings) =>
                 mappings.get(varName) match {
                     case Some(mapsTo) =>
                         LookupItem(LookupType.Declarative, mapsTo, objIdx) :: Nil
+                    case None =>
+                        superChain
+                }
+            case Argument(mappings) =>
+                mappings.get(varName) match {
+                    case Some(mapsToIdx) =>
+                        LookupItem(LookupType.Declarative, mapsToIdx.toString, objIdx) :: Nil
                     case None =>
                         superChain
                 }
@@ -78,8 +125,12 @@ object LexicalEnv {
     sealed abstract class Behavior
 
     object Behavior {
-        final case class Hoisted(hoistedMapping: mutable.Set[String]) extends Behavior
+        final case class Hoisted(hoistedNames: mutable.Set[String]) extends Behavior
+        final case class BlockHoisted(hoistedMapping: mutable.Map[String, String]) extends Behavior
         final case class Declarative(mapping: Map[String, String]) extends Behavior
+        final case class Argument(mapping: Map[String, Int]) extends Behavior
         case object Computed extends Behavior
     }
+
+    def lookupChainToString(lookupChain: List[LookupItem]): String = lookupChain.map(item => s"${item.lookupType}(${item.property} at ${item.objIdx})").mkString(" :: ")
 }

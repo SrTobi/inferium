@@ -41,7 +41,7 @@ object RecursionImpl {
         }
 
         def default: Option[Tree] = getAnnotationParam("default", 0) orElse {
-            if (getAnnotationParam("nonrec", -1) collectFirst { case q"true" => } isEmpty) {
+            if (getAnnotationParam("nonrec", -1).collectFirst{ case q"true" => }.isEmpty) {
                 c.abort(c.enclosingPosition, "Either specify a default value or set nonrec = true")
             }
 
@@ -71,7 +71,7 @@ object RecursionImpl {
             case None => body
         }
 
-        c.Expr[Any](annottees map (_.tree) head match {
+        c.Expr[Any](annottees.map(_.tree).head match {
             case q"""$mods def $name(..$args): $ty""" =>
                 q"""$mods def $name(..$args)(implicit calledSites: inferium.utils.macros.RecursionImpl.RecursionSet = new inferium.utils.macros.RecursionImpl.RecursionSet): $ty"""
 

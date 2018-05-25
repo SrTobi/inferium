@@ -19,19 +19,24 @@ object Heap {
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
 
     abstract class Mutator {
-        def allocObject(location: Location): ObjectEntity
-        def defineProperty(obj: ObjectEntity, property: String, descriptor: Property)
-        def setProperty(obj: ObjectEntity, propertyName: String, property: Property)
-        def getProperty(obj: ObjectEntity, propertyName: String): Property
-        //def listProperties(obj: ObjectEntity): Seq[Entity]
+        def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike
+        def allocOrdinaryObject(location: Location): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac))
+        def setProperty(obj: ObjectLike, propertyName: String, property: Property)
+        def getProperty(obj: ObjectLike, propertyName: String): Property
+        //def listProperties(obj: ObjectLike): Seq[Entity]
 
         def getValue(loc: ValueLocation): Entity
         def setValue(loc: ValueLocation, value: Entity): Unit
 
-        def getPropertyValueIgnoringGetter(obj: ObjectEntity, propertyName: String): Entity = {
+        def getPropertyValueIgnoringGetter(obj: ObjectLike, propertyName: String): Entity = {
             val Property(_, _, value, _, getter, _) = getProperty(obj, propertyName)
             val result = value.toSeq map getValue
             UnionValue(result)
+        }
+
+        def forceSetPropertyValue(obj: ObjectLike, propertyName: String, writeLoc: ValueLocation, value: Entity): Unit = {
+            setProperty(obj, propertyName, Property.defaultWriteToObject(Set(writeLoc)))
+            setValue(writeLoc, value)
         }
     }
 

@@ -45,8 +45,8 @@ class SimpleHeap(private val objects: Map[Location, Obj] = Map.empty, private va
 object SimpleHeap {
     private type Properties = Map[String, Property]
     class Obj(val abstractProperties: Properties, val concreteProperties: Properties, val abstractCount: Long) {
-        def isAbstractObject(o: ObjectEntity): Boolean = abstractCount != o.abstractCount
-        def propertiesFor(o: ObjectEntity): Properties = if (isAbstractObject(o)) abstractProperties else concreteProperties
+        def isAbstractObject(o: ObjectLike): Boolean = abstractCount != o.abstractCount
+        def propertiesFor(o: ObjectLike): Properties = if (isAbstractObject(o)) abstractProperties else concreteProperties
 
         override def equals(o: scala.Any): Boolean = o match {
             case other: Obj =>
@@ -67,7 +67,7 @@ object SimpleHeap {
     }
 
     private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity]) extends Mutator {
-        override def allocObject(location: Location): ObjectEntity = {
+        override def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike = {
             val ac = objects.get(location) match {
                 case Some(Obj(abstractProps, concreteProps, oldAbstractCount)) =>
                     val abstractCount = oldAbstractCount + 1
@@ -79,10 +79,10 @@ object SimpleHeap {
                     objects += location -> Obj(Map.empty, Map.empty, abstractCount)
                     abstractCount
             }
-            ObjectEntity(location, ObjectType.OrdinaryObject)(ac)
+            creator(location, ac)
         }
 
-        override def setProperty(obj: ObjectEntity, propertyName: String, property: Property): Unit = {
+        override def setProperty(obj: ObjectLike, propertyName: String, property: Property): Unit = {
             assert(property != Property.absentProperty)
             objects.get(obj.loc) match {
                 case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
@@ -101,7 +101,7 @@ object SimpleHeap {
             }
         }
 
-        override def getProperty(obj: ObjectEntity, propertyName: String): Property = {
+        override def getProperty(obj: ObjectLike, propertyName: String): Property = {
             objects.get(obj.loc) match {
                 case Some(objDesc) =>
 
@@ -120,8 +120,6 @@ object SimpleHeap {
                     ???
             }
         }
-
-        override def defineProperty(obj: ObjectEntity, property: String, descriptor: Property): Unit = ???
 
         override def getValue(valueLocation: ValueLocation): Entity = valueLocation match {
             case ValueLocation.AbsentLocation => UndefinedValue

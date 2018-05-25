@@ -2,6 +2,7 @@ package inferium.dataflow.graph
 
 import inferium.dataflow.Analysable
 import inferium.dataflow.graph.visitors.PrintVisitor
+import scala.language.implicitConversions
 
 
 sealed abstract class Graph {
@@ -33,7 +34,7 @@ sealed abstract class NonEmptyGraph extends Graph {
     def end: Node
     def priority: Int
 
-    override def toString: String = new PrintVisitor().start(this).toString
+    override def toString: String = PrintVisitor.print(this)
 }
 
 final case class GraphPath(override val begin: Node, override val end: Node)(override val priority: Int = Math.min(begin.priority, end.priority)) extends NonEmptyGraph {
@@ -76,6 +77,9 @@ final case class ScriptGraph(override val begin: Node, override val end: EndNode
 
 object Graph {
     implicit def convertSingleNodeToGraph(node: Node): Graph = Graph(node)
+
+    def concat(graphs: TraversableOnce[Graph]): Graph = graphs.foldLeft[Graph](EmptyGraph) { _ ~> _ }
+
     def apply(): EmptyGraph.type = EmptyGraph
     def apply(beginAndEnd: Node): GraphPath = GraphPath(beginAndEnd, beginAndEnd)()
     def apply(begin: Node, end: Node): GraphPath = GraphPath(begin, end)()

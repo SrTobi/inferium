@@ -15,14 +15,4 @@ object Templates {
         def hasVar(name: String): Boolean
         def closureIndexForVar(name: String): Int
     }*/
-
-
-    //type CallStack = Map[Function, Nodes.FunctionCall]
-    trait Function {
-
-        //def closure: Closure
-        def parameters: Seq[String]
-
-        def instantiate(): (Node, Node)
-    }
 }

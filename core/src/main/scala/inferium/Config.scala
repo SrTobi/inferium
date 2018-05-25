@@ -7,6 +7,7 @@ import inferium.utils.GrammarUtils
 import scala.collection.generic.Growable
 import scala.collection.mutable
 import scala.util.Try
+import scala.language.implicitConversions
 
 class Config(defs: ConfigEntry*) extends Growable[ConfigEntry] with Cloneable {
     private val entries = mutable.Map.empty[String, ConfigEntry]

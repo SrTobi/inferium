@@ -1,7 +1,7 @@
 package inferium.prelude
 
 import inferium.dataflow.{ExecutionState, LexicalFrame}
-import inferium.lattice.{Location, ObjectEntity, UndefinedValue}
+import inferium.lattice.{Location, ObjectLike, UndefinedValue}
 import inferium.lattice.heaps.SimpleHeap
 
 object NodeJs {
@@ -10,12 +10,13 @@ object NodeJs {
             val initialHeap = new SimpleHeap()
             val mutator = initialHeap.begin(Location())
 
-            val gObj = mutator.allocObject(Location())
+            val gObj = mutator.allocOrdinaryObject(Location())
 
             (initialHeap.end(mutator), gObj)
         }
 
 
-        new ExecutionState(UndefinedValue :: Nil, heap, LexicalFrame(globalObj))
+        val callFrame = ExecutionState.CallFrame(globalObj, LexicalFrame(globalObj), None)
+        new ExecutionState(UndefinedValue :: Nil, heap, callFrame)
     }
 }

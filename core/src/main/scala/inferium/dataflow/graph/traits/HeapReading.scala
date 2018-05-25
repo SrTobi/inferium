@@ -1,9 +1,10 @@
 package inferium.dataflow.graph.traits
 
+import inferium.dataflow.graph.Node
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice._
 
-trait HeapReading extends FailingTransformerNode {
+trait HeapReading extends Node {
     private val heapResolveLoc = Location()
     private val heapReadingLoc = Location()
 
@@ -28,7 +29,7 @@ trait HeapReading extends FailingTransformerNode {
         Some((result, resultState))
     }
 
-    /*protected final def read(obj: ObjectEntity, propertyName: String, state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[(Entity, ExecutionState)] = {
+    /*protected final def read(obj: ObjectLike, propertyName: String, state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[(Entity, ExecutionState)] = {
         val heap = state.heap
 
         val readMutator = heap.begin(heapReadingLoc)
@@ -39,7 +40,7 @@ trait HeapReading extends FailingTransformerNode {
         Some((result, resultState))
     }*/
 
-    private final def read(base: Entity, obj: ObjectEntity, propertyName: String, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Entity = {
+    private final def read(base: Entity, obj: ObjectLike, propertyName: String, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Entity = {
 
         val Property(_, _, target, _, getter, _) = mutator.getProperty(obj, propertyName)
         if (getter.nonEmpty) {

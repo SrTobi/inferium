@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.LinearNode
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice.Location
 import inferium.lattice.assertions.{Assertion, Falsyfied, Truthyfied}
