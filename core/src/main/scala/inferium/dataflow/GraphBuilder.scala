@@ -574,22 +574,38 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         Graph(testGraph.begin(ifNode), merger)
 
                     case ast.WhileStatement(test, body) =>
-                        val testerInfo = info.copy(priority = priority + 1)
-                        val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(testerInfo)
+                        val loopMergerInfo = info.copy(priority = priority + 1)
+                        val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(loopMergerInfo)
                         val loopTarget = here
                         loopTarget.entry = loopMerger
                         val afterMerger = loopTarget.exit
-                        val testGraph = buildExpression(test, priority + 1, env)
+                        val testGraph = buildExpression(test, priority + 2, env)
                         val loopBlock = innerBlock.inner(loopTarget = Some(loopTarget))
                         val bodyGraph = buildInnerBlock(loopBlock, Seq(body), priority + 2, newInnerBlockEnv())
-                        val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)
+                        val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)(info.copy(priority = priority + 1))
 
                         loopMerger ~> testGraph ~> cond
                         bodyGraph ~> loopMerger
                         Graph(loopMerger, afterMerger)
 
-                    case ast.VariableDeclaration(decls, kind) =>
+                    case ast.DoWhileStatement(body, test) =>
+                        val loopMergerInfo = info.copy(priority = priority + 1)
+                        val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(loopMergerInfo)
+                        val beforeTestMerger = new graph.MergeNode()(loopMergerInfo.copy(priority = priority + 2))
+                        val loopTarget = here
+                        loopTarget.entry = beforeTestMerger
+                        val afterMerger = loopTarget.exit
+                        val testGraph = buildExpression(test, priority + 2, env)
+                        val loopBlock = innerBlock.inner(loopTarget = Some(loopTarget))
+                        val bodyGraph = buildInnerBlock(loopBlock, Seq(body), priority + 3, newInnerBlockEnv())
+                        val cond = new graph.CondJumpNode(loopMerger, afterMerger)(info.copy(priority = priority + 2))
+                        // todo: this might also be solved by a code-cleanup-visitor
+                        val beforeTestGraph: Graph = if (beforeTestMerger.hasPred) beforeTestMerger else EmptyGraph
 
+                        loopMerger ~> bodyGraph ~> beforeTestGraph ~> testGraph ~> cond
+                        Graph(loopMerger, afterMerger)
+
+                    case ast.VariableDeclaration(decls, kind) =>
                         val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
                         newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
                             for (name <- bindingNames if !hoistables.contains(name)) {

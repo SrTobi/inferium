@@ -605,54 +605,33 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
 
 
     "/concrete/control-flow" - {
-        "break should break the current loop" in {
+        "break should jump out of do-while loop" in {
             val code =
                 """/*
-                  |    name: loop break
-                  |    desc: break should break the current loop
+                  |    name: break do-while loop
+                  |    desc: break should jump out of do-while loop
                   | */
                   |
-                  |
-                  |while (true) {
+                  |do {
                   |    debug.liveCode()
                   |    break
                   |    debug.deadCode()
-                  |}
+                  |} while (debug(debug.boolean).deadCode())
                   |
+                  |debug.liveCode()
                   |
-                  |while (debug.boolean) {
+                  |fst: do {
                   |    debug.liveCode()
-                  |
-                  |    while (true) {
+                  |    do {
                   |        debug.liveCode()
-                  |        break
+                  |        break fst
                   |        debug.deadCode()
-                  |    }
-                  |    debug.liveCode()
-                  |}
                   |
+                  |    } while (debug(debug.boolean).deadCode())
                   |
-                  |debug.liveCode()
-                  |
-                  |fst: while(true) {
-                  |    debug.liveCode()
-                  |    break fst
                   |    debug.deadCode()
-                  |}
                   |
-                  |debug.liveCode()
-                  |
-                  |snd: while(true) {
-                  |    debug.liveCode()
-                  |    inner: while(true) {
-                  |        debug.liveCode()
-                  |        break snd
-                  |        debug.deadCode()
-                  |    }
-                  |    debug.deadCode()
-                  |}
-                  |
-                  |debug.liveCode()
+                  |} while (debug(debug.boolean).deadCode())
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -706,6 +685,95 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    break fifth
                   |    debug.deadCode()
                   |}
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "break should break the current loop" in {
+            val code =
+                """/*
+                  |    name: loop break
+                  |    desc: break should break the current loop
+                  | */
+                  |
+                  |
+                  |while (true) {
+                  |    debug.liveCode()
+                  |    break
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |
+                  |while (debug.boolean) {
+                  |    debug.liveCode()
+                  |
+                  |    while (true) {
+                  |        debug.liveCode()
+                  |        break
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |
+                  |debug.liveCode()
+                  |
+                  |fst: while(true) {
+                  |    debug.liveCode()
+                  |    break fst
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |snd: while(true) {
+                  |    debug.liveCode()
+                  |    inner: while(true) {
+                  |        debug.liveCode()
+                  |        break snd
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "continue should restart do-while loop" in {
+            val code =
+                """/*
+                  |    name: continue do-while
+                  |    desc: continue should restart do-while loop
+                  | */
+                  |
+                  |do {
+                  |    debug.liveCode()
+                  |    continue
+                  |    debug.deadCode()
+                  |
+                  |} while (debug(debug.boolean).liveCode())
+                  |
+                  |debug.liveCode()
+                  |
+                  |fst: do {
+                  |
+                  |    debug.liveCode()
+                  |
+                  |    do {
+                  |        debug.liveCode()
+                  |        continue fst
+                  |        debug.deadCode()
+                  |    } while (debug(true).deadCode())
+                  |
+                  |    debug.deadCode()
+                  |
+                  |} while (debug(debug.boolean).liveCode())
                   |
                   |debug.liveCode()
                 """.stripMargin
@@ -792,6 +860,29 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |while (true) {
                   |    continue
                   |}
+                  |
+                  |debug.deadCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "Do-while loops should work correctly" in {
+            val code =
+                """/*
+                  |    name: do-while loop
+                  |    desc: Do-while loops should work correctly
+                  | */
+                  |
+                  |do {
+                  |    debug.liveCode()
+                  |} while (false)
+                  |
+                  |debug.liveCode()
+                  |
+                  |do {
+                  |    debug.liveCode()
+                  |} while (true)
                   |
                   |debug.deadCode()
                 """.stripMargin
