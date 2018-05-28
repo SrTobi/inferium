@@ -16,7 +16,14 @@ import scala.language.implicitConversions
 object GraphBuilder {
 
     private type VarMapping = Map[String, String]
-    private case class JumpTarget(targetBlock: BlockInfo, entry: Option[MergeNode], exit: MergeNode)
+    private class JumpTarget(val targetBlock: BlockInfo, val exit: MergeNode) {
+        private var _entry: Option[MergeNode] = None
+        def entry: Option[MergeNode] = _entry
+        def entry_=(node: MergeNode): Unit = {
+            assert(_entry.isEmpty)
+            _entry = Some(node)
+        }
+    }
 
     private class BlockInfo(val outer: Option[BlockInfo],
                             val labelTargets: Map[String, JumpTarget],
@@ -53,10 +60,11 @@ object GraphBuilder {
 class GraphBuilder(config: GraphBuilder.Config) {
     import GraphBuilder._
 
-    private class FunctionBuilder(isTopLevel: Boolean, val functionFrame: Node.CallFrame) {
+    private class FunctionBuilder(isTopLevel: Boolean, val functionFrame: Node.CallFrame, val functionPriority: Int) {
         private[this] var done = false
         private val hoistables = mutable.Set.empty[String]
         private var hoistableGraph: Graph = EmptyGraph
+        private var hoistingNodeInfo: Node.Info = _
         private var varRenameIdx = 1
         private var returnBlockInfo: BlockInfo = _
         private var returnMergeNode: MergeNode = _
@@ -72,11 +80,13 @@ class GraphBuilder(config: GraphBuilder.Config) {
         private class BlockBuilder(var strict: Boolean = false,
                                    block: BlockInfo,
                                    hoistingEnv: LexicalEnv,
-                                   blockLexicalEnv: LexicalEnv) {
+                                   blockLexicalEnv: LexicalEnv,
+                                   blockPriority: Int) {
 
             private var blockHoistableGraph: Graph = EmptyGraph
             private val blockHoistables = if (isTopLevel) null else mutable.Map.empty[String, String]
             private val blockHoistingEnv = if (isTopLevel) hoistingEnv else new LexicalEnv(Some(blockLexicalEnv), false, LexicalEnv.Behavior.BlockHoisted(blockHoistables))
+            private val blockHoistingNodeInfo = Node.Info(blockPriority, blockLexicalEnv, functionFrame, block.catchEntry)
             private def initialBlockEnv: LexicalEnv = if (isTopLevel) blockLexicalEnv else blockHoistingEnv
             private[this] var done = false
 
@@ -205,6 +215,11 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             case (ops, innerExpr) => (ops.filter(_ != DebugNode.CheckLiveCode) :+ DebugNode.CheckDeadCode, innerExpr)
                         }
 
+                    case ast.CallExpression(ast.MemberExpression(callee: ast.Expression, ast.Identifier("mightBeDead"), false), Seq()) =>
+                        parseDebugExpression(callee, needExpression, needSubject, hadExpression) map {
+                            case (ops, innerExpr) => (ops.filter(_ != DebugNode.CheckLiveCode), innerExpr)
+                        }
+
                     case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("isOneOf"), false), args) =>
                         parseDebugExpression(source, needExpression, needSubject = true) map {
                             case (ops, innerExpr) =>
@@ -273,7 +288,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     case DebugExpression(ops, innerExprOpt) =>
                         val innerExpr = innerExprOpt getOrElse (throw new BuildException("debug within expressions need a base expression"))
                         val exprGraph = buildExpression(innerExpr, priority, env)
-                        exprGraph ~> new DebugNode(ops)
+                        exprGraph ~> new DebugNode(ops, expr.loc.map(_.start.line))
 
                     case ast.CallExpression(ast.MemberExpression(ast.Identifier("debug"), ast.Identifier("squash"), false), args) if config.buildDebugNodes =>
                         if (args.length < 2) {
@@ -448,11 +463,21 @@ class GraphBuilder(config: GraphBuilder.Config) {
             private def buildStatement(stmt: ast.Statement,
                                        priority: Int,
                                        labels: Map[String, JumpTarget],
-                                       here: Option[JumpTarget],
+                                       hereOpt: Option[JumpTarget],
                                        env: LexicalEnv): (Graph, LexicalEnv) =  BuildException.enrich(stmt) {
                 implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
                 def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
                 def innerBlock: BlockInfo = block.inner(labelTargets = labels)
+
+                // gets or builds the facilities for jumps (continue/break incl. labels)
+                // returns the jump target for the current statement
+                lazy val here = hereOpt match {
+                    case Some(hereTarget) =>
+                        hereTarget
+                    case None =>
+                        val merger = new MergeNode
+                        new JumpTarget(block, merger)
+                }
 
                 var newEnv = env
                 val result: Graph = stmt match {
@@ -461,17 +486,20 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             throw new BuildException(s"Label '$name' already declared")
                         }
 
-                        val (target, merger) = here match {
-                            case Some(hereTarget) =>
-                                (hereTarget, EmptyGraph)
-                            case None =>
-                                val merger = new MergeNode
-                                (JumpTarget(block, None, merger), Graph(merger))
-                        }
-                        val (graph, resultEnv) = buildStatement(body, priority + 1, labels + (name -> target), Some(target), env)
-                        newEnv = resultEnv
-                        graph ~> merger
 
+                        val (graph, resultEnv) = buildStatement(body, priority + 1, labels + (name -> here), Some(here), env)
+                        newEnv = resultEnv
+                        graph.endOption map {
+                            end =>
+                                if (end eq here.exit) {
+                                    graph
+                                } else {
+                                    graph ~> here.exit
+                                }
+                        } getOrElse {
+                            // if there was nothing done in the statement we also need no after merger!
+                            EmptyGraph
+                        }
                     case ast.BlockStatement(body) =>
                         buildInnerBlock(innerBlock, body, priority + 1, newInnerBlockEnv())
 
@@ -485,7 +513,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         buildJump(target.targetBlock, loopEntry, priority, env)
 
                     case DebugStatement(ops, innerExprOpt) =>
-                        def debugNode = new DebugNode(ops)
+                        def debugNode = new DebugNode(ops, stmt.loc.map(_.start.line))
                         innerExprOpt match {
                             case Some(expr) =>
                                 val exprGraph = buildExpression(expr, priority, env)
@@ -510,12 +538,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             case Some(ast.CatchClause(pattern, catchBody)) =>
                                 val catchMerger = new graph.MergeNode(MergeType.CatchMerger)(info.copy(priority = priority + 1))
 
-                                val tryBlock = block.inner(catchEntry = Some(catchMerger))
+                                val tryBlock = innerBlock.inner(catchEntry = Some(catchMerger))
                                 val tryGraph = buildInnerBlock(tryBlock, tryBody.body, priority + 2, newInnerBlockEnv())
 
                                 val catchEnv = newInnerBlockEnv()
                                 val expBindingGraph = buildPatternBinding(pattern, priority + 1, catchEnv, pushWrittenValueToStack = false)
-                                val catchBlock = block.inner(finalizer = finallyBuilder)
+                                val catchBlock = innerBlock.inner(finalizer = finallyBuilder)
                                 val catchGraph = buildInnerBlock(catchBlock, catchBody.body, priority + 1, catchEnv)
 
                                 val afterMerger = new graph.MergeNode
@@ -524,7 +552,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> expBindingGraph ~> catchGraph ~> afterMerger
 
                             case None =>
-                                buildInnerBlock(block.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())
+                                buildInnerBlock(innerBlock.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())
                         }
 
                         // build finally
@@ -548,9 +576,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     case ast.WhileStatement(test, body) =>
                         val testerInfo = info.copy(priority = priority + 1)
                         val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(testerInfo)
-                        val afterMerger = new graph.MergeNode
+                        val loopTarget = here
+                        loopTarget.entry = loopMerger
+                        val afterMerger = loopTarget.exit
                         val testGraph = buildExpression(test, priority + 1, env)
-                        val bodyGraph = buildInnerBlock(innerBlock, Seq(body), priority + 2, newInnerBlockEnv())
+                        val loopBlock = innerBlock.inner(loopTarget = Some(loopTarget))
+                        val bodyGraph = buildInnerBlock(loopBlock, Seq(body), priority + 2, newInnerBlockEnv())
                         val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)
 
                         loopMerger ~> testGraph ~> cond
@@ -559,7 +590,6 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                     case ast.VariableDeclaration(decls, kind) =>
 
-                        lazy val hoistingInfo = info.copy(lexicalEnv = hoistingEnv)
                         val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
                         newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
                             for (name <- bindingNames if !hoistables.contains(name)) {
@@ -568,7 +598,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                     // if we are not in a function `var statements` directly modify the global object
                                     // so we have to write undefined into it even if there is no initializer
                                     // because of enumeration
-                                    val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingInfo) ~> new LexicalWriteNode(name)(hoistingInfo) ~> new PopNode()(hoistingInfo)
+                                    val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingNodeInfo) ~> new LexicalWriteNode(name)(hoistingNodeInfo) ~> new PopNode()(hoistingNodeInfo)
                                     hoistableGraph ~>= hoistingGraphs
                                 }
                             }
@@ -619,17 +649,17 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildInnerBlock(block: BlockInfo, statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
-                val builder = new BlockBuilder(strict, block, hoistingEnv, initialEnv)
-                builder.build(statements, priority)
+                val builder = new BlockBuilder(strict, block, hoistingEnv, initialEnv, priority)
+                builder.build(statements)
             }
 
             private def buildInnerBlockWithNewLexObj(block: BlockInfo, statements: Seq[ast.Statement], priority: Int, initialEnv: LexicalEnv): Graph = {
                 val newDeclEnv = new LexicalEnv(Some(initialEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
-                val builder = new BlockBuilder(strict, block, hoistingEnv, newDeclEnv)
-                builder.build(statements, priority)
+                val builder = new BlockBuilder(strict, block, hoistingEnv, newDeclEnv, priority)
+                builder.build(statements)
             }
 
-            def build(statements: Seq[ast.Statement], priority: Int): Graph = {
+            def build(statements: Seq[ast.Statement]): Graph = {
                 assert(!done)
 
                 // check that directives only appear at the beginning
@@ -648,13 +678,13 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         // build expression
-                        implicit val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry, None)
+                        implicit val info: Node.Info = Node.Info(blockPriority, env, functionFrame, block.catchEntry, None)
                         val stringExpr = new graph.PopNode ~> buildLiteral(StringValue(directive))
                         bodyGraph = bodyGraph ~> stringExpr
 
                     case stmt =>
                         visitedNonDirective = true
-                        val (stmtGraph, resultEnv) = buildStatement(stmt, priority, block.labelTargets, None, env)
+                        val (stmtGraph, resultEnv) = buildStatement(stmt, blockPriority, block.labelTargets, None, env)
                         env = resultEnv
                         bodyGraph = bodyGraph ~> stmtGraph
                 }
@@ -665,13 +695,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
 
         def buildTopLevel(program: ast.Program, strict: Boolean): ScriptGraph = {
+            assert(functionPriority == 0)
             val priority = 0
             assert(!done)
             val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
             val firstVarsEnv = new LexicalEnv(Some(globalEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
-            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv, firstVarsEnv)
-            val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt }, priority)
             implicit val info: Node.Info = Node.Info(priority, globalEnv, functionFrame, None)
+            hoistingNodeInfo = info
+            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv, firstVarsEnv, priority)
+            val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt })
             val endNode = new EndNode
             val scriptGraph = new PushLexicalFrameNode("main-block", takeFromStack = false) ~> hoistableGraph ~> graph ~> endNode
 
@@ -679,8 +711,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
             ScriptGraph(scriptGraph.begin(endNode), endNode)
         }
 
-        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, priority: Int, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
+        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
             assert(!done)
+            val priority = functionPriority
             val hasPatternMatching = params.exists(!_.isInstanceOf[ast.Identifier])
 
             val initialNodeInfo = Node.Info(priority, initialEnv, functionFrame, catchTarget, None)
@@ -700,13 +733,13 @@ class GraphBuilder(config: GraphBuilder.Config) {
             // create hoisting env and object
             prologGraph ~>= new PushLexicalFrameNode("func", false)(argNodeInfo)
             val funcHoistingEnv = LexicalEnv(Some(argEnv), pushesObject = true, LexicalEnv.Behavior.Hoisted(hoistables))
-            val hoistingInfo = initialNodeInfo.copy(lexicalEnv = funcHoistingEnv)
+            hoistingNodeInfo = initialNodeInfo.copy(lexicalEnv = funcHoistingEnv)
 
             // first write arguments object to hoisting object
             val argumentNames = params.flatMap(gatherBindingNamesFromPattern).toSet
             if (argumentNames.contains("arguments")) {
-                prologGraph ~>= new DupNode(1)(hoistingInfo)
-                prologGraph ~>= new LexicalWriteNode("arguments")(hoistingInfo)
+                prologGraph ~>= new DupNode(1)(hoistingNodeInfo)
+                prologGraph ~>= new LexicalWriteNode("arguments")(hoistingNodeInfo)
             }
 
             if (hasPatternMatching) {
@@ -715,7 +748,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 ???
             }
 
-            prologGraph ~>= new graph.PopNode()(hoistingInfo)
+            prologGraph ~>= new graph.PopNode()(hoistingNodeInfo)
 
             val normalizedBody = body match {
                 case ast.FunctionBody(stmts) =>
@@ -730,8 +763,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
             returnBlockInfo = new BlockInfo(None, Map.empty, None, catchTarget, None)
             returnMergeNode = new MergeNode()(initialNodeInfo)
-            val builder = new BlockBuilder(false, returnBlockInfo, funcHoistingEnv, funcHoistingEnv)
-            val bodyGraph = builder.build(normalizedBody, priority + 1)
+            val builder = new BlockBuilder(false, returnBlockInfo, funcHoistingEnv, funcHoistingEnv, priority + 1)
+            val bodyGraph = builder.build(normalizedBody)
 
             // build default return
             val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
@@ -743,7 +776,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
     def buildTemplate(scriptAst: ast.Program): Templates.Script =  new Templates.Script {
         override def instantiate(): ScriptGraph = {
-            val builder = new FunctionBuilder(isTopLevel = true, new Node.CallFrame(None, None))
+            val builder = new FunctionBuilder(isTopLevel = true, new Node.CallFrame(None, None), 0)
             val graph = builder.buildTopLevel(scriptAst, strict = false)
             new StackAnnotationVisitor(isFunction = false).start(graph)
             graph
@@ -752,8 +785,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
     private case class FunctionTemplate(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, lexicalEnv: LexicalEnv) extends CallableInfo {
         override def instantiate(returnMerger: MergeNode, priority: Int, catchTarget: Option[MergeNode], callFrame: Node.CallFrame): CallInstance = {
-            val functionBuilder = new FunctionBuilder(isTopLevel = false, callFrame)
-            val funcGraph: Graph = functionBuilder.buildFunction(name, params, body, priority, catchTarget, lexicalEnv)
+            val functionBuilder = new FunctionBuilder(isTopLevel = false, callFrame, priority)
+            val funcGraph: Graph = functionBuilder.buildFunction(name, params, body, catchTarget, lexicalEnv)
             funcGraph ~> returnMerger
             new StackAnnotationVisitor(isFunction = true).start(funcGraph)
             new InlinedCallInstance(funcGraph.begin)

@@ -4,14 +4,16 @@ import inferium.dataflow.graph.DebugNode._
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading, LexicalLookup}
 import inferium.lattice.{Entity, Primitive, ValueLocation}
 
-class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
+class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
+
+    private def reportError(msg: String)(implicit analysis: DataFlowAnalysis): Unit = analysis.debugAdapter.error(this,  s"In line ${lineNumber.getOrElse("unknown")}: $msg")
+
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
         lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
-        val error = analysis.debugAdapter.error(this, _: String)
 
         operations foreach {
             case CheckDeadCode =>
-                error("Analyzing dead code!")
+                reportError("Analyzing dead code!")
 
             case CheckLiveCode =>
                 // nothing to do
@@ -26,7 +28,6 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
     }
 
     def executeChecks(debugAdapter: DebugAdapter)(implicit analysis: DataFlowAnalysis): Unit = {
-        val error = debugAdapter.error(this, _: String)
         val state = inState
         lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
 
@@ -36,12 +37,14 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
 
             case CheckLiveCode =>
                 if (state == null) {
-                    error("LiveCode check failed. There is reachable, but unanalyzed, code")
+                    reportError("LiveCode check failed. There is reachable, but unanalyzed, code")
                     return
                 }
 
             case OneOf(entites) =>
-                assert(state != null)
+                if (state == null) {
+                    return
+                }
                 val normalizedEntities = entites map {
                     case Left(p) => p
                     case Right(name) =>
@@ -52,7 +55,7 @@ class DebugNode(operations: Seq[Operation])(implicit _info: Node.Info) extends F
                 }
 
                 if (!(Entity.unify(normalizedEntities) mightBe subject)) {
-                    error(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
+                    reportError(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
                 }
 
             case PrintExpr(_) =>

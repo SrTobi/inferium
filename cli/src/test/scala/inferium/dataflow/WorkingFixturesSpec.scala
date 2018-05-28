@@ -9,8 +9,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
     "/abstract" - {
         "Checks if conditional branching filters chained properties" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: chain filtering
                   |    desc: Checks if conditional branching filters chained properties
                   | */
@@ -63,8 +62,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "Checks if conditional branching filters properties respecting union values" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: fan filtering
                   |    desc: Checks if conditional branching filters properties respecting union values
                   | */
@@ -114,6 +112,24 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    debug(d).isOneOf(false)
                   |    debug(e).isOneOf(false)
                   |}
+                  |
+                  |a = true
+                  |
+                  |if (e) {
+                  |    debug(a).isOneOf(true)
+                  |    debug(b).isOneOf(true)
+                  |    debug(c).isOneOf(true)
+                  |
+                  |    debug(d).isOneOf(debug.boolean)
+                  |    debug(e).isOneOf(true)
+                  |} else {
+                  |    debug(a).isOneOf(true)
+                  |    debug(b).isOneOf(true)
+                  |    debug(c).isOneOf(true)
+                  |
+                  |    debug(d).isOneOf(false)
+                  |    debug(e).isOneOf(false)
+                  |}
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -121,8 +137,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "Checks if conditional branching filters the condition" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: filtering
                   |    desc: Checks if conditional branching filters the condition
                   | */
@@ -187,8 +202,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "Checks if conditional branching filters the base object of references" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Object filtering
                   |    desc: Checks if conditional branching filters the base object of references
                   | */
@@ -244,8 +258,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
     "/abstract/objects" - {
         "Object instances should become abstract in iteration" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Abstract instances
                   |    desc: Object instances should become abstract in iteration
                   | */
@@ -280,8 +293,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "When objects get merged, properties should merge as well" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Object merging
                   |    desc: When objects get merged, properties should merge as well
                   | */
@@ -319,8 +331,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "When writing to multiple objects, the properties should hold the correct values" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Object merging
                   |    desc: When writing to multiple objects, the properties should hold the correct values
                   | */
@@ -358,8 +369,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
     "/concrete" - {
         "After a statement, ans should have the correct value" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: ans from statement
                   |    desc: After a statement, ans should have the correct value
                   | */
@@ -403,8 +413,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "After an expression statement, ans should be the result of the expression" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: ans from Expression statement
                   |    desc: After an expression statement, ans should be the result of the expression
                   | */
@@ -459,8 +468,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "A directive should also influence the ans value" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Directive is a string-expression
                   |    desc: A directive should also influence the ans value
                   | */
@@ -475,8 +483,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "Empty script should be parsable" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: empty
                   |    desc: Empty script should be parsable
                   | */
@@ -487,45 +494,9 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
-        "If the condition is concrete, if should disregard the false branch" in {
-            val code =
-                """
-                  |/*
-                  |    name: if control flow
-                  |    desc: If the condition is concrete, if should disregard the false branch
-                  | */
-                  |
-                  |var t = true
-                  |var f = false
-                  |var b = debug.boolean
-                  |var result
-                  |
-                  |if(t) {
-                  |    debug.liveCode()
-                  |} else {
-                  |    debug.deadCode()
-                  |}
-                  |
-                  |if(f) {
-                  |    debug.deadCode()
-                  |} else {
-                  |    debug.liveCode()
-                  |}
-                  |
-                  |if(b) {
-                  |    debug.liveCode()
-                  |} else {
-                  |    debug.liveCode()
-                  |}
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
         "Lexical read and write should respect scopes" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: lexical scopes
                   |    desc: Lexical read and write should respect scopes
                   | */
@@ -580,8 +551,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "Objects should be creatable and hold properties" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Object creation
                   |    desc: Objects should be creatable and hold properties
                   | */
@@ -606,8 +576,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             
         "properties should be flow- and instance-sensitive" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: Property Semantics
                   |    desc: properties should be flow- and instance-sensitive
                   | */
@@ -632,10 +601,353 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
+    }
+
+
+    "/concrete/control-flow" - {
+        "break should break the current loop" in {
+            val code =
+                """/*
+                  |    name: loop break
+                  |    desc: break should break the current loop
+                  | */
+                  |
+                  |
+                  |while (true) {
+                  |    debug.liveCode()
+                  |    break
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |
+                  |while (debug.boolean) {
+                  |    debug.liveCode()
+                  |
+                  |    while (true) {
+                  |        debug.liveCode()
+                  |        break
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |
+                  |debug.liveCode()
+                  |
+                  |fst: while(true) {
+                  |    debug.liveCode()
+                  |    break fst
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |snd: while(true) {
+                  |    debug.liveCode()
+                  |    inner: while(true) {
+                  |        debug.liveCode()
+                  |        break snd
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "break should jump to referenced label" in {
+            val code =
+                """/*
+                  |    name: syntactic break
+                  |    desc: break should jump to referenced label
+                  | */
+                  |
+                  |fst: {
+                  |    debug.liveCode()
+                  |    break fst
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |snd: {
+                  |    inner: {
+                  |        debug.liveCode()
+                  |        break snd
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |outer: {
+                  |    third: {
+                  |        debug.liveCode()
+                  |        break third
+                  |        debug.deadCode()
+                  |    }
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |forth:
+                  |    break forth;
+                  |
+                  |debug.liveCode()
+                  |
+                  |fifth:
+                  |after: {
+                  |    debug.liveCode()
+                  |    break fifth
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "continue starts the most inner or labeled loop over" in {
+            val code =
+                """/*
+                  |    name: loop continue
+                  |    desc: continue starts the most inner or labeled loop over
+                  | */
+                  |
+                  |while (debug.boolean) {
+                  |    debug.liveCode()
+                  |    continue
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |while (debug.boolean) {
+                  |    debug.liveCode()
+                  |
+                  |    while (debug.boolean) {
+                  |        debug.liveCode()
+                  |        continue
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |
+                  |fst: while (debug.boolean) {
+                  |    debug.liveCode()
+                  |    continue fst
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |snd: while (debug.boolean) {
+                  |    debug.liveCode()
+                  |
+                  |    var a = "init"
+                  |
+                  |    inner: while (debug.boolean) {
+                  |        debug.liveCode()
+                  |        debug(a).isOneOf("init")
+                  |        a = "changed"
+                  |        continue snd
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug(a).isOneOf("init")
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |third: while (debug.boolean) {
+                  |    debug.liveCode()
+                  |
+                  |    var b = "init"
+                  |
+                  |    inner: while (debug.boolean) {
+                  |        debug.liveCode()
+                  |        debug(b).isOneOf("init")
+                  |        b = "changed"
+                  |        continue third
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug(b).isOneOf("init", "changed")
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |while (true) {
+                  |    continue
+                  |}
+                  |
+                  |debug.deadCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "finally code should be executed even if break out of the try block" in {
+            val code =
+                """/*
+                  |    name: break finally
+                  |    desc: finally code should be executed even if break out of the try block
+                  | */
+                  |
+                  |let a = "init"
+                  |
+                  |fst: try {
+                  |    a = "in try"
+                  |    break fst
+                  |    debug.deadCode()
+                  |} finally {
+                  |    debug(a).isOneOf("in try").mightBeDead()
+                  |    a = "in finally"
+                  |}
+                  |
+                  |debug(a).isOneOf("in finally")
+                  |
+                  |
+                  |let b = "init"
+                  |
+                  |snd: try {
+                  |    b = "in try"
+                  |    try {
+                  |        b = "in inner try"
+                  |        break snd
+                  |        debug.deadCode()
+                  |    } finally {
+                  |        debug(b).isOneOf("in inner try").mightBeDead()
+                  |        b = "in inner finally"
+                  |    }
+                  |    debug.deadCode()
+                  |} finally {
+                  |    debug(b).isOneOf("in inner finally").mightBeDead()
+                  |    b = "in finally"
+                  |}
+                  |
+                  |debug(b).isOneOf("in finally")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "finally code should be executed even if continued out of a try block" in {
+            val code =
+                """/*
+                  |    name: continue with finally
+                  |    desc: finally code should be executed even if continued out of a try block
+                  | */
+                  |
+                  |let a = "init"
+                  |while (debug.boolean) {
+                  |    debug(a).isOneOf("init", "in finally")
+                  |    try {
+                  |        a = "in try"
+                  |        continue
+                  |        debug.deadCode()
+                  |    } finally {
+                  |        debug(a).isOneOf("in try").mightBeDead()
+                  |        a = "in finally"
+                  |    }
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug(a).isOneOf("init", "in finally")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "Finally should be executed if try block exists normally" in {
+            val code =
+                """/*
+                  |    name: simple finally
+                  |    desc: Finally should be executed if try block exists normally
+                  | */
+                  |
+                  |let a = "init"
+                  |
+                  |try {
+                  |    a = "in try"
+                  |} finally {
+                  |    a = "in finally"
+                  |}
+                  |
+                  |debug(a).isOneOf("in finally")
+                  |
+                  |
+                  |let b = "init"
+                  |
+                  |try {
+                  |    b = "in try"
+                  |    try {
+                  |        debug(b).isOneOf("in try")
+                  |        b = "in inner try"
+                  |    } finally {
+                  |        debug(b).isOneOf("in inner try")
+                  |        b = "in inner finally"
+                  |    }
+                  |} finally {
+                  |    debug(b).isOneOf("in inner finally")
+                  |    b = "in finally"
+                  |}
+                  |
+                  |debug(b).isOneOf("in finally")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "If the condition is concrete, if should disregard the false branch" in {
+            val code =
+                """/*
+                  |    name: if control flow
+                  |    desc: If the condition is concrete, if should disregard the false branch
+                  | */
+                  |
+                  |var t = true
+                  |var f = false
+                  |var b = debug.boolean
+                  |var result
+                  |
+                  |if(t) {
+                  |    debug.liveCode()
+                  |} else {
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |if(f) {
+                  |    debug.deadCode()
+                  |} else {
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |if(b) {
+                  |    debug.liveCode()
+                  |} else {
+                  |    debug.liveCode()
+                  |}
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
         "If the condition is concrete, while should disregard the respective branch" in {
             val code =
-                """
-                  |/*
+                """/*
                   |    name: while control flow
                   |    desc: If the condition is concrete, while should disregard the respective branch
                   | */

@@ -59,7 +59,7 @@ if (e) {
     debug(d).isOneOf(debug.boolean)
     debug(e).isOneOf(true)
 } else {
-    debug(a).isOneOf(false)
+    debug(a).isOneOf(true)
     debug(b).isOneOf(true)
     debug(c).isOneOf(true)
 

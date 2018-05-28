@@ -13,11 +13,12 @@ class FixtureTestBuilder {
         builder.append("        \"" + fixture.description + "\" in {\n")
 
         builder.append("            val code =\n")
-        builder.append("                \"\"\"\n")
+        builder.append("                \"\"\"")
 
-        fixtureFile.content.split("\n") foreach {
-            line =>
-                builder.append("                  |")
+        fixtureFile.content.split("\n").zipWithIndex foreach {
+            case (line,  idx) =>
+                if (idx > 0)
+                    builder.append("                  |")
                 builder.append(line)
                 builder.append("\n")
         }

@@ -20,18 +20,12 @@ object Playground {
 
     def main(args: Array[String]): Unit = {
         val code =
-            """
-              |function test(a, b) {
-              |  debug(a).print("inner")
-              |  return b
-              |}
-              |
-              |const x = test(5, "haha")
-              |debug(x).print()
+            """var x = test;
+              |debug.deadCode()
             """.stripMargin
 
         /*val code =
-            """
+
               |if (false) {
               |  debug.liveCode()
               |}
@@ -42,12 +36,12 @@ object Playground {
 
         val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
-        //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
+        println(PrintVisitor.print(graph, printMergeNodes = true))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState)
 
-        println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
+        //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 
         //println("-------")
         //println(new DotPrintVisitor(showStackInfo = false).start(graph))

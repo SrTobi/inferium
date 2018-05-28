@@ -14,6 +14,10 @@ sealed abstract class Graph {
     def begin: Node
     def beginOption: Option[Node]
 
+    def end(before: => Node): Node
+    def end: Node
+    def endOption: Option[Node]
+
     def replace(oldNode: Node, newNode: Node): Graph
 }
 
@@ -26,13 +30,24 @@ case object EmptyGraph extends Graph {
     override def begin: Node = throw new IllegalAccessException("can not access first node of an empty graph")
     override def beginOption: Option[Node] = None
 
+    override def end(before: => Node): Node = before
+    override def end: Node = throw new IllegalAccessException("can not access last node of an empty graph")
+    override def endOption: Option[Node] = None
+
     override def toString: String = "EmptyGraph"
 }
 
 sealed abstract class NonEmptyGraph extends Graph {
-    def begin: Node
-    def end: Node
+    override def begin: Node
+    override def end: Node
     def priority: Int
+
+
+    override def begin(after: => Node): Node = begin
+    override def beginOption: Option[Node] = Some(begin)
+
+    override def end(before: => Node): Node = end
+    override def endOption: Option[Node] = Some(end)
 
     override def toString: String = PrintVisitor.print(this)
 }
@@ -42,9 +57,9 @@ final case class GraphPath(override val begin: Node, override val end: Node)(ove
         graph match {
             case EmptyGraph =>
                 this
-            case g@Graph(otherBegin, otherEnd, priority) =>
+            case g@Graph(otherBegin, otherEnd, otherPriority) =>
                 end ~> otherBegin
-                GraphPath(begin, otherEnd)(Math.min(this.priority, priority))
+                GraphPath(begin, otherEnd)(Math.min(priority, otherPriority))
         }
     }
 
@@ -60,19 +75,17 @@ final case class GraphPath(override val begin: Node, override val end: Node)(ove
             this
         }*/
     }
-
-    override def begin(after: => Node): Node = begin
-    override def beginOption: Option[Node] = Some(begin)
 }
 
 final case class ScriptGraph(override val begin: Node, override val end: EndNode) extends NonEmptyGraph with Analysable {
     override def priority: Int = 0
 
     override def ~>(graph: Graph): Graph = throw new IllegalAccessException("Can not connect script graph to another graph")
-    override def begin(after: => Node): EndNode = end
-    override def beginOption: Option[Node] = Some(begin)
 
     override def replace(oldNode: Node, newNode: Node): Graph = ???
+
+
+    override def begin(after: => Node): Node = end
 }
 
 object Graph {
@@ -83,6 +96,7 @@ object Graph {
     def apply(): EmptyGraph.type = EmptyGraph
     def apply(beginAndEnd: Node): GraphPath = GraphPath(beginAndEnd, beginAndEnd)()
     def apply(begin: Node, end: Node): GraphPath = GraphPath(begin, end)()
+    def apply(beginAndEnd: Option[Node]): Graph = beginAndEnd.map(Graph(_)).getOrElse(EmptyGraph)
 
     def unapply(graph: Graph): Option[(Node, Node, Int)] = graph match {
         case graph: NonEmptyGraph => Some((graph.begin, graph.end, graph.priority))
