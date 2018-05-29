@@ -1,0 +1,11 @@
+package inferium.dataflow.graph
+import inferium.dataflow.graph.traits.TransformerNode
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+
+class PushThisNode(implicit _info: Node.Info) extends TransformerNode {
+    override def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): ExecutionState = {
+        state.copy(stack = state.thisEntity :: state.stack)
+    }
+
+    override def asAsmStmt: String = "pushThis"
+}

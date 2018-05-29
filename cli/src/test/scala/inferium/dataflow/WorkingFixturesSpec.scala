@@ -601,6 +601,22 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
+        "this should point to the global object outside of functions" in {
+            val code =
+                """/*
+                  |    name: this is global
+                  |    desc: this should point to the global object outside of functions
+                  | */
+                  |
+                  |var g = global
+                  |var ths = this
+                  |
+                  |debug(ths).isOneOf(g)
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
     }
 
 

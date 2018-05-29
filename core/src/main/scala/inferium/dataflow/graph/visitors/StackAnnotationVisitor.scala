@@ -75,6 +75,9 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
                 assert(stack.tail.isEmpty)
                 stack
 
+            case _: graph.PushThisNode =>
+                "this" :: stack
+
             case node: graph.AllocateObjectNode =>
                 s"obj#${node.id}" :: stack
 

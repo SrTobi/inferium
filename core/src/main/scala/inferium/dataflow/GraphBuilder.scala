@@ -320,6 +320,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
                         new graph.LexicalReadNode(varName)
 
+                    case _: ast.ThisExpression =>
+                        new graph.PushThisNode()
+
                     case memberExpr: ast.MemberExpression =>
                         buildMemberAccess(memberExpr, priority, env)
 
