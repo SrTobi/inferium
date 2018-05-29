@@ -21,6 +21,7 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
         assert(node.exprStackInfo == null)
 
         assert(preds forall {_.exprStackInfo != null})
+        assert(preds.isEmpty || (preds zip preds.tail forall { case (fst, snd) => fst.exprStackInfo.length == snd.exprStackInfo.length } ))
 
         node.exprStackInfo = node match {
             case node: graph.LiteralNode =>
@@ -37,22 +38,28 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
                 stack.tail // the jump reads the condition
 
             case merger: graph.MergeNode =>
-                assert(preds forall { _.exprStackInfo.nonEmpty })
+                assert(isFunction || (preds forall { _.exprStackInfo.nonEmpty }))
 
                 if(merger.isCatchMerger) {
                     assert(preds.count(!_.catchTarget.contains(merger)) == 1)
                     "exception" :: undefined :: Nil
                 } else {
-                    val restStack = preds.head.exprStackInfo.tail
-                    assert(preds forall {
-                        _.exprStackInfo.tail eq restStack
-                    })
-                    val mergeFrame = predecesors map { p => if (p.exprStackInfo == null) ExprStackFrame(p.toString) else p.exprStackInfo.head } reduce[ExprStackFrame] {
-                        case (left, right) =>
-                            ExprStackFrame("|", left, right)
-                    }
+                    val stackIsEmpty = preds.head.exprStackInfo.isEmpty
+                    if (stackIsEmpty) {
+                        assert(isFunction)
+                        Nil
+                    } else {
+                        val restStack = preds.head.exprStackInfo.tail
+                        assert(preds forall {
+                            _.exprStackInfo.tail eq restStack
+                        })
+                        val mergeFrame = predecesors map { p => if (p.exprStackInfo == null) ExprStackFrame(p.toString) else p.exprStackInfo.head } reduce[ExprStackFrame] {
+                            case (left, right) =>
+                                ExprStackFrame("|", left, right)
+                        }
 
-                    mergeFrame :: restStack
+                        mergeFrame :: restStack
+                    }
                 }
 
             case _: graph.DebugNode =>

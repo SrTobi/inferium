@@ -77,6 +77,14 @@ class GraphBuilder(config: GraphBuilder.Config) {
             case _ => ???
         }
 
+        private def popToResult(g: Graph)(implicit info: Node.Info): Graph = {
+            if (isTopLevel) {
+                new graph.PopNode ~> g
+            } else {
+                g ~> new graph.PopNode
+            }
+        }
+
         private class BlockBuilder(var strict: Boolean = false,
                                    block: BlockInfo,
                                    hoistingEnv: LexicalEnv,
@@ -84,21 +92,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                    blockPriority: Int) {
 
             private var blockHoistableGraph: Graph = EmptyGraph
-            private val blockHoistables = if (isTopLevel) null else mutable.Map.empty[String, String]
-            private val blockHoistingEnv = if (isTopLevel) hoistingEnv else new LexicalEnv(Some(blockLexicalEnv), false, LexicalEnv.Behavior.BlockHoisted(blockHoistables))
+            //private val blockHoistables = if (isTopLevel) null else mutable.Map.empty[String, String]
+            //private val blockHoistingEnv = if (isTopLevel) hoistingEnv else new LexicalEnv(Some(blockLexicalEnv), false, LexicalEnv.Behavior.BlockHoisted(blockHoistables))
             private val blockHoistingNodeInfo = Node.Info(blockPriority, blockLexicalEnv, functionFrame, block.catchEntry)
-            private def initialBlockEnv: LexicalEnv = if (isTopLevel) blockLexicalEnv else blockHoistingEnv
+            //private def initialBlockEnv: LexicalEnv = if (isTopLevel) blockLexicalEnv else blockHoistingEnv
             private[this] var done = false
 
-            private def addBlockHoistable(name: String, initGraph: Graph): Unit = {
-                if (isTopLevel) {
-                    hoistables += name
-                    hoistableGraph ~>= initGraph
-                } else {
-                    blockHoistables += name -> makeLocalNameUnique(name)
-                    blockHoistableGraph ~>= initGraph
-                }
-            }
 
             private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode, priority: Int, env: LexicalEnv): graph.JumpNode = {
                 def unroll(block: BlockInfo): Graph = {
@@ -518,6 +517,16 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                 var newEnv = env
 
+                def reserveHoistedName(name: String): Unit = {
+                    // if we are not in a function `var statements` or `function statements` directly modify the global object
+                    // so we have to write undefined into it even if there is no initializer
+                    // because of enumeration
+                    if (isTopLevel) {
+                        val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingNodeInfo) ~> new LexicalWriteNode(name)(hoistingNodeInfo) ~> new PopNode()(hoistingNodeInfo)
+                        hoistableGraph ~>= hoistingGraphs
+                    }
+                }
+
                 def buildVariableDeclaration(node: ast.VariableDeclaration, env: LexicalEnv): (Graph, LexicalEnv) = {
                     val ast.VariableDeclaration(decls, kind) = node
 
@@ -525,13 +534,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     val newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
                         for (name <- bindingNames if !hoistables.contains(name)) {
                             hoistables += name
-                            if (isTopLevel) {
-                                // if we are not in a function `var statements` directly modify the global object
-                                // so we have to write undefined into it even if there is no initializer
-                                // because of enumeration
-                                val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingNodeInfo) ~> new LexicalWriteNode(name)(hoistingNodeInfo) ~> new PopNode()(hoistingNodeInfo)
-                                hoistableGraph ~>= hoistingGraphs
-                            }
+                            reserveHoistedName(name)
                         }
                         env
                     } else {
@@ -588,7 +591,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                     case ast.ExpressionStatement(expr) =>
                         val exprGraph = buildExpression(expr, priority, env)
-                        new PopNode() ~> exprGraph
+                        popToResult(exprGraph)
 
                     case ast.TryStatement(tryBody, catchHandler, finallyHandler) =>
                         val finallyBuilder = finallyHandler map {
@@ -729,7 +732,13 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val name = decl.id.getOrElse(throw new AssertionError("Expected id on function declaration")).name
                         val funcGraph = buildFunction(decl)
                         val hoistingGraph = funcGraph ~> new LexicalWriteNode(name) ~> new PopNode()
-                        addBlockHoistable(name, hoistingGraph)
+
+                        if (!hoistables.contains(name)) {
+                            hoistables += name
+                            reserveHoistedName(name)
+                        }
+                        blockHoistableGraph ~>= hoistingGraph
+
                         EmptyGraph
 
                     case _: ast.EmptyStatement =>
@@ -779,7 +788,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                 var bodyGraph: Graph = EmptyGraph
                 var visitedNonDirective = false
-                var env = initialBlockEnv
+                var env = blockLexicalEnv
 
                 statements foreach {
                     case ast.Directive(_, directive) =>
