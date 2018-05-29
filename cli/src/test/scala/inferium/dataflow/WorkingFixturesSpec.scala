@@ -653,6 +653,56 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
+        "break should jump out of for loop" in {
+            val code =
+                """/*
+                  |    name: break for loop
+                  |    desc: break should jump out of for loop
+                  | */
+                  |
+                  |for(;;) {
+                  |    debug.liveCode()
+                  |    break
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |for(;debug.boolean;) {
+                  |    debug.liveCode()
+                  |
+                  |    for(;;) {
+                  |        debug.liveCode()
+                  |        break
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |
+                  |debug.liveCode()
+                  |
+                  |fst: for(;;) {
+                  |    debug.liveCode()
+                  |
+                  |    for(;;) {
+                  |        debug.liveCode()
+                  |        break fst
+                  |        debug.deadCode()
+                  |
+                  |    }
+                  |
+                  |    debug.deadCode()
+                  |
+                  |}
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
         "break should jump to referenced label" in {
             val code =
                 """/*
@@ -815,6 +865,74 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    debug.deadCode()
                   |
                   |} while (debug(debug.boolean).liveCode())
+                  |
+                  |debug.liveCode()
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "continue restarts the most inner or labeled for-loop" in {
+            val code =
+                """/*
+                  |    name: for-loop continue
+                  |    desc: continue restarts the most inner or labeled for-loop
+                  | */
+                  |
+                  |for (let a = true; debug.boolean; c = false) {
+                  |    debug(a).isOneOf(debug.boolean)
+                  |    continue
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |for (let a = "init"; debug.boolean; debug(a).isOneOf("changed")) {
+                  |    debug(a).isOneOf("init", "changed")
+                  |    a = "changed"
+                  |    continue
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |for (let b = "init"; debug.boolean; b = "update") {
+                  |    debug(b).isOneOf("init", "update")
+                  |
+                  |    for (let b = true; debug.boolean; b = false) {
+                  |        debug(b).isOneOf(debug.boolean)
+                  |        continue
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |let c = "init"
+                  |fst: for (debug(c).isOneOf("init"); debug.boolean; c = "update") {
+                  |    debug(c).isOneOf("init", "update")
+                  |    continue fst
+                  |    debug.deadCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |let d = "init"
+                  |snd: for (debug(d).isOneOf("init"); debug.boolean; d = "update") {
+                  |    debug(d).isOneOf("init", "update")
+                  |
+                  |    inner: for (d = "init2" ;debug.boolean; debug("never").deadCode()) {
+                  |        debug(d).isOneOf("init2")
+                  |        d = "changed"
+                  |        continue snd
+                  |        debug.deadCode()
+                  |    }
+                  |
+                  |    debug(d).isOneOf("init2")
+                  |    debug.liveCode()
+                  |}
                   |
                   |debug.liveCode()
                 """.stripMargin
@@ -1038,6 +1156,56 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |}
                   |
                   |debug(b).isOneOf("in finally")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "for-loops should handle init-, test- and update-expressions correctly" in {
+            val code =
+                """/*
+                  |    name: for flow
+                  |    desc: for-loops should handle init-, test- and update-expressions correctly
+                  | */
+                  |
+                  |
+                  |for (var a = "init"; debug.boolean; a = "update") {
+                  |    debug(a).isOneOf("init", "update")
+                  |    a = "inner"
+                  |    debug(a).isOneOf("inner")
+                  |}
+                  |
+                  |debug(a).isOneOf("init", "update")
+                  |
+                  |let b = "outer"
+                  |
+                  |for (let b = "init"; debug.boolean; debug(b).isOneOf("init", "inner1")) {
+                  |    debug(b).isOneOf("init", "inner1")
+                  |    b = "inner1"
+                  |    let b = "inner2"
+                  |    debug(b).isOneOf("inner2")
+                  |}
+                  |
+                  |debug(b).isOneOf("outer")
+                  |
+                  |
+                  |var c = false
+                  |
+                  |for (c = true; c; c = false) {
+                  |    debug(c).isOneOf(true)
+                  |}
+                  |
+                  |debug(c).isOneOf(false)
+                  |
+                  |for (; debug.boolean;) {
+                  |    debug.liveCode()
+                  |}
+                  |
+                  |debug.liveCode()
+                  |
+                  |for (;;) {}
+                  |
+                  |debug.deadCode()
                 """.stripMargin
 
             FixtureRunner.test(code)

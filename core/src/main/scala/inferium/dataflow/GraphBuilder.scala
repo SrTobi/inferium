@@ -487,7 +487,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 bindingGraph ~> consumeResult
             }
 
-            private def buildVarDeclaration(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
+            private def buildVarDeclarationAssignment(decl: ast.VariableDeclarator, priority: Int, env: LexicalEnv): Graph = decl match {
                 case ast.VariableDeclarator(pattern, init@Some(_)) =>
                     buildAssignment(pattern, init, priority, env, pushWrittenValueToStack = false)
                 case ast.VariableDeclarator(_, _) =>
@@ -501,8 +501,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                        hereOpt: Option[JumpTarget],
                                        env: LexicalEnv): (Graph, LexicalEnv) =  BuildException.enrich(stmt) {
                 implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
-                def newInnerBlockEnv(): LexicalEnv = new LexicalEnv(Some(env), false, LexicalEnv.Behavior.Declarative(Map.empty))
-                def innerBlock: BlockInfo = block.inner(labelTargets = labels)
+                def newInnerBlockEnv(baseEnv: LexicalEnv = env): LexicalEnv = new LexicalEnv(Some(baseEnv), false, LexicalEnv.Behavior.Declarative(Map.empty))
+                lazy val innerBlock: BlockInfo = block.inner(labelTargets = labels)
 
                 // gets or builds the facilities for jumps (continue/break incl. labels)
                 // returns the jump target for the current statement
@@ -515,6 +515,33 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 }
 
                 var newEnv = env
+
+                def buildVariableDeclaration(node: ast.VariableDeclaration, env: LexicalEnv): (Graph, LexicalEnv) = {
+                    val ast.VariableDeclaration(decls, kind) = node
+
+                    val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
+                    val newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
+                        for (name <- bindingNames if !hoistables.contains(name)) {
+                            hoistables += name
+                            if (isTopLevel) {
+                                // if we are not in a function `var statements` directly modify the global object
+                                // so we have to write undefined into it even if there is no initializer
+                                // because of enumeration
+                                val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingNodeInfo) ~> new LexicalWriteNode(name)(hoistingNodeInfo) ~> new PopNode()(hoistingNodeInfo)
+                                hoistableGraph ~>= hoistingGraphs
+                            }
+                        }
+                        env
+                    } else {
+                        // kind == let | const
+                        addVarsToLexicalEnv(env, bindingNames map { n => (n, makeLocalNameUnique(n)) })
+                    }
+
+                    val declGraphs = decls map { buildVarDeclarationAssignment(_, priority, newEnv) }
+
+                    (Graph.concat(declGraphs), newEnv)
+                }
+
                 val result: Graph = stmt match {
                     case ast.LabeledStatement(ast.Identifier(name), body) =>
                         if (labels.contains(name)) {
@@ -618,7 +645,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val testGraph = buildExpression(test, priority + 2, env)
                         val loopBlock = innerBlock.inner(loopTarget = Some(loopTarget))
                         val bodyGraph = buildInnerBlock(loopBlock, Seq(body), priority + 2, newInnerBlockEnv())
-                        val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)(info.copy(priority = priority + 1))
+                        val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)(info.copy(priority = priority + 2))
 
                         loopMerger ~> testGraph ~> cond
                         bodyGraph ~> loopMerger
@@ -641,28 +668,59 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         loopMerger ~> bodyGraph ~> beforeTestGraph ~> testGraph ~> cond
                         Graph(loopMerger, afterMerger)
 
-                    case ast.VariableDeclaration(decls, kind) =>
-                        val bindingNames = decls map { _.id } flatMap { gatherBindingNamesFromPattern }
-                        newEnv = if (kind == ast.VariableDeclarationKind.`var`) {
-                            for (name <- bindingNames if !hoistables.contains(name)) {
-                                hoistables += name
-                                if (isTopLevel) {
-                                    // if we are not in a function `var statements` directly modify the global object
-                                    // so we have to write undefined into it even if there is no initializer
-                                    // because of enumeration
-                                    val hoistingGraphs = buildLiteral(UndefinedValue)(hoistingNodeInfo) ~> new LexicalWriteNode(name)(hoistingNodeInfo) ~> new PopNode()(hoistingNodeInfo)
-                                    hoistableGraph ~>= hoistingGraphs
-                                }
-                            }
-                            env
-                        } else {
-                            // kind == let | const
-                            addVarsToLexicalEnv(env, bindingNames map { n => (n, makeLocalNameUnique(n)) })
+                    case ast.ForStatement(init, test, update, body) =>
+                        val source = stmt.loc
+
+                        val (initGraph, forEnv) = init map {
+                            case decl: ast.VariableDeclaration =>
+                                buildVariableDeclaration(decl, newInnerBlockEnv())
+
+                            case expr: ast.Expression =>
+                                val initGraph = buildExpression(expr, priority, env) ~> new PopNode
+                                (initGraph, env)
+                        } getOrElse (EmptyGraph, env)
+
+
+                        val innerNodeInfo = info.copy(priority + 2, lexicalEnv = forEnv)
+                        val loopMergerInfo = info.copy(priority + 1, lexicalEnv = forEnv)
+                        val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(loopMergerInfo)
+
+
+                        val (updateGraph, continueMerger) = update map {
+                            updateExpr =>
+                                val exprGraph = buildExpression(updateExpr, priority + 2, forEnv)
+                                // pop after pushing the update-expr's result to the stack
+                                // because the update expression should not influence the result value
+                                val continueMerger = new graph.MergeNode()(innerNodeInfo)
+                                val updateGraph = continueMerger ~> exprGraph ~> new PopNode()(innerNodeInfo)
+                                (updateGraph, continueMerger)
+                        } getOrElse (EmptyGraph, loopMerger)
+
+                        val loopTarget = here
+                        loopTarget.entry = continueMerger
+                        val afterMerger = loopTarget.exit
+                        val loopBlock = innerBlock.inner(loopTarget = Some(loopTarget))
+                        val bodyGraph = buildInnerBlock(loopBlock, Seq(body), priority + 3, newInnerBlockEnv(forEnv))
+
+
+                        val testAndJumpGraph: Graph = test match {
+                            case Some(testExpr) =>
+
+                                val testGraph = buildExpression(testExpr, priority + 2, forEnv)
+                                val cond = new graph.CondJumpNode(bodyGraph.begin(loopMerger), afterMerger)(innerNodeInfo)
+                                testGraph ~> cond
+                            case None =>
+                                new JumpNode(bodyGraph.begin(loopMerger))(innerNodeInfo) ~> afterMerger
                         }
 
-                        val declGraphs = decls map { buildVarDeclaration(_, priority, newEnv) }
+                        initGraph ~> loopMerger ~> testAndJumpGraph
+                        bodyGraph ~> updateGraph ~> loopMerger
+                        Graph(initGraph.begin(loopMerger), afterMerger)
 
-                        Graph.concat(declGraphs)
+                    case node: ast.VariableDeclaration =>
+                        val (declGraph, envWithDecl) = buildVariableDeclaration(node, env)
+                        newEnv = envWithDecl
+                        declGraph
 
                     case decl: ast.FunctionDeclaration =>
                         //lazy val hoistingInfo: Node.Info = info.copy(lexicalEnv = blockHoistingEnv)
