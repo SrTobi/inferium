@@ -403,6 +403,23 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         thenGraph ~> merger
                         elseGraph ~> merger
                         Graph(testGraph.begin, merger)
+
+                    case ast.SequenceExpression(exprs) =>
+                        val exprsIt = exprs.iterator
+
+                        val graphs = exprsIt map {
+                            expr =>
+                                val lastExpr = !exprsIt.hasNext
+                                val exprGraph = buildExpression(expr, priority, env)
+
+                                if (lastExpr) {
+                                    exprGraph
+                                } else {
+                                    exprGraph ~> new graph.PopNode
+                                }
+                        }
+
+                        Graph.concat(graphs)
                 }
             }
 

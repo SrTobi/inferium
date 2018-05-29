@@ -1077,6 +1077,29 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
             FixtureRunner.test(code)
         }
             
+        "Sequence expression should execute all expressions in its sequence" in {
+            val code =
+                """/*
+                  |    name: sequence expr
+                  |    desc: Sequence expression should execute all expressions in its sequence
+                  | */
+                  |
+                  |var a = (1, 2)
+                  |debug(a).isOneOf(2)
+                  |
+                  |var b = ("test", 4, "last")
+                  |debug(b).isOneOf("last")
+                  |
+                  |if (true, false) {
+                  |    debug.deadCode()
+                  |} else {
+                  |    debug.liveCode()
+                  |}
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
         "If the condition is concrete, while should disregard the respective branch" in {
             val code =
                 """/*
