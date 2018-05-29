@@ -281,13 +281,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
             private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = BuildException.enrich(expr) {
                 implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
+                def buildExpression(expr: ast.Expression, priority: Int = priority, env: LexicalEnv = env): Graph = this.buildExpression(expr, priority, env)
+
                 expr match {
                     case AbstractDebugLiteral(literal) =>
                         buildLiteral(literal)
 
                     case DebugExpression(ops, innerExprOpt) =>
                         val innerExpr = innerExprOpt getOrElse (throw new BuildException("debug within expressions need a base expression"))
-                        val exprGraph = buildExpression(innerExpr, priority, env)
+                        val exprGraph = buildExpression(innerExpr)
                         exprGraph ~> new DebugNode(ops, expr.loc.map(_.start.line))
 
                     case ast.CallExpression(ast.MemberExpression(ast.Identifier("debug"), ast.Identifier("squash"), false), args) if config.buildDebugNodes =>
@@ -295,7 +297,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             throw new BuildException(s"debug.squash needs at least 2 arguments")
                         }
 
-                        val argGraph = Graph.concat(args map { _.asInstanceOf[ast.Expression] } map { buildExpression(_, priority, env) })
+                        val argGraph = Graph.concat(args map { _.asInstanceOf[ast.Expression] } map { buildExpression(_) })
                         argGraph ~> new graph.DebugSquashNode(args.length)
 
                     case ast.BooleanLiteral(value) =>
@@ -338,14 +340,14 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 if (kind != ast.PropertyKind.init) ???
                                 if (isMethod) ???
 
-                                def valueGraph: Graph = buildExpression(value, priority, env)
+                                def valueGraph: Graph = buildExpression(value)
 
                                 (isComputed, key) match {
                                     case (false, ast.Identifier(name)) =>
                                         valueGraph ~> new graph.PropertyWriteNode(name) ~> new graph.PopNode
                                     case _ =>
                                         // todo: write dynamic property
-                                        buildExpression(key, priority, env) ~> ???
+                                        buildExpression(key) ~> ???
                                 }
                         }
 
@@ -372,7 +374,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 (accessGraph, true)
 
                             case other: ast.Expression =>
-                                val funcGraph = buildExpression(other, priority, env)
+                                val funcGraph = buildExpression(other)
                                 (funcGraph, false)
                         }
 
@@ -382,7 +384,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             case expr: ast.Expression =>
                                 expr
                         } map {
-                            buildExpression(_, priority, env)
+                            buildExpression(_)
                         }
 
                         val spreadArguments = arguments map { _.isInstanceOf[ast.SpreadElement] }
@@ -390,9 +392,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         thisAndFuncGraph ~> Graph.concat(argGraphs) ~> new graph.CallNode(hasThis, spreadArguments)
 
                     case ast.ConditionalExpression(test, consequence, alternate) =>
-                        val testGraph = buildExpression(test, priority, env)
-                        val thenGraph = buildExpression(consequence, priority + 1, env)
-                        val elseGraph = buildExpression(alternate, priority + 1, env)
+                        val testGraph = buildExpression(test)
+                        val thenGraph = buildExpression(consequence, priority + 1)
+                        val elseGraph = buildExpression(alternate, priority + 1)
                         val merger = new graph.MergeNode
                         // The testGraph, thenGraph and the elseGraph can not be empty!
                         assert(testGraph != EmptyGraph)
@@ -410,7 +412,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val graphs = exprsIt map {
                             expr =>
                                 val lastExpr = !exprsIt.hasNext
-                                val exprGraph = buildExpression(expr, priority, env)
+                                val exprGraph = buildExpression(expr)
 
                                 if (lastExpr) {
                                     exprGraph
