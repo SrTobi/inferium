@@ -425,7 +425,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildMemberAccess(node: ast.MemberExpression, priority: Int, env: LexicalEnv, needThis: Boolean = false)(implicit nodeInfo: Node.Info): Graph = {
-                lazy val dupGraph: Graph = if (needThis) new graph.DupNode(2) else EmptyGraph
+                lazy val dupGraph: Graph = if (needThis) new graph.DupNode(1) else EmptyGraph
                 node match {
                     case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
                         // read static member (base.propertyName)
