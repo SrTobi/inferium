@@ -5,6 +5,7 @@ import inferium.dataflow.calls.CallInstance
 import inferium.dataflow.graph.MergeNode.MergeType
 import inferium.dataflow.graph.traits.{HeapWriting, LinearNode, SingleSuccessor}
 import inferium.lattice._
+import inferium.utils.Utils._
 
 import scala.collection.mutable
 
@@ -87,5 +88,5 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
 
     }
 
-    override def asAsmStmt: String = "call"
+    override def asAsmStmt: String = "call" + thisIsOnStack ?: " popping this" + s" with $argumentCount arguments"
 }
