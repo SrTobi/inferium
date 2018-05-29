@@ -48,7 +48,7 @@ trait HeapWriting extends Node {
 
     // returns whether a property was changed
     private def write(base: Entity, obj: ObjectLike, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
-        val isCertainWrite = onlyOneTarget && true // todo: the object might be abstrict so it wouldn't be a certain write
+        val isCertainWrite = onlyOneTarget && mutator.isConcreteObject(obj) // todo: the object might be abstrict so it wouldn't be a certain write
 
         val p@Property(_, _, oldValues, _, _, setter) = mutator.getProperty(obj, propertyName)
         if (setter.nonEmpty) {

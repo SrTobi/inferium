@@ -82,6 +82,16 @@ object SimpleHeap {
             creator(location, ac)
         }
 
+        override def isConcreteObject(obj: ObjectLike): Boolean = {
+            objects.get(obj.loc) match {
+                case Some(Obj(_, _, ac)) =>
+                    ac == obj.abstractCount
+                case None =>
+                    // TODO: the object does not exist... can that even happen? maybe create a new object?
+                    ???
+            }
+        }
+
         override def setProperty(obj: ObjectLike, propertyName: String, property: Property): Unit = {
             assert(property != Property.absentProperty)
             objects.get(obj.loc) match {

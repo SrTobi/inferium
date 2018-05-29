@@ -19,8 +19,10 @@ object Heap {
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
 
     abstract class Mutator {
+
         def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike
         def allocOrdinaryObject(location: Location): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac))
+        def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: Property)
         def getProperty(obj: ObjectLike, propertyName: String): Property
         //def listProperties(obj: ObjectLike): Seq[Entity]
