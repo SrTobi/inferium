@@ -388,6 +388,21 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val spreadArguments = arguments map { _.isInstanceOf[ast.SpreadElement] }
 
                         thisAndFuncGraph ~> Graph.concat(argGraphs) ~> new graph.CallNode(hasThis, spreadArguments)
+
+                    case ast.ConditionalExpression(test, consequence, alternate) =>
+                        val testGraph = buildExpression(test, priority, env)
+                        val thenGraph = buildExpression(consequence, priority + 1, env)
+                        val elseGraph = buildExpression(alternate, priority + 1, env)
+                        val merger = new graph.MergeNode
+                        // The testGraph, thenGraph and the elseGraph can not be empty!
+                        assert(testGraph != EmptyGraph)
+                        assert(thenGraph != EmptyGraph)
+                        assert(elseGraph != EmptyGraph)
+                        val ifNode = new graph.CondJumpNode(thenGraph.begin, elseGraph.begin)
+                        testGraph ~> ifNode
+                        thenGraph ~> merger
+                        elseGraph ~> merger
+                        Graph(testGraph.begin, merger)
                 }
             }
 
@@ -574,7 +589,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         testGraph ~> ifNode
                         thenGraph ~> merger
                         elseGraph ~> merger // <- this might do nothing
-                        Graph(testGraph.begin(ifNode), merger)
+                        assert(testGraph != EmptyGraph)
+                        Graph(testGraph.begin, merger)
 
                     case ast.WhileStatement(test, body) =>
                         val loopMergerInfo = info.copy(priority = priority + 1)
