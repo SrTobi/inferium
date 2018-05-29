@@ -93,15 +93,18 @@ object IndexMain {
 
     compile("")
 
-    val compileListeners: mutable.Buffer[(Future[Compiled]) => Unit] = mutable.Buffer.empty
+    val compileListeners: mutable.Buffer[Future[Compiled] => Unit] = mutable.Buffer.empty
 
     val tabs: Tabs = {
         val graphTab = new GraphTab
         compileListeners += graphTab.notifyNewGraph
 
+        val outputTab = new OutputTab
+        compileListeners += outputTab.notifyNewGraph
+
         new Tabs(Constants(
             new SettingsTab,
-            new OutputTab,
+            outputTab,
             graphTab
         ))
     }

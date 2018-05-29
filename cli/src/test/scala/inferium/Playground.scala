@@ -15,13 +15,26 @@ object Playground {
 
         override def warn(node: Node, message: String): Unit = println("Warn: " + message)
 
+        override def info(node: Node, message: String): Unit = println(message)
+
         override def hasError: Boolean = ???
     }
 
     def main(args: Array[String]): Unit = {
         val code =
-            """var x = test;
-              |debug.deadCode()
+            """
+              |
+              |
+              |
+              |
+              |function f5(a) {
+              |    if (debug.boolean) {
+              |        return a
+              |    }
+              |    "nothing To do"
+              |}
+              |
+              |debug(f5("a")).isOneOf("a", undefined)
             """.stripMargin
 
         /*val code =

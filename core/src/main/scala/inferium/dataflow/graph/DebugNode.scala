@@ -6,7 +6,10 @@ import inferium.lattice.{Entity, Primitive, ValueLocation}
 
 class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
 
-    private def reportError(msg: String)(implicit analysis: DataFlowAnalysis): Unit = analysis.debugAdapter.error(this,  s"In line ${lineNumber.getOrElse("unknown")}: $msg")
+    private def report(f: (Node, String) => Unit)(msg: String)(implicit analysis: DataFlowAnalysis): Unit = f(this,  s"In line ${lineNumber.getOrElse("unknown")}: $msg")
+    private def reportError(msg: String)(implicit analysis: DataFlowAnalysis): Unit = report(analysis.debugAdapter.error)(msg)
+    private def reportWarning(msg: String)(implicit analysis: DataFlowAnalysis): Unit = report(analysis.debugAdapter.warn)(msg)
+    private def reportInfo(msg: String)(implicit analysis: DataFlowAnalysis): Unit = analysis.debugAdapter.info(this, msg)
 
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
         lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
@@ -21,7 +24,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
             case OneOf(_) =>
 
             case PrintExpr(name) =>
-                println(s"$name: $subject")
+                reportInfo(s"$name: $subject")
         }
 
         Some(state)

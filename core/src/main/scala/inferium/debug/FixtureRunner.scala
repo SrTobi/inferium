@@ -26,6 +26,7 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
             println("Error: " + message)
         }
         override def warn(node: Node, message: String): Unit = println("Warn: " + message)
+        override def info(node: Node, message: String): Unit = println("Info: " + message)
         override def hasError: Boolean = _hasError
     }
 
