@@ -42,7 +42,7 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
             (thisObject, restStack)
         } else {
             val thisObject = UndefinedValue
-            (thisObject, initialStack)
+            (thisObject, stackWithoutFunc)
         }
 
         val mutator = initialHeap.begin(loc)
@@ -73,7 +73,7 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
         }
 
         // make the calls
-        val stateBeforeCall = inState.copy(stack = restStack, heap = heapAfterSetup)
+        val stateBeforeCall = stateAfterSetup
         for (func@FunctionEntity(loc, frame) <- callables) {
             val call = callInstances.getOrElseUpdate(loc, {
                 val callable = func.callableInfo
@@ -85,7 +85,6 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
 
             call.call(callState, spreadedArguments, NeverValue)
         }
-
     }
 
     override def asAsmStmt: String = "call" + thisIsOnStack ?: " popping this" + s" with $argumentCount arguments"
