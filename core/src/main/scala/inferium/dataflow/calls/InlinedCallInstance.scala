@@ -1,10 +1,11 @@
 package inferium.dataflow.calls
 
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalFrame}
 import inferium.dataflow.graph.Node
 import inferium.lattice._
 
-class InlinedCallInstance(entryNode: Node) extends CallInstance {
+abstract class InlinedCallInstance extends CallInstance.RecursionAble {
+    def entryNode: Node
     private val lengthWriteLoc = ValueLocation(Location())
     private val argumentWriteLocations = Stream.continually(ValueLocation(Location()))
     private val argumentsBuildingLoc = Location()
@@ -12,9 +13,8 @@ class InlinedCallInstance(entryNode: Node) extends CallInstance {
 
     override def info: CallInstance.Info = CallInstance.InlinedCallInfo(entryNode)
 
-    override def call(state: ExecutionState, arguments: Seq[Entity], unifiedRest: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
+    protected override def doCall(heap: Heap, thisEntity: Entity, lexicalFrame: LexicalFrame, arguments: Seq[Entity], unifiedRest: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
         // build arguments object
-        val heap = state.heap
         val mutator = heap.begin(argumentsBuildingLoc)
         val argumentObject = mutator.allocOrdinaryObject(argumentsObjectLoc)
 
@@ -29,7 +29,12 @@ class InlinedCallInstance(entryNode: Node) extends CallInstance {
         mutator.forceSetPropertyValue(argumentObject, "length", lengthWriteLoc, SpecificNumberValue(arguments.length))
 
         val afterHeap = heap.end(mutator)
-        val afterState = state.copy(stack = argumentObject :: state.stack, heap = afterHeap)
-        entryNode <~ afterState
+
+        // build execution state
+        //val afterState = state.copy(stack = argumentObject :: state.stack, heap = afterHeap)
+        val callState = ExecutionState(argumentObject :: Nil, afterHeap, thisEntity, lexicalFrame)
+
+        // call entry node
+        entryNode <~ callState
     }
 }

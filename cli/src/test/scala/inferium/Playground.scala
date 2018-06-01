@@ -23,18 +23,17 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |
-              |
-              |
-              |
-              |function f5(a) {
-              |    if (debug.boolean) {
-              |        return a
-              |    }
-              |    "nothing To do"
+              |function test(a) {
+              |  if (debug.boolean) {
+              |     test(9)
+              |     return "haha"
+              |  } else {
+              |     return
+              |  }
               |}
               |
-              |debug(f5("a")).isOneOf("a", undefined)
+              |let r = test("test")
+              |debug(r).print()
             """.stripMargin
 
         /*val code =

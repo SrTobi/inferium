@@ -60,7 +60,9 @@ object GraphBuilder {
 class GraphBuilder(config: GraphBuilder.Config) {
     import GraphBuilder._
 
-    private class FunctionBuilder(isTopLevel: Boolean, val functionFrame: Node.CallFrame, val functionPriority: Int) {
+    private class FunctionBuilder(val isTopLevel: Boolean,
+                                  val functionFrame: Node.CallFrame,
+                                  val functionPriority: Int) {
         private[this] var done = false
         private val hoistables = mutable.Set.empty[String]
         private var hoistableGraph: Graph = EmptyGraph
@@ -832,7 +834,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             ScriptGraph(scriptGraph.begin(endNode), endNode)
         }
 
-        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
+        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, callSite: CallInstance.RecursionAble, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
             assert(!done)
             val priority = functionPriority
             val hasPatternMatching = params.exists(!_.isInstanceOf[ast.Identifier])
@@ -888,7 +890,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             val bodyGraph = builder.build(normalizedBody)
 
             // build default return
-            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
+            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode ~> new RetNode(callSite)(initialNodeInfo)
 
             // put everything together
             prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph
@@ -905,12 +907,18 @@ class GraphBuilder(config: GraphBuilder.Config) {
     }
 
     private case class FunctionTemplate(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, lexicalEnv: LexicalEnv) extends CallableInfo {
-        override def instantiate(returnMerger: MergeNode, priority: Int, catchTarget: Option[MergeNode], callFrame: Node.CallFrame): CallInstance = {
-            val functionBuilder = new FunctionBuilder(isTopLevel = false, callFrame, priority)
-            val funcGraph: Graph = functionBuilder.buildFunction(name, params, body, catchTarget, lexicalEnv)
-            funcGraph ~> returnMerger
+        override def anchor: AnyRef = body
+
+        override def instantiate(onReturn: CallableInfo.ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame): CallInstance = {
+            class InlinedCallInstanceImpl(protected override val onReturn: CallableInfo.ReturnHandler) extends InlinedCallInstance {
+                /*override*/ var entryNode: Node = _
+            }
+            val callInstance = new InlinedCallInstanceImpl(onReturn)
+            val functionBuilder = new FunctionBuilder(isTopLevel = false, (anchor -> callInstance) :: callSiteFrame, priority)
+            val funcGraph: Graph = functionBuilder.buildFunction(name, params, body, callInstance, catchTarget, lexicalEnv)
+            callInstance.entryNode = funcGraph.begin
             new StackAnnotationVisitor(isFunction = true).start(funcGraph)
-            new InlinedCallInstance(funcGraph.begin)
+            callInstance
         }
     }
 }

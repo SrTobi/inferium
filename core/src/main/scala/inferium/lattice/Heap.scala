@@ -7,9 +7,10 @@ abstract class Heap {
     def end(actor: Mutator): Heap
 
     def split(): Heap
-    def unify(heap: Heap): Heap = unify(Seq(heap))
+    def unify(heap: Heap, heaps: Heap*): Heap = unify(heap +: heaps)
     def unify(heaps: Seq[Heap]): Heap
 
+    def fixpointUnify(futureHeap: Heap, futureHeaps: Heap*): Heap = fixpointUnify(futureHeap +: futureHeaps)
     def fixpointUnify(futureHeap: Seq[Heap]): Heap
 }
 

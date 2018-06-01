@@ -78,8 +78,12 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case node: graph.LexicalReadNode =>
                 node.varName :: stack
 
-            case node: graph.EndNode =>
-                assert(stack.tail.isEmpty)
+            case _: graph.EndNode =>
+                assert(stack.length == 1)
+                stack
+
+            case _: graph.RetNode =>
+                assert(stack.length == 1)
                 stack
 
             case _: graph.PushThisNode =>
@@ -88,7 +92,7 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case node: graph.AllocateObjectNode =>
                 s"obj#${node.id}" :: stack
 
-            case node: graph.PropertyWriteNode =>
+            case _: graph.PropertyWriteNode =>
                 val writeValue :: _ :: rest = stack
                 writeValue :: rest
 

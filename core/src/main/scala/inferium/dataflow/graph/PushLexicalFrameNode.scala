@@ -20,7 +20,7 @@ class PushLexicalFrameNode(val kind: String, val takeFromStack: Boolean)(implici
         val newHeap = heap.end(mutator)
 
         val newLexFrame = lexObj :: state.lexicalFrame
-        state.copy(heap = newHeap).withLexicalFrame(newLexFrame)
+        state.copy(heap = newHeap, lexicalFrame = newLexFrame)
     }
 
     override def asAsmStmt: String = s"lexPush <$kind>"

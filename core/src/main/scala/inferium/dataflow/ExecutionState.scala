@@ -1,10 +1,9 @@
 package inferium.dataflow
 
-import inferium.lattice.Entity
-import inferium.lattice.Heap
+import inferium.lattice.{Entity, Heap, UnionValue}
 
 
-case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, callFrame: ExecutionState.CallFrame) {
+case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, thisEntity: Entity, lexicalFrame: LexicalFrame) {
 
     def merge(others: Seq[ExecutionState], fixpoint: Boolean): ExecutionState = {
         // merge stack
@@ -18,26 +17,16 @@ case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, callFrame: Ex
         def otherHeaps = others map { _.heap }
         val resultHeap = if (fixpoint) heap.fixpointUnify(otherHeaps) else heap.unify(otherHeaps)
 
+        val resultThis = Entity.unify(thisEntity +: others.map { _.thisEntity })
+
         // check that all call frames are the same
-        lazy val otherCallFrames = others.iterator map { _.callFrame }
-        assert(otherCallFrames forall { _ == callFrame })
+        lazy val lexFrames = others.iterator map { _.lexicalFrame }
+        assert(lexFrames forall { _ == lexicalFrame})
 
-        ExecutionState(resultStack, resultHeap, callFrame)
+        ExecutionState(resultStack, resultHeap, resultThis, lexicalFrame)
     }
-
-    def lexicalFrame: LexicalFrame = callFrame.lexicalFrame
-    def thisEntity: Entity = callFrame.thisEntity
-
-    def withCallFrame(callFrame: ExecutionState.CallFrame): ExecutionState = copy(callFrame = callFrame)
-    def withLexicalFrame(lexicalFrame: LexicalFrame): ExecutionState = withCallFrame(callFrame.copy(lexicalFrame = lexicalFrame))
 }
 
 object ExecutionState {
-    case class CallFrame(thisEntity: Entity, lexicalFrame: LexicalFrame, next: Option[CallFrame]) {
-        val depth: Int = next map { _.depth + 1 } getOrElse 0
-
-        override def toString: String = s"($thisEntity, $lexicalFrame)${next map {" :: " + _ } getOrElse ""}"
-    }
-
     type Stack = List[Entity]
 }

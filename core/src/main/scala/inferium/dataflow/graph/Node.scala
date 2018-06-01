@@ -1,5 +1,7 @@
 package inferium.dataflow.graph
 
+import inferium.dataflow.calls.CallInstance
+
 import scala.collection.mutable
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
 import inferium.lattice.{Entity, Location}
@@ -66,7 +68,9 @@ abstract class Node(implicit val info: Node.Info) {
         }
     }
 
-    final def fixState(state: ExecutionState): ExecutionState = {
+    final def fixLexicalFrame(state: ExecutionState): ExecutionState = state.copy(lexicalFrame = info.lexicalEnv.fixLexicalStack(state.lexicalFrame))
+
+    /*final def fixState(state: ExecutionState): ExecutionState = {
         var frame = state.callFrame
         val targetDepth = info.callFrame.depth
         assert(frame.depth >= targetDepth)
@@ -78,7 +82,7 @@ abstract class Node(implicit val info: Node.Info) {
         val fixedLexicalFrame = info.lexicalEnv.fixLexicalStack(frame.lexicalFrame)
         val fixedCallFrame = frame.copy(lexicalFrame = fixedLexicalFrame)
         state.withCallFrame(fixedCallFrame)
-    }
+    }*/
 
     def priority: Int = info.priority
 
@@ -135,11 +139,17 @@ object Node {
 
     type ExprStackInfo = List[ExprStackFrame]
 
-    class CallFrame(val outer: Option[CallFrame], val callSite: Option[CallNode]) {
+    class CallFrame(val outer: Option[CallFrame], val callSite: Option[(AnyRef, CallInstance.RecursionAble)]) {
         assert(callSite.isDefined == outer.isDefined)
         val depth: Int = outer map { _.depth + 1 } getOrElse 0
+        val callSites: Map[AnyRef, CallInstance.RecursionAble] = {
+            val outerCallSites = outer.map { _.callSites } getOrElse Map.empty
+            callSite map { outerCallSites + _ } getOrElse outerCallSites
+        }
 
-        def ::(callSite: CallNode): CallFrame = new CallFrame(Some(this), Some(callSite))
+        def getRecursiveSite(anchor: AnyRef): Option[CallInstance.RecursionAble] = callSites.get(anchor)
+
+        def ::(callSite: (AnyRef, CallInstance.RecursionAble)): CallFrame = new CallFrame(Some(this), Some(callSite))
 
         override def toString: String = s"CallFrame:$depth"
     }

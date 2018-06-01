@@ -17,7 +17,7 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     private var mergeState: ExecutionState = _
 
     override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
-        val fixedState = fixState(state)
+        val fixedState = fixLexicalFrame(state)
 
         if (mergeState == null) {
             mergeState = fixedState

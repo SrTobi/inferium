@@ -17,8 +17,6 @@ object NodeJs {
             (initialHeap.end(mutator), gObj)
         }
 
-
-        val callFrame = ExecutionState.CallFrame(globalObj, LexicalFrame(globalObj), None)
-        new ExecutionState(UndefinedValue :: Nil, heap, callFrame)
+        new ExecutionState(UndefinedValue :: Nil, heap, globalObj, LexicalFrame(globalObj))
     }
 }

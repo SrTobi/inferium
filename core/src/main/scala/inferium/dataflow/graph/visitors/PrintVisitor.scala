@@ -132,6 +132,9 @@ private class PrintVisitor(val showStackInfo: Boolean,
 
                         case SignatureCallInfo() =>
                             ???
+
+                        case RecursiveCallInfo() =>
+                            ???
                     }
 
                 case _ =>

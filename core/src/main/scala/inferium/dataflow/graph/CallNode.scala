@@ -1,7 +1,7 @@
 package inferium.dataflow.graph
 
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
-import inferium.dataflow.calls.CallInstance
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv, LexicalFrame}
+import inferium.dataflow.calls.{CallInstance, RecursiveCallInstance}
 import inferium.dataflow.graph.MergeNode.MergeType
 import inferium.dataflow.graph.traits.{HeapWriting, LinearNode, SingleSuccessor}
 import inferium.lattice._
@@ -12,14 +12,30 @@ import scala.collection.mutable
 class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends LinearNode with SingleSuccessor with HeapWriting{
 
     private val callInstances = mutable.Map.empty[Location, CallInstance]
-    private val returnMergeNode = new MergeNode(MergeType.CallMerger)(info.copy(priority = info.priority + 2, label = None))
+    private var savedLocalStack: ExecutionState.Stack = _
+    private var savedLocalThisEntity: Entity = _
+    private var savedLocalLexicalFrame: LexicalFrame = _
+
+    private var savedReturnValue: Entity = _
+    private var savedReturnHeap: Heap = _
 
     def argumentCount: Int = spreadArguments.length
     def calls: Iterable[CallInstance.Info] = callInstances.values.map(_.info)
 
-    protected[graph] override def addSuccessor(node: Node): Unit = {
-        super.addSuccessor(node)
-        returnMergeNode.addSuccessor(node)
+    private def ret(result: Entity, heap: Heap, analysis: DataFlowAnalysis): Unit = {
+        if (savedReturnValue == null) {
+            assert(savedReturnHeap == null)
+            savedReturnValue = result
+            savedReturnHeap = heap
+        } else {
+            assert(savedReturnHeap != null)
+            savedReturnValue = savedReturnValue unify result
+            savedReturnHeap = savedReturnHeap unify heap
+        }
+
+        val resultState = ExecutionState(savedReturnValue :: savedLocalStack, savedReturnHeap, savedLocalThisEntity, savedLocalLexicalFrame)
+        implicit val _: DataFlowAnalysis = analysis
+        succ <~ resultState
     }
 
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
@@ -72,20 +88,28 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
                 }
         }
 
-        // make the calls
+        // save local frame stuff
         val stateBeforeCall = stateAfterSetup
+        savedLocalStack = stateBeforeCall.stack
+        savedLocalThisEntity = stateBeforeCall.thisEntity
+        savedLocalLexicalFrame = stateBeforeCall.lexicalFrame
+
+        // make the calls
         for (func@FunctionEntity(loc, frame) <- callables) {
             val call = callInstances.getOrElseUpdate(loc, {
                 val callable = func.callableInfo
-                val newFrame = this :: info.callFrame
-                callable.instantiate(returnMergeNode, info.priority + 1, info.catchTarget, newFrame)
-            })
-            val newCallFrame = ExecutionState.CallFrame(thisObject, frame, Some(stateBeforeCall.callFrame))
-            val callState = stateBeforeCall.withCallFrame(newCallFrame)
 
-            call.call(callState, spreadedArguments, NeverValue)
+                info.callFrame.getRecursiveSite(callable.anchor) match {
+                    case Some(inst) =>
+                        new RecursiveCallInstance(inst, ret)
+                    case None =>
+                        callable.instantiate(ret, info.priority + 1, info.catchTarget, info.callFrame)
+                }
+            })
+
+            call.call(stateBeforeCall.heap, stateBeforeCall.thisEntity, frame, spreadedArguments, NeverValue)
         }
     }
 
-    override def asAsmStmt: String = "call" + thisIsOnStack ?: " popping this" + s" with $argumentCount arguments"
+    override def asAsmStmt: String = (if (thisIsOnStack) "invoke" else "call") + s" ($argumentCount args)"
 }
