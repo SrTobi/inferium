@@ -874,7 +874,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    desc: continue restarts the most inner or labeled for-loop
                   | */
                   |
-                  |for (let a = true; debug.boolean; c = false) {
+                  |for (let a = true; debug.boolean; a = false) {
                   |    debug(a).is(debug.boolean)
                   |    continue
                   |    debug.deadCode()
@@ -995,6 +995,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |third: while (debug.boolean) {
                   |    debug.liveCode()
                   |
+                  |    debug(b).is(undefined, "init", "changed")
                   |    var b = "init"
                   |
                   |    inner: while (debug.boolean) {
@@ -1005,7 +1006,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |        debug.deadCode()
                   |    }
                   |
-                  |    debug(b).is("init", "changed")
+                  |    debug(b).is("init")
                   |    debug.liveCode()
                   |}
                   |
@@ -1174,7 +1175,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |let b = "outer"
                   |
-                  |for (let b = "init"; debug.boolean; debug(b).is("init", "inner1")) {
+                  |for (let b = "init"; debug.boolean; debug(b).is("inner1")) {
                   |    debug(b).is("init", "inner1")
                   |    b = "inner1"
                   |    let b = "inner2"

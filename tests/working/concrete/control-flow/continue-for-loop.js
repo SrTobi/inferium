@@ -3,7 +3,7 @@
     desc: continue restarts the most inner or labeled for-loop
  */
 
-for (let a = true; debug.boolean; c = false) {
+for (let a = true; debug.boolean; a = false) {
     debug(a).is(debug.boolean)
     continue
     debug.deadCode()

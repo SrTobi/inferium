@@ -56,6 +56,7 @@ debug.liveCode()
 third: while (debug.boolean) {
     debug.liveCode()
 
+    debug(b).is(undefined, "init", "changed")
     var b = "init"
 
     inner: while (debug.boolean) {
@@ -66,7 +67,7 @@ third: while (debug.boolean) {
         debug.deadCode()
     }
 
-    debug(b).is("init", "changed")
+    debug(b).is("init")
     debug.liveCode()
 }
 

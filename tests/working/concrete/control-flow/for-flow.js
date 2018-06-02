@@ -14,7 +14,7 @@ debug(a).is("init", "update")
 
 let b = "outer"
 
-for (let b = "init"; debug.boolean; debug(b).is("init", "inner1")) {
+for (let b = "init"; debug.boolean; debug(b).is("inner1")) {
     debug(b).is("init", "inner1")
     b = "inner1"
     let b = "inner2"
