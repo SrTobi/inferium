@@ -10,11 +10,11 @@ fst: try {
     break fst
     debug.deadCode()
 } finally {
-    debug(a).isOneOf("in try").mightBeDead()
+    debug(a).is("in try").mightBeDead()
     a = "in finally"
 }
 
-debug(a).isOneOf("in finally")
+debug(a).is("in finally")
 
 
 let b = "init"
@@ -26,13 +26,13 @@ snd: try {
         break snd
         debug.deadCode()
     } finally {
-        debug(b).isOneOf("in inner try").mightBeDead()
+        debug(b).is("in inner try").mightBeDead()
         b = "in inner finally"
     }
     debug.deadCode()
 } finally {
-    debug(b).isOneOf("in inner finally").mightBeDead()
+    debug(b).is("in inner finally").mightBeDead()
     b = "in finally"
 }
 
-debug(b).isOneOf("in finally")
+debug(b).is("in finally")

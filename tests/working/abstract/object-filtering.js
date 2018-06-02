@@ -13,33 +13,33 @@ if (debug.boolean) {
     test = f
 }
 
-debug(test).isOneOf(t, f)
-debug(test.cond).isOneOf(debug.boolean)
+debug(test).is(t, f)
+debug(test.cond).is(debug.boolean)
 
 if (test.cond) {
-    debug(test).isOneOf(t)
-    debug(t.cond).isOneOf(true)
-    debug(f.cond).isOneOf(false)
+    debug(test).is(t)
+    debug(t.cond).is(true)
+    debug(f.cond).is(false)
 } else {
-    debug(test).isOneOf(f)
-    debug(t.cond).isOneOf(true)
-    debug(f.cond).isOneOf(false)
+    debug(test).is(f)
+    debug(t.cond).is(true)
+    debug(f.cond).is(false)
 }
 
-debug(test).isOneOf(t, f)
+debug(test).is(t, f)
 
 if (debug.boolean) {
     test = b
 }
 
-debug(test).isOneOf(t, f, b)
+debug(test).is(t, f, b)
 
 if (test.cond) {
-    debug(test).isOneOf(t, b)
-    debug(t.cond).isOneOf(true)
-    debug(f.cond).isOneOf(false)
+    debug(test).is(t, b)
+    debug(t.cond).is(true)
+    debug(f.cond).is(false)
 } else {
-    debug(test).isOneOf(f, b)
-    debug(t.cond).isOneOf(true)
-    debug(f.cond).isOneOf(false)
+    debug(test).is(f, b)
+    debug(t.cond).is(true)
+    debug(f.cond).is(false)
 }

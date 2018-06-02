@@ -10,7 +10,7 @@ if (debug.boolean) {
     o.prop = "no"
 }
 
-debug(o.prop).isOneOf("yes", "no")
+debug(o.prop).is("yes", "no")
 
 o.prop = "clear"
 
@@ -18,7 +18,7 @@ if (debug.boolean) {
     o.prop = "then"
 }
 
-debug(o.prop).isOneOf("clear", "then")
+debug(o.prop).is("clear", "then")
 
 
 o.prop = "clear"
@@ -28,4 +28,4 @@ if (debug.boolean) {
     o.prop = "else"
 }
 
-debug(o.prop).isOneOf("clear", "else")
+debug(o.prop).is("clear", "else")

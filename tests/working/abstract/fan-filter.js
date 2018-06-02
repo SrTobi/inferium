@@ -10,60 +10,60 @@ var c = true
 var d = debug.squash(a, b)
 var e = debug.squash(c, d)
 
-debug(a).isOneOf(false)
-debug(b).isOneOf(true)
-debug(c).isOneOf(true)
+debug(a).is(false)
+debug(b).is(true)
+debug(c).is(true)
 
-debug(d).isOneOf(debug.boolean)
-debug(e).isOneOf(debug.boolean)
+debug(d).is(debug.boolean)
+debug(e).is(debug.boolean)
 
 if (d) {
-    debug(a).isOneOf(false)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(false)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(true)
-    debug(e).isOneOf(true)
+    debug(d).is(true)
+    debug(e).is(true)
 } else {
-    debug(a).isOneOf(false)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(false)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(false)
-    debug(e).isOneOf(debug.boolean)
+    debug(d).is(false)
+    debug(e).is(debug.boolean)
 }
 
 if (e) {
-    debug(a).isOneOf(false)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(false)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(debug.boolean)
-    debug(e).isOneOf(true)
+    debug(d).is(debug.boolean)
+    debug(e).is(true)
 } else {
-    debug(a).isOneOf(false)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(false)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(false)
-    debug(e).isOneOf(false)
+    debug(d).is(false)
+    debug(e).is(false)
 }
 
 a = true
 
 if (e) {
-    debug(a).isOneOf(true)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(true)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(debug.boolean)
-    debug(e).isOneOf(true)
+    debug(d).is(debug.boolean)
+    debug(e).is(true)
 } else {
-    debug(a).isOneOf(true)
-    debug(b).isOneOf(true)
-    debug(c).isOneOf(true)
+    debug(a).is(true)
+    debug(b).is(true)
+    debug(c).is(true)
 
-    debug(d).isOneOf(false)
-    debug(e).isOneOf(false)
+    debug(d).is(false)
+    debug(e).is(false)
 }
 

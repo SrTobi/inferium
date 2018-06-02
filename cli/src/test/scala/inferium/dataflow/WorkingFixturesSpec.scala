@@ -20,40 +20,40 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |var d = a
                   |
                   |if(a) {
-                  |    debug(a).isOneOf(true)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
-                  |    debug(d).isOneOf(true)
+                  |    debug(a).is(true)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
+                  |    debug(d).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(false)
-                  |    debug(c).isOneOf(false)
-                  |    debug(d).isOneOf(false)
+                  |    debug(a).is(false)
+                  |    debug(b).is(false)
+                  |    debug(c).is(false)
+                  |    debug(d).is(false)
                   |}
                   |
                   |
                   |if(c) {
-                  |    debug(a).isOneOf(true)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
-                  |    debug(d).isOneOf(true)
+                  |    debug(a).is(true)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
+                  |    debug(d).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(false)
-                  |    debug(c).isOneOf(false)
-                  |    debug(d).isOneOf(false)
+                  |    debug(a).is(false)
+                  |    debug(b).is(false)
+                  |    debug(c).is(false)
+                  |    debug(d).is(false)
                   |}
                   |
                   |if(d) {
-                  |    debug(a).isOneOf(true)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
-                  |    debug(d).isOneOf(true)
+                  |    debug(a).is(true)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
+                  |    debug(d).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(false)
-                  |    debug(c).isOneOf(false)
-                  |    debug(d).isOneOf(false)
+                  |    debug(a).is(false)
+                  |    debug(b).is(false)
+                  |    debug(c).is(false)
+                  |    debug(d).is(false)
                   |}
                 """.stripMargin
 
@@ -74,61 +74,61 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |var d = debug.squash(a, b)
                   |var e = debug.squash(c, d)
                   |
-                  |debug(a).isOneOf(false)
-                  |debug(b).isOneOf(true)
-                  |debug(c).isOneOf(true)
+                  |debug(a).is(false)
+                  |debug(b).is(true)
+                  |debug(c).is(true)
                   |
-                  |debug(d).isOneOf(debug.boolean)
-                  |debug(e).isOneOf(debug.boolean)
+                  |debug(d).is(debug.boolean)
+                  |debug(e).is(debug.boolean)
                   |
                   |if (d) {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(false)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(true)
-                  |    debug(e).isOneOf(true)
+                  |    debug(d).is(true)
+                  |    debug(e).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(false)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(false)
-                  |    debug(e).isOneOf(debug.boolean)
+                  |    debug(d).is(false)
+                  |    debug(e).is(debug.boolean)
                   |}
                   |
                   |if (e) {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(false)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(debug.boolean)
-                  |    debug(e).isOneOf(true)
+                  |    debug(d).is(debug.boolean)
+                  |    debug(e).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(false)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(false)
-                  |    debug(e).isOneOf(false)
+                  |    debug(d).is(false)
+                  |    debug(e).is(false)
                   |}
                   |
                   |a = true
                   |
                   |if (e) {
-                  |    debug(a).isOneOf(true)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(true)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(debug.boolean)
-                  |    debug(e).isOneOf(true)
+                  |    debug(d).is(debug.boolean)
+                  |    debug(e).is(true)
                   |} else {
-                  |    debug(a).isOneOf(true)
-                  |    debug(b).isOneOf(true)
-                  |    debug(c).isOneOf(true)
+                  |    debug(a).is(true)
+                  |    debug(b).is(true)
+                  |    debug(c).is(true)
                   |
-                  |    debug(d).isOneOf(false)
-                  |    debug(e).isOneOf(false)
+                  |    debug(d).is(false)
+                  |    debug(e).is(false)
                   |}
                 """.stripMargin
 
@@ -145,34 +145,34 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |var a = debug.boolean
                   |
                   |if (a) {
-                  |    debug(a).isOneOf(true)
+                  |    debug(a).is(true)
                   |} else {
-                  |    debug(a).isOneOf(false)
+                  |    debug(a).is(false)
                   |}
                   |
-                  |debug(a).isOneOf(debug.boolean)
+                  |debug(a).is(debug.boolean)
                   |
                   |
                   |var b = debug.number
                   |
                   |if (b) {
-                  |    debug(b).isOneOf(debug.number)
+                  |    debug(b).is(debug.number)
                   |} else {
-                  |    debug(b).isOneOf(0)
+                  |    debug(b).is(0)
                   |}
                   |
-                  |debug(b).isOneOf(debug.number)
+                  |debug(b).is(debug.number)
                   |
                   |
                   |var c = debug.string
                   |
                   |if (c) {
-                  |    debug(c).isOneOf(debug.string)
+                  |    debug(c).is(debug.string)
                   |} else {
-                  |    debug(c).isOneOf("")
+                  |    debug(c).is("")
                   |}
                   |
-                  |debug(c).isOneOf(debug.string)
+                  |debug(c).is(debug.string)
                   |
                   |
                   |var d = undefined
@@ -187,14 +187,14 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    d = ""
                   |}
                   |
-                  |debug(d).isOneOf(undefined, debug.number, "test", "")
+                  |debug(d).is(undefined, debug.number, "test", "")
                   |if (d) {
-                  |    debug(d).isOneOf(debug.number, "test")
+                  |    debug(d).is(debug.number, "test")
                   |} else {
-                  |    debug(d).isOneOf(undefined, 0, "")
+                  |    debug(d).is(undefined, 0, "")
                   |}
                   |
-                  |debug(d).isOneOf(undefined, debug.number, "test", "")
+                  |debug(d).is(undefined, debug.number, "test", "")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -217,35 +217,35 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    test = f
                   |}
                   |
-                  |debug(test).isOneOf(t, f)
-                  |debug(test.cond).isOneOf(debug.boolean)
+                  |debug(test).is(t, f)
+                  |debug(test.cond).is(debug.boolean)
                   |
                   |if (test.cond) {
-                  |    debug(test).isOneOf(t)
-                  |    debug(t.cond).isOneOf(true)
-                  |    debug(f.cond).isOneOf(false)
+                  |    debug(test).is(t)
+                  |    debug(t.cond).is(true)
+                  |    debug(f.cond).is(false)
                   |} else {
-                  |    debug(test).isOneOf(f)
-                  |    debug(t.cond).isOneOf(true)
-                  |    debug(f.cond).isOneOf(false)
+                  |    debug(test).is(f)
+                  |    debug(t.cond).is(true)
+                  |    debug(f.cond).is(false)
                   |}
                   |
-                  |debug(test).isOneOf(t, f)
+                  |debug(test).is(t, f)
                   |
                   |if (debug.boolean) {
                   |    test = b
                   |}
                   |
-                  |debug(test).isOneOf(t, f, b)
+                  |debug(test).is(t, f, b)
                   |
                   |if (test.cond) {
-                  |    debug(test).isOneOf(t, b)
-                  |    debug(t.cond).isOneOf(true)
-                  |    debug(f.cond).isOneOf(false)
+                  |    debug(test).is(t, b)
+                  |    debug(t.cond).is(true)
+                  |    debug(f.cond).is(false)
                   |} else {
-                  |    debug(test).isOneOf(f, b)
-                  |    debug(t.cond).isOneOf(true)
-                  |    debug(f.cond).isOneOf(false)
+                  |    debug(test).is(f, b)
+                  |    debug(t.cond).is(true)
+                  |    debug(f.cond).is(false)
                   |}
                 """.stripMargin
 
@@ -271,9 +271,9 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |        someObj = lastObj
                   |    }
                   |
-                  |    debug(lastObj.prop).isOneOf("init")
+                  |    debug(lastObj.prop).is("init")
                   |    lastObj.prop = "next"
-                  |    debug(lastObj.prop).isOneOf("next")
+                  |    debug(lastObj.prop).is("next")
                   |
                   |
                   |    if (debug.boolean) {
@@ -281,11 +281,11 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    }
                   |}
                   |
-                  |debug(lastObj.prop).isOneOf("next", "blub")
-                  |debug(someObj.prop).isOneOf("next", "blub")
+                  |debug(lastObj.prop).is("next", "blub")
+                  |debug(someObj.prop).is("next", "blub")
                   |
                   |someObj.absProp = "abs"
-                  |debug(someObj.absProp).isOneOf("abs", undefined)
+                  |debug(someObj.absProp).is("abs", undefined)
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -305,7 +305,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    o.prop = "no"
                   |}
                   |
-                  |debug(o.prop).isOneOf("yes", "no")
+                  |debug(o.prop).is("yes", "no")
                   |
                   |o.prop = "clear"
                   |
@@ -313,7 +313,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    o.prop = "then"
                   |}
                   |
-                  |debug(o.prop).isOneOf("clear", "then")
+                  |debug(o.prop).is("clear", "then")
                   |
                   |
                   |o.prop = "clear"
@@ -323,7 +323,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    o.prop = "else"
                   |}
                   |
-                  |debug(o.prop).isOneOf("clear", "else")
+                  |debug(o.prop).is("clear", "else")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -345,19 +345,19 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    o = b
                   |}
                   |
-                  |debug(a.prop).isOneOf("a")
-                  |debug(b.prop).isOneOf("b")
-                  |debug(o.prop).isOneOf("a", "b")
+                  |debug(a.prop).is("a")
+                  |debug(b.prop).is("b")
+                  |debug(o.prop).is("a", "b")
                   |
                   |a.prop = "A"
-                  |debug(a.prop).isOneOf("A")
-                  |debug(b.prop).isOneOf("b")
-                  |debug(o.prop).isOneOf("A", "b")
+                  |debug(a.prop).is("A")
+                  |debug(b.prop).is("b")
+                  |debug(o.prop).is("A", "b")
                   |
                   |o.prop = "O"
-                  |debug(a.prop).isOneOf("A", "O")
-                  |debug(b.prop).isOneOf("b", "O")
-                  |debug(o.prop).isOneOf("A", "b", "O")
+                  |debug(a.prop).is("A", "O")
+                  |debug(b.prop).is("b", "O")
+                  |debug(o.prop).is("A", "b", "O")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -374,20 +374,20 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    desc: After a statement, ans should have the correct value
                   | */
                   |
-                  |debug.ans.isOneOf(undefined);
+                  |debug.ans.is(undefined);
                   |
                   |"a"
                   |{
                   |    // nothing
                   |}
-                  |debug.ans.isOneOf("a");
+                  |debug.ans.is("a");
                   |
                   |
                   |"b"
                   |{
                   |    "c"
                   |}
-                  |debug.ans.isOneOf("c");
+                  |debug.ans.is("c");
                   |
                   |
                   |"d"
@@ -396,7 +396,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |} catch (e) {
                   |    "f"
                   |}
-                  |debug.ans.isOneOf("e");
+                  |debug.ans.is("e");
                   |
                   |
                   |"g"
@@ -405,7 +405,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |} finally {
                   |    "i"
                   |}
-                  |debug.ans.isOneOf("i");
+                  |debug.ans.is("i");
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -419,48 +419,48 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   | */
                   |
                   |// when the program is started ans should be undefined
-                  |debug.ans.isOneOf(undefined);
+                  |debug.ans.is(undefined);
                   |
                   |undefined;
-                  |debug.ans.isOneOf(undefined);
+                  |debug.ans.is(undefined);
                   |
                   |null;
-                  |debug.ans.isOneOf(null);
+                  |debug.ans.is(null);
                   |
                   |0;
-                  |debug.ans.isOneOf(0);
-                  |debug.ans.isOneOf(debug.number);
+                  |debug.ans.is(0);
+                  |debug.ans.is(debug.number);
                   |
                   |//(-8);
-                  |//debug.ans.isOneOf(-8);
-                  |//debug.ans.isOneOf(debug.number);
+                  |//debug.ans.is(-8);
+                  |//debug.ans.is(debug.number);
                   |
                   |"test";
-                  |debug.ans.isOneOf("test");
-                  |debug.ans.isOneOf(debug.string);
+                  |debug.ans.is("test");
+                  |debug.ans.is(debug.string);
                   |
                   |"";
-                  |debug.ans.isOneOf("");
-                  |debug.ans.isOneOf(debug.string);
+                  |debug.ans.is("");
+                  |debug.ans.is(debug.string);
                   |
                   |true;
-                  |debug.ans.isOneOf(true);
-                  |debug.ans.isOneOf(debug.boolean);
+                  |debug.ans.is(true);
+                  |debug.ans.is(debug.boolean);
                   |
                   |false;
-                  |debug.ans.isOneOf(false);
-                  |debug.ans.isOneOf(debug.boolean);
+                  |debug.ans.is(false);
+                  |debug.ans.is(debug.boolean);
                   |
                   |
                   |// test the debug helpers
                   |debug.boolean;
-                  |debug.ans.isOneOf(debug.boolean);
+                  |debug.ans.is(debug.boolean);
                   |
                   |debug.number;
-                  |debug.ans.isOneOf(debug.number);
+                  |debug.ans.is(debug.number);
                   |
                   |debug.string;
-                  |debug.ans.isOneOf(debug.string);
+                  |debug.ans.is(debug.string);
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -475,7 +475,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |"use strict";
                   |
-                  |debug.ans.isOneOf("use strict")
+                  |debug.ans.is("use strict")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -503,47 +503,47 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |var a = "a"
                   |a
-                  |debug.ans.isOneOf("a")
+                  |debug.ans.is("a")
                   |
                   |var b = "b"
                   |
-                  |debug(a).isOneOf("a")
-                  |debug(b).isOneOf("b")
+                  |debug(a).is("a")
+                  |debug(b).is("b")
                   |
-                  |debug(c).isOneOf(undefined)
+                  |debug(c).is(undefined)
                   |c = "c"
-                  |debug(c).isOneOf("c")
+                  |debug(c).is("c")
                   |var c
-                  |debug(c).isOneOf("c")
+                  |debug(c).is("c")
                   |
-                  |debug(d).isOneOf(undefined)
+                  |debug(d).is(undefined)
                   |{
                   |    var d = "d"
-                  |    debug(d).isOneOf("d")
+                  |    debug(d).is("d")
                   |}
-                  |debug(d).isOneOf("d")
+                  |debug(d).is("d")
                   |
                   |
                   |{
                   |    let d = "not d"
-                  |    debug(d).isOneOf("not d")
+                  |    debug(d).is("not d")
                   |
                   |    {
-                  |        debug(d).isOneOf("not d")
+                  |        debug(d).is("not d")
                   |        let d = "d indeed"
-                  |        debug(d).isOneOf("d indeed")
+                  |        debug(d).is("d indeed")
                   |    }
-                  |    debug(d).isOneOf("not d")
+                  |    debug(d).is("not d")
                   |}
-                  |debug(d).isOneOf("d")
+                  |debug(d).is("d")
                   |
                   |var e = "e"
                   |{
-                  |    debug(e).isOneOf("e")
+                  |    debug(e).is("e")
                   |    let e = "e-inner"
-                  |    debug(e).isOneOf("e-inner")
+                  |    debug(e).is("e-inner")
                   |}
-                  |debug(e).isOneOf("e")
+                  |debug(e).is("e")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -557,18 +557,18 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   | */
                   |
                   |var o = {}
-                  |debug(o).isOneOf(o)
+                  |debug(o).is(o)
                   |
                   |o.a = "a"
                   |o.b = "b"
                   |
-                  |debug(o.a).isOneOf("a")
-                  |debug(o.b).isOneOf("b")
+                  |debug(o.a).is("a")
+                  |debug(o.b).is("b")
                   |
                   |
                   |var o2 = { a: "a", b: "b" }
-                  |debug(o2.a).isOneOf("a")
-                  |debug(o2.b).isOneOf("b")
+                  |debug(o2.a).is("a")
+                  |debug(o2.b).is("b")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -586,16 +586,16 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |// check overwrite
                   |o.prop = "prop"
-                  |debug(o.prop).isOneOf("prop")
+                  |debug(o.prop).is("prop")
                   |
                   |o.prop = "something else"
-                  |debug(o.prop).isOneOf("something else")
+                  |debug(o.prop).is("something else")
                   |
                   |{
                   |    const a = o
                   |    a.prop = "written by a"
                   |}
-                  |debug(o.prop).isOneOf("written by a")
+                  |debug(o.prop).is("written by a")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -611,7 +611,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |var g = global
                   |var ths = this
                   |
-                  |debug(ths).isOneOf(g)
+                  |debug(ths).is(g)
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -824,13 +824,13 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |
                   |var res1 = t? "then" : debug("never").deadCode()
-                  |debug(res1).isOneOf("then")
+                  |debug(res1).is("then")
                   |
                   |var res2 = f? debug("never").deadCode() : "else"
-                  |debug(res2).isOneOf("else")
+                  |debug(res2).is("else")
                   |
                   |var res3 = b? "then" : "else"
-                  |debug(res3).isOneOf("then", "else")
+                  |debug(res3).is("then", "else")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -880,15 +880,15 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   | */
                   |
                   |for (let a = true; debug.boolean; c = false) {
-                  |    debug(a).isOneOf(debug.boolean)
+                  |    debug(a).is(debug.boolean)
                   |    continue
                   |    debug.deadCode()
                   |}
                   |
                   |debug.liveCode()
                   |
-                  |for (let a = "init"; debug.boolean; debug(a).isOneOf("changed")) {
-                  |    debug(a).isOneOf("init", "changed")
+                  |for (let a = "init"; debug.boolean; debug(a).is("changed")) {
+                  |    debug(a).is("init", "changed")
                   |    a = "changed"
                   |    continue
                   |    debug.deadCode()
@@ -897,10 +897,10 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |debug.liveCode()
                   |
                   |for (let b = "init"; debug.boolean; b = "update") {
-                  |    debug(b).isOneOf("init", "update")
+                  |    debug(b).is("init", "update")
                   |
                   |    for (let b = true; debug.boolean; b = false) {
-                  |        debug(b).isOneOf(debug.boolean)
+                  |        debug(b).is(debug.boolean)
                   |        continue
                   |        debug.deadCode()
                   |    }
@@ -911,8 +911,8 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |debug.liveCode()
                   |
                   |let c = "init"
-                  |fst: for (debug(c).isOneOf("init"); debug.boolean; c = "update") {
-                  |    debug(c).isOneOf("init", "update")
+                  |fst: for (debug(c).is("init"); debug.boolean; c = "update") {
+                  |    debug(c).is("init", "update")
                   |    continue fst
                   |    debug.deadCode()
                   |}
@@ -920,17 +920,17 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |debug.liveCode()
                   |
                   |let d = "init"
-                  |snd: for (debug(d).isOneOf("init"); debug.boolean; d = "update") {
-                  |    debug(d).isOneOf("init", "update")
+                  |snd: for (debug(d).is("init"); debug.boolean; d = "update") {
+                  |    debug(d).is("init", "update")
                   |
                   |    inner: for (d = "init2" ;debug.boolean; debug("never").deadCode()) {
-                  |        debug(d).isOneOf("init2")
+                  |        debug(d).is("init2")
                   |        d = "changed"
                   |        continue snd
                   |        debug.deadCode()
                   |    }
                   |
-                  |    debug(d).isOneOf("init2")
+                  |    debug(d).is("init2")
                   |    debug.liveCode()
                   |}
                   |
@@ -985,13 +985,13 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |    inner: while (debug.boolean) {
                   |        debug.liveCode()
-                  |        debug(a).isOneOf("init")
+                  |        debug(a).is("init")
                   |        a = "changed"
                   |        continue snd
                   |        debug.deadCode()
                   |    }
                   |
-                  |    debug(a).isOneOf("init")
+                  |    debug(a).is("init")
                   |    debug.liveCode()
                   |}
                   |
@@ -1004,13 +1004,13 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |    inner: while (debug.boolean) {
                   |        debug.liveCode()
-                  |        debug(b).isOneOf("init")
+                  |        debug(b).is("init")
                   |        b = "changed"
                   |        continue third
                   |        debug.deadCode()
                   |    }
                   |
-                  |    debug(b).isOneOf("init", "changed")
+                  |    debug(b).is("init", "changed")
                   |    debug.liveCode()
                   |}
                   |
@@ -1063,11 +1063,11 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    break fst
                   |    debug.deadCode()
                   |} finally {
-                  |    debug(a).isOneOf("in try").mightBeDead()
+                  |    debug(a).is("in try").mightBeDead()
                   |    a = "in finally"
                   |}
                   |
-                  |debug(a).isOneOf("in finally")
+                  |debug(a).is("in finally")
                   |
                   |
                   |let b = "init"
@@ -1079,16 +1079,16 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |        break snd
                   |        debug.deadCode()
                   |    } finally {
-                  |        debug(b).isOneOf("in inner try").mightBeDead()
+                  |        debug(b).is("in inner try").mightBeDead()
                   |        b = "in inner finally"
                   |    }
                   |    debug.deadCode()
                   |} finally {
-                  |    debug(b).isOneOf("in inner finally").mightBeDead()
+                  |    debug(b).is("in inner finally").mightBeDead()
                   |    b = "in finally"
                   |}
                   |
-                  |debug(b).isOneOf("in finally")
+                  |debug(b).is("in finally")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1103,19 +1103,19 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |let a = "init"
                   |while (debug.boolean) {
-                  |    debug(a).isOneOf("init", "in finally")
+                  |    debug(a).is("init", "in finally")
                   |    try {
                   |        a = "in try"
                   |        continue
                   |        debug.deadCode()
                   |    } finally {
-                  |        debug(a).isOneOf("in try").mightBeDead()
+                  |        debug(a).is("in try").mightBeDead()
                   |        a = "in finally"
                   |    }
                   |    debug.deadCode()
                   |}
                   |
-                  |debug(a).isOneOf("init", "in finally")
+                  |debug(a).is("init", "in finally")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1136,7 +1136,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    a = "in finally"
                   |}
                   |
-                  |debug(a).isOneOf("in finally")
+                  |debug(a).is("in finally")
                   |
                   |
                   |let b = "init"
@@ -1144,18 +1144,18 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |try {
                   |    b = "in try"
                   |    try {
-                  |        debug(b).isOneOf("in try")
+                  |        debug(b).is("in try")
                   |        b = "in inner try"
                   |    } finally {
-                  |        debug(b).isOneOf("in inner try")
+                  |        debug(b).is("in inner try")
                   |        b = "in inner finally"
                   |    }
                   |} finally {
-                  |    debug(b).isOneOf("in inner finally")
+                  |    debug(b).is("in inner finally")
                   |    b = "in finally"
                   |}
                   |
-                  |debug(b).isOneOf("in finally")
+                  |debug(b).is("in finally")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1170,32 +1170,32 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |
                   |for (var a = "init"; debug.boolean; a = "update") {
-                  |    debug(a).isOneOf("init", "update")
+                  |    debug(a).is("init", "update")
                   |    a = "inner"
-                  |    debug(a).isOneOf("inner")
+                  |    debug(a).is("inner")
                   |}
                   |
-                  |debug(a).isOneOf("init", "update")
+                  |debug(a).is("init", "update")
                   |
                   |let b = "outer"
                   |
-                  |for (let b = "init"; debug.boolean; debug(b).isOneOf("init", "inner1")) {
-                  |    debug(b).isOneOf("init", "inner1")
+                  |for (let b = "init"; debug.boolean; debug(b).is("init", "inner1")) {
+                  |    debug(b).is("init", "inner1")
                   |    b = "inner1"
                   |    let b = "inner2"
-                  |    debug(b).isOneOf("inner2")
+                  |    debug(b).is("inner2")
                   |}
                   |
-                  |debug(b).isOneOf("outer")
+                  |debug(b).is("outer")
                   |
                   |
                   |var c = false
                   |
                   |for (c = true; c; c = false) {
-                  |    debug(c).isOneOf(true)
+                  |    debug(c).is(true)
                   |}
                   |
-                  |debug(c).isOneOf(false)
+                  |debug(c).is(false)
                   |
                   |for (; debug.boolean;) {
                   |    debug.liveCode()
@@ -1220,14 +1220,14 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |function f1() {}
                   |
-                  |debug(f1()).isOneOf(undefined)
+                  |debug(f1()).is(undefined)
                   |
                   |
                   |
                   |function f2(a) { return a }
                   |
-                  |debug(f2("param")).isOneOf("param")
-                  |debug(f2()).isOneOf(undefined)
+                  |debug(f2("param")).is("param")
+                  |debug(f2()).is(undefined)
                   |
                   |
                   |
@@ -1235,8 +1235,8 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    return debug.squash(b, c)
                   |}
                   |
-                  |debug(f3("a", "b", "c", "d")).isOneOf("b", "c")
-                  |debug(f3()).isOneOf(undefined)
+                  |debug(f3("a", "b", "c", "d")).is("b", "c")
+                  |debug(f3()).is(undefined)
                   |
                   |
                   |
@@ -1248,9 +1248,9 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    }
                   |}
                   |
-                  |debug(f4(true, "then", "else")).isOneOf("then")
-                  |debug(f4(false, "then", "else")).isOneOf("else")
-                  |debug(f4(debug.boolean, "then", "else")).isOneOf("then", "else")
+                  |debug(f4(true, "then", "else")).is("then")
+                  |debug(f4(false, "then", "else")).is("else")
+                  |debug(f4(debug.boolean, "then", "else")).is("then", "else")
                   |
                   |
                   |
@@ -1261,7 +1261,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    "nothing To do"
                   |}
                   |
-                  |debug(f5("a")).isOneOf("a", undefined)
+                  |debug(f5("a")).is("a", undefined)
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1276,7 +1276,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |function f1() {}
                   |
-                  |debug(f1()).isOneOf(undefined)
+                  |debug(f1()).is(undefined)
                   |
                   |
                   |function f2() {
@@ -1284,7 +1284,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |    return "return"
                   |}
                   |
-                  |debug(f2()).isOneOf("return")
+                  |debug(f2()).is("return")
                   |
                   |{
                   |    function f2() {
@@ -1292,32 +1292,32 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |        return "inner"
                   |    }
                   |
-                  |    debug(f2()).isOneOf("inner")
+                  |    debug(f2()).is("inner")
                   |}
                   |
-                  |debug(f2()).isOneOf("inner")
+                  |debug(f2()).is("inner")
                   |
-                  |debug(f3()).isOneOf("return2")
+                  |debug(f3()).is("return2")
                   |
                   |function f3() {
                   |    debug.liveCode()
                   |    return "return2"
                   |}
                   |
-                  |debug(f3()).isOneOf("return2")
+                  |debug(f3()).is("return2")
                   |
                   |{
-                  |    debug(f3()).isOneOf("inner2")
+                  |    debug(f3()).is("inner2")
                   |
                   |    function f3() {
                   |        debug.liveCode()
                   |        return "inner2"
                   |    }
-                  |    debug(f3()).isOneOf("inner2")
+                  |    debug(f3()).is("inner2")
                   |}
                   |
                   |
-                  |debug(f3()).isOneOf("inner2")
+                  |debug(f3()).is("inner2")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1365,10 +1365,10 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   | */
                   |
                   |var a = (1, 2)
-                  |debug(a).isOneOf(2)
+                  |debug(a).is(2)
                   |
                   |var b = ("test", 4, "last")
-                  |debug(b).isOneOf("last")
+                  |debug(b).is("last")
                   |
                   |if (true, false) {
                   |    debug.deadCode()

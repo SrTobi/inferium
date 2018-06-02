@@ -4,10 +4,10 @@
  */
 
 var a = (1, 2)
-debug(a).isOneOf(2)
+debug(a).is(2)
 
 var b = ("test", 4, "last")
-debug(b).isOneOf("last")
+debug(b).is("last")
 
 if (true, false) {
     debug.deadCode()

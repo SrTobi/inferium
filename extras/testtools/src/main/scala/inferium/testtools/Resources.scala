@@ -5,7 +5,7 @@ object Resources {
 {
     idgb = function(expr) {
         return {
-            isOneOf: function() {
+            is: function() {
                 var args = [].slice.call(arguments);
                 args.some(function (arg) {
                     return arg === expr
@@ -16,7 +16,7 @@ object Resources {
     };
 
     idgb.ans = {
-        isOneOf: function () {
+        is: function () {
             // nothing to do
         }
     };

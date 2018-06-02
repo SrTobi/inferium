@@ -11,7 +11,7 @@ try {
     a = "in finally"
 }
 
-debug(a).isOneOf("in finally")
+debug(a).is("in finally")
 
 
 let b = "init"
@@ -19,15 +19,15 @@ let b = "init"
 try {
     b = "in try"
     try {
-        debug(b).isOneOf("in try")
+        debug(b).is("in try")
         b = "in inner try"
     } finally {
-        debug(b).isOneOf("in inner try")
+        debug(b).is("in inner try")
         b = "in inner finally"
     }
 } finally {
-    debug(b).isOneOf("in inner finally")
+    debug(b).is("in inner finally")
     b = "in finally"
 }
 
-debug(b).isOneOf("in finally")
+debug(b).is("in finally")

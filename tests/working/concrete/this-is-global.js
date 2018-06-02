@@ -6,4 +6,4 @@
 var g = global
 var ths = this
 
-debug(ths).isOneOf(g)
+debug(ths).is(g)

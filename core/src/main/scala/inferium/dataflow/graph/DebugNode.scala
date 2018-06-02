@@ -21,7 +21,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
             case CheckLiveCode =>
                 // nothing to do
 
-            case OneOf(_) =>
+            case Is(_) =>
 
             case PrintExpr(name) =>
                 reportInfo(s"$name: $subject")
@@ -44,7 +44,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
                     return
                 }
 
-            case OneOf(entites) =>
+            case Is(entites) =>
                 if (state == null) {
                     return
                 }
@@ -57,8 +57,8 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
                         result.normalized(state.heap.begin(loc))
                 }
 
-                if (!(Entity.unify(normalizedEntities) mightBe subject)) {
-                    reportError(s"debugged expression [$subject] was none of [${normalizedEntities.mkString(", ")}]")
+                if (!(Entity.unify(normalizedEntities) == subject)) {
+                    reportError(s"debugged expression [$subject] is not [${normalizedEntities.mkString(", ")}]")
                 }
 
             case PrintExpr(_) =>
@@ -78,8 +78,8 @@ object DebugNode {
     case object CheckLiveCode extends Operation {
         override def toString: String = "live"
     }
-    case class OneOf(entities: Seq[Either[Primitive, String]]) extends Operation {
-        override def toString: String = s"oneOf(${entities map { case Left(p) => p.toString case Right(s) => s} mkString ", "})"
+    case class Is(entities: Seq[Either[Primitive, String]]) extends Operation {
+        override def toString: String = s"is(${entities map { case Left(p) => p.toString case Right(s) => s} mkString ", "})"
     }
     case class PrintExpr(name: String) extends Operation {
         override def toString: String = "print"

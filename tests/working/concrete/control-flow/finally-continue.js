@@ -5,16 +5,16 @@
 
 let a = "init"
 while (debug.boolean) {
-    debug(a).isOneOf("init", "in finally")
+    debug(a).is("init", "in finally")
     try {
         a = "in try"
         continue
         debug.deadCode()
     } finally {
-        debug(a).isOneOf("in try").mightBeDead()
+        debug(a).is("in try").mightBeDead()
         a = "in finally"
     }
     debug.deadCode()
 }
 
-debug(a).isOneOf("init", "in finally")
+debug(a).is("init", "in finally")

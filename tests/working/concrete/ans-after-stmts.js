@@ -3,20 +3,20 @@
     desc: After a statement, ans should have the correct value
  */
 
-debug.ans.isOneOf(undefined);
+debug.ans.is(undefined);
 
 "a"
 {
     // nothing
 }
-debug.ans.isOneOf("a");
+debug.ans.is("a");
 
 
 "b"
 {
     "c"
 }
-debug.ans.isOneOf("c");
+debug.ans.is("c");
 
 
 "d"
@@ -25,7 +25,7 @@ try {
 } catch (e) {
     "f"
 }
-debug.ans.isOneOf("e");
+debug.ans.is("e");
 
 
 "g"
@@ -34,4 +34,4 @@ try {
 } finally {
     "i"
 }
-debug.ans.isOneOf("i");
+debug.ans.is("i");

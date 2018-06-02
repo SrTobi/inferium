@@ -221,10 +221,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             case (ops, innerExpr) => (ops.filter(_ != DebugNode.CheckLiveCode), innerExpr)
                         }
 
-                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("isOneOf"), false), args) =>
+                    case ast.CallExpression(ast.MemberExpression(source: ast.Expression, ast.Identifier("is"), false), args) =>
                         parseDebugExpression(source, needExpression, needSubject = true) map {
                             case (ops, innerExpr) =>
-                                val op = DebugNode.OneOf(args map parseDebugLiteral)
+                                val op = DebugNode.Is(args map parseDebugLiteral)
                                 (ops :+ op, innerExpr)
                         }
 

@@ -5,44 +5,44 @@
 
 var a = "a"
 a
-debug.ans.isOneOf("a")
+debug.ans.is("a")
 
 var b = "b"
 
-debug(a).isOneOf("a")
-debug(b).isOneOf("b")
+debug(a).is("a")
+debug(b).is("b")
 
-debug(c).isOneOf(undefined)
+debug(c).is(undefined)
 c = "c"
-debug(c).isOneOf("c")
+debug(c).is("c")
 var c
-debug(c).isOneOf("c")
+debug(c).is("c")
 
-debug(d).isOneOf(undefined)
+debug(d).is(undefined)
 {
     var d = "d"
-    debug(d).isOneOf("d")
+    debug(d).is("d")
 }
-debug(d).isOneOf("d")
+debug(d).is("d")
 
 
 {
     let d = "not d"
-    debug(d).isOneOf("not d")
+    debug(d).is("not d")
 
     {
-        debug(d).isOneOf("not d")
+        debug(d).is("not d")
         let d = "d indeed"
-        debug(d).isOneOf("d indeed")
+        debug(d).is("d indeed")
     }
-    debug(d).isOneOf("not d")
+    debug(d).is("not d")
 }
-debug(d).isOneOf("d")
+debug(d).is("d")
 
 var e = "e"
 {
-    debug(e).isOneOf("e")
+    debug(e).is("e")
     let e = "e-inner"
-    debug(e).isOneOf("e-inner")
+    debug(e).is("e-inner")
 }
-debug(e).isOneOf("e")
+debug(e).is("e")

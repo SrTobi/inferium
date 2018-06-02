@@ -11,9 +11,9 @@ while (debug.boolean) {
         someObj = lastObj
     }
 
-    debug(lastObj.prop).isOneOf("init")
+    debug(lastObj.prop).is("init")
     lastObj.prop = "next"
-    debug(lastObj.prop).isOneOf("next")
+    debug(lastObj.prop).is("next")
 
 
     if (debug.boolean) {
@@ -21,8 +21,8 @@ while (debug.boolean) {
     }
 }
 
-debug(lastObj.prop).isOneOf("next", "blub")
-debug(someObj.prop).isOneOf("next", "blub")
+debug(lastObj.prop).is("next", "blub")
+debug(someObj.prop).is("next", "blub")
 
 someObj.absProp = "abs"
-debug(someObj.absProp).isOneOf("abs", undefined)
+debug(someObj.absProp).is("abs", undefined)

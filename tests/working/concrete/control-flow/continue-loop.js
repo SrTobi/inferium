@@ -41,13 +41,13 @@ snd: while (debug.boolean) {
 
     inner: while (debug.boolean) {
         debug.liveCode()
-        debug(a).isOneOf("init")
+        debug(a).is("init")
         a = "changed"
         continue snd
         debug.deadCode()
     }
 
-    debug(a).isOneOf("init")
+    debug(a).is("init")
     debug.liveCode()
 }
 
@@ -60,13 +60,13 @@ third: while (debug.boolean) {
 
     inner: while (debug.boolean) {
         debug.liveCode()
-        debug(b).isOneOf("init")
+        debug(b).is("init")
         b = "changed"
         continue third
         debug.deadCode()
     }
 
-    debug(b).isOneOf("init", "changed")
+    debug(b).is("init", "changed")
     debug.liveCode()
 }
 

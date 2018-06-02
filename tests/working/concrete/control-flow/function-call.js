@@ -5,14 +5,14 @@
 
 function f1() {}
 
-debug(f1()).isOneOf(undefined)
+debug(f1()).is(undefined)
 
 
 
 function f2(a) { return a }
 
-debug(f2("param")).isOneOf("param")
-debug(f2()).isOneOf(undefined)
+debug(f2("param")).is("param")
+debug(f2()).is(undefined)
 
 
 
@@ -20,8 +20,8 @@ function f3(a, b, c, d) {
     return debug.squash(b, c)
 }
 
-debug(f3("a", "b", "c", "d")).isOneOf("b", "c")
-debug(f3()).isOneOf(undefined)
+debug(f3("a", "b", "c", "d")).is("b", "c")
+debug(f3()).is(undefined)
 
 
 
@@ -33,9 +33,9 @@ function f4(a, b, c) {
     }
 }
 
-debug(f4(true, "then", "else")).isOneOf("then")
-debug(f4(false, "then", "else")).isOneOf("else")
-debug(f4(debug.boolean, "then", "else")).isOneOf("then", "else")
+debug(f4(true, "then", "else")).is("then")
+debug(f4(false, "then", "else")).is("else")
+debug(f4(debug.boolean, "then", "else")).is("then", "else")
 
 
 
@@ -46,4 +46,4 @@ function f5(a) {
     "nothing To do"
 }
 
-debug(f5("a")).isOneOf("a", undefined)
+debug(f5("a")).is("a", undefined)

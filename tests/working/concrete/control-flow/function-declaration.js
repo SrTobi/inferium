@@ -5,7 +5,7 @@
 
 function f1() {}
 
-debug(f1()).isOneOf(undefined)
+debug(f1()).is(undefined)
 
 
 function f2() {
@@ -13,7 +13,7 @@ function f2() {
     return "return"
 }
 
-debug(f2()).isOneOf("return")
+debug(f2()).is("return")
 
 {
     function f2() {
@@ -21,29 +21,29 @@ debug(f2()).isOneOf("return")
         return "inner"
     }
 
-    debug(f2()).isOneOf("inner")
+    debug(f2()).is("inner")
 }
 
-debug(f2()).isOneOf("inner")
+debug(f2()).is("inner")
 
-debug(f3()).isOneOf("return2")
+debug(f3()).is("return2")
 
 function f3() {
     debug.liveCode()
     return "return2"
 }
 
-debug(f3()).isOneOf("return2")
+debug(f3()).is("return2")
 
 {
-    debug(f3()).isOneOf("inner2")
+    debug(f3()).is("inner2")
 
     function f3() {
         debug.liveCode()
         return "inner2"
     }
-    debug(f3()).isOneOf("inner2")
+    debug(f3()).is("inner2")
 }
 
 
-debug(f3()).isOneOf("inner2")
+debug(f3()).is("inner2")

@@ -5,4 +5,4 @@
 
 "use strict";
 
-debug.ans.isOneOf("use strict")
+debug.ans.is("use strict")

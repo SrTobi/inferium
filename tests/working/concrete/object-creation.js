@@ -4,15 +4,15 @@
  */
 
 var o = {}
-debug(o).isOneOf(o)
+debug(o).is(o)
 
 o.a = "a"
 o.b = "b"
 
-debug(o.a).isOneOf("a")
-debug(o.b).isOneOf("b")
+debug(o.a).is("a")
+debug(o.b).is("b")
 
 
 var o2 = { a: "a", b: "b" }
-debug(o2.a).isOneOf("a")
-debug(o2.b).isOneOf("b")
+debug(o2.a).is("a")
+debug(o2.b).is("b")

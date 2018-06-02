@@ -4,45 +4,45 @@
  */
 
 // when the program is started ans should be undefined
-debug.ans.isOneOf(undefined);
+debug.ans.is(undefined);
 
 undefined;
-debug.ans.isOneOf(undefined);
+debug.ans.is(undefined);
 
 null;
-debug.ans.isOneOf(null);
+debug.ans.is(null);
 
 0;
-debug.ans.isOneOf(0);
-debug.ans.isOneOf(debug.number);
+debug.ans.is(0);
+debug.ans.is(debug.number);
 
 //(-8);
-//debug.ans.isOneOf(-8);
-//debug.ans.isOneOf(debug.number);
+//debug.ans.is(-8);
+//debug.ans.is(debug.number);
 
 "test";
-debug.ans.isOneOf("test");
-debug.ans.isOneOf(debug.string);
+debug.ans.is("test");
+debug.ans.is(debug.string);
 
 "";
-debug.ans.isOneOf("");
-debug.ans.isOneOf(debug.string);
+debug.ans.is("");
+debug.ans.is(debug.string);
 
 true;
-debug.ans.isOneOf(true);
-debug.ans.isOneOf(debug.boolean);
+debug.ans.is(true);
+debug.ans.is(debug.boolean);
 
 false;
-debug.ans.isOneOf(false);
-debug.ans.isOneOf(debug.boolean);
+debug.ans.is(false);
+debug.ans.is(debug.boolean);
 
 
 // test the debug helpers
 debug.boolean;
-debug.ans.isOneOf(debug.boolean);
+debug.ans.is(debug.boolean);
 
 debug.number;
-debug.ans.isOneOf(debug.number);
+debug.ans.is(debug.number);
 
 debug.string;
-debug.ans.isOneOf(debug.string);
+debug.ans.is(debug.string);

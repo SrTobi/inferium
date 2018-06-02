@@ -6,34 +6,34 @@
 var a = debug.boolean
 
 if (a) {
-    debug(a).isOneOf(true)
+    debug(a).is(true)
 } else {
-    debug(a).isOneOf(false)
+    debug(a).is(false)
 }
 
-debug(a).isOneOf(debug.boolean)
+debug(a).is(debug.boolean)
 
 
 var b = debug.number
 
 if (b) {
-    debug(b).isOneOf(debug.number)
+    debug(b).is(debug.number)
 } else {
-    debug(b).isOneOf(0)
+    debug(b).is(0)
 }
 
-debug(b).isOneOf(debug.number)
+debug(b).is(debug.number)
 
 
 var c = debug.string
 
 if (c) {
-    debug(c).isOneOf(debug.string)
+    debug(c).is(debug.string)
 } else {
-    debug(c).isOneOf("")
+    debug(c).is("")
 }
 
-debug(c).isOneOf(debug.string)
+debug(c).is(debug.string)
 
 
 var d = undefined
@@ -48,11 +48,11 @@ if (debug.boolean) {
     d = ""
 }
 
-debug(d).isOneOf(undefined, debug.number, "test", "")
+debug(d).is(undefined, debug.number, "test", "")
 if (d) {
-    debug(d).isOneOf(debug.number, "test")
+    debug(d).is(debug.number, "test")
 } else {
-    debug(d).isOneOf(undefined, 0, "")
+    debug(d).is(undefined, 0, "")
 }
 
-debug(d).isOneOf(undefined, debug.number, "test", "")
+debug(d).is(undefined, debug.number, "test", "")

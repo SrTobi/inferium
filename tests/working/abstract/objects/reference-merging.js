@@ -12,16 +12,16 @@ if (debug.boolean) {
     o = b
 }
 
-debug(a.prop).isOneOf("a")
-debug(b.prop).isOneOf("b")
-debug(o.prop).isOneOf("a", "b")
+debug(a.prop).is("a")
+debug(b.prop).is("b")
+debug(o.prop).is("a", "b")
 
 a.prop = "A"
-debug(a.prop).isOneOf("A")
-debug(b.prop).isOneOf("b")
-debug(o.prop).isOneOf("A", "b")
+debug(a.prop).is("A")
+debug(b.prop).is("b")
+debug(o.prop).is("A", "b")
 
 o.prop = "O"
-debug(a.prop).isOneOf("A", "O")
-debug(b.prop).isOneOf("b", "O")
-debug(o.prop).isOneOf("A", "b", "O")
+debug(a.prop).is("A", "O")
+debug(b.prop).is("b", "O")
+debug(o.prop).is("A", "b", "O")
