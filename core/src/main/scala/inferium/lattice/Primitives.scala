@@ -1,5 +1,6 @@
 package inferium.lattice
 
+import inferium.Unifiable
 import inferium.dataflow.CallableInfo
 import inferium.lattice.assertions.{Assertion, Falsyfied, Propertyfied, Truthyfied}
 import inferium.utils.macros.blockRec
@@ -29,7 +30,7 @@ sealed abstract class Primitive extends Entity {
 
 object NeverValue extends Primitive {
 
-    override def unify(other: Entity): Entity = other
+    override def unify(other: Entity)(implicit fixpoint: Unifiable.Fixpoint): Entity = other
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq()
 
     @blockRec(nonrec = true)

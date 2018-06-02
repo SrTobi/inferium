@@ -1,5 +1,7 @@
 package inferium.lattice
 
+import inferium.Unifiable
+import inferium.Unifiable.Fixpoint
 import inferium.dataflow.CallableInfo
 import inferium.lattice.assertions.Assertion
 import inferium.utils.macros.blockRec
@@ -8,9 +10,9 @@ import scala.collection.mutable
 import scala.collection.immutable
 
 
-abstract class Entity {
+abstract class Entity extends Unifiable[Entity] {
 
-    def unify(other: Entity): Entity = Entity.unify(this, other)
+    override def unify(other: Entity)(implicit fixpoint: Fixpoint = Unifiable.noFixpoint): Entity = Entity.unify(this, other)
 
     def mightBe(entity: Entity): Boolean = this == entity || entity == NeverValue
 
@@ -83,12 +85,12 @@ object Entity {
         )
     }*/
 
-    def unify(entity: Entity, entities: Entity*): Entity = unify(entity +: entities)
+    def unify(entity: Entity, entities: Entity*)(implicit fixpoint: Fixpoint): Entity = unify(entity +: entities)
 
     //private val emptyUnion = UnionValue(isUndef = false, isNull = false, GeneralBoolLattice.Bottom, None, Set.empty, Set.empty, Set.empty)
     //private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
 
-    def unify(entities: Seq[Entity]): Entity = UnionValue(entities)
+    def unify(entities: Seq[Entity])(implicit fixpoint: Fixpoint): Entity = UnionValue(entities)
 
     /*private def unify(entity: Entity, entities: Seq[Entity]): Entity = entities match {
         case Seq() => entity

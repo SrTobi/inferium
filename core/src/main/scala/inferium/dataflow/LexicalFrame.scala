@@ -1,14 +1,15 @@
 package inferium.dataflow
 
+import inferium.Unifiable
 import inferium.lattice.{Entity, ObjectLike}
 
-case class LexicalFrame(obj: Entity, outer: Option[LexicalFrame] = None) {
+case class LexicalFrame(obj: Entity, outer: Option[LexicalFrame] = None) extends Unifiable[LexicalFrame] {
     val depth: Int = outer map { _.depth + 1 } getOrElse 0
     val objects: Vector[Entity] = (outer map { _.objects } getOrElse Vector()) :+ obj
 
     def ::(obj: Entity): LexicalFrame = LexicalFrame(obj, Some(this))
 
-    def unify(other: LexicalFrame): LexicalFrame = {
+    override def unify(other: LexicalFrame)(implicit fixpoint: Unifiable.Fixpoint): LexicalFrame = {
         assert(depth == other.depth)
 
         if (this eq other)

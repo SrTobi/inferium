@@ -1,5 +1,6 @@
 package inferium.dataflow.calls
 
+import inferium.Unifiable
 import inferium.dataflow.graph.Node
 import inferium.dataflow.{CallableInfo, DataFlowAnalysis, ExecutionState, LexicalFrame}
 import inferium.lattice.{Entity, Heap, NeverValue, UndefinedValue}
@@ -46,11 +47,13 @@ object CallInstance {
                 invocationMergedRest = mergedRest
             } else {
                 assert(invocationHeap != null && invocationThisEntity != null && invocationLexFrames != null && invocationArguments != null && invocationMergedRest != null)
-                invocationHeap = invocationHeap fixpointUnify heap
+                implicit val useFixpoint: Unifiable.Fixpoint = Unifiable.useFixpoint
+
+                invocationHeap = invocationHeap unify heap
                 invocationThisEntity = invocationThisEntity unify thisEntity
                 invocationLexFrames = invocationLexFrames unify lexicalFrame
                 invocationArguments = invocationArguments.zipAll(arguments, UndefinedValue, UndefinedValue).map { case (x, y) => x unify y }
-                invocationMergedRest = invocationMergedRest unify mergedRest
+                invocationMergedRest = invocationMergedRest unify  mergedRest
             }
 
             doCall(invocationHeap,invocationThisEntity, invocationLexFrames, invocationArguments, invocationMergedRest)
@@ -70,8 +73,11 @@ object CallInstance {
                 returnHeap = heap
             } else {
                 assert(returnEntity != null && returnHeap != null)
+
+                implicit val useFixpoint: Unifiable.Fixpoint = Unifiable.useFixpoint
+
                 returnEntity = returnEntity unify result
-                returnHeap = returnHeap fixpointUnify heap
+                returnHeap = returnHeap unify heap
             }
             hasReturned = true
             recursiveCallSites foreach { _.ret(returnEntity, returnHeap, analysis) }

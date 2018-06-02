@@ -1,4 +1,5 @@
 package inferium.dataflow.graph
+import inferium.Unifiable
 import inferium.dataflow.graph.MergeNode.MergeType
 import inferium.dataflow.graph.MergeNode.MergeType.MergeType
 import inferium.dataflow.graph.traits.SingleSuccessor
@@ -17,13 +18,14 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     private var mergeState: ExecutionState = _
 
     override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
+        implicit val useFixpoint: Unifiable.Fixpoint = new Unifiable.Fixpoint(isFixpoint)
         val fixedState = fixLexicalFrame(state)
 
         if (mergeState == null) {
             mergeState = fixedState
         } else {
             // merge
-            val newMergeState = mergeState.merge(Seq(fixedState), isFixpoint)
+            val newMergeState = mergeState unify fixedState
 
             if (mergeState == newMergeState) {
                 return
@@ -41,8 +43,8 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         processed = true
         succ <~ mergeState
-        if (!isFixpoint)
-            mergeState = null
+        //if (!isFixpoint)
+        //    mergeState = null
     }
 
 

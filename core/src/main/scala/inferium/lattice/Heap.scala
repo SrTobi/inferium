@@ -1,17 +1,17 @@
 package inferium.lattice
 
+import inferium.Unifiable
+import inferium.Unifiable.Fixpoint
 import inferium.lattice.Heap.Mutator
 
-abstract class Heap {
+abstract class Heap extends Unifiable[Heap] {
     def begin(location: Location): Mutator
     def end(actor: Mutator): Heap
 
     def split(): Heap
-    def unify(heap: Heap, heaps: Heap*): Heap = unify(heap +: heaps)
-    def unify(heaps: Seq[Heap]): Heap
 
-    def fixpointUnify(futureHeap: Heap, futureHeaps: Heap*): Heap = fixpointUnify(futureHeap +: futureHeaps)
-    def fixpointUnify(futureHeap: Seq[Heap]): Heap
+    override def unify(other: Heap)(implicit fixpoint: Fixpoint): Heap = unify(Seq(other))
+    override def unify(heaps: Seq[Heap])(implicit fixpoint: Fixpoint): Heap
 }
 
 

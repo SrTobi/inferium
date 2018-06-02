@@ -1,5 +1,6 @@
 package inferium.lattice.heaps
 
+import inferium.Unifiable
 import inferium.lattice.Heap.{Mutator, PropertyMutationResult}
 import inferium.lattice.heaps.SimpleHeap.{Obj, SimpleMutator}
 import inferium.lattice._
@@ -17,7 +18,7 @@ class SimpleHeap(private val objects: Map[Location, Obj] = Map.empty, private va
 
     override def split(): Heap = this
 
-    override def unify(heaps: Seq[Heap]): Heap = {
+    override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
         import SimpleHeap.mergeProperties
         val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeap] }
         val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*)() {
@@ -29,8 +30,6 @@ class SimpleHeap(private val objects: Map[Location, Obj] = Map.empty, private va
 
         new SimpleHeap(newObjects, newBoxedValues)
     }
-
-    override def fixpointUnify(futureHeaps: Seq[Heap]): Heap = unify(futureHeaps)
 
     override def equals(o: scala.Any): Boolean = o match {
         case other: SimpleHeap =>
