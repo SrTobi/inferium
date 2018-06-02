@@ -43,9 +43,7 @@ if (debug.boolean) {
 }
 
 if (debug.boolean) {
-    d = "test"
-} else {
-    d = ""
+    d = debug.squash("", "test")
 }
 
 debug(d).is(undefined, debug.number, "test", "")

@@ -182,9 +182,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |}
                   |
                   |if (debug.boolean) {
-                  |    d = "test"
-                  |} else {
-                  |    d = ""
+                  |    d = debug.squash("", "test")
                   |}
                   |
                   |debug(d).is(undefined, debug.number, "test", "")
