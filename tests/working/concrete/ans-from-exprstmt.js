@@ -14,7 +14,6 @@ debug.ans.is(null);
 
 0;
 debug.ans.is(0);
-debug.ans.is(debug.number);
 
 //(-8);
 //debug.ans.is(-8);
@@ -22,19 +21,15 @@ debug.ans.is(debug.number);
 
 "test";
 debug.ans.is("test");
-debug.ans.is(debug.string);
 
 "";
 debug.ans.is("");
-debug.ans.is(debug.string);
 
 true;
 debug.ans.is(true);
-debug.ans.is(debug.boolean);
 
 false;
 debug.ans.is(false);
-debug.ans.is(debug.boolean);
 
 
 // test the debug helpers
