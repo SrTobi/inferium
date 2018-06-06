@@ -14,14 +14,23 @@ object AbsentProperty extends AbstractProperty {
 }
 */
 
-sealed case class Property(configurable: GeneralBoolLattice,
-                           enumerable: GeneralBoolLattice,
-                           value: Set[ValueLocation],
-                           writable: GeneralBoolLattice,
-                           getter: Set[ValueLocation],
-                           setter: Set[ValueLocation]) {
-    def unify(other: Property): Property =
-        Property(
+sealed abstract class Property {
+    def configurable: GeneralBoolLattice
+    def enumerable: GeneralBoolLattice
+    def writable: GeneralBoolLattice
+    def mightBeAbsent: Boolean
+
+    def abstractify(heap: Heap.Mutator): AbstractProperty
+}
+
+sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
+                                   enumerable: GeneralBoolLattice,
+                                   value: Set[ValueLocation],
+                                   writable: GeneralBoolLattice,
+                                   getter: Set[ValueLocation],
+                                   setter: Set[ValueLocation]) extends Property {
+    def unify(other: ConcreteProperty): ConcreteProperty =
+        ConcreteProperty(
             this.configurable.unify(other.configurable),
             this.enumerable.unify(other.enumerable),
             this.value | other.value,
@@ -30,13 +39,48 @@ sealed case class Property(configurable: GeneralBoolLattice,
             this.setter | other.setter,
         )
 
-    def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
+    override def abstractify(heap: Heap.Mutator): AbstractProperty = {
+        def toValue(locs: Set[ValueLocation]): Entity = Entity.unify(locs.toSeq.map(loc => heap.getValue(loc).normalized(heap)))
+        AbstractProperty(
+            configurable,
+            enumerable,
+            toValue(value),
+            writable,
+            toValue(getter),
+            toValue(setter),
+            mightBeAbsent
+        )
+    }
+
+    override def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
     //def withAbsent: Property = if (mightBeAbsent) this else copy(value = value + ValueLocation.AbsentLocation)
 }
 
-object Property {
-    def defaultWriteToObject(value: Set[ValueLocation], mightBeAbsent: Boolean = false): Property =
-        Property(
+
+sealed case class AbstractProperty(configurable: GeneralBoolLattice,
+                           enumerable: GeneralBoolLattice,
+                           value: Entity,
+                           writable: GeneralBoolLattice,
+                           getter: Entity,
+                           setter: Entity,
+                           mightBeAbsent: Boolean) extends Property  {
+    def unify(other: AbstractProperty): AbstractProperty =
+        AbstractProperty(
+            this.configurable.unify(other.configurable),
+            this.enumerable.unify(other.enumerable),
+            this.value | other.value,
+            this.writable.unify(other.writable),
+            this.getter | other.getter,
+            this.setter | other.setter,
+            this.mightBeAbsent | other.mightBeAbsent
+        )
+
+    override def abstractify(heap: Heap.Mutator): AbstractProperty = this
+}
+
+object ConcreteProperty {
+    def defaultWriteToObject(value: Set[ValueLocation], mightBeAbsent: Boolean = false): ConcreteProperty =
+        ConcreteProperty(
             configurable = BoolLattice.True,
             enumerable = BoolLattice.True,
             value = if (mightBeAbsent) value + ValueLocation.AbsentLocation else value,
@@ -45,8 +89,8 @@ object Property {
             setter = Set.empty
         )
 
-    val absentProperty: Property =
-        Property(
+    val absentProperty: ConcreteProperty =
+        ConcreteProperty(
             configurable = GeneralBoolLattice.Bottom,
             enumerable = GeneralBoolLattice.Bottom,
             value = Set(ValueLocation.AbsentLocation),
