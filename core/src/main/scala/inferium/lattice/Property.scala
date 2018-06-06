@@ -58,12 +58,12 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
 
 
 sealed case class AbstractProperty(configurable: GeneralBoolLattice,
-                           enumerable: GeneralBoolLattice,
-                           value: Entity,
-                           writable: GeneralBoolLattice,
-                           getter: Entity,
-                           setter: Entity,
-                           mightBeAbsent: Boolean) extends Property  {
+                                   enumerable: GeneralBoolLattice,
+                                   value: Entity,
+                                   writable: GeneralBoolLattice,
+                                   getter: Entity,
+                                   setter: Entity,
+                                   mightBeAbsent: Boolean) extends Property  {
     def unify(other: AbstractProperty): AbstractProperty =
         AbstractProperty(
             this.configurable.unify(other.configurable),
@@ -100,7 +100,18 @@ object ConcreteProperty {
         )
 }
 
-
+object AbstractProperty {
+    def defaultWriteToObject(value: Entity, mightBeAbsent: Boolean = false): AbstractProperty =
+        AbstractProperty(
+            configurable = BoolLattice.True,
+            enumerable = BoolLattice.True,
+            value = value,
+            writable = BoolLattice.True,
+            getter = NeverValue,
+            setter = NeverValue,
+            mightBeAbsent = mightBeAbsent
+        )
+}
 /*
 object Property {
     def unify(data: DataProperty, accessor: PureAccessorProperty): Property = {

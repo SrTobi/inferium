@@ -21,41 +21,58 @@ object Playground {
     }
 
     def main(args: Array[String]): Unit = {
+        /*val code =
+            """
+              |var lastObj
+              |var someObj
+              |while (debug.boolean) {
+              |    lastObj = { prop: "init" }
+              |    if (debug.boolean) {
+              |        someObj = lastObj
+              |    }
+              |    debug(lastObj).print("obj")
+              |    debug(lastObj.prop).is("init").print("here")
+              |    lastObj.prop = "next"
+              |    debug(lastObj.prop).is("next")
+              |
+              |
+              |    if (debug.boolean) {
+              |        someObj.prop = "blub"
+              |    }
+              |}
+              |
+              |debug(lastObj.prop).is("next", "blub")
+              |debug(someObj.prop).is("next", "blub")
+              |
+              |someObj.absProp = "abs"
+              |debug(someObj.absProp).is("abs", undefined)
+            """.stripMargin*/
+
         val code =
             """
-              |var d = undefined
-              |
-              |if (debug.boolean) {
-              |    d = debug.number
+              |var a = false
+              |function f(b) {
+              | if (a) {
+              |   return "blub"
+              | }
+              | if (b) {
+              |     a = true
+              |     return f(false)
+              | } else {
+              |     return "test"
+              | }
               |}
+              |let r = f(true)
+              |debug(r).print()
               |
-              |if (debug.boolean) {
-              |    d = debug.squash("", "test")
-              |}
-              |
-              |debug(d).is(undefined, debug.number, "test", "")
-              |if (d) {
-              |    debug(d).is(debug.number, "test")
-              |} else {
-              |    debug(d).is(undefined, 0, "")
-              |}
-              |
-              |debug(d).is(undefined, debug.number, "test", "")
             """.stripMargin
-
-        /*val code =
-
-              |if (false) {
-              |  debug.liveCode()
-              |}
-            """.stripMargin*/
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
         val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
-        //println(PrintVisitor.print(graph, printMergeNodes = true))
+        println(PrintVisitor.print(graph, printMergeNodes = true))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState)

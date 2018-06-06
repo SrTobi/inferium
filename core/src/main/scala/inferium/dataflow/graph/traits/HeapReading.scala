@@ -42,12 +42,21 @@ trait HeapReading extends Node {
 
     private final def read(base: Entity, obj: ObjectLike, propertyName: String, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Entity = {
 
-        val Property(_, _, target, _, getter, _) = mutator.getProperty(obj, propertyName)
-        if (getter.nonEmpty) {
-            // todo: implement getters
-            ???
-        }
+        mutator.getProperty(obj, propertyName) match {
+            case ConcreteProperty(_, _, target, _, getter, _) =>
+                if (getter.nonEmpty) {
+                    // todo: implement getters
+                    ???
+                }
 
-        Ref(base, propertyName, target)
+                Ref(base, propertyName, target)
+
+            case AbstractProperty(_, _, value, _, getter, _, mightBeAbsent) =>
+                if (getter != NeverValue) {
+                    // todo: implement getters
+                    ???
+                }
+                if (mightBeAbsent) UndefinedValue | value else value
+        }
     }
 }

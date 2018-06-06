@@ -5,6 +5,7 @@ import scala.language.implicitConversions
 final class AbsentLattice(val mightBeAbsent: Boolean) extends AnyVal {
     def asBool: Boolean = mightBeAbsent
 
+    def |(other: AbsentLattice): AbsentLattice = unify(other)
     def unify(other: AbsentLattice): AbsentLattice = AbsentLattice(mightBeAbsent || other.mightBeAbsent)
 
     override def toString: String = if (mightBeAbsent) "MightBeAbsent" else "NeverAbsent"

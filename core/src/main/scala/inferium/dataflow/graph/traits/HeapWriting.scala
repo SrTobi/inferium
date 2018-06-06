@@ -24,20 +24,20 @@ trait HeapWriting extends Node {
 
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
         val isCertainWrite = objs.tail.isEmpty
-        var propertyChanged = false
+        var valueLocationWasWritten = false
         objs foreach { obj =>
             val res = write(target, obj, propertyName, value, isCertainWrite, writeMutator)
             if (res) {
-                propertyChanged = true
+                valueLocationWasWritten = true
             }
         }
-        if (propertyChanged) {
+        if (valueLocationWasWritten) {
             writeMutator.setValue(valueLocation, value)
         }
         val resultHeap = heapAfterCoersion.end(writeMutator)
 
         val resultState = state.copy(heap = resultHeap)
-        val result = if (propertyChanged) Ref(target, propertyName, Set(valueLocation)) else value
+        val result = if (valueLocationWasWritten) Ref(target, propertyName, Set(valueLocation)) else value
 
         Some((result, resultState))
     }
@@ -48,22 +48,20 @@ trait HeapWriting extends Node {
 
     // returns whether a property was changed
     private def write(base: Entity, obj: ObjectLike, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
-        val isCertainWrite = onlyOneTarget && mutator.isConcreteObject(obj) // todo: the object might be abstrict so it wouldn't be a certain write
 
-        val p@Property(_, _, oldValues, _, _, setter) = mutator.getProperty(obj, propertyName)
-        if (setter.nonEmpty) {
-            // todo: implement setter
-            ???
+        mutator.writeToProperty(obj, propertyName, valueLocation, isCertainWrite = onlyOneTarget, value) match {
+            case AbstractProperty(_, _, _, _, _, setter, _) =>
+                if (setter != NeverValue) {
+                    ???
+                }
+                false
+
+            case ConcreteProperty(_, _, _, _, _, setter) =>
+                if (setter.nonEmpty) {
+                    // todo: implement setter
+                    ???
+                }
+                true
         }
-
-        val result = if (isCertainWrite) {
-            Property.defaultWriteToObject(Set(valueLocation))
-        } else {
-            p.copy(value = oldValues + valueLocation)
-        }
-
-        mutator.setProperty(obj, propertyName, result)
-
-        true
     }
 }

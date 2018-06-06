@@ -7,6 +7,8 @@ abstract class Unifiable[T <: Unifiable[T]] {
     this: T =>
     import Unifiable._
 
+    @inline
+    final def |(other: T)(implicit fixpoint: Fixpoint = Unifiable.noFixpoint): T = unify(other)(fixpoint)
     def unify(other: T)(implicit fixpoint: Fixpoint = Unifiable.noFixpoint): T
 
     def unify(other1: T, other2: T, others: T*)(implicit fixpoint: Fixpoint): T = unify(other1 +: other2 +: others)(fixpoint)

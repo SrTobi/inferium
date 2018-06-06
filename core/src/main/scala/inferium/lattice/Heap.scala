@@ -24,7 +24,8 @@ object Heap {
         def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike
         def allocOrdinaryObject(location: Location): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac))
         def isConcreteObject(obj: ObjectLike): Boolean
-        def setProperty(obj: ObjectLike, propertyName: String, property: Property)
+        def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit
+        def writeToProperty(obj: ObjectLike, propertyName: String, valueLocs: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property
         def getProperty(obj: ObjectLike, propertyName: String): Property
         //def listProperties(obj: ObjectLike): Seq[Entity]
 
@@ -32,13 +33,21 @@ object Heap {
         def setValue(loc: ValueLocation, value: Entity): Unit
 
         def getPropertyValueIgnoringGetter(obj: ObjectLike, propertyName: String): Entity = {
-            val Property(_, _, value, _, getter, _) = getProperty(obj, propertyName)
-            val result = value.toSeq map getValue
-            UnionValue(result)
+            getProperty(obj, propertyName) match {
+                case ConcreteProperty(_, _, value, _, getter, _) =>
+                    val result = value.toSeq map getValue
+                    UnionValue(result)
+
+                case AbstractProperty(_, _, value, _, _, _, mightBeAbsent) =>
+                    if (mightBeAbsent)
+                        value | UndefinedValue
+                    else
+                        value
+            }
         }
 
         def forceSetPropertyValue(obj: ObjectLike, propertyName: String, writeLoc: ValueLocation, value: Entity): Unit = {
-            setProperty(obj, propertyName, Property.defaultWriteToObject(Set(writeLoc)))
+            setProperty(obj, propertyName, ConcreteProperty.defaultWriteToObject(Set(writeLoc)))
             setValue(writeLoc, value)
         }
     }

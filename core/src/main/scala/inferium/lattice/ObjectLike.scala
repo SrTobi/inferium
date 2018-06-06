@@ -46,7 +46,7 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
 
     override def toString: String = s"Obj($loc)"
 
-    override def withAbstractCount(ac: Long): ObjectLike = OrdinaryObjectEntity(loc)(abstractCount)
+    override def withAbstractCount(ac: Long): ObjectLike = OrdinaryObjectEntity(loc)(ac)
 
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         fail()

@@ -12,7 +12,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
     private def reportInfo(msg: String)(implicit analysis: DataFlowAnalysis): Unit = analysis.debugAdapter.info(this, msg)
 
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
-        lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
+        val subject = state.stack.head.normalized(state.heap.begin(loc))
 
         operations foreach {
             case CheckDeadCode =>

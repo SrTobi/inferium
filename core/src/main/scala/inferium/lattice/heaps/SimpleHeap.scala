@@ -19,11 +19,11 @@ class SimpleHeap(private val objects: Map[Location, Obj] = Map.empty, private va
     override def split(): Heap = this
 
     override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
-        import SimpleHeap.mergeProperties
+        import SimpleHeap._
         val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeap] }
         val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*)() {
             case (Obj(ap1, cp1, c1), Obj(ap2, cp2, c2)) =>
-                Obj(mergeProperties(ap1, ap2), mergeProperties(cp1, cp2), Math.max(c1, c2))
+                Obj(mergeAbsProperties(ap1, ap2), mergeConcreteProperties(cp1, cp2), Math.max(c1, c2))
         }
 
         val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*)() { _ unify _}
@@ -42,10 +42,11 @@ class SimpleHeap(private val objects: Map[Location, Obj] = Map.empty, private va
 
 
 object SimpleHeap {
-    private type Properties = Map[String, Property]
-    class Obj(val abstractProperties: Properties, val concreteProperties: Properties, val abstractCount: Long) {
+    private type ConcreteProperties = Map[String, ConcreteProperty]
+    private type AbstractProperties = Map[String, AbstractProperty]
+    class Obj(val abstractProperties: AbstractProperties, val concreteProperties: ConcreteProperties, val abstractCount: Long) {
         def isAbstractObject(o: ObjectLike): Boolean = abstractCount != o.abstractCount
-        def propertiesFor(o: ObjectLike): Properties = if (isAbstractObject(o)) abstractProperties else concreteProperties
+        def propertiesFor(o: ObjectLike): Map[String, Property] = if (isAbstractObject(o)) abstractProperties else concreteProperties
 
         override def equals(o: scala.Any): Boolean = o match {
             case other: Obj =>
@@ -57,11 +58,15 @@ object SimpleHeap {
     }
 
     object Obj {
-        def apply(abstractProperties: Properties, concreteProperties: Properties, abstractCount: Long): Obj = new Obj(abstractProperties, concreteProperties, abstractCount)
-        def unapply(arg: Obj): Option[(Properties, Properties, Long)] = Some((arg.abstractProperties, arg.concreteProperties, arg.abstractCount))
+        def apply(abstractProperties: AbstractProperties, concreteProperties: ConcreteProperties, abstractCount: Long): Obj = new Obj(abstractProperties, concreteProperties, abstractCount)
+        def unapply(arg: Obj): Option[(AbstractProperties, ConcreteProperties, Long)] = Some((arg.abstractProperties, arg.concreteProperties, arg.abstractCount))
     }
 
-    private def mergeProperties(p1: Properties, p2: Properties): Properties = {
+    private def mergeAbsProperties(p1: AbstractProperties, p2: AbstractProperties): AbstractProperties = {
+        Utils.mergeMaps(p1, p2)(a => a)({ _ unify _ })
+    }
+
+    private def mergeConcreteProperties(p1: ConcreteProperties, p2: ConcreteProperties): ConcreteProperties = {
         Utils.mergeMaps(p1, p2)(a => a)({ _ unify _ })
     }
 
@@ -70,7 +75,7 @@ object SimpleHeap {
             val ac = objects.get(location) match {
                 case Some(Obj(abstractProps, concreteProps, oldAbstractCount)) =>
                     val abstractCount = oldAbstractCount + 1
-                    objects += location -> Obj(mergeProperties(abstractProps, concreteProps), Map.empty, abstractCount)
+                    objects += location -> Obj(mergeAbsProperties(abstractProps, concreteProps.mapValues(_.abstractify(this))), Map.empty, abstractCount)
 
                     abstractCount
                 case None =>
@@ -91,17 +96,54 @@ object SimpleHeap {
             }
         }
 
-        override def setProperty(obj: ObjectLike, propertyName: String, property: Property): Unit = {
-            assert(property != Property.absentProperty)
+        override def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit = {
+            assert(property != ConcreteProperty.absentProperty)
             objects.get(obj.loc) match {
                 case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
-                        val newProperties = abstractProps + (propertyName -> property)
+                        val newProperties = abstractProps + (propertyName -> property.abstractify(this))
                         objects += obj.loc -> Obj(newProperties, concreteProps, abstractCount)
                     } else {
                         val newProperties = concreteProps + (propertyName -> property)
                         objects += obj.loc -> Obj(abstractProps, newProperties, abstractCount)
+                    }
+
+                case None =>
+                    // TODO: the object does not exist... can that even happen? maybe create a new object?
+                    ???
+            }
+        }
+
+
+        override def writeToProperty(obj: ObjectLike, propertyName: String, valueLoc: ValueLocation, isCertainWrite: Boolean, value: Entity): Property = {
+            objects.get(obj.loc) match {
+                case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
+                    if (desc.isAbstractObject(obj)) {
+                        val newProp = abstractProps.get(propertyName) match {
+                            case Some(prop) =>
+                                prop.copy(value = prop.value | value)
+
+                            case None =>
+                                AbstractProperty.defaultWriteToObject(value, mightBeAbsent = true)
+                        }
+
+                        val newProperties = abstractProps + (propertyName -> newProp)
+                        objects += obj.loc -> Obj(newProperties, concreteProps, abstractCount)
+                        newProp
+                    } else {
+                        val newProp = concreteProps.get(propertyName) match {
+                            case Some(prop) =>
+                                if (isCertainWrite) prop.copy(value = Set(valueLoc)) else prop.copy(value = prop.value + valueLoc)
+
+                            case None =>
+                                // TODO: search prototypes
+                                ConcreteProperty.defaultWriteToObject(Set(valueLoc))
+                        }
+
+                        val newProperties = concreteProps + (propertyName -> newProp)
+                        objects += obj.loc -> Obj(abstractProps, newProperties, abstractCount)
+                        newProp
                     }
 
                 case None =>
@@ -121,7 +163,7 @@ object SimpleHeap {
 
                         case None =>
                             // TODO: search prototypes
-                            Property.absentProperty
+                            ConcreteProperty.absentProperty
                     }
 
                 case None =>

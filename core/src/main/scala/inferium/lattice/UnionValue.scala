@@ -99,7 +99,7 @@ object UnionValue {
             case obj: ObjectLike =>
                 val v = objLocations.get(obj.loc) match {
                     case Some((hadAbstract, max)) =>
-                        lazy val newMax = if (obj.abstractCount > max.abstractCount) obj else max
+                        val newMax = if (obj.abstractCount > max.abstractCount) obj else max
                         (hadAbstract || obj.abstractCount != max.abstractCount, newMax)
 
                     case None =>
