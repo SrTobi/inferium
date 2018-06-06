@@ -24,13 +24,17 @@ abstract class ObjectLike extends Entity {
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity = if (cond(this)) this else NeverValue
 
     @blockRec(nonrec = true)
-    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = (assertion match {
-        case Truthyfied => this
-        case Falsyfied => NeverValue
-        case Propertyfied(name, has) =>
-            val propBool = heap.getPropertyValueIgnoringGetter(this, name).asBoolLattice(heap)
-            if (propBool mightBe has) this else NeverValue
-    }, Iterator())
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
+        val result = assertion match {
+            case Truthyfied => this
+            case Falsyfied => NeverValue
+            case Propertyfied(name, has) =>
+                val propBool = heap.getPropertyValueIgnoringGetter(this, name).asBoolLattice(heap)
+                if (propBool mightBe has) this else NeverValue
+        }
+
+        (result, this ne result, Assertion.noEffect(result))
+    }
 
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq(this)

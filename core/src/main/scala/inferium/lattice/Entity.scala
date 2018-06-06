@@ -27,14 +27,13 @@ abstract class Entity extends Unifiable[Entity] {
     //@blockRec
     //def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity
 
-    def instituteAssertion(assertion: Assertion, heap: Heap.Mutator): Entity = {
-        val (result, effects) = gatherAssertionEffects(assertion, heap)
-        effects foreach { _() }
-        result
+    def instituteAssertion(assertion: Assertion, heap: Heap.Mutator): Unit = {
+        val (_, _, effects) = gatherAssertionEffects(assertion, heap)
+        effects()
     }
 
     @blockRec
-    protected[lattice] def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit])
+    protected[lattice] def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect)
 
     def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike]
 

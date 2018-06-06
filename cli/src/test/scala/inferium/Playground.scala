@@ -23,17 +23,24 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |function test(a) {
-              |  if (debug.boolean) {
-              |     test(9)
-              |     return "haha"
-              |  } else {
-              |     return
-              |  }
+              |var d = undefined
+              |
+              |if (debug.boolean) {
+              |    d = debug.number
               |}
               |
-              |let r = test("test")
-              |debug(r).print()
+              |if (debug.boolean) {
+              |    d = debug.squash("", "test")
+              |}
+              |
+              |debug(d).is(undefined, debug.number, "test", "")
+              |if (d) {
+              |    debug(d).is(debug.number, "test")
+              |} else {
+              |    debug(d).is(undefined, 0, "")
+              |}
+              |
+              |debug(d).is(undefined, debug.number, "test", "")
             """.stripMargin
 
         /*val code =
@@ -48,7 +55,7 @@ object Playground {
 
         val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
 
-        println(PrintVisitor.print(graph, printMergeNodes = true))
+        //println(PrintVisitor.print(graph, printMergeNodes = true))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState)

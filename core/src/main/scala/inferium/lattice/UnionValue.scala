@@ -28,9 +28,33 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
     }
 
     @blockRec(nonrec = true)
-    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = {
-        val (es, its) = entities.map(_.gatherAssertionEffects(assertion, heap)).unzip
-            (UnionValue(es), its.iterator.flatten)
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
+        var changedEntityEffects: Assertion.Effect = null
+        var hasChanged = false
+        var remainingEntities = 0
+
+        val es = entities.map(_.gatherAssertionEffects(assertion, heap)).map {
+            case (entity, changed, effects) =>
+                if (changed) {
+                    hasChanged = true
+                    if (changedEntityEffects == null && entity != NeverValue) {
+                        changedEntityEffects = effects
+                    }
+                }
+                if (entity != NeverValue) {
+                    remainingEntities += 1
+                }
+                entity
+        }
+
+        lazy val result = Entity.unify(es)
+        if (!hasChanged) {
+            (this, false, Assertion.noEffect(this))
+        } else if (remainingEntities == 1 && changedEntityEffects != null) {
+            (result, true, changedEntityEffects)
+        } else {
+            (result, true, Assertion.noEffect(result))
+        }
     }
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = entities flatMap { _.coerceToObjects(heap) }

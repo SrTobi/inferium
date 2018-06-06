@@ -1,6 +1,7 @@
 package inferium.lattice
 
 import inferium.dataflow.CallableInfo
+import inferium.lattice.assertions.Assertion.NoAssertionEffect
 import inferium.lattice.assertions.{Assertion, Propertyfied}
 import inferium.utils.macros.blockRec
 
@@ -26,7 +27,7 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Ref = ???
 
     @blockRec(nonrec = true)
-    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = {
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
 
         //def filterBase(obj: Entity): Boolean = true
         //base.instituteAssertion(filterBase, heap)
@@ -38,26 +39,39 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
                 base.instituteAssertion(Propertyfied(property, has = false), heap)
         }
 
-        val (results, hereEffects) = target.toSeq.map { loc =>
+
+        var hasChanged = false
+        var changedEntityEffects: Assertion.Effect = null
+        var remainingEntities = 0
+
+        val results = target.toSeq.map { loc =>
             val oldValue = heap.getValue(loc)
-            val (assertedValue, effects) = oldValue.gatherAssertionEffects(assertion, heap)
-            val changed = oldValue ne assertedValue
+            val (assertedValue, changed, effects) = oldValue.gatherAssertionEffects(assertion, heap)
 
-            (assertedValue, () => {
-                effects.foreach(_())
-
-                if (changed) {
-                    heap.setValue(loc, assertedValue)
+            if (changed) {
+                hasChanged = true
+                if (changedEntityEffects == null && assertedValue != NeverValue) {
+                    changedEntityEffects = () => {
+                        val affectedValue = effects()
+                        heap.setValue(loc, affectedValue)
+                        this
+                    }
                 }
-            })
-        }.unzip
+            }
+            if (assertedValue != NeverValue) {
+                remainingEntities += 1
+            }
 
-        val result = UnionValue(results)
+            assertedValue
+        }
 
-        if (result == NeverValue) {
-            (NeverValue, Iterator())
+        lazy val result = Entity.unify(results)
+        if (!hasChanged) {
+            (this, false, Assertion.noEffect(this))
+        } else if (remainingEntities == 1 && changedEntityEffects != null) {
+            (result, true, changedEntityEffects)
         } else {
-            (this, hereEffects.iterator)
+            (result, true, Assertion.noEffect(result))
         }
     }
 

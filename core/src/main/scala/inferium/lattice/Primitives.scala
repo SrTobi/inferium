@@ -17,7 +17,10 @@ sealed abstract class Primitive extends Entity {
     def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive
 
     @blockRec(nonrec = true)
-    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Iterator[() => Unit]) = withAssertion(assertion, heap) -> Iterator()
+    protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
+        val entity = withAssertion(assertion, heap)
+        (entity, entity != this, Assertion.noEffect(entity))
+    }
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = ???
 
