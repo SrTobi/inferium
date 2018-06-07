@@ -5,7 +5,6 @@ import inferium.dataflow._
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.PrintVisitor
 import inferium.prelude.NodeJs
-import inferium.utils.macros.blockRec
 
 
 object Playground {
@@ -21,34 +20,18 @@ object Playground {
     }
 
     def main(args: Array[String]): Unit = {
-        /*val code =
-            """
-              |var lastObj
-              |var someObj
-              |while (debug.boolean) {
-              |    lastObj = { prop: "init" }
-              |    if (debug.boolean) {
-              |        someObj = lastObj
-              |    }
-              |    debug(lastObj).print("obj")
-              |    debug(lastObj.prop).is("init").print("here")
-              |    lastObj.prop = "next"
-              |    debug(lastObj.prop).is("next")
-              |
-              |
-              |    if (debug.boolean) {
-              |        someObj.prop = "blub"
-              |    }
-              |}
-              |
-              |debug(lastObj.prop).is("next", "blub")
-              |debug(someObj.prop).is("next", "blub")
-              |
-              |someObj.absProp = "abs"
-              |debug(someObj.absProp).is("abs", undefined)
-            """.stripMargin*/
-
         val code =
+            """
+              |var a = true
+              |if (debug.boolean) {
+              |  a = false
+              |}
+              |if (a) {
+              |  debug(a).print("a")
+              |}
+            """.stripMargin
+
+        /*val code =
             """
               |var a = false
               |function f(b) {
@@ -65,7 +48,7 @@ object Playground {
               |let r = f(true)
               |debug(r).print()
               |
-            """.stripMargin
+            """.stripMargin*/
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
