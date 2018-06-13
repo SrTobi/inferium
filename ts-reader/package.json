@@ -9,9 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/chalk": "^2.2.0",
     "@types/execa": "^0.9.0",
     "@types/node": "^9.6.6",
     "@types/typescript": "^2.0.0",
+    "chalk": "^2.4.1",
     "execa": "^0.10.0",
     "typescript": "^2.9.1"
   }
