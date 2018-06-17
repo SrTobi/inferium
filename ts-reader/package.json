@@ -4,7 +4,9 @@
   "description": "",
   "main": "./dist/main.js",
   "scripts": {
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "build": "tsc -p .",
+    "use-mkdirp": "npm run build && node . mkdirp"
   },
   "author": "",
   "license": "ISC",
