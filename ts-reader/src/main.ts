@@ -222,7 +222,7 @@ async function main(pkgname: string) {
 
     const resultPath = join(orgcwd, "result.json")
     console.log("Write result to", here(resultPath))
-    fs.writeFileSync(resultPath, JSON.stringify(predef, undefined, "  "))
+    fs.writeFileSync(resultPath, JSON.stringify(predef))
     console.log("Done.")
 }
 

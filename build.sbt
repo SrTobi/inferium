@@ -29,7 +29,7 @@ lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when exec
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS)
+    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM, nodePreludeDataJS)
     .dependsOn(testCreator)
     .settings(
         name := "inferium",
@@ -112,6 +112,18 @@ lazy val web = project
         libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "11.0.1"
     )
 
+
+//--------------------- node prelude defs -------------//
+lazy val nodePreludeData = crossProject
+    .crossType(CrossType.Pure)
+    .in(file("extras/node-prelude"))
+    .settings(commonSettings)
+    .jvmSettings(
+        fork := true
+    )
+
+lazy val nodePreludeDataJVM = nodePreludeData.jvm
+lazy val nodePreludeDataJS = nodePreludeData.js
 
 //--------------------- jsEval tools ---------------------//
 lazy val jsEval = crossProject
