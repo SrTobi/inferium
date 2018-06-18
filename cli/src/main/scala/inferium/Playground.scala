@@ -21,30 +21,54 @@ object Playground {
 
     def main(args: Array[String]): Unit = {
         val code =
-            """
-              |var lastObj
-              |var someObj
-              |while (debug.boolean) {
-              |    lastObj = { prop: "init" }
-              |    if (debug.boolean) {
-              |        someObj = lastObj
-              |    }
-              |    debug(lastObj).print("obj")
-              |    debug(lastObj.prop).is("init").print("here")
-              |    lastObj.prop = "next"
-              |    debug(lastObj.prop).is("next")
+            """/*
+              |    name: for flow
+              |    desc: for-loops should handle init-, test- and update-expressions correctly
+              | */
               |
               |
-              |    if (debug.boolean) {
-              |        someObj.prop = "blub"
-              |    }
+              |for (var a = "init"; debug.boolean; a = "update") {
+              |    debug(a).is("init", "update")
+              |    a = "inner"
+              |    debug(a).is("inner")
               |}
               |
-              |debug(lastObj.prop).is("next", "blub")
-              |debug(someObj.prop).is("next", "blub")
+              |debug(a).is("init", "update")
+              |debug("1!").print()
               |
-              |someObj.absProp = "abs"
-              |debug(someObj.absProp).is("abs", undefined)
+              |let b = "outer"
+              |
+              |for (let b = "init"; debug.boolean; debug(b).is("inner1")) {
+              |    debug(b).is("init", "inner1")
+              |    b = "inner1"
+              |    let b = "inner2"
+              |    debug(b).is("inner2")
+              |}
+              |
+              |debug(b).is("outer")
+              |debug("2!").print()
+              |
+              |
+              |var c = false
+              |
+              |for (c = true; c; c = false) {
+              |    debug(c).is(true)
+              |}
+              |debug("3!").print()
+              |
+              |debug(c).is(false)
+              |
+              |for (; debug.boolean;) {
+              |    debug.liveCode()
+              |}
+              |
+              |debug("4!").print()
+              |debug.liveCode()
+              |
+              |for (;;) {
+              |}
+              |
+              |debug.deadCode()
             """.stripMargin
 
         /*val code =

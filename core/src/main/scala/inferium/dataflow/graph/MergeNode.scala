@@ -15,37 +15,38 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
 
     def isFixpoint: Boolean = mergeType == MergeType.Fixpoint
     def isCatchMerger: Boolean = mergeType == MergeType.CatchMerger
-    private var processed: Boolean = true
+    private val inStates = mutable.Map.empty[Location, ExecutionState]
     private var mergeState: ExecutionState = _
 
     override def setNewInState(state: ExecutionState, origin: Location)(implicit analysis: DataFlowAnalysis): Unit = {
+        assert(origin != this.loc)
+
         implicit val useFixpoint: Unifiable.Fixpoint = new Unifiable.Fixpoint(isFixpoint)
         val fixedState = fixLexicalFrame(state)
 
-        if (mergeState == null) {
-            mergeState = fixedState
-        } else {
-            // merge
-            val newMergeState = mergeState unify fixedState
+        inStates.put(origin, state)
 
-            if (mergeState == newMergeState) {
-                return
-            }
-
-            mergeState = newMergeState
-        }
-
-        if (processed) {
-            processed = false
-            analysis.enqueue(this)
-        }
+        analysis.enqueue(this)
     }
 
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
-        processed = true
-        succ <~ mergeState
-        //if (!isFixpoint)
-        //    mergeState = null
+        assert(inStates.nonEmpty)
+
+        val resState = if (isFixpoint && mergeState != null) {
+            mergeState.unify(inStates.values.toSeq)
+        } else {
+            val states = inStates.values.toSeq
+            states.head unify states.tail
+        }
+
+        if (isFixpoint) {
+            if (mergeState == resState) {
+                return
+            }
+            mergeState = resState
+        }
+
+        succ <~ resState
     }
 
 
