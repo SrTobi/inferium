@@ -6,6 +6,7 @@ import inferium.lattice._
 
 abstract class InlinedCallInstance extends CallInstance.RecursionAble {
     def entryNode: Node
+    private implicit val thisStateOrigin: Node.StateOrigin = Node.StateOrigin()
     private val lengthWriteLoc = ValueLocation(Location())
     private val argumentWriteLocations = Stream.continually(ValueLocation(Location()))
     private val argumentsBuildingLoc = Location()

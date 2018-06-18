@@ -6,10 +6,15 @@ import scala.collection.mutable
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
 import inferium.lattice.{Entity, Location}
 
+import scala.language.implicitConversions
+
 abstract class Node(implicit val info: Node.Info) {
     import Node._
+
+    protected implicit def thisOrigin: StateOrigin = StateOrigin(loc)
+
     val loc: Location = Location()
-    val id: Location = loc
+    def id: Location = loc
     def label: String = info.label.getOrElse(s"L${id.id}")
     def catchTarget: Option[Node] = info.catchTarget
 
@@ -97,8 +102,8 @@ abstract class Node(implicit val info: Node.Info) {
     protected[graph] def addPredecessor(node: Node): Unit
     protected[graph] def addSuccessor(node: Node): Unit
 
-    final def <~(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = setNewInState(state)
-    def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit
+    final def <~(state: ExecutionState)(implicit originNode: StateOrigin, analysis: DataFlowAnalysis): Unit = setNewInState(state, originNode)
+    def setNewInState(state: ExecutionState, origin: Location)(implicit analysis: DataFlowAnalysis): Unit
 
     def process(implicit analysis: DataFlowAnalysis): Unit
 
@@ -108,6 +113,15 @@ abstract class Node(implicit val info: Node.Info) {
 
 
 object Node {
+    final class StateOrigin private (private val id: Long) extends AnyVal {
+        def loc: Location = Location.create(id)
+    }
+
+    object StateOrigin {
+        def apply(loc: Location = Location()): StateOrigin = new StateOrigin(loc.id)
+        implicit def stateOriginToLocation(origin: StateOrigin): Location = origin.loc
+    }
+
     sealed abstract class ExprStackFrame {
         //override def toString: String = super.toString
     }

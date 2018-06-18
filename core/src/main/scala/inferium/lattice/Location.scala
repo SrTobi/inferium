@@ -12,9 +12,7 @@ object Location {
 
     private val counter = new Counter()
 
-    def create(): Location = {
-        return new Location(counter.next())
-    }
-
+    def create(id: Long) = new Location(id)
+    def create(): Location = create(counter.next())
     def apply(): Location = create()
 }

@@ -1,6 +1,7 @@
 package inferium.dataflow.graph
 import inferium.dataflow.graph.traits.{SinglePredecessor, SingleSuccessor}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.lattice.Location
 
 class JumpNode(val target: Node)(implicit _info: Node.Info) extends Node with SingleSuccessor with SinglePredecessor {
     assert(target != null)
@@ -8,7 +9,7 @@ class JumpNode(val target: Node)(implicit _info: Node.Info) extends Node with Si
 
     override def successors: Seq[Node] = super.successors ++ Seq(target)
 
-    override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
+    override def setNewInState(state: ExecutionState, origin: Location)(implicit analysis: DataFlowAnalysis): Unit = {
         target <~ state
     }
 

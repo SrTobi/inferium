@@ -22,13 +22,29 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |var a = true
-              |if (debug.boolean) {
-              |  a = false
+              |var lastObj
+              |var someObj
+              |while (debug.boolean) {
+              |    lastObj = { prop: "init" }
+              |    if (debug.boolean) {
+              |        someObj = lastObj
+              |    }
+              |    debug(lastObj).print("obj")
+              |    debug(lastObj.prop).is("init").print("here")
+              |    lastObj.prop = "next"
+              |    debug(lastObj.prop).is("next")
+              |
+              |
+              |    if (debug.boolean) {
+              |        someObj.prop = "blub"
+              |    }
               |}
-              |if (a) {
-              |  debug(a).print("a")
-              |}
+              |
+              |debug(lastObj.prop).is("next", "blub")
+              |debug(someObj.prop).is("next", "blub")
+              |
+              |someObj.absProp = "abs"
+              |debug(someObj.absProp).is("abs", undefined)
             """.stripMargin
 
         /*val code =
@@ -40,7 +56,7 @@ object Playground {
               | }
               | if (b) {
               |     a = true
-              |     return f(false)
+              |     return f(ffalse)
               | } else {
               |     return "test"
               | }

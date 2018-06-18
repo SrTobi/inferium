@@ -4,6 +4,7 @@ import inferium.dataflow.graph.MergeNode.MergeType
 import inferium.dataflow.graph.MergeNode.MergeType.MergeType
 import inferium.dataflow.graph.traits.SingleSuccessor
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.lattice.Location
 
 import scala.collection.mutable
 
@@ -17,7 +18,7 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     private var processed: Boolean = true
     private var mergeState: ExecutionState = _
 
-    override def setNewInState(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Unit = {
+    override def setNewInState(state: ExecutionState, origin: Location)(implicit analysis: DataFlowAnalysis): Unit = {
         implicit val useFixpoint: Unifiable.Fixpoint = new Unifiable.Fixpoint(isFixpoint)
         val fixedState = fixLexicalFrame(state)
 
