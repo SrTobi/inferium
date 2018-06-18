@@ -67,8 +67,7 @@ object js {
     }
 
     object InterfaceType {
-        def apply(name: String, properties: => Seq[Property], extend: Type = null): CompoundType = new CompoundType(Some(name), Seq.empty, properties, Option(extend))
-        def apply(properties: => Seq[Property], extend: Type = null): CompoundType = InterfaceType(null, properties, extend)
+        def apply(properties: => Seq[Property], name: String = null, extend: Type = null): CompoundType = new CompoundType(Some(name), Seq.empty, properties, Option(extend))
     }
 
     final case class Property(name: String, ty: Type, readonly: Boolean = false)
