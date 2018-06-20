@@ -6,7 +6,8 @@ import inferium.utils.macros.blockRec
 
 import scala.collection.mutable
 
-case class UnionValue(entities: Seq[Entity]) extends Entity {
+class UnionValue private (val entities: Seq[Entity]) extends Entity {
+    assert(entities.length > 1)
     override def mightBe(entity: Entity): Boolean = entity match {
         case NeverValue => true
         case SpecificBoolValue(_) if entities.contains(BoolValue) => true
@@ -24,7 +25,12 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = {
-        GeneralBoolLattice.unify(entities.view.map(_.asBoolLattice(heap)))
+        GeneralBoolLattice.unify(entities.iterator map { _.asBoolLattice(heap) })
+    }
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = {
+        StringLattice.unify(entities.iterator map { _.asStringLattice(heap) })
     }
 
     @blockRec(nonrec = true)
@@ -61,12 +67,22 @@ case class UnionValue(entities: Seq[Entity]) extends Entity {
 
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = entities flatMap { _.coerceToFunctions(heap, fail) }
 
+    override def hashCode(): Int = entities.hashCode()
+
+    override def equals(o: scala.Any): Boolean = o match {
+        case o: UnionValue =>
+            o.entities == this.entities
+
+        case _ =>
+            false
+    }
+
     override def toString: String = entities.mkString("{", " | ", "}")
 }
 
 object UnionValue {
     def apply(entity: Entity, entities: Entity*): Entity = apply(entity +: entities)
-    def apply(entities: Seq[Entity]): Entity = {
+    def apply(entities: TraversableOnce[Entity]): Entity = {
         var hasUndefined = false
         var hasNull = false
         var boolValue: BoolValue = null
@@ -128,6 +144,8 @@ object UnionValue {
             refs.toSeq
         )
     }
+
+    private def unapply(unionValue: UnionValue): Option[Seq[Entity]] = Some(unionValue.entities)
 
     private def unpackUnion(value: Entity): Seq[Entity] = value match {
         case UnionValue(values) => values

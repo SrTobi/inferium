@@ -21,54 +21,36 @@ object Playground {
 
     def main(args: Array[String]): Unit = {
         val code =
-            """/*
-              |    name: for flow
-              |    desc: for-loops should handle init-, test- and update-expressions correctly
-              | */
+            """
+              |var o = { p: "init" }
+              |
+              |debug(o.p).is("init")
+              |
+              |o[debug.string] = "haha"
+              |
+              |debug(o.p).is("haha", "init")
+              |debug(o[debug.string]).is("haha", "init", undefined)
+              |
+              |o.p = "reset"
+              |
+              |debug(o.p).is("reset")
+              |debug(o[debug.string]).is("haha", "reset", undefined)
               |
               |
-              |for (var a = "init"; debug.boolean; a = "update") {
-              |    debug(a).is("init", "update")
-              |    a = "inner"
-              |    debug(a).is("inner")
-              |}
               |
-              |debug(a).is("init", "update")
-              |debug("1!").print()
+              |var o2 = { [42]: "init", p: "string" }
               |
-              |let b = "outer"
+              |debug(o2.p).is("string")
+              |debug(o2[42]).is("init")
+              |debug(o2[debug.number]).is("init")
+              |debug(o2[debug.string]).is("string", "init")
               |
-              |for (let b = "init"; debug.boolean; debug(b).is("inner1")) {
-              |    debug(b).is("init", "inner1")
-              |    b = "inner1"
-              |    let b = "inner2"
-              |    debug(b).is("inner2")
-              |}
+              |o2[debug.number] = "haha"
               |
-              |debug(b).is("outer")
-              |debug("2!").print()
-              |
-              |
-              |var c = false
-              |
-              |for (c = true; c; c = false) {
-              |    debug(c).is(true)
-              |}
-              |debug("3!").print()
-              |
-              |debug(c).is(false)
-              |
-              |for (; debug.boolean;) {
-              |    debug.liveCode()
-              |}
-              |
-              |debug("4!").print()
-              |debug.liveCode()
-              |
-              |for (;;) {
-              |}
-              |
-              |debug.deadCode()
+              |debug(o2.p).is("string")
+              |debug(o2[42]).is("haha", "init")
+              |debug(o2[debug.number]).is("haha", "init")
+              |debug(o2[debug.string]).is("string", "haha", "init")
             """.stripMargin
 
         /*val code =
@@ -93,12 +75,13 @@ object Playground {
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
-        val graph = new GraphBuilder(InferiumConfig.Env.NodeDebug).buildTemplate(prog).instantiate()
+        val config = InferiumConfig.Env.NodeDebug
+        val graph = new GraphBuilder(config).buildTemplate(prog).instantiate()
 
-        println(PrintVisitor.print(graph, printMergeNodes = true))
+        println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
-        analysis.runAnalysis(NodeJs.initialState)
+        analysis.runAnalysis(NodeJs.initialState(config))
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 

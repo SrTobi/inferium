@@ -14,11 +14,13 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
     val name: String = fixture.name
     val description: String = fixture.description
 
+    def config: Config = fixture.config
+
     val prog: Program = bridge.parseScript(fixture.code)
 
-    val graph: ScriptGraph = new GraphBuilder(fixture.config).buildTemplate(prog).instantiate()
+    val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog).instantiate()
 
-    val iniState: ExecutionState = NodeJs.initialState
+    val iniState: ExecutionState = NodeJs.initialState(config)
     val debugAdapter: DebugAdapter = new DebugAdapter {
         private var _hasError = false
         override def error(node: Node, message: String): Unit = {

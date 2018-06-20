@@ -20,7 +20,12 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
 
     @blockRec(GeneralBoolLattice.Bottom)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = {
-        GeneralBoolLattice.unify(target map { t => heap.getValue(t).asBoolLattice(heap) })
+        GeneralBoolLattice.unify(target.iterator map { t => heap.getValue(t).asBoolLattice(heap) })
+    }
+
+    @blockRec(StringLattice.Bottom)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = {
+        StringLattice.unify(target.iterator map { t => heap.getValue(t).asStringLattice(heap) })
     }
 
     //@blockRec(nonrec = true)

@@ -2,7 +2,7 @@ package inferium.dataflow.graph
 
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading, LexicalLookup}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
-import inferium.lattice.ValueLocation
+import inferium.lattice.{StringLattice, ValueLocation}
 
 class LexicalReadNode(val varName: String)(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
 
@@ -13,7 +13,7 @@ class LexicalReadNode(val varName: String)(implicit _info: Node.Info) extends Fa
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
 
         val (obj, propertyName, stateAfterLookup) = lookup(state, lookupChain)
-        for((result, stateAfterRead) <- read(obj, propertyName, stateAfterLookup))
+        for((result, stateAfterRead) <- read(obj, StringLattice(propertyName), stateAfterLookup))
             yield stateAfterRead.copy(stack = result :: stateAfterRead.stack)
     }
 

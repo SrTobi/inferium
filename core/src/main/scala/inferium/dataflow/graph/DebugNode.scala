@@ -2,7 +2,7 @@ package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, DebugAdapter, ExecutionState}
 import inferium.dataflow.graph.DebugNode._
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading, LexicalLookup}
-import inferium.lattice.{Entity, Primitive, ValueLocation}
+import inferium.lattice.{Entity, Primitive, StringLattice, ValueLocation}
 
 class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
 
@@ -12,7 +12,11 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
     private def reportInfo(msg: String)(implicit analysis: DataFlowAnalysis): Unit = analysis.debugAdapter.info(this, msg)
 
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
-        val subject = state.stack.head.normalized(state.heap.begin(loc))
+        val stack = state.stack
+        lazy val subject = if (stack.isEmpty)
+                throw new IllegalStateException("Can't access ans element because it does not exist in the current context")
+            else
+                stack.head.normalized(state.heap.begin(loc))
 
         operations foreach {
             case CheckDeadCode =>
@@ -24,6 +28,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
             case Is(_) =>
 
             case PrintExpr(name) =>
+                subject
                 reportInfo(s"$name: $subject")
         }
 
@@ -53,7 +58,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
                     case Right(name) =>
                         val lookupChain = info.lexicalEnv.buildLookupSeq(name)
                         val (obj, propertyName, _) = lookup(state, lookupChain)
-                        val Some((result, _)) = read(obj, propertyName, state)
+                        val Some((result, _)) = read(obj, StringLattice(propertyName), state)
                         result.normalized(state.heap.begin(loc))
                 }
 

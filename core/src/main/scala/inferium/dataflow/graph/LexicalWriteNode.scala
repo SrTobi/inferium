@@ -2,7 +2,7 @@ package inferium.dataflow.graph
 
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapWriting, LexicalLookup}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
-import inferium.lattice.ValueLocation
+import inferium.lattice.{StringLattice, ValueLocation}
 
 class LexicalWriteNode(val varName: String)(implicit _info: Node.Info) extends FailingTransformerNode with HeapWriting with LexicalLookup {
 
@@ -14,7 +14,7 @@ class LexicalWriteNode(val varName: String)(implicit _info: Node.Info) extends F
 
         val writeValue :: restStack = state.stack
         val (obj, propertyName, stateAfterLookup) = lookup(state.copy(stack = restStack), lookupChain)
-        write(obj, propertyName, writeValue, stateAfterLookup) map {
+        write(obj, StringLattice(propertyName), writeValue, stateAfterLookup) map {
             case (result, resultState) => resultState.copy(stack = result :: resultState.stack)
         }
     }

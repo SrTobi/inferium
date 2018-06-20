@@ -24,6 +24,9 @@ abstract class Entity extends Unifiable[Entity] {
     @blockRec
     def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice
 
+    @blockRec
+    def asStringLattice(heap: Heap.Mutator): StringLattice
+
     //@blockRec
     //def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity
 

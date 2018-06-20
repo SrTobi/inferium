@@ -42,6 +42,9 @@ abstract class ObjectLike extends Entity {
 
 case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long) extends ObjectLike {
 
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("[object Object]")
+
     override def objectType: ObjectType = ObjectType.OrdinaryObject
 
     override def toString: String = s"Obj($loc)"
@@ -55,6 +58,10 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
 }
 
 case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override val abstractCount: Long, val callableInfo: CallableInfo) extends ObjectLike {
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
+
     override def objectType: ObjectType = ObjectType.FunctionObject
 
     override def toString: String = s"Func($loc${callableInfo.name map { ":" + _ } getOrElse ""})"

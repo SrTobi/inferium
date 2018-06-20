@@ -101,7 +101,7 @@ class OutputTab extends Tabs.Tab {
                     p.complete(Try {
                         val analysis = new DataFlowAnalysis(g, OutputDebugAdapter)
 
-                        analysis.runAnalysis(NodeJs.initialState)
+                        analysis.runAnalysis(NodeJs.initialState(IndexMain.inferiumConfig))
                     })
 
                     val f = p.future

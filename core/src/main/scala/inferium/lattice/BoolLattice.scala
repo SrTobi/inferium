@@ -56,9 +56,9 @@ object GeneralBoolLattice {
         override def mightBeFalse: Boolean = false
     }
 
-    def unify(bools: Iterable[GeneralBoolLattice]): GeneralBoolLattice = {
+    def unify(bools: TraversableOnce[GeneralBoolLattice]): GeneralBoolLattice = {
 
-        bools.reduce {
+        bools.foldLeft[GeneralBoolLattice](Bottom) {
             (a, b) =>
                 if (a == Top)
                     return Top

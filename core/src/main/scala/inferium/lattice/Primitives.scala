@@ -39,6 +39,9 @@ object NeverValue extends Primitive {
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): GeneralBoolLattice = GeneralBoolLattice.Bottom
 
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Bottom
+
     //@blockRec(nonrec = true)
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): NeverValue.type = NeverValue
 
@@ -55,6 +58,9 @@ object UndefinedValue extends Primitive {
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
 
     @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("undefined")
+
+    @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => NeverValue
         case Falsyfied => this
@@ -69,6 +75,9 @@ object NullValue extends Primitive {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("null")
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
@@ -106,6 +115,8 @@ object BoolValue extends BoolValue {
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
 
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("true", "false")
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
@@ -130,6 +141,9 @@ object TrueValue extends SpecificBoolValue(true) {
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.True
 
     @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("true")
+
+    @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => NeverValue
@@ -143,6 +157,9 @@ object FalseValue extends SpecificBoolValue(false) {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.False
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("false")
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
@@ -175,6 +192,9 @@ object NumberValue extends NumberValue {
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
 
     @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.NumberString
+
+    @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => SpecificNumberValue(0)
@@ -188,6 +208,9 @@ case class SpecificNumberValue(value: Int) extends NumberValue {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice(value != 0)
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice(value.toString)
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
@@ -216,6 +239,9 @@ object StringValue extends StringValue {
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
 
     @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
+
+    @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => SpecificStringValue.emptyString
@@ -229,6 +255,9 @@ class SpecificStringValue private (val value: String) extends StringValue {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice(value != "")
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice(value)
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {

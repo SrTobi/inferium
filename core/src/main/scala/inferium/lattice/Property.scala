@@ -52,6 +52,8 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
         )
     }
 
+    def addValue(value: ValueLocation): ConcreteProperty = copy(value = this.value + value)
+
     override def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
     //def withAbsent: Property = if (mightBeAbsent) this else copy(value = value + ValueLocation.AbsentLocation)
 }
@@ -74,6 +76,8 @@ sealed case class AbstractProperty(configurable: GeneralBoolLattice,
             this.setter | other.setter,
             this.mightBeAbsent | other.mightBeAbsent
         )
+
+    def addValue(value: Entity): AbstractProperty = copy(value = this.value | value)
 
     override def abstractify(heap: Heap.Mutator): AbstractProperty = this
 }
@@ -98,6 +102,11 @@ object ConcreteProperty {
             getter = Set.empty,
             setter = Set.empty
         )
+
+    val internalProperty: ConcreteProperty = absentProperty.copy(
+        configurable = BoolLattice.True,
+        enumerable = BoolLattice.False
+    )
 }
 
 object AbstractProperty {
@@ -110,6 +119,23 @@ object AbstractProperty {
             getter = NeverValue,
             setter = NeverValue,
             mightBeAbsent = mightBeAbsent
+        )
+
+    val absentProperty: AbstractProperty =
+        AbstractProperty(
+            configurable = GeneralBoolLattice.Bottom,
+            enumerable = GeneralBoolLattice.Bottom,
+            value = NeverValue,
+            writable = GeneralBoolLattice.Bottom,
+            getter = NeverValue,
+            setter = NeverValue,
+            mightBeAbsent = true
+        )
+
+    val internalProperty: AbstractProperty =
+        absentProperty.copy(
+            configurable = BoolLattice.True,
+            enumerable = BoolLattice.False
         )
 }
 /*

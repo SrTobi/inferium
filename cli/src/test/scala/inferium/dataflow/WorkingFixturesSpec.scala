@@ -6,253 +6,6 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class WorkingFixturesSpec extends FreeSpec with Matchers {
             
-    "/abstract" - {
-        "Checks if conditional branching filters chained properties" in {
-            val code =
-                """/*
-                  |    name: chain filtering
-                  |    desc: Checks if conditional branching filters chained properties
-                  | */
-                  |
-                  |var a = debug.boolean
-                  |var b = a
-                  |var c = b
-                  |var d = a
-                  |
-                  |if(a) {
-                  |    debug(a).is(true)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |    debug(d).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |    debug(b).is(false)
-                  |    debug(c).is(false)
-                  |    debug(d).is(false)
-                  |}
-                  |
-                  |
-                  |if(c) {
-                  |    debug(a).is(true)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |    debug(d).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |    debug(b).is(false)
-                  |    debug(c).is(false)
-                  |    debug(d).is(false)
-                  |}
-                  |
-                  |if(d) {
-                  |    debug(a).is(true)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |    debug(d).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |    debug(b).is(false)
-                  |    debug(c).is(false)
-                  |    debug(d).is(false)
-                  |}
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
-        "Checks if conditional branching filters properties respecting union values" in {
-            val code =
-                """/*
-                  |    name: fan filtering
-                  |    desc: Checks if conditional branching filters properties respecting union values
-                  | */
-                  |
-                  |var a = false
-                  |var b = true
-                  |var c = true
-                  |
-                  |var d = debug.squash(a, b)
-                  |var e = debug.squash(c, d)
-                  |
-                  |debug(a).is(false)
-                  |debug(b).is(true)
-                  |debug(c).is(true)
-                  |
-                  |debug(d).is(debug.boolean)
-                  |debug(e).is(debug.boolean)
-                  |
-                  |if (d) {
-                  |    debug(a).is(false)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(true)
-                  |    debug(e).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(false)
-                  |    debug(e).is(debug.boolean)
-                  |}
-                  |
-                  |if (e) {
-                  |    debug(a).is(false)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(debug.boolean)
-                  |    debug(e).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(false)
-                  |    debug(e).is(false)
-                  |}
-                  |
-                  |a = true
-                  |
-                  |if (e) {
-                  |    debug(a).is(true)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(debug.boolean)
-                  |    debug(e).is(true)
-                  |} else {
-                  |    debug(a).is(true)
-                  |    debug(b).is(true)
-                  |    debug(c).is(true)
-                  |
-                  |    debug(d).is(false)
-                  |    debug(e).is(false)
-                  |}
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
-        "Checks if conditional branching filters the condition" in {
-            val code =
-                """/*
-                  |    name: filtering
-                  |    desc: Checks if conditional branching filters the condition
-                  | */
-                  |
-                  |var a = debug.boolean
-                  |
-                  |if (a) {
-                  |    debug(a).is(true)
-                  |} else {
-                  |    debug(a).is(false)
-                  |}
-                  |
-                  |debug(a).is(debug.boolean)
-                  |
-                  |
-                  |var b = debug.number
-                  |
-                  |if (b) {
-                  |    debug(b).is(debug.number)
-                  |} else {
-                  |    debug(b).is(0)
-                  |}
-                  |
-                  |debug(b).is(debug.number)
-                  |
-                  |
-                  |var c = debug.string
-                  |
-                  |if (c) {
-                  |    debug(c).is(debug.string)
-                  |} else {
-                  |    debug(c).is("")
-                  |}
-                  |
-                  |debug(c).is(debug.string)
-                  |
-                  |
-                  |var d = undefined
-                  |
-                  |if (debug.boolean) {
-                  |    d = debug.number
-                  |}
-                  |
-                  |if (debug.boolean) {
-                  |    d = debug.squash("", "test")
-                  |}
-                  |
-                  |debug(d).is(undefined, debug.number, "test", "")
-                  |if (d) {
-                  |    debug(d).is(debug.number, "test")
-                  |} else {
-                  |    debug(d).is(undefined, 0, "")
-                  |}
-                  |
-                  |debug(d).is(undefined, debug.number, "test", "")
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
-        "Checks if conditional branching filters the base object of references" in {
-            val code =
-                """/*
-                  |    name: Object filtering
-                  |    desc: Checks if conditional branching filters the base object of references
-                  | */
-                  |
-                  |var t = { cond: true }
-                  |var f = { cond: false }
-                  |var b = { cond: debug.boolean }
-                  |
-                  |if (debug.boolean) {
-                  |    var test = t
-                  |} else {
-                  |    test = f
-                  |}
-                  |
-                  |debug(test).is(t, f)
-                  |debug(test.cond).is(debug.boolean)
-                  |
-                  |if (test.cond) {
-                  |    debug(test).is(t)
-                  |    debug(t.cond).is(true)
-                  |    debug(f.cond).is(false)
-                  |} else {
-                  |    debug(test).is(f)
-                  |    debug(t.cond).is(true)
-                  |    debug(f.cond).is(false)
-                  |}
-                  |
-                  |debug(test).is(t, f)
-                  |
-                  |if (debug.boolean) {
-                  |    test = b
-                  |}
-                  |
-                  |debug(test).is(t, f, b)
-                  |
-                  |if (test.cond) {
-                  |    debug(test).is(t, b)
-                  |    debug(t.cond).is(true)
-                  |    debug(f.cond).is(false)
-                  |} else {
-                  |    debug(test).is(f, b)
-                  |    debug(t.cond).is(true)
-                  |    debug(f.cond).is(false)
-                  |}
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
-    }
-
-
     "/abstract/objects" - {
         "Object instances should become abstract in iteration" in {
             val code =
@@ -284,6 +37,49 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |someObj.absProp = "abs"
                   |debug(someObj.absProp).is("abs", undefined)
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "write/read to unknown properties" in {
+            val code =
+                """/*
+                  |    name: dynamic property access
+                  |    desc: write/read to unknown properties
+                  | */
+                  |
+                  |
+                  |var o = { p: "init" }
+                  |
+                  |debug(o.p).is("init")
+                  |
+                  |o[debug.string] = "haha"
+                  |
+                  |debug(o.p).is("haha", "init")
+                  |debug(o[debug.string]).is("haha", "init", undefined)
+                  |
+                  |o.p = "reset"
+                  |
+                  |debug(o.p).is("reset")
+                  |debug(o[debug.string]).is("haha", "reset", undefined)
+                  |
+                  |
+                  |
+                  |var o2 = { [42]: "init", p: "string" }
+                  |
+                  |debug(o2.p).is("string")
+                  |debug(o2[42]).is("init")
+                  |debug(o2[debug.squash(42, "p")]).is("init", "string")
+                  |debug(o2[debug.number]).is("init", undefined)
+                  |debug(o2[debug.string]).is("string", "init", undefined)
+                  |
+                  |o2[debug.number] = "haha"
+                  |
+                  |debug(o2.p).is("string")
+                  |debug(o2[42]).is("haha", "init")
+                  |debug(o2[debug.number]).is("haha", "init", undefined)
+                  |debug(o2[debug.string]).is("string", "haha", "init", undefined)
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -454,6 +250,91 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |
                   |debug.string;
                   |debug.ans.is(debug.string);
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "Dynamic access should work with concrete parameters" in {
+            val code =
+                """/*
+                  |    name: Concrete dynamic access
+                  |    desc: Dynamic access should work with concrete parameters
+                  | */
+                  |
+                  |
+                  |
+                  |var o = {
+                  |    a: true,
+                  |    [1]: "test",
+                  |    "2": "test2",
+                  |    "true": "test3",
+                  |    false: "test4"
+                  |}
+                  |
+                  |var aname = "a"
+                  |var one = 1
+                  |var onename = "1"
+                  |var two = 2
+                  |var twoname = "2"
+                  |var t = true
+                  |var tname = "true"
+                  |var f = false
+                  |var fname = "false"
+                  |
+                  |debug(o[aname]).is(true)
+                  |
+                  |debug(o[one]).is("test")
+                  |debug(o[onename]).is("test")
+                  |
+                  |debug(o[two]).is("test2")
+                  |debug(o[twoname]).is("test2")
+                  |
+                  |debug(o[t]).is("test3")
+                  |debug(o[tname]).is("test3")
+                  |
+                  |debug(o[f]).is("test4")
+                  |debug(o[fname]).is("test4")
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+        "Dynamic access should work with constant parameters" in {
+            val code =
+                """/*
+                  |    name: Constant dynamic access
+                  |    desc: Dynamic access should work with constant parameters
+                  | */
+                  |
+                  |
+                  |
+                  |var o = {
+                  |    a: true,
+                  |    [1]: "test",
+                  |    "2": "test2",
+                  |    "true": "test3",
+                  |    false: "test4",
+                  |    "undefined": "test5"
+                  |}
+                  |
+                  |debug(o.a).is(true)
+                  |debug(o["a"]).is(true)
+                  |
+                  |debug(o[1]).is("test")
+                  |debug(o["1"]).is("test")
+                  |
+                  |debug(o["2"]).is("test2")
+                  |debug(o[2]).is("test2")
+                  |
+                  |debug(o["true"]).is("test3")
+                  |debug(o[true]).is("test3")
+                  |
+                  |debug(o[false]).is("test4")
+                  |debug(o["false"]).is("test4")
+                  |
+                  |debug(o[undefined]).is("test5")
+                  |debug(o["undefined"]).is("test5")
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1150,56 +1031,6 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |}
                   |
                   |debug(b).is("in finally")
-                """.stripMargin
-
-            FixtureRunner.test(code)
-        }
-            
-        "for-loops should handle init-, test- and update-expressions correctly" in {
-            val code =
-                """/*
-                  |    name: for flow
-                  |    desc: for-loops should handle init-, test- and update-expressions correctly
-                  | */
-                  |
-                  |
-                  |for (var a = "init"; debug.boolean; a = "update") {
-                  |    debug(a).is("init", "update")
-                  |    a = "inner"
-                  |    debug(a).is("inner")
-                  |}
-                  |
-                  |debug(a).is("init", "update")
-                  |
-                  |let b = "outer"
-                  |
-                  |for (let b = "init"; debug.boolean; debug(b).is("inner1")) {
-                  |    debug(b).is("init", "inner1")
-                  |    b = "inner1"
-                  |    let b = "inner2"
-                  |    debug(b).is("inner2")
-                  |}
-                  |
-                  |debug(b).is("outer")
-                  |
-                  |
-                  |var c = false
-                  |
-                  |for (c = true; c; c = false) {
-                  |    debug(c).is(true)
-                  |}
-                  |
-                  |debug(c).is(false)
-                  |
-                  |for (; debug.boolean;) {
-                  |    debug.liveCode()
-                  |}
-                  |
-                  |debug.liveCode()
-                  |
-                  |for (;;) {}
-                  |
-                  |debug.deadCode()
                 """.stripMargin
 
             FixtureRunner.test(code)

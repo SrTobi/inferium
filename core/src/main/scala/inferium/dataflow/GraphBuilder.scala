@@ -100,6 +100,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             //private def initialBlockEnv: LexicalEnv = if (isTopLevel) blockLexicalEnv else blockHoistingEnv
             private[this] var done = false
 
+            def makeBlockInfo(priority: Int, lexicalEnv: LexicalEnv): Node.Info = Node.Info(priority, lexicalEnv, functionFrame, block.catchEntry)
 
             private def buildJump(targetBlock: BlockInfo, targetNode: MergeNode, priority: Int, env: LexicalEnv): graph.JumpNode = {
                 def unroll(block: BlockInfo): Graph = {
@@ -113,7 +114,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                 val finalizers = unroll(block)
                 val unrollGraph = finalizers ~> targetNode
-                val jmp = new graph.JumpNode(unrollGraph.begin)(Node.Info(priority, env, functionFrame, targetBlock.catchEntry))
+                val jmp = new graph.JumpNode(unrollGraph.begin)(makeBlockInfo(priority, env))
                 jmp
             }
 
@@ -281,7 +282,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildExpression(expr: ast.Expression, priority: Int, env: LexicalEnv): Graph = BuildException.enrich(expr) {
-                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
+                implicit lazy val info: Node.Info = makeBlockInfo(priority, env)
                 def buildExpression(expr: ast.Expression, priority: Int = priority, env: LexicalEnv = env): Graph = this.buildExpression(expr, priority, env)
 
                 expr match {
@@ -339,17 +340,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                             case ast.Property(key, value, kind, isMethod, isShorthand, isComputed) =>
                                 if (kind != ast.PropertyKind.init) ???
-                                if (isMethod) ???
 
-                                def valueGraph: Graph = buildExpression(value)
+                                val valueGraph: Graph = buildExpression(value)
 
-                                (isComputed, key) match {
-                                    case (false, ast.Identifier(name)) =>
-                                        valueGraph ~> new graph.PropertyWriteNode(name) ~> new graph.PopNode
-                                    case _ =>
-                                        // todo: write dynamic property
-                                        buildExpression(key) ~> ???
-                                }
+                                buildPropertyWrite(key, isComputed, valueGraph, priority, env) ~> new graph.PopNode
                         }
 
                         val dupGraph: Graph = if (propertyInitGraphs.isEmpty) EmptyGraph else new graph.DupNode(propertyInitGraphs.length)
@@ -429,10 +423,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
             private def buildMemberAccess(node: ast.MemberExpression, priority: Int, env: LexicalEnv, needThis: Boolean = false)(implicit nodeInfo: Node.Info): Graph = {
                 lazy val dupGraph: Graph = if (needThis) new graph.DupNode(1) else EmptyGraph
                 node match {
-                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
+                    case ast.MemberExpression(obj: ast.Expression, property, computed) =>
                         // read static member (base.propertyName)
                         val baseGraph = buildExpression(obj, priority, env)
-                        baseGraph ~> dupGraph ~> new graph.PropertyReadNode(propertyName)
+                        baseGraph ~> dupGraph ~> buildPropertyRead(property, computed, nodeInfo.priority, nodeInfo.lexicalEnv)
 
                 }
             }
@@ -455,18 +449,62 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 buildFunction(tmpl, isGenerator, isAsync, captureThis = false)
             }
 
+            object ConstantProperty {
+                def unapply(arg: ast.Expression): Option[String] = {
+                    implicit def stringToOption(str: String): Some[String] = Some(str)
+                    arg match {
+                        case ast.BooleanLiteral(value) => value.toString
+                        case ast.StringLiteral(value) => value
+                        case num: ast.NumberLiteral => num.raw
+                        case _: ast.NullLiteral => "null"
+                        case ast.Identifier("undefined") => "undefined"
+                        case _ => None
+                    }
+                }
+            }
+
+            private def buildPropertyRead(property: ast.Expression, computed: Boolean, priority: Int, lexicalEnv: LexicalEnv): Graph = {
+                implicit val info: Node.Info = makeBlockInfo(priority, lexicalEnv)
+                property match {
+                    case ConstantProperty(propertyName) =>
+                        new PropertyReadNode(propertyName)
+                    case ast.Identifier(propertyName) if !computed =>
+                        new PropertyReadNode(propertyName)
+                    case expr =>
+                        assert(computed)
+                        val propertyGraph = buildExpression(expr, priority, lexicalEnv)
+                        propertyGraph ~> new PropertyDynamicReadNode
+                }
+            }
+
+
+            private def buildPropertyWrite(property: ast.Expression, computed: Boolean, valueGraph: Graph, priority: Int, lexicalEnv: LexicalEnv): Graph = {
+                implicit val info: Node.Info = makeBlockInfo(priority, lexicalEnv)
+                property match {
+                    case ConstantProperty(propertyName) =>
+                        valueGraph ~> new PropertyWriteNode(propertyName)
+                    case ast.Identifier(propertyName) if !computed =>
+                        valueGraph ~> new PropertyWriteNode(propertyName)
+                    case expr =>
+                        assert(computed)
+                        val propertyGraph = buildExpression(expr, priority, lexicalEnv)
+                        propertyGraph ~> valueGraph ~> new PropertyDynamicWriteNode
+
+                }
+            }
+
             private def buildAssignment(pattern: ast.Pattern, init: Option[ast.Expression], priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
-                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
+                implicit lazy val info: Node.Info = makeBlockInfo(priority, env)
 
                 def buildExpr(expr: ast.Expression) = buildExpression(expr, priority, env)
                 def initGraph: Graph = init map { buildExpr } getOrElse { new graph.LiteralNode(UndefinedValue) }
                 def consumeResult: Graph = if (pushWrittenValueToStack) EmptyGraph else { new graph.PopNode }
 
                 val assignmentGraph = pattern match {
-                    case ast.MemberExpression(obj: ast.Expression, ast.Identifier(propertyName), false) =>
+                    case ast.MemberExpression(obj: ast.Expression, property, computed) =>
                         val objGraph = buildExpr(obj)
 
-                        objGraph ~> initGraph ~> new graph.PropertyWriteNode(propertyName)
+                        objGraph ~> buildPropertyWrite(property, computed, initGraph, priority, env)
 
                     case _ =>
                         initGraph ~> buildPatternBinding(pattern, priority, env, pushWrittenValueToStack = true)
@@ -476,7 +514,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private def buildPatternBinding(pattern: ast.Pattern, priority: Int, env: LexicalEnv, pushWrittenValueToStack: Boolean): Graph = {
-                implicit lazy val info: Node.Info = Node.Info(priority, env, functionFrame, block.catchEntry)
+                implicit lazy val info: Node.Info = makeBlockInfo(priority, env)
 
                 def consumeResult: Graph = if (pushWrittenValueToStack) EmptyGraph else { new graph.PopNode }
 

@@ -93,12 +93,20 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
                 s"obj#${node.id}" :: stack
 
             case _: graph.PropertyWriteNode =>
-                val writeValue :: _ :: rest = stack
+                val writeValue :: /* base object */ _ :: rest = stack
+                writeValue :: rest
+
+            case _: graph.PropertyDynamicWriteNode =>
+                val writeValue :: _ /* property */ :: _ /* base object */ :: rest = stack
                 writeValue :: rest
 
             case node: graph.PropertyReadNode =>
                 val obj :: rest = stack
                 ExprStackFrame("read", obj, node.propertyName) :: rest
+
+            case node: graph.PropertyDynamicReadNode =>
+                val property :: obj :: rest = stack
+                ExprStackFrame("read", obj, property) :: rest
 
             case node: graph.DupNode =>
                 val top :: _ = stack

@@ -22,7 +22,7 @@ object Utils {
         result
     }
 
-    implicit class UtilsString(str: String) extends AnyRef {
+    implicit class UtilsString(val str: String) extends AnyVal {
         def splitCamelCase: Seq[String] = {
             return str.replaceAll(
                 String.format("%s|%s|%s",
@@ -35,5 +35,16 @@ object Utils {
         }
 
         def ?: (cond: Boolean): String = if (cond) str else ""
+    }
+
+    implicit class UtilsBoolean(val left: Boolean) extends AnyVal {
+        @inline
+        def implies(conclusion: => Boolean): Boolean = !left || conclusion
+
+        @inline
+        def ==>(conclusion: => Boolean): Boolean = implies(conclusion)
+
+        @inline
+        def =/>(right: => Boolean): Boolean = !left || !right
     }
 }
