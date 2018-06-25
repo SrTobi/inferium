@@ -31,7 +31,7 @@ object StringLattice {
             case ss: SpecificStrings => if (ss.containsOnlyNumbers) NumberString else AnyString
         }
     }
-    case object NonNumberString extends StringLattice {
+    /*case object NonNumberString extends StringLattice {
         override def containsOnlyNumbers: Boolean = false
         override def containsNoNumbers: Boolean = true
 
@@ -40,7 +40,7 @@ object StringLattice {
             case NumberString => NumberString
             case ss: SpecificStrings => if (ss.containsOnlyNumbers) NumberString else AnyString
         }
-    }
+    }*/
     final case class SpecificStrings(strings: Set[String]) extends StringLattice {
         override lazy val containsOnlyNumbers: Boolean = strings.forall(isNumberString)
         override lazy val containsNoNumbers: Boolean = !strings.exists(isNumberString)
