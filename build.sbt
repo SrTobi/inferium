@@ -115,7 +115,7 @@ lazy val web = project
 
 //--------------------- node prelude defs -------------//
 lazy val nodePreludeData = crossProject
-    .crossType(CrossType.Pure)
+    .crossType(CrossType.Full)
     .in(file("extras/node-prelude"))
     .settings(commonSettings)
     .jvmSettings(
