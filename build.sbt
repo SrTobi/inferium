@@ -78,7 +78,7 @@ lazy val macrosJS = macros.js
 lazy val core = crossProject
     .crossType(CrossType.Pure)
     .in(file("core"))
-    .dependsOn(macros)
+    .dependsOn(macros, nodePreludeData)
     .settings(commonSettings)
     .jvmSettings(
         fork in Test := true

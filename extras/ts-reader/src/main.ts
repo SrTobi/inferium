@@ -1,12 +1,14 @@
 import * as ts from "typescript";
 import * as fs from 'fs'
-import { join, basename, dirname } from 'path'
-import * as p from 'path'
+import * as _p from 'path'
 import { shell } from 'execa'
 import * as os from 'os'
 import assert from 'assert'
 import c from 'chalk'
-
+const p = _p//_p.posix
+const join = p.join
+const basename = p.basename
+const dirname = p.dirname
 /*function compile(fileNames: string[], options: ts.CompilerOptions): void {
     let program = ts.createProgram(fileNames, options);
     const tc = program.getTypeChecker()
@@ -71,8 +73,8 @@ function findPackageRoot(pkgname: string, path: string): string {
 const persistant = true
 
 const dirsurfix = persistant? "" : "-" + Date.now()
-const orgcwd = process.cwd()
-const dir = join(os.tmpdir(), "inferium" + dirsurfix)
+const orgcwd = process.cwd().replace(/\\/g, "/")
+const dir = join(os.tmpdir().replace(/\\/g, "/"), "inferium" + dirsurfix)
 
 
 function here(path: string) {
@@ -95,14 +97,15 @@ function getDependencies(path: string, found: Set<string>) {
     }
     found.add(path)
 
-    let pkgjson = require(join(path, "package.json"))
+    const pkgpath = join(path, "package.json")
+    let pkgjson = require(pkgpath)
 
     const deps = pkgjson.dependencies || {}
 
     Object.keys(deps)
         .filter((key) => !/^@types\//.test(key))
         .forEach(dep => {
-            const deppath = require.resolve(dep, {paths: [path]})
+            const deppath = require.resolve(dep, {paths: [pkgpath]})
             getDependencies(findPackageRoot(dep, deppath), found)
         })
 }
@@ -115,7 +118,7 @@ async function main(pkgname: string) {
     async function installType(path: string) {
         const pkg = basename(path)
         console.log("Install types for", pkg)
-        const res = await shell(`npm install '@types/${pkg}' --prefix '${dir}'`)
+        const res = await shell(`npm install "@types/${pkg}" --prefix "${dir}"`)
         if (res.failed) {
             console.log("=> not found")
         }
@@ -123,7 +126,7 @@ async function main(pkgname: string) {
 
     if (!skipInstall) {
         console.log(`Install ${pkgname} into ${dir}`)
-        let res = await shell(`npm install '${pkgname}' --prefix '${dir}'`)
+        let res = await shell(`npm install "${pkgname}" --prefix "${dir}"`)
         if (res.failed) {
             console.log("Failed! Error:", res.stderr)
             return
@@ -140,6 +143,7 @@ async function main(pkgname: string) {
     const deps = new Set<string>()
     getDependencies(mainpkg, deps)
     deps.delete(mainpkg)
+    
 
     if (!skipInstall) {
         for (const dep of deps) {
@@ -244,7 +248,7 @@ interface Type {
     declarationFiles?: string[]
     isAlias: boolean
     aliasTypeParameter?: Generic[]
-    type: TypeInfo
+    type: TypeInfo  
 }
 
 type TypeInfo = number | TypeInfoBase
@@ -253,7 +257,10 @@ interface TypeInfoBase {
     type: string
 }
 
+type PrimitveType = "this" | "any" | "boolean" | "number" | "number-lit" | "string" | "string-lit" | "undefined" | "null" | "never" | "void" | "symbol" | "object"
+
 interface Primitive extends TypeInfoBase {
+    type: PrimitveType
     value?: string | boolean | number
 }
 
@@ -282,6 +289,7 @@ interface IndexAccess extends TypeInfoBase {
 interface Interface extends TypeInfoBase {
     type: "interface"
     isClass: boolean
+    typeParameters: Generic[]
     bases: TypeInfo[]
     callSignatures: CallSignature[]
     constructionSignatures: CallSignature[]
@@ -333,7 +341,7 @@ interface Reference extends TypeInfoBase {
 
 function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbol: ts.Symbol): PredefTypes {
         
-    function p(type: string, value?: string | number | boolean): Primitive {
+    function p(type: PrimitveType, value?: string | number | boolean): Primitive {
         const prim: Primitive = { type, value }
         return prim
     }
@@ -376,9 +384,9 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
             const typeParameter = (type.aliasTypeArguments || []).map(ty => resolveType(ty))
 
             if (!foundTypes.has(id)) {
-                /*if (sym.name == "Readonly") {
+                if (sym.name == "Readonly") {
                     debugger
-                }*/
+                }
                 foundTypes.add(id)
                 const alias: Type = {
                     id: idof(type),
@@ -394,13 +402,13 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
 
             ref(id, typeParameter)
         }
-
         return resolve()
 
         function resolve(): TypeInfo {
             const f = type.getFlags()
             const tf = ts.TypeFlags
             assert(!type.pattern)
+
 
             if (f == tf.Any) {
                 return p("any")
@@ -427,6 +435,9 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
             } else if (f == tf.NonPrimitive) {
                 return p("object")
             } else if (f == tf.TypeParameter) {
+                if ((type as any).isThisType) {
+                    return p("this")
+                }
                 const genref: GenericsReference = {
                     type: "generics-ref",
                     targetId: idof(type)
@@ -569,6 +580,14 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
             }
         })
 
+        function makeGeneric(param: ts.TypeParameter): Generic {
+            const c = param.getConstraint()
+            return {
+                id: (<any>param).id,
+                constraint: c? resolveType(c) : undefined,
+            }
+        }
+
         function resolveCallSignature(sig: ts.Signature): CallSignature {
             const parameters = sig.getParameters().map<Parameter>(param => {
                 return {
@@ -578,13 +597,7 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
                 }
             })
 
-            const typeParameter = (sig.getTypeParameters() || []).map<Generic>(param => {
-                const c = param.getConstraint()
-                return {
-                    id: (<any>param).id,
-                    constraint: c? resolveType(c) : undefined,
-                }
-            })
+            const typeParameter = (sig.getTypeParameters() || []).map(makeGeneric)
 
             const returnType = resolveType(sig.getReturnType())
             
@@ -594,7 +607,7 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
                 parameters
             }
         }
-
+        
         let callsigs = obj.getCallSignatures()
         callsigs = obj.declaredCallSignatures || callsigs
         const callSignatures = callsigs.map(resolveCallSignature)
@@ -608,6 +621,7 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
             type: "interface",
             isClass: obj.isClass(),
             bases,
+            typeParameters: (obj.typeParameters || []).map(makeGeneric),
             callSignatures,
             constructionSignatures,
             properties: pmap
@@ -629,9 +643,9 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
     }
 }
 
-main(process.argv[2])/*.catch(err => {
+main(process.argv[2]).catch(err => {
     console.error("Error:", err)
-})*/
+})
 
 export namespace ns {
 	export function test() {
