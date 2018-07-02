@@ -1,69 +1,101 @@
 package inferium.lattice.heaps
 
 import inferium.Unifiable
-import inferium.lattice.Heap.Mutator
+import inferium.lattice.Heap.{Mutator, SpecialObjectMap}
 import inferium.lattice.heaps.SimpleHeap.{Obj, SimpleMutator}
 import inferium.lattice._
 import inferium.utils.Utils
 
-class SimpleHeap(val config: Heap.Config, private val objects: Map[Location, Obj] = Map.empty, private val boxedValues: Map[ValueLocation, Entity] = Map.empty) extends Heap {
 
 
-    override def begin(location: Location): Heap.Mutator = new SimpleMutator(objects, boxedValues, config)
-
-    override def end(actor: Heap.Mutator): Heap = {
-        val mutator = actor.asInstanceOf[SimpleMutator]
-        new SimpleHeap(config, mutator.objects, mutator.boxedValues)
+object SimpleHeap extends Heap.Factory {
+    override def create(config: Heap.Config): (Heap, SpecialObjectMap) = {
+        val shared = Heap.Shared(config)
+        val heap = new SimpleHeapImpl(shared)
+        (heap, shared.specialObjects)
     }
 
-    override def split(): Heap = this
+    private class SimpleHeapImpl(_shared: Heap.Shared, private val objects: Map[Location, Obj] = Map.empty, private val boxedValues: Map[ValueLocation, Entity] = Map.empty) extends Heap(_shared) {
 
-    override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
-        import SimpleHeap._
-        val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeap] }
-        val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*)() {
-            case (Obj(ap1, cp1, c1), Obj(ap2, cp2, c2)) =>
-                Obj(mergeAbsProperties(ap1, ap2), mergeConcreteProperties(cp1, cp2), Math.max(c1, c2))
+
+        override def begin(location: Location): Heap.Mutator = new SimpleMutator(objects, boxedValues, this)
+
+        override def end(actor: Heap.Mutator): Heap = {
+            val mutator = actor.asInstanceOf[SimpleMutator]
+            new SimpleHeapImpl(shared, mutator.objects, mutator.boxedValues)
         }
 
-        val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*)() { _ unify _}
+        override def split(): Heap = this
 
-        new SimpleHeap(config, newObjects, newBoxedValues)
-    }
+        override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
+            val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeapImpl] }
+            val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*)() {
+                case (Obj(ad1, cd1, c1), Obj(ad2, cd2, c2)) =>
+                    Obj(mergeAbsDesc(ad1, ad2), mergeConcreteDesc(cd1, cd2), Math.max(c1, c2))
+            }
 
-    override def equals(o: scala.Any): Boolean = o match {
-        case other: SimpleHeap =>
-            objects == other.objects && boxedValues == other.boxedValues
+            val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*)() { _ unify _}
 
-        case _ =>
-            false
-    }
-}
-
-
-object SimpleHeap {
-    private type PropertyKey = AnyRef
-    private val GeneralDynamicPropertyName: PropertyKey = new { override def toString: String = "GeneralDynamicPropertyName" }
-    private val NumberDynamicPropertyName: PropertyKey = new { override def toString: String = "NumberDynamicPropertyName" }
-
-    private type ConcreteProperties = Map[PropertyKey, ConcreteProperty]
-    private type AbstractProperties = Map[PropertyKey, AbstractProperty]
-    class Obj(val abstractProperties: AbstractProperties, val concreteProperties: ConcreteProperties, val abstractCount: Long) {
-        def isAbstractObject(o: ObjectLike): Boolean = abstractCount != o.abstractCount
-        def propertiesFor(o: ObjectLike): Map[PropertyKey, Property] = if (isAbstractObject(o)) abstractProperties else concreteProperties
+            new SimpleHeapImpl(shared, newObjects, newBoxedValues)
+        }
 
         override def equals(o: scala.Any): Boolean = o match {
-            case other: Obj =>
-                abstractProperties == other.abstractProperties && concreteProperties == other.concreteProperties
+            case other: SimpleHeapImpl =>
+                objects == other.objects && boxedValues == other.boxedValues
 
             case _ =>
                 false
         }
     }
 
-    object Obj {
-        def apply(abstractProperties: AbstractProperties, concreteProperties: ConcreteProperties, abstractCount: Long): Obj = new Obj(abstractProperties, concreteProperties, abstractCount)
-        def unapply(arg: Obj): Option[(AbstractProperties, ConcreteProperties, Long)] = Some((arg.abstractProperties, arg.concreteProperties, arg.abstractCount))
+    private type PropertyKey = String
+
+    private abstract class InternalFields {
+        def dynamicProp: Property
+        def base: Set[ObjectLike]
+    }
+    private case class ConcreteInternalFields(dynamicProp: AbstractProperty, base: Set[ObjectLike]) extends InternalFields {
+        def unify(other: ConcreteInternalFields): ConcreteInternalFields = {
+            ConcreteInternalFields(
+                dynamicProp unify other.dynamicProp,
+                base | other.base
+            )
+        }
+
+        def abstractify(heap: Heap.Mutator): AbstractInternalFields = AbstractInternalFields(dynamicProp.abstractify(heap), base)
+    }
+    private case class AbstractInternalFields(dynamicProp: AbstractProperty, base: Set[ObjectLike]) extends InternalFields {
+        def unify(other: AbstractInternalFields): AbstractInternalFields = {
+            AbstractInternalFields(
+                dynamicProp unify other.dynamicProp,
+                base | other.base
+            )
+        }
+    }
+
+    private type ConcreteProperties = Map[PropertyKey, ConcreteProperty]
+    private type ConcreteDesc = (ConcreteInternalFields, ConcreteProperties)
+    private type AbstractProperties = Map[PropertyKey, AbstractProperty]
+    private type AbstractDesc = (AbstractInternalFields, AbstractProperties)
+    private type Properties = Map[PropertyKey, Property]
+    private type Desc = (InternalFields, Properties)
+
+    private class Obj(val abstractDesc: AbstractDesc, val concreteDesc: ConcreteDesc, val abstractCount: Long) {
+        def isAbstractObject(o: ObjectLike): Boolean = abstractCount != o.abstractCount
+        def descFor(o: ObjectLike): Desc = if (isAbstractObject(o)) abstractDesc else concreteDesc
+
+        override def equals(o: scala.Any): Boolean = o match {
+            case other: Obj =>
+                abstractDesc == other.abstractDesc && concreteDesc == other.concreteDesc
+
+            case _ =>
+                false
+        }
+    }
+
+    private object Obj {
+        def apply(abstractDesc: AbstractDesc, concreteDesc: ConcreteDesc, abstractCount: Long): Obj = new Obj(abstractDesc, concreteDesc, abstractCount)
+        def unapply(arg: Obj): Option[(AbstractDesc, ConcreteDesc, Long)] = Some((arg.abstractDesc, arg.concreteDesc, arg.abstractCount))
     }
 
     private def mergeAbsProperties(p1: AbstractProperties, p2: AbstractProperties): AbstractProperties = {
@@ -74,17 +106,30 @@ object SimpleHeap {
         Utils.mergeMaps(p1, p2)(a => a)({ _ unify _ })
     }
 
-    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity], config: Heap.Config) extends Mutator {
-        override def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike = {
+    private def mergeAbsDesc(d1: AbstractDesc, d2: AbstractDesc): AbstractDesc = {
+        (d1._1 unify d2._1, mergeAbsProperties(d1._2, d2._2))
+    }
+
+    private def mergeConcreteDesc(d1: ConcreteDesc, d2: ConcreteDesc): ConcreteDesc = {
+        (d1._1 unify d2._1, mergeConcreteProperties(d1._2, d2._2))
+    }
+
+    private val initialAbstractDesc: AbstractDesc = (AbstractInternalFields(AbstractProperty.internalProperty, Set.empty), Map.empty)
+
+    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity], override val origin: SimpleHeapImpl) extends Mutator {
+        override def allocObject(location: Location, creator: (Location, Long) => ObjectLike, base: Set[ObjectLike]): ObjectLike = {
+            val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, base), Map.empty)
+
             val ac = objects.get(location) match {
-                case Some(Obj(abstractProps, concreteProps, oldAbstractCount)) =>
+                case Some(Obj(abstractDesc, (concreteFields, conreteProps), oldAbstractCount)) =>
                     val abstractCount = oldAbstractCount + 1
-                    objects += location -> Obj(mergeAbsProperties(abstractProps, concreteProps.mapValues(_.abstractify(this))), Map.empty, abstractCount)
+                    val newAbstractDesc = (concreteFields.abstractify(this), conreteProps mapValues { _.abstractify(this) })
+                    objects += location -> Obj(mergeAbsDesc(abstractDesc, newAbstractDesc), initialConcreteDesc, abstractCount)
 
                     abstractCount
                 case None =>
                     val abstractCount = 1
-                    objects += location -> Obj(Map.empty, Map.empty, abstractCount)
+                    objects += location -> Obj(initialAbstractDesc, initialConcreteDesc, abstractCount)
                     abstractCount
             }
             creator(location, ac)
@@ -103,14 +148,14 @@ object SimpleHeap {
         override def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit = {
             assert(property != ConcreteProperty.absentProperty)
             objects.get(obj.loc) match {
-                case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
                         val newProperties = abstractProps + (propertyName -> property.abstractify(this))
-                        objects += obj.loc -> Obj(newProperties, concreteProps, abstractCount)
+                        objects += obj.loc -> Obj((abstractFields, newProperties), concreteDesc, abstractCount)
                     } else {
                         val newProperties = concreteProps + (propertyName -> property)
-                        objects += obj.loc -> Obj(abstractProps, newProperties, abstractCount)
+                        objects += obj.loc -> Obj(abstractDesc, (concreteFields, newProperties), abstractCount)
                     }
 
                 case None =>
@@ -121,7 +166,6 @@ object SimpleHeap {
 
         override def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit = {
             import Utils._
-            val dynamicPropName: AnyRef = if (numbersOnly) NumberDynamicPropertyName else GeneralDynamicPropertyName
 
             def changeExisting(name: String, p: Property): Boolean =
                 (numbersOnly ==> StringLattice.isNumberString(name)) &&
@@ -129,40 +173,43 @@ object SimpleHeap {
                     (config.dynamicWriteAffectsOnlyEnumerable ==> p.enumerable.mightBeTrue)
 
             objects.get(obj.loc) match {
-                case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
-                        val oldProp = abstractProps.getOrElse(dynamicPropName, AbstractProperty.internalProperty)
-                        val newProp = oldProp.addValue(resolvedValue)
-                        var newProperties = abstractProps + (dynamicPropName -> newProp)
+                        val oldDyn = abstractFields.dynamicProp
+                        val newDyn = oldDyn.addValue(resolvedValue)
+                        var props = abstractProps
 
                         // change existingProperties
                         if (config.dynamicWriteAffectsExistingProperties) {
-                            newProperties
+                            props
                                 .iterator
                                 .foreach {
                                     case (name: String, p) if changeExisting(name, p) =>
-                                        newProperties += name -> p.addValue(resolvedValue)
-                                }
-                        }
-
-                        objects += obj.loc -> Obj(newProperties, concreteProps, abstractCount)
-                    } else {
-                        val oldProp = concreteProps.getOrElse(dynamicPropName, ConcreteProperty.internalProperty)
-                        val newProp = oldProp.addValue(valueLocs)
-                        var newProperties = concreteProps + (dynamicPropName -> newProp)
-
-                        // change existingProperties
-                        if (config.dynamicWriteAffectsExistingProperties) {
-                            newProperties
-                                .iterator
-                                .foreach {
-                                    case (name: String, p) if changeExisting(name, p) =>
-                                        newProperties += name -> p.addValue(valueLocs)
+                                        props += name -> p.addValue(resolvedValue)
                                     case _ =>
                                 }
                         }
 
-                        objects += obj.loc -> Obj(abstractProps, newProperties, abstractCount)
+                        // todo: only copy when changed
+                        objects += obj.loc -> Obj((abstractFields.copy(dynamicProp = newDyn), props), concreteDesc, abstractCount)
+                    } else {
+                        val oldProp = concreteFields.dynamicProp
+                        val newProp = oldProp.addValue(resolvedValue)
+                        var props = concreteProps
+
+                        // change existingProperties
+                        if (config.dynamicWriteAffectsExistingProperties) {
+                            props
+                                .iterator
+                                .foreach {
+                                    case (name: String, p) if changeExisting(name, p) =>
+                                        props += name -> p.addValue(valueLocs)
+                                    case _ =>
+                                }
+                        }
+
+                        // todo: only copy when changed
+                        objects += obj.loc -> Obj(abstractDesc, (concreteFields.copy(dynamicProp = newProp), props), abstractCount)
                     }
 
                 case None =>
@@ -173,7 +220,7 @@ object SimpleHeap {
 
         override def writeToProperty(obj: ObjectLike, propertyName: String, valueLoc: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property = {
             objects.get(obj.loc) match {
-                case Some(desc@Obj(abstractProps, concreteProps, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
                         val newProp = abstractProps.get(propertyName) match {
                             case Some(prop) =>
@@ -184,7 +231,7 @@ object SimpleHeap {
                         }
 
                         val newProperties = abstractProps + (propertyName -> newProp)
-                        objects += obj.loc -> Obj(newProperties, concreteProps, abstractCount)
+                        objects += obj.loc -> Obj((abstractFields, newProperties), concreteDesc, abstractCount)
                         newProp
                     } else {
                         val newProp = concreteProps.get(propertyName) match {
@@ -197,7 +244,7 @@ object SimpleHeap {
                         }
 
                         val newProperties = concreteProps + (propertyName -> newProp)
-                        objects += obj.loc -> Obj(abstractProps, newProperties, abstractCount)
+                        objects += obj.loc -> Obj(abstractDesc, (concreteFields, newProperties), abstractCount)
                         newProp
                     }
 
@@ -211,20 +258,13 @@ object SimpleHeap {
             import Utils._
             objects.get(obj.loc) match {
                 case Some(desc) =>
-                    val dynamicPropName: AnyRef = if (numbersOnly) NumberDynamicPropertyName else GeneralDynamicPropertyName
-
-                    desc.propertiesFor(obj).iterator.filter {
+                    val (fields, properties) = desc.descFor(obj)
+                    properties.iterator.filter {
                         case (key: String, p) =>
                             numbersOnly ==> StringLattice.isNumberString(key)
-
-                        case (`dynamicPropName`, _) =>
-                            true
-
-                        case _ => false
                     }.map {
                         case (key: String, p) => (Some(key), p)
-                        case (_, p) => (None, p)
-                    }
+                    } ++ Seq((None, fields.dynamicProp)).iterator
 
                 case None =>
                     // TODO: the object does not exist... can that even happen? maybe create a new object?
@@ -237,7 +277,9 @@ object SimpleHeap {
                 case Some(objDesc) =>
 
                     // we found the object, now get the property
-                    objDesc.propertiesFor(obj).get(propertyName) match {
+                    val (fields, properties) = objDesc.descFor(obj)
+
+                    properties.get(propertyName) match {
                         case Some(prop) =>
                             prop
 

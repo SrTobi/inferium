@@ -3,13 +3,18 @@ package inferium.lattice
 import inferium.Config.ConfigKey
 import inferium.Unifiable
 import inferium.Unifiable.Fixpoint
-import inferium.lattice.Heap.Mutator
-import inferium.utils.Flag
+import inferium.lattice.Heap.{Mutator, Shared}
+import inferium.lattice.Heap.SpecialObjects.SpecialObject
 
+import scala.collection.mutable
 import scala.language.implicitConversions
 
 
-abstract class Heap extends Unifiable[Heap] {
+abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
+    final def config: Heap.Config = shared.config
+    final def specialObjectSet(specialObject: SpecialObject): Set[ObjectLike] = shared.specialObjects(specialObject)
+    final def specialObject(specialObject: SpecialObject): ObjectLike = specialObjectSet(specialObject).head
+
     def begin(location: Location): Mutator
     def end(actor: Mutator): Heap
 
@@ -21,6 +26,14 @@ abstract class Heap extends Unifiable[Heap] {
 
 
 object Heap {
+    object SpecialObjects extends Enumeration {
+        type SpecialObject = Value
+        val Object, ObjectConstructor, Function, FunctionConstructor = Value
+    }
+
+    type SpecialObjectMap = mutable.Map[SpecialObject, Set[ObjectLike]]
+    case class Shared(config: Config, specialObjects: SpecialObjectMap = mutable.Map.empty)
+
     sealed class PropertyMutationResult
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
 
@@ -40,9 +53,15 @@ object Heap {
     }
 
     abstract class Mutator {
+        final def config: Config = origin.config
+        def origin: Heap
 
-        def allocObject(location: Location, creator: (Location, Long) => ObjectLike): ObjectLike
-        def allocOrdinaryObject(location: Location): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac))
+        def allocObject(location: Location, creator: (Location, Long) => ObjectLike, base: Set[ObjectLike]): ObjectLike
+        def allocOrdinaryObject(location: Location, base: Set[ObjectLike]): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), base)
+        def allocOrdinaryObject(location: Location): ObjectLike = {
+            val objectPrototype = origin.specialObjectSet(SpecialObjects.Object)
+            allocOrdinaryObject(location, objectPrototype)
+        }
         def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit
         def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit
@@ -75,6 +94,6 @@ object Heap {
     }
 
     abstract class Factory {
-        def create(config: Config): Heap
+        def create(config: Config): (Heap, SpecialObjectMap)
     }
 }

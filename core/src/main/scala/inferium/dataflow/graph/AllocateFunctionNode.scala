@@ -3,6 +3,7 @@ package inferium.dataflow.graph
 import inferium.dataflow.{CallableInfo, DataFlowAnalysis, ExecutionState, Templates}
 import inferium.dataflow.graph.traits.TransformerNode
 import inferium.lattice.FunctionEntity
+import inferium.lattice.Heap.SpecialObjects
 
 class AllocateFunctionNode(val function: CallableInfo, val captureThis: Boolean)(implicit _info: Node.Info) extends TransformerNode {
     def name: String = function.name.getOrElse("<anonym>")
@@ -13,7 +14,7 @@ class AllocateFunctionNode(val function: CallableInfo, val captureThis: Boolean)
         val mutator = initialHeap.begin(loc)
         val obj = mutator.allocObject(loc, (l, ac) => {
             FunctionEntity(l, state.lexicalFrame)(ac, function)
-        })
+        }, initialHeap.specialObjectSet(SpecialObjects.Function))
         // todo write this to heap
         val resultHeap = initialHeap.end(mutator)
 
