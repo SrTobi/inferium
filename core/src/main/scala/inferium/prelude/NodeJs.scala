@@ -3,7 +3,7 @@ package inferium.prelude
 import inferium.Config
 import inferium.dataflow.{ExecutionState, LexicalFrame}
 import inferium.lattice.Heap.SpecialObjects
-import inferium.lattice.{Location, ObjectLike, UndefinedValue, ValueLocation}
+import inferium.lattice._
 import inferium.lattice.heaps.SimpleHeap
 
 object NodeJs {
@@ -13,12 +13,12 @@ object NodeJs {
             val mutator = initialHeap.begin(Location())
 
             {
-                val `{}` = mutator.allocOrdinaryObject(Location(), Set.empty)
-                specialObjects += SpecialObjects.Object -> Set(`{}`)
+                val `{}` = mutator.allocOrdinaryObject(Location(), NullValue)
+                specialObjects += SpecialObjects.Object -> `{}`
             }
             {
-                val Function = mutator.allocOrdinaryObject(Location(), Set.empty)
-                specialObjects += SpecialObjects.Function -> Set(Function)
+                val Function = mutator.allocOrdinaryObject(Location())
+                specialObjects += SpecialObjects.Function -> Function
             }
             val gObj = mutator.allocOrdinaryObject(Location())
 

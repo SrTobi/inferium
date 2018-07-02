@@ -92,7 +92,7 @@ object Entity {
     //private val emptyUnion = UnionValue(isUndef = false, isNull = false, GeneralBoolLattice.Bottom, None, Set.empty, Set.empty, Set.empty)
     //private val stringUnion: Set[StringValue] = immutable.Set(StringValue)
 
-    def unify(entities: Seq[Entity])(implicit fixpoint: Fixpoint): Entity = UnionValue(entities)
+    def unify(entities: TraversableOnce[Entity])(implicit fixpoint: Fixpoint): Entity = UnionValue(entities)
 
     /*private def unify(entity: Entity, entities: Seq[Entity]): Entity = entities match {
         case Seq() => entity

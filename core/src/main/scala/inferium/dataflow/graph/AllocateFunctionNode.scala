@@ -14,7 +14,7 @@ class AllocateFunctionNode(val function: CallableInfo, val captureThis: Boolean)
         val mutator = initialHeap.begin(loc)
         val obj = mutator.allocObject(loc, (l, ac) => {
             FunctionEntity(l, state.lexicalFrame)(ac, function)
-        }, initialHeap.specialObjectSet(SpecialObjects.Function))
+        }, initialHeap.specialObject(SpecialObjects.Function))
         // todo write this to heap
         val resultHeap = initialHeap.end(mutator)
 

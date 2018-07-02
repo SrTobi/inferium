@@ -52,23 +52,27 @@ object SimpleHeap extends Heap.Factory {
 
     private abstract class InternalFields {
         def dynamicProp: Property
-        def base: Set[ObjectLike]
+        def prototype: Seq[ObjectLike]
     }
-    private case class ConcreteInternalFields(dynamicProp: AbstractProperty, base: Set[ObjectLike]) extends InternalFields {
+
+    // todo: implement a mock heap mutator
+    private def unifyObjectLists(l1: Seq[ObjectLike], l2: Seq[ObjectLike]) = Entity.unify(l1.iterator ++ l2.iterator).coerceToObjects(null)
+
+    private case class ConcreteInternalFields(dynamicProp: AbstractProperty, prototype: Seq[ObjectLike]) extends InternalFields {
         def unify(other: ConcreteInternalFields): ConcreteInternalFields = {
             ConcreteInternalFields(
                 dynamicProp unify other.dynamicProp,
-                base | other.base
+                unifyObjectLists(prototype, other.prototype)
             )
         }
 
-        def abstractify(heap: Heap.Mutator): AbstractInternalFields = AbstractInternalFields(dynamicProp.abstractify(heap), base)
+        def abstractify(heap: Heap.Mutator): AbstractInternalFields = AbstractInternalFields(dynamicProp.abstractify(heap), prototype)
     }
-    private case class AbstractInternalFields(dynamicProp: AbstractProperty, base: Set[ObjectLike]) extends InternalFields {
+    private case class AbstractInternalFields(dynamicProp: AbstractProperty, prototype: Seq[ObjectLike]) extends InternalFields {
         def unify(other: AbstractInternalFields): AbstractInternalFields = {
             AbstractInternalFields(
                 dynamicProp unify other.dynamicProp,
-                base | other.base
+                unifyObjectLists(prototype, other.prototype)
             )
         }
     }
@@ -114,11 +118,12 @@ object SimpleHeap extends Heap.Factory {
         (d1._1 unify d2._1, mergeConcreteProperties(d1._2, d2._2))
     }
 
-    private val initialAbstractDesc: AbstractDesc = (AbstractInternalFields(AbstractProperty.internalProperty, Set.empty), Map.empty)
+    private val initialAbstractDesc: AbstractDesc = (AbstractInternalFields(AbstractProperty.internalProperty, Seq.empty), Map.empty)
 
     private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity], override val origin: SimpleHeapImpl) extends Mutator {
-        override def allocObject(location: Location, creator: (Location, Long) => ObjectLike, base: Set[ObjectLike]): ObjectLike = {
-            val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, base), Map.empty)
+        override def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike = {
+            val prototypeObjs = prototype.coerceToObjects(this)
+            val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, prototypeObjs), Map.empty)
 
             val ac = objects.get(location) match {
                 case Some(Obj(abstractDesc, (concreteFields, conreteProps), oldAbstractCount)) =>
@@ -259,12 +264,22 @@ object SimpleHeap extends Heap.Factory {
             objects.get(obj.loc) match {
                 case Some(desc) =>
                     val (fields, properties) = desc.descFor(obj)
-                    properties.iterator.filter {
-                        case (key: String, p) =>
-                            numbersOnly ==> StringLattice.isNumberString(key)
-                    }.map {
-                        case (key: String, p) => (Some(key), p)
-                    } ++ Seq((None, fields.dynamicProp)).iterator
+
+                    var result = Iterator((None: Option[String], fields.dynamicProp))
+
+                    if (config.dynamicReadRespectsProperties) {
+                        result ++= properties.iterator.filter {
+                            case (key: String, p) =>
+                                numbersOnly ==> StringLattice.isNumberString(key)
+                        } map {
+                            case (key: String, p) => (Some(key), p)
+                        }
+                    }
+
+                    if (config.dynamicReadRespectsPrototypes) {
+                        result ++= fields.prototype.iterator flatMap { getProperties(_, numbersOnly) }
+                    }
+                    result
 
                 case None =>
                     // TODO: the object does not exist... can that even happen? maybe create a new object?
@@ -279,19 +294,35 @@ object SimpleHeap extends Heap.Factory {
                     // we found the object, now get the property
                     val (fields, properties) = objDesc.descFor(obj)
 
+                    def foldPrototype(initial: Property): Property =
+                        fields.prototype.foldLeft[Property](initial) {
+                            case (acc, prototype) =>
+                                unifyProperty(acc, getProperty(prototype, propertyName))
+                        }
+
                     properties.get(propertyName) match {
                         case Some(prop) =>
-                            prop
+                            if (prop.mightBeAbsent) {
+                                foldPrototype(prop)
+                            } else {
+                                prop
+                            }
 
                         case None =>
-                            // TODO: search prototypes
-                            ConcreteProperty.absentProperty
+                            foldPrototype(ConcreteProperty.absentProperty)
                     }
 
                 case None =>
                     // TODO: the object does not exist... can that even happen? maybe create a new object?
                     ???
             }
+        }
+
+        private def unifyProperty(p1: Property, p2: Property): Property = (p1, p2) match {
+            case (p1: ConcreteProperty, p2: ConcreteProperty) =>
+                p1 unify p2
+            case _ =>
+                p1.abstractify(this) unify p2.abstractify(this)
         }
 
         override def getValue(valueLocation: ValueLocation): Entity = valueLocation match {

@@ -12,8 +12,7 @@ import scala.language.implicitConversions
 
 abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
     final def config: Heap.Config = shared.config
-    final def specialObjectSet(specialObject: SpecialObject): Set[ObjectLike] = shared.specialObjects(specialObject)
-    final def specialObject(specialObject: SpecialObject): ObjectLike = specialObjectSet(specialObject).head
+    final def specialObject(specialObject: SpecialObject): ObjectLike = shared.specialObjects(specialObject)
 
     def begin(location: Location): Mutator
     def end(actor: Mutator): Heap
@@ -31,24 +30,33 @@ object Heap {
         val Object, ObjectConstructor, Function, FunctionConstructor = Value
     }
 
-    type SpecialObjectMap = mutable.Map[SpecialObject, Set[ObjectLike]]
+    type SpecialObjectMap = mutable.Map[SpecialObject, ObjectLike]
     case class Shared(config: Config, specialObjects: SpecialObjectMap = mutable.Map.empty)
 
     sealed class PropertyMutationResult
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult
 
-    case class Config(dynamicWriteAffectsExistingProperties: Boolean, dynamicWriteAffectsOnlyConfigurable: Boolean, dynamicWriteAffectsOnlyEnumerable: Boolean)
+    case class Config(dynamicWriteAffectsExistingProperties: Boolean,
+                      dynamicWriteAffectsOnlyConfigurable: Boolean,
+                      dynamicWriteAffectsOnlyEnumerable: Boolean,
+                      dynamicReadRespectsProperties: Boolean,
+                      dynamicReadRespectsPrototypes: Boolean)
     object Config extends inferium.Config.Section("Heap") {
 
         val dynamicWriteAffectsExistingProperties: ConfigKey[Boolean] = ConfigKey(true)
         val dynamicWriteAffectsOnlyConfigurable: ConfigKey[Boolean] = ConfigKey(true)
         val dynamicWriteAffectsOnlyEnumerable: ConfigKey[Boolean] = ConfigKey(true)
+        val dynamicReadRespectsProperties: ConfigKey[Boolean] = ConfigKey(true)
+        val dynamicReadRespectsPrototypes: ConfigKey[Boolean] = ConfigKey(false)
+        
 
 
         implicit def configToHeapConfig(config: inferium.Config): Heap.Config = Heap.Config(
             dynamicWriteAffectsExistingProperties = config(dynamicWriteAffectsExistingProperties),
             dynamicWriteAffectsOnlyConfigurable = config(dynamicWriteAffectsOnlyConfigurable),
-            dynamicWriteAffectsOnlyEnumerable = config(dynamicWriteAffectsOnlyEnumerable)
+            dynamicWriteAffectsOnlyEnumerable = config(dynamicWriteAffectsOnlyEnumerable),
+            dynamicReadRespectsProperties = config(dynamicReadRespectsProperties),
+            dynamicReadRespectsPrototypes = config(dynamicReadRespectsPrototypes)
         )
     }
 
@@ -56,10 +64,10 @@ object Heap {
         final def config: Config = origin.config
         def origin: Heap
 
-        def allocObject(location: Location, creator: (Location, Long) => ObjectLike, base: Set[ObjectLike]): ObjectLike
-        def allocOrdinaryObject(location: Location, base: Set[ObjectLike]): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), base)
+        def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike
+        def allocOrdinaryObject(location: Location, prototype: Entity): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), prototype)
         def allocOrdinaryObject(location: Location): ObjectLike = {
-            val objectPrototype = origin.specialObjectSet(SpecialObjects.Object)
+            val objectPrototype = origin.specialObject(SpecialObjects.Object)
             allocOrdinaryObject(location, objectPrototype)
         }
         def isConcreteObject(obj: ObjectLike): Boolean
