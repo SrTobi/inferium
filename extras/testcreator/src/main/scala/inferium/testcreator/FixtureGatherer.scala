@@ -30,7 +30,7 @@ object FixtureGatherer {
         val rootPath = _rootPath.toAbsolutePath
         require(Files.isDirectory(rootPath))
 
-        def rel(p: Path): String = "/" + rootPath.relativize(p).toString
+        def rel(p: Path): String = "/" + rootPath.relativize(p).toString.replaceAll("\\\\", "/")
 
         def readFixtureFile(path: Path): FixtureFile = {
             try {
