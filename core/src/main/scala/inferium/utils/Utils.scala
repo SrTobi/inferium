@@ -5,10 +5,24 @@ import scala.collection.mutable
 object Utils {
 
     // todo: check if mapper is really needed
-    def mergeMaps[K, V](maps: Map[K, V]*)(mapper: V => V = (a: V) => a)(merge: (V, V) => V): Map[K, V] =
+    def mergeMaps[K, V](maps: Map[K, V]*)(merge: (V, V) => V): Map[K, V] =
         maps.reduceLeft ((r, m) => m.foldLeft(r) {
-            case (dict, (k, v)) => dict + (k -> (dict get k map { merge(_, v) } getOrElse mapper(v)))
+            case (dict, (k, v)) => dict + (k -> (dict get k map { merge(_, v) } getOrElse v))
         })
+    def mergeMapsWithMapper[K, V](m1: Map[K, V], m2: Map[K, V])(mapper: V => V = (a: V) => a)(merge: (V, V) => V): Map[K, V] = {
+        val res = m1.foldLeft(m2) {
+            case (dict, (k, v)) => dict + (k -> (dict get k map { merge(_, v) } getOrElse mapper(v)))
+        }
+
+        // map the properties of m2
+        m2.foldLeft(res) {
+            case (dict, (k, v)) =>
+                if (m1.contains(k))
+                    dict
+                else
+                    dict + (k -> mapper(v))
+        }
+    }
 
     def mergeMaps[K, V](maps: mutable.Map[K, V]*)(merge: (V, V) => V): mutable.Map[K, V] = {
         val result = maps.head.clone()

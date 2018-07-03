@@ -21,6 +21,7 @@ sealed abstract class Property {
     def mightBeAbsent: Boolean
 
     def abstractify(heap: Heap.Mutator): AbstractProperty
+    def withAbsent: Property
 }
 
 sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
@@ -55,7 +56,7 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
     def addValue(value: ValueLocation): ConcreteProperty = copy(value = this.value + value)
 
     override def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
-    //def withAbsent: Property = if (mightBeAbsent) this else copy(value = value + ValueLocation.AbsentLocation)
+    def withAbsent: ConcreteProperty = if (mightBeAbsent) this else addValue(ValueLocation.AbsentLocation)
 }
 
 
@@ -80,6 +81,7 @@ sealed case class AbstractProperty(configurable: GeneralBoolLattice,
     def addValue(value: Entity): AbstractProperty = copy(value = this.value | value)
 
     override def abstractify(heap: Heap.Mutator): AbstractProperty = this
+    override def withAbsent: AbstractProperty = if (mightBeAbsent) this else copy(mightBeAbsent = true)
 }
 
 object ConcreteProperty {
@@ -93,14 +95,19 @@ object ConcreteProperty {
             setter = Set.empty
         )
 
-    val absentProperty: ConcreteProperty =
+    val bottomProperty: ConcreteProperty =
         ConcreteProperty(
             configurable = GeneralBoolLattice.Bottom,
             enumerable = GeneralBoolLattice.Bottom,
-            value = Set(ValueLocation.AbsentLocation),
+            value = Set.empty,
             writable = GeneralBoolLattice.Bottom,
             getter = Set.empty,
             setter = Set.empty
+        )
+
+    val absentProperty: ConcreteProperty =
+        bottomProperty.copy(
+            value = Set(ValueLocation.AbsentLocation)
         )
 
     val internalProperty: ConcreteProperty = absentProperty.copy(

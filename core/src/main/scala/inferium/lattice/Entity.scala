@@ -40,6 +40,8 @@ abstract class Entity extends Unifiable[Entity] {
 
     def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike]
 
+    def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike]
+
     def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity]
 }
 

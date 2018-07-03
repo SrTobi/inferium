@@ -82,6 +82,8 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
 
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = normalized(heap).coerceToFunctions(heap, fail)
 
+    override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = normalized(heap).coerceToConstructionObject(heap, constructionObject)
+
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = normalized(heap).coerceToObjects(heap)
 
     override def toString: String = s"Ref[$base.$property -> {${target.mkString(", ")}}]"

@@ -123,6 +123,13 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
                 val func :: stackWithThis = stackWithoutArgs
                 val restStack = if (node.thisIsOnStack) stackWithThis.tail else stackWithThis
                 ExprStackFrame("ret:", func) :: restStack
+
+            case node: graph.NewNode =>
+                // drop arguments
+                // drop function
+                val stackWithoutArgs = stack.drop(node.argumentCount)
+                val func :: restStack = stackWithoutArgs
+                ExprStackFrame("new:", func) :: restStack
         }
     }
 }

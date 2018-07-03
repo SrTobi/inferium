@@ -37,8 +37,9 @@ abstract class ObjectLike extends Entity {
         (result, this ne result, Assertion.noEffect(result))
     }
 
-
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq(this)
+
+    override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = Seq(this)
 }
 
 case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long) extends ObjectLike {
@@ -91,8 +92,8 @@ case object AnyEntity extends ObjectLike {
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
 
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
-        // empty nothing but don't fail either
-        Seq.empty
+        // todo: return a function that takes any and returns any
+        ???
     }
 }
 

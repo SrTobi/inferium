@@ -33,10 +33,10 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     override def process(implicit analysis: DataFlowAnalysis): Unit = {
         assert(inStates.nonEmpty)
 
+        val states = inStates.values.toSeq
         val resState = if (isFixpoint && mergeState != null) {
-            mergeState.unify(inStates.values.toSeq)
+            mergeState.unify(states)
         } else {
-            val states = inStates.values.toSeq
             states.head unify states.tail
         }
 

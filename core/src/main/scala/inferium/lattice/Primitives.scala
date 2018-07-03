@@ -24,6 +24,8 @@ sealed abstract class Primitive extends Entity {
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = ???
 
+    override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = Seq(constructionObject)
+
     def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         fail()
         Seq()

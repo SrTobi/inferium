@@ -65,6 +65,10 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
 
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = entities flatMap { _.coerceToObjects(heap) }
 
+    override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = {
+        entities flatMap { _.coerceToConstructionObject(heap, constructionObject) }
+    }
+
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = entities flatMap { _.coerceToFunctions(heap, fail) }
 
     override def hashCode(): Int = entities.hashCode()

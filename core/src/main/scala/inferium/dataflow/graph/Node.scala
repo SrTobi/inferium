@@ -68,9 +68,7 @@ abstract class Node(implicit val info: Node.Info) {
 
 
     final def fail(state: ExecutionState, exception: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
-        info.catchTarget foreach {
-            _ <~ state.copy(stack = exception :: Nil)
-        }
+        Node.fail(info.catchTarget, state, exception)
     }
 
     final def fixLexicalFrame(state: ExecutionState): ExecutionState = state.copy(lexicalFrame = info.lexicalEnv.fixLexicalStack(state.lexicalFrame))
@@ -171,7 +169,15 @@ object Node {
         override def toString: String = s"CallFrame:$depth"
     }
 
-    case class Info(priority: Int, lexicalEnv: LexicalEnv, callFrame: CallFrame, catchTarget: Option[MergeNode], label: Option[String] = None)
+    type CatchTarget = Option[MergeNode]
+
+    def fail(catchTarget: CatchTarget, state: ExecutionState, exception: Entity)(implicit stateOrigin: StateOrigin, analysis: DataFlowAnalysis): Unit = {
+        catchTarget foreach {
+            _ <~ state.copy(stack = exception :: Nil)
+        }
+    }
+
+    case class Info(priority: Int, lexicalEnv: LexicalEnv, callFrame: CallFrame, catchTarget: CatchTarget, label: Option[String] = None)
 
     case class AdditionalInfo(key: String, name: String)
 

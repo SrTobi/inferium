@@ -22,35 +22,34 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |const x = debug.any
+              |function test(x) {
+              |  debug(x).print()
+              |  debug(this).print()
+              |  this.prop = x
+              |}
               |
-              |debug(x).is(debug.any)
-              |debug(x.x).is(debug.any)
-              |debug(x.x.x).is(debug.any)
-              |const a = x.x = 5
-              |debug(a).is(5)
-              |debug(x.x).is(debug.any)
+              |if (debug.boolean) {
+              |  test.prototype = { p: "hihi" }
+              |} else {
+              |  test.prototype = { p: "haha" }
+              |}
               |
-              |debug(x[debug.any]).is(debug.any)
-              |debug(x[a]).is(debug.any)
+              |var o = new test("xxx")
+              |debug(o).print("o")
+              |debug(o.prop).print("o.prop")
+              |debug(o.p).print("o.p")
+              |
             """.stripMargin
 
         /*val code =
             """
-              |var a = false
-              |function f(b) {
-              | if (a) {
-              |   return "blub"
-              | }
-              | if (b) {
-              |     a = true
-              |     return f(ffalse)
-              | } else {
-              |     return "test"
-              | }
+              |var o = {}
+              |
+              |if (debug.boolean) {
+              |  o.p = "test"
               |}
-              |let r = f(true)
-              |debug(r).print()
+              |
+              |debug(o.p).print("o.p")
               |
             """.stripMargin*/
 

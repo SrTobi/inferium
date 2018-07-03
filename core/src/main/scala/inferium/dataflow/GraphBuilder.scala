@@ -1,5 +1,6 @@
 package inferium.dataflow
 import escalima.ast
+import escalima.ast.{SpreadElement, SpreadableExpression}
 import inferium.Config.ConfigKey
 import inferium.dataflow.calls.{CallInstance, InlinedCallInstance}
 import inferium.dataflow.graph.MergeNode.MergeType
@@ -286,6 +287,17 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 implicit lazy val info: Node.Info = makeBlockInfo(priority, env)
                 def buildExpression(expr: ast.Expression, priority: Int = priority, env: LexicalEnv = env): Graph = this.buildExpression(expr, priority, env)
 
+                def buildArgumentsGraph(arguments: Seq[SpreadableExpression]) : Graph = {
+                    Graph.concat(arguments map {
+                        case ast.SpreadElement(element) =>
+                            element
+                        case expr: ast.Expression =>
+                            expr
+                    } map {
+                        buildExpression(_)
+                    })
+                }
+
                 expr match {
                     case AbstractDebugLiteral(literal) =>
                         buildLiteral(literal)
@@ -374,6 +386,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
                                 (funcGraph, false)
                         }
 
+                        val argsGraph = buildArgumentsGraph(arguments)
+                        val spreadArguments = findSpreadArguments(arguments)
+
+                        thisAndFuncGraph ~> argsGraph ~> new graph.CallNode(hasThis, spreadArguments)
+
+                    case ast.NewExpression(callee, arguments) =>
+                        // Stack for a construction call: func, args...
+                        val funcGraph = buildExpression(callee)
+
                         val argGraphs = arguments map {
                             case ast.SpreadElement(element) =>
                                 element
@@ -383,9 +404,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
                             buildExpression(_)
                         }
 
-                        val spreadArguments = arguments map { _.isInstanceOf[ast.SpreadElement] }
+                        val argsGraph = buildArgumentsGraph(arguments)
+                        val spreadArguments = findSpreadArguments(arguments)
 
-                        thisAndFuncGraph ~> Graph.concat(argGraphs) ~> new graph.CallNode(hasThis, spreadArguments)
+                        funcGraph ~> argsGraph ~> new graph.NewNode(spreadArguments)
 
                     case ast.ConditionalExpression(test, consequence, alternate) =>
                         val testGraph = buildExpression(test)
@@ -418,6 +440,12 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         Graph.concat(graphs)
+                }
+            }
+
+            private def findSpreadArguments(arguments: Seq[SpreadableExpression]): Seq[Boolean] = {
+                arguments map {
+                    _.isInstanceOf[SpreadElement]
                 }
             }
 
