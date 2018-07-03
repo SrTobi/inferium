@@ -9,7 +9,7 @@ class UtilsSpec extends FlatSpec with Matchers {
         val map1 = Map(1 -> "no merge", 2 -> "merge")
         val map2 = Map(2 -> "merge", 3 -> "no merge")
 
-        val merged = Utils.mergeMaps(map1, map2)() { _ + _ }
+        val merged = Utils.mergeMaps(map1, map2) { _ + _ }
 
         merged(1) shouldBe "no merge"
         merged(2) shouldBe "mergemerge"

@@ -29,12 +29,12 @@ object SimpleHeap extends Heap.Factory {
 
         override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
             val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeapImpl] }
-            val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*)() {
+            val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*) {
                 case (Obj(ad1, cd1, c1), Obj(ad2, cd2, c2)) =>
                     Obj(mergeAbsDesc(ad1, ad2), mergeConcreteDesc(cd1, cd2), Math.max(c1, c2))
             }
 
-            val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*)() { _ unify _}
+            val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*) { _ unify _}
 
             new SimpleHeapImpl(shared, newObjects, newBoxedValues)
         }
@@ -103,11 +103,11 @@ object SimpleHeap extends Heap.Factory {
     }
 
     private def mergeAbsProperties(p1: AbstractProperties, p2: AbstractProperties): AbstractProperties = {
-        Utils.mergeMaps(p1, p2)(a => a)({ _ unify _ })
+        Utils.mergeMapsWithMapper(p1, p2)(a => a.withAbsent)({ _ unify _ })
     }
 
     private def mergeConcreteProperties(p1: ConcreteProperties, p2: ConcreteProperties): ConcreteProperties = {
-        Utils.mergeMaps(p1, p2)(a => a)({ _ unify _ })
+        Utils.mergeMapsWithMapper(p1, p2)(a => a.withAbsent)({ _ unify _ })
     }
 
     private def mergeAbsDesc(d1: AbstractDesc, d2: AbstractDesc): AbstractDesc = {
@@ -333,7 +333,11 @@ object SimpleHeap extends Heap.Factory {
                             }
 
                         case None =>
-                            foldPrototype(ConcreteProperty.absentProperty)
+                            if (fields.prototype.isEmpty) {
+                                ConcreteProperty.absentProperty
+                            } else {
+                                foldPrototype(ConcreteProperty.bottomProperty)
+                            }
                     }
 
                 case None =>
