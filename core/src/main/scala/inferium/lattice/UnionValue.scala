@@ -83,6 +83,7 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
 object UnionValue {
     def apply(entity: Entity, entities: Entity*): Entity = apply(entity +: entities)
     def apply(entities: TraversableOnce[Entity]): Entity = {
+        var hasAny = false
         var hasUndefined = false
         var hasNull = false
         var boolValue: BoolValue = null
@@ -112,6 +113,8 @@ object UnionValue {
             case NullValue =>
                 hasNull = true
             case NeverValue =>
+            case AnyEntity =>
+                hasAny = true
             case obj: ObjectLike =>
                 val v = objLocations.get(obj.loc) match {
                     case Some((hadAbstract, max)) =>
@@ -134,15 +137,24 @@ object UnionValue {
                 max +: (if (hadAbstract) Seq(max.withAbstractCount(0)) else Seq())
         }
 
-        return unionFromSeq(
-            (if (hasUndefined) Seq(UndefinedValue) else Seq()) ++
-            (if (hasNull) Seq(NullValue) else Seq()) ++
-            Option(boolValue).toSeq ++
-            Option(numberValue).toSeq ++
-            Option(stringValues).getOrElse(Seq(StringValue)) ++
-            objLocationSeq ++
-            refs.toSeq
-        )
+        if (hasAny) {
+            // keep object locations to be more precise
+            unionFromSeq(
+                Seq(AnyEntity) ++
+                objLocationSeq ++
+                refs.toSeq
+            )
+        } else {
+            unionFromSeq(
+                (if (hasUndefined) Seq(UndefinedValue) else Seq()) ++
+                    (if (hasNull) Seq(NullValue) else Seq()) ++
+                    Option(boolValue).toSeq ++
+                    Option(numberValue).toSeq ++
+                    Option(stringValues).getOrElse(Seq(StringValue)) ++
+                    objLocationSeq ++
+                    refs.toSeq
+            )
+        }
     }
 
     private def unapply(unionValue: UnionValue): Option[Seq[Entity]] = Some(unionValue.entities)

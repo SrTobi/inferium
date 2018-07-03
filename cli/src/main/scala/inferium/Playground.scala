@@ -22,35 +22,17 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |var o = { p: "init" }
+              |const x = debug.any
               |
-              |debug(o.p).is("init")
+              |debug(x).is(debug.any)
+              |debug(x.x).is(debug.any)
+              |debug(x.x.x).is(debug.any)
+              |const a = x.x = 5
+              |debug(a).is(5)
+              |debug(x.x).is(debug.any)
               |
-              |o[debug.string] = "haha"
-              |
-              |debug(o.p).is("haha", "init")
-              |debug(o[debug.string]).is("haha", "init", undefined)
-              |
-              |o.p = "reset"
-              |
-              |debug(o.p).is("reset")
-              |debug(o[debug.string]).is("haha", "reset", undefined)
-              |
-              |
-              |
-              |var o2 = { [42]: "init", p: "string" }
-              |
-              |debug(o2.p).is("string")
-              |debug(o2[42]).is("init")
-              |debug(o2[debug.number]).is("init")
-              |debug(o2[debug.string]).is("string", "init")
-              |
-              |o2[debug.number] = "haha"
-              |
-              |debug(o2.p).is("string")
-              |debug(o2[42]).is("haha", "init")
-              |debug(o2[debug.number]).is("haha", "init")
-              |debug(o2[debug.string]).is("string", "haha", "init")
+              |debug(x[debug.any]).is(debug.any)
+              |debug(x[a]).is(debug.any)
             """.stripMargin
 
         /*val code =

@@ -146,14 +146,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 new graph.LiteralNode(entity)
             }
 
-            private def parseAbstractDebugLiteral(name: String): Primitive = name match {
+            private def parseAbstractDebugLiteral(name: String): Entity = name match {
                 case "never" => NeverValue
                 case "string" => StringValue
                 case "boolean" => BoolValue
                 case "number" => NumberValue
+                case "any" => AnyEntity
             }
 
-            private def parseDebugLiteral(expr: ast.SpreadableExpression): Either[Primitive, String] = expr match {
+            private def parseDebugLiteral(expr: ast.SpreadableExpression): Either[Entity, String] = expr match {
                 case ast.BooleanLiteral(value) =>
                     Left(BoolValue(value))
 
@@ -258,7 +259,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             }
 
             private object AbstractDebugLiteral {
-                def unapply(arg: ast.Expression): Option[Primitive] = if (!config.buildDebugNodes) None else arg match {
+                def unapply(arg: ast.Expression): Option[Entity] = if (!config.buildDebugNodes) None else arg match {
                     case ast.MemberExpression(ast.Identifier(base), ast.Identifier(lit), false) if base == config.debugObjectName =>
                         Some(parseAbstractDebugLiteral(lit))
                     case _ =>

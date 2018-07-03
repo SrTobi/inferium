@@ -137,6 +137,17 @@ object AbstractProperty {
             configurable = BoolLattice.True,
             enumerable = BoolLattice.False
         )
+
+    val anyProperty: AbstractProperty =
+        AbstractProperty(
+            configurable = BoolLattice.Top,
+            enumerable = BoolLattice.Top,
+            value = AnyEntity,
+            writable = BoolLattice.Top,
+            getter = AnyEntity,
+            setter = AnyEntity,
+            mightBeAbsent = true
+        )
 }
 /*
 object Property {

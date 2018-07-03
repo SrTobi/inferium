@@ -6,6 +6,33 @@ import org.scalatest.{FreeSpec, Matchers}
 
 class WorkingFixturesSpec extends FreeSpec with Matchers {
             
+    "/abstract" - {
+        "any should do anything to any" in {
+            val code =
+                """/*
+                  |    name: any
+                  |    desc: any should do anything to any
+                  | */
+                  |
+                  |var x = debug.any
+                  |
+                  |debug(x).is(debug.any)
+                  |debug(x.x).is(debug.any)
+                  |debug(x.x.x).is(debug.any)
+                  |var a = x.x = 5
+                  |debug(a).is(5)
+                  |debug(x.x).is(debug.any)
+                  |
+                  |debug(x[debug.any]).is(debug.any)
+                  |debug(x[a]).is(debug.any)
+                """.stripMargin
+
+            FixtureRunner.test(code)
+        }
+            
+    }
+
+
     "/abstract/objects" - {
         "Object instances should become abstract in iteration" in {
             val code =
@@ -680,6 +707,8 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |}
                   |
                   |debug.liveCode()
+                  |
+                  |
                 """.stripMargin
 
             FixtureRunner.test(code)
@@ -1234,6 +1263,7 @@ class WorkingFixturesSpec extends FreeSpec with Matchers {
                   |}
                   |
                   |debug.deadCode()
+                  |
                 """.stripMargin
 
             FixtureRunner.test(code)

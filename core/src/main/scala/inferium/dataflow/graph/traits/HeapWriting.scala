@@ -85,7 +85,7 @@ trait HeapWriting extends Node {
 
         mutator.writeToProperty(obj, propertyName, valueLocation, isCertainWrite = onlyOneTarget, value) match {
             case AbstractProperty(_, _, _, _, _, setter, _) =>
-                if (setter != NeverValue) {
+                if (setter != NeverValue && setter != AnyEntity) {
                     ???
                 }
                 false

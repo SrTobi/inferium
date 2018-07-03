@@ -1,6 +1,7 @@
 package inferium.lattice
 
 import inferium.dataflow.{CallableInfo, LexicalFrame, Templates}
+import inferium.lattice.ObjectType.AnyObject
 import inferium.lattice.assertions._
 import inferium.utils.macros.blockRec
 
@@ -53,7 +54,7 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
 
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         fail()
-        Seq()
+        Seq.empty
     }
 }
 
@@ -71,9 +72,33 @@ case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override va
     override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = Seq(this)
 }
 
+case object AnyEntity extends ObjectLike {
+    override def objectType: ObjectType = AnyObject
+
+    override val loc: Location = Location()
+
+    override def abstractCount: Long = 0
+
+    override def withAbstractCount(ac: Long): ObjectLike = {
+        assert(ac == 0)
+        this
+    }
+
+    @blockRec(nonrec = true)
+    override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top
+
+    @blockRec(nonrec = true)
+    override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
+
+    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
+        // empty nothing but don't fail either
+        Seq.empty
+    }
+}
 
 sealed abstract class ObjectType
 object ObjectType {
+    case object AnyObject extends ObjectType
     case object OrdinaryObject extends ObjectType
     case object FunctionObject extends ObjectType
 }

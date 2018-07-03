@@ -141,6 +141,9 @@ object SimpleHeap extends Heap.Factory {
         }
 
         override def isConcreteObject(obj: ObjectLike): Boolean = {
+            if (obj == AnyEntity) {
+                return false
+            }
             objects.get(obj.loc) match {
                 case Some(Obj(_, _, ac)) =>
                     ac == obj.abstractCount
@@ -152,6 +155,11 @@ object SimpleHeap extends Heap.Factory {
 
         override def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit = {
             assert(property != ConcreteProperty.absentProperty)
+
+            if (obj == AnyEntity) {
+                return
+            }
+
             objects.get(obj.loc) match {
                 case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
                     // we found the object, now set the property
@@ -171,6 +179,10 @@ object SimpleHeap extends Heap.Factory {
 
         override def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit = {
             import Utils._
+
+            if (obj == AnyEntity) {
+                return
+            }
 
             def changeExisting(name: String, p: Property): Boolean =
                 (numbersOnly ==> StringLattice.isNumberString(name)) &&
@@ -224,6 +236,10 @@ object SimpleHeap extends Heap.Factory {
         }
 
         override def writeToProperty(obj: ObjectLike, propertyName: String, valueLoc: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property = {
+            if (obj == AnyEntity) {
+                return AbstractProperty.anyProperty
+            }
+
             objects.get(obj.loc) match {
                 case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
@@ -260,6 +276,10 @@ object SimpleHeap extends Heap.Factory {
         }
 
         override def getProperties(obj: ObjectLike, numbersOnly: Boolean): TraversableOnce[(Option[String], Property)] = {
+            if (obj == AnyEntity) {
+                return Iterator(None -> AbstractProperty.anyProperty)
+            }
+
             import Utils._
             objects.get(obj.loc) match {
                 case Some(desc) =>
@@ -288,6 +308,10 @@ object SimpleHeap extends Heap.Factory {
         }
 
         override def getProperty(obj: ObjectLike, propertyName: String): Property = {
+            if (obj == AnyEntity) {
+                return AbstractProperty.anyProperty
+            }
+
             objects.get(obj.loc) match {
                 case Some(objDesc) =>
 

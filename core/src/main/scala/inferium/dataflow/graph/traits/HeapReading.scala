@@ -73,7 +73,7 @@ trait HeapReading extends Node {
             }
 
         case AbstractProperty(_, _, value, _, getter, _, mightBeAbsent) =>
-            if (getter != NeverValue) {
+            if (getter != NeverValue && getter != AnyEntity) {
                 // todo: implement getters
                 ???
             }

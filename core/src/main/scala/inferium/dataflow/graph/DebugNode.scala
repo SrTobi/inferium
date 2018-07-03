@@ -83,7 +83,7 @@ object DebugNode {
     case object CheckLiveCode extends Operation {
         override def toString: String = "live"
     }
-    case class Is(entities: Seq[Either[Primitive, String]]) extends Operation {
+    case class Is(entities: Seq[Either[Entity, String]]) extends Operation {
         override def toString: String = s"is(${entities map { case Left(p) => p.toString case Right(s) => s} mkString ", "})"
     }
     case class PrintExpr(name: String) extends Operation {
