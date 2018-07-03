@@ -1,5 +1,6 @@
 package inferium.dataflow
 
+import inferium.dataflow.graph.Node.StateOrigin
 import inferium.lattice.Location
 
 import scala.collection.mutable
@@ -7,7 +8,7 @@ import scala.collection.mutable
 class DataFlowAnalysis(analysable: Analysable, val debugAdapter: DebugAdapter = DebugAdapter.Empty) {
 
     private implicit def useThisAsAnalysis: DataFlowAnalysis = this
-    private val initialStateOrigin = Location()
+    private val initialStateOrigin = StateOrigin()
     private val enquedNodes = mutable.Set.empty[graph.Node]
     private val nodesToProcess = mutable.PriorityQueue.empty[graph.Node](Ordering.by(_.priority))
 

@@ -2,9 +2,11 @@ package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, DebugAdapter, ExecutionState}
 import inferium.dataflow.graph.DebugNode._
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading, LexicalLookup}
-import inferium.lattice.{Entity, Primitive, StringLattice, ValueLocation}
+import inferium.lattice._
 
 class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading with LexicalLookup {
+
+    private val heapAccessLoc: Location = Location()
 
     private def report(f: (Node, String) => Unit)(msg: String)(implicit analysis: DataFlowAnalysis): Unit = f(this,  s"In line ${lineNumber.getOrElse("unknown")}: $msg")
     private def reportError(msg: String)(implicit analysis: DataFlowAnalysis): Unit = report(analysis.debugAdapter.error)(msg)
@@ -16,7 +18,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
         lazy val subject = if (stack.isEmpty)
                 throw new IllegalStateException("Can't access ans element because it does not exist in the current context")
             else
-                stack.head.normalized(state.heap.begin(loc))
+                stack.head.normalized(state.heap.begin(heapAccessLoc))
 
         operations foreach {
             case CheckDeadCode =>
@@ -37,7 +39,8 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
 
     def executeChecks(debugAdapter: DebugAdapter)(implicit analysis: DataFlowAnalysis): Unit = {
         val state = inState
-        lazy val subject = state.stack.head.normalized(state.heap.begin(loc))
+        lazy val heapAccess = state.heap.begin(heapAccessLoc)
+        lazy val subject = state.stack.head.normalized(heapAccess)
 
         operations foreach {
             case CheckDeadCode =>
@@ -59,7 +62,7 @@ class DebugNode(operations: Seq[Operation], lineNumber: Option[Int])(implicit _i
                         val lookupChain = info.lexicalEnv.buildLookupSeq(name)
                         val (obj, propertyName, _) = lookup(state, lookupChain)
                         val Some((result, _)) = read(obj, StringLattice(propertyName), state)
-                        result.normalized(state.heap.begin(loc))
+                        result.normalized(heapAccess)
                 }
 
                 if (!(Entity.unify(normalizedEntities) == subject)) {

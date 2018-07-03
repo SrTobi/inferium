@@ -19,6 +19,8 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
     private var savedReturnValue: Entity = _
     private var savedReturnHeap: Heap = _
 
+    private val heapAccessLoc: Location = Location()
+
     def argumentCount: Int = spreadArguments.length
     def calls: Iterable[CallInstance.Info] = callInstances.values.map(_.info)
 
@@ -61,7 +63,7 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
             (thisObject, stackWithoutFunc)
         }
 
-        val mutator = initialHeap.begin(loc)
+        val mutator = initialHeap.begin(heapAccessLoc)
         lazy val heapAfterSetup = initialHeap.end(mutator)
 
 

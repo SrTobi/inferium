@@ -1,14 +1,16 @@
 package inferium.dataflow.graph
 import inferium.dataflow.graph.traits.{FailingTransformerNode, HeapReading}
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
-import inferium.lattice.StringLattice
+import inferium.lattice.{Location, StringLattice}
 
 class PropertyDynamicReadNode()(implicit _info: Node.Info) extends FailingTransformerNode with HeapReading {
+    private val heapAccessLoc: Location = Location()
+
     override protected def transform(state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[ExecutionState] = {
         val heap = state.heap
         val property :: base :: rest = state.stack
 
-        val mutator = heap.begin(loc)
+        val mutator = heap.begin(heapAccessLoc)
         val propertyNames = property.asStringLattice(mutator)
         val heapAfterToStringLattice = heap.end(mutator)
 

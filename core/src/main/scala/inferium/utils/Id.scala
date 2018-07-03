@@ -8,5 +8,6 @@ final class Id[T](val id: Long) extends AnyVal {
 
 class IdGenerator[T] {
     private val counter = new Counter()
-    def newId(): Id[T] = new Id[T](counter.next())
+    def newId(): Id[T] = createFromExisting(counter.next())
+    def createFromExisting(id: Long): Id[T] = new Id[T](id)
 }

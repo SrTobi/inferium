@@ -8,6 +8,8 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
     assert(thenNode != null)
     assert(elseNode != null)
 
+    private val heapAccessLoc: Location = Location()
+
     thenNode.addPredecessor(this)
     elseNode.addPredecessor(this)
 
@@ -28,7 +30,7 @@ class CondJumpNode(val thenNode: Node, val elseNode: Node)(implicit _info: Node.
         val cond :: rest = inState.stack
         val heap = inState.heap
 
-        val condBool = cond.asBoolLattice(heap.begin(loc))
+        val condBool = cond.asBoolLattice(heap.begin(heapAccessLoc))
 
         def afterAssert(assertion: Assertion, l: Location) = {
             val mutator = heap.begin(l)

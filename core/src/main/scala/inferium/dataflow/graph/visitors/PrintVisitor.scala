@@ -125,7 +125,7 @@ private class PrintVisitor(val showStackInfo: Boolean,
                                 foundSubcalls += begin
                                 subCallQueue += begin
                             }
-                            cmd(s"  -inlined: ${begin.loc}")
+                            cmd(s"  -inlined: ${begin.id}")
 
                         case NativeCallInfo(_) =>
                             ???
@@ -175,7 +175,7 @@ private class PrintVisitor(val showStackInfo: Boolean,
         while (subCallQueue.nonEmpty) {
             val subcallBegin = subCallQueue.dequeue()
             line("")
-            line(s"Subcall to ${subcallBegin.loc}")
+            line(s"Subcall to ${subcallBegin.id}")
             firstNode = true
             start(subcallBegin)
         }

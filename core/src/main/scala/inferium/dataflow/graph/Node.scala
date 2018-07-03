@@ -5,16 +5,16 @@ import inferium.dataflow.calls.CallInstance
 import scala.collection.mutable
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
 import inferium.lattice.{Entity, Location}
+import inferium.utils.{Id, IdGenerator}
 
 import scala.language.implicitConversions
 
 abstract class Node(implicit val info: Node.Info) {
     import Node._
 
-    protected implicit def thisOrigin: StateOrigin = StateOrigin(loc)
+    protected implicit val thisOrigin: StateOrigin = StateOrigin()
 
-    val loc: Location = Location()
-    def id: Location = loc
+    def id: NodeId = NodeId.newId()
     def label: String = info.label.getOrElse(s"L${id.id}")
     def catchTarget: Option[Node] = info.catchTarget
 
@@ -103,7 +103,7 @@ abstract class Node(implicit val info: Node.Info) {
     protected[graph] def addSuccessor(node: Node): Unit
 
     final def <~(state: ExecutionState)(implicit originNode: StateOrigin, analysis: DataFlowAnalysis): Unit = setNewInState(state, originNode)
-    def setNewInState(state: ExecutionState, origin: Location)(implicit analysis: DataFlowAnalysis): Unit
+    def setNewInState(state: ExecutionState, origin: NodeId)(implicit analysis: DataFlowAnalysis): Unit
 
     def process(implicit analysis: DataFlowAnalysis): Unit
 
@@ -113,13 +113,16 @@ abstract class Node(implicit val info: Node.Info) {
 
 
 object Node {
-    final class StateOrigin private (private val id: Long) extends AnyVal {
-        def loc: Location = Location.create(id)
+    type NodeId = Id[Node]
+    object NodeId extends IdGenerator[Node]
+
+    final class StateOrigin private (private val originId: Long) extends AnyVal {
+        def id: NodeId = NodeId.createFromExisting(originId)
     }
 
     object StateOrigin {
-        def apply(loc: Location = Location()): StateOrigin = new StateOrigin(loc.id)
-        implicit def stateOriginToLocation(origin: StateOrigin): Location = origin.loc
+        def apply(loc: NodeId = NodeId.newId()): StateOrigin = new StateOrigin(loc.id)
+        implicit def stateOriginToId(origin: StateOrigin): NodeId = origin.id
     }
 
     sealed abstract class ExprStackFrame {
