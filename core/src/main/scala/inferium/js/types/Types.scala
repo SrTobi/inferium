@@ -3,6 +3,7 @@ package inferium.js.types
 import java.security.Signature
 
 import inferium.Unifiable
+import inferium.lattice._
 import ujson.Js
 
 import scala.collection.mutable
@@ -11,6 +12,8 @@ import scala.collection.mutable
 object js {
 
     sealed abstract class Type extends Unifiable[Type] {
+        def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity
+
         override def unify(other: Type)(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this, other)
         override def unify(others: Seq[Type])(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this +: others)
     }
@@ -26,37 +29,65 @@ object js {
         private def unifyRest(types: Seq[Type]): Type = ???
     }
 
-    case object AnyType extends Type
+    case object AnyType extends Type {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = AnyEntity
+    }
 
     sealed abstract class Primitive extends Type
 
-    case object NeverType extends Primitive
-    case object UndefinedType extends Primitive
-    case object NullType extends Primitive
+    case object NeverType extends Primitive {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = NeverValue
+    }
+    case object UndefinedType extends Primitive {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = UndefinedValue
+    }
+    case object NullType extends Primitive {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = NullValue
+    }
 
     sealed abstract class BooleanType extends Primitive
-    case object BooleanType extends BooleanType
+    case object BooleanType extends BooleanType {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = BoolValue
+    }
 
-    case object TrueType extends BooleanType
-    case object FalseType extends BooleanType
+    case object TrueType extends BooleanType {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = TrueValue
+    }
+    case object FalseType extends BooleanType {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = FalseValue
+    }
 
-    case object NumberType extends Primitive
+    case object NumberType extends Primitive {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = NumberValue
+    }
 
     sealed abstract class StringType extends Primitive
-    case object StringType extends StringType
+    case object StringType extends StringType {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = StringValue
+    }
 
-    final case class LiteralType(value: String) extends StringType
+    final case class LiteralType(value: String) extends StringType {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = SpecificStringValue(value)
+    }
 
-    case object ThisType extends Type
+    case object ThisType extends Type {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = ???
+    }
 
     final class TupleType extends Type {
         var members: Seq[Type] = _
+
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = ???
     }
 
-    case object ObjectType extends Type
+    case object ObjectType extends Type {
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = ???
+    }
 
     final class GenericType(/*val name: String, */) extends Type {
         var constraint: Option[Type] = None
+
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = substitutions(this)
     }
 
     final class UnionType extends Type {
@@ -68,6 +99,10 @@ object js {
         }
         override def hashCode: Int = types.hashCode()
         override def toString: String = types.mkString(" | ")
+
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = {
+            Entity.unify(types map { _.instantiate(heap, substitutions) })
+        }
     }
 
     object UnionType {
@@ -85,6 +120,17 @@ object js {
         // todo: check if typeArguments has the same length as the target's typeParameters
         var typeArguments: Seq[Type] = _
         var target: CompoundType = _
+
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = {
+            assert(typeArguments.length == target.typeParameter.length)
+
+            // todo: respect default type parameter
+            val newSubstitution = target.typeParameter zip typeArguments map {
+                case (generic, ty) => (generic, ty.instantiate(heap, substitutions))
+            }
+
+            target.instantiate(heap, newSubstitution.toMap)
+        }
     }
 
     final class CompoundType(val name: Option[String]) extends Type {
@@ -98,13 +144,21 @@ object js {
         def callable: Boolean = signature.nonEmpty
         def constructable: Boolean = constructor.nonEmpty
 
-        private[js] def _resolve(bases: Seq[Type], typeParameter: Seq[GenericType], signature: Signature, constructor: Signature, properties: Seq[Property]): Unit = {
+        private[js] def _resolve(bases: Seq[Type],
+                                 typeParameter: Seq[GenericType],
+                                 signature: Signature,
+                                 constructor: Signature,
+                                 properties: Seq[Property]): Unit = {
             this.bases = bases
             this.typeParameter = typeParameter
             this.signature = signature
             this.constructor = constructor
             this.properties = properties.map(p => p.name -> p).toMap
             assert(this.properties.size == properties.size)
+        }
+
+        override def instantiate(heap: Heap.Mutator, substitutions: Map[GenericType, Entity]): Entity = {
+            ???
         }
     }
 
