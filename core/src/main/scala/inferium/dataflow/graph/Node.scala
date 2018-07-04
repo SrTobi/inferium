@@ -14,7 +14,7 @@ abstract class Node(implicit val info: Node.Info) {
 
     protected implicit val thisOrigin: StateOrigin = StateOrigin()
 
-    def id: NodeId = NodeId.newId()
+    val id: NodeId = NodeId.newId()
     def label: String = info.label.getOrElse(s"L${id.id}")
     def catchTarget: Option[Node] = info.catchTarget
 
