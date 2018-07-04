@@ -73,14 +73,8 @@ trait Calling extends Async[Unit] with Failing {
         callables
     }
 
-    def spreadArguments(arguments: Seq[Entity], spreadArguments: Seq[Boolean]): Seq[Entity] = {
-        arguments zip spreadArguments flatMap {
-            case (arg, isSpread) =>
-                if (isSpread) {
-                    ???
-                } else {
-                    Seq(arg)
-                }
-        }
+    def spreadArguments(arguments: Seq[Entity], spreadArguments: Seq[Boolean]): (Seq[Entity], Entity) = {
+        val (spreaded, rest) = ArrayUtils.spreadSeq(arguments, spreadArguments)
+        (spreaded, rest getOrElse NeverValue)
     }
 }

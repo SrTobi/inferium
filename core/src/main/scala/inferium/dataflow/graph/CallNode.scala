@@ -53,9 +53,9 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
         val callables = calling.coerceCallables(func, mutator, stateAfterSetup)
 
         // normalize spread
-        val spreadedArguments = calling.spreadArguments(arguments, spreadArguments)
+        val (spreadedArguments, restArgument) = calling.spreadArguments(arguments, spreadArguments)
 
-        calling.call(stateAfterSetup, callables, thisObject, spreadedArguments, NeverValue)
+        calling.call(stateAfterSetup, callables, thisObject, spreadedArguments, restArgument)
     }
 
     override def asAsmStmt: String = (if (thisIsOnStack) "invoke" else "call") + s" ($argumentCount args)"

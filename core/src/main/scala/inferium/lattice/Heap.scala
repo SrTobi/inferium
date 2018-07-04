@@ -27,8 +27,11 @@ abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
 object Heap {
     object SpecialObjects extends Enumeration {
         type SpecialObject = Value
-        val Object, ObjectConstructor, Function, FunctionConstructor = Value
+        val Object, ObjectConstructor,
+            Function, FunctionConstructor,
+            Array, ArrayConstructor = Value
     }
+
 
     type SpecialObjectMap = mutable.Map[SpecialObject, ObjectLike]
     case class Shared(config: Config, specialObjects: SpecialObjectMap = mutable.Map.empty)
