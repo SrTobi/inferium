@@ -58,7 +58,7 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
                 if (changedEntityEffects == null && assertedValue != NeverValue) {
                     changedEntityEffects = () => {
                         val affectedValue = effects()
-                        heap.setValue(loc, affectedValue)
+                        heap.changeValue(loc, affectedValue)
                         this
                     }
                 }

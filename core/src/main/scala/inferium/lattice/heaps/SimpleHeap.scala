@@ -15,7 +15,9 @@ object SimpleHeap extends Heap.Factory {
         (heap, shared.specialObjects)
     }
 
-    private class SimpleHeapImpl(_shared: Heap.Shared, private val objects: Map[Location, Obj] = Map.empty, private val boxedValues: Map[ValueLocation, Entity] = Map.empty) extends Heap(_shared) {
+    private class SimpleHeapImpl(_shared: Heap.Shared,
+                                 private val objects: Map[Location, Obj] = Map.empty,
+                                 private val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap(_shared) {
 
 
         private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, this)
@@ -143,7 +145,27 @@ object SimpleHeap extends Heap.Factory {
 
     private val initialAbstractDesc: AbstractDesc = (AbstractInternalFields(AbstractProperty.internalProperty, Seq.empty), Map.empty)
 
-    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity], override val origin: SimpleHeapImpl) extends Mutator {
+    private class BoxedValue(val abstractValue: Entity, val concreteValue: Entity, val abstractCount: Long) {
+        def isAbstract(loc: ValueLocation): Boolean = loc.abstractCount < abstractCount
+        def valueFor(loc: ValueLocation): Entity = if (isAbstract(loc)) abstractValue else concreteValue
+        def unify(other: BoxedValue): BoxedValue = {
+            BoxedValue(abstractValue unify other.abstractValue, concreteValue unify other.concreteValue, Math.max(abstractCount, other.abstractCount))
+        }
+
+        override def hashCode(): Int = abstractValue.hashCode() ^ concreteValue.hashCode()
+
+        override def equals(obj: scala.Any): Boolean = obj match {
+            case obj: BoxedValue => abstractValue == obj.abstractValue && concreteValue == obj.concreteValue
+            case _ => false
+        }
+    }
+
+    private object BoxedValue {
+        def apply(abstractValue: Entity, concreteValue: Entity, abstractCount: Long): BoxedValue = new BoxedValue(abstractValue, concreteValue, abstractCount)
+        def unapply(arg: BoxedValue): Option[(Entity, Entity, Long)] = Some((arg.abstractValue, arg.concreteValue, arg.abstractCount))
+    }
+
+    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[Location, BoxedValue], override val origin: SimpleHeapImpl) extends Mutator {
         override def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike = {
             val prototypeObjs = prototype.coerceToObjects(this)
             val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, prototypeObjs), Map.empty)
@@ -281,7 +303,7 @@ object SimpleHeap extends Heap.Factory {
                     } else {
                         val newProp = concreteProps.get(propertyName) match {
                             case Some(prop) =>
-                                if (isCertainWrite) prop.copy(value = Set(valueLoc)) else prop.copy(value = prop.value + valueLoc)
+                                if (isCertainWrite) prop.copy(value = Set(valueLoc)) else prop.addValue(valueLoc)
 
                             case None =>
                                 // TODO: search prototypes
@@ -379,11 +401,37 @@ object SimpleHeap extends Heap.Factory {
 
         override def getValue(valueLocation: ValueLocation): Entity = valueLocation match {
             case ValueLocation.AbsentLocation => UndefinedValue
-            case _ => boxedValues(valueLocation)
+            case _ => boxedValues(valueLocation.loc).valueFor(valueLocation)
         }
-        override def setValue(loc: ValueLocation, value: Entity): Unit = {
-            assert(loc != ValueLocation.AbsentLocation)
-            boxedValues += loc -> value
+
+        override def setValue(loc: Location, value: Entity): ValueLocation = {
+            assert(value != NeverValue)
+            assert(loc != ValueLocation.AbsentLocation.loc)
+
+            val newBox = boxedValues.get(loc) match {
+                case Some(BoxedValue(abstractValue, _, oldAbstractCount)) =>
+                    val newAbstractCount = oldAbstractCount + 1
+                    BoxedValue(abstractValue unify value, value, newAbstractCount)
+                case None =>
+                    BoxedValue(NeverValue, value, 1)
+            }
+            boxedValues += loc -> newBox
+            new ValueLocation(loc, newBox.abstractCount)
+        }
+
+        override def changeValue(valueLoc: ValueLocation, value: Entity): Unit = {
+            val loc = valueLoc.loc
+            assert(value != NeverValue)
+            assert(loc != ValueLocation.AbsentLocation.loc)
+
+            boxedValues.get(loc) match {
+                case Some(BoxedValue(abstractValue, concreteValue, abstractCount)) =>
+                    if (abstractCount == valueLoc.abstractCount) {
+                        boxedValues += loc -> BoxedValue(abstractValue, concreteValue, abstractCount)
+                    }
+                case None =>
+                    throw new AssertionError(s"$valueLoc can not be changed, because it does not exist")
+            }
         }
     }
 }

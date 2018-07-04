@@ -7,7 +7,7 @@ import inferium.lattice._
 trait HeapWriting extends Node {
     private val heapWritingLoc = Location()
     private val heapResolveLoc = Location()
-    private val valueLocation = ValueLocation(Location())
+    private val valueLocation = Location()
 
     protected final def write(target: Entity, properties: StringLattice, value: Entity, state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[(Entity, ExecutionState)] = {
         val initialHeap = state.heap
@@ -23,13 +23,11 @@ trait HeapWriting extends Node {
         }
 
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
-        var valueLocationWasWritten = false
+        var assignmentLocation = writeMutator.setValue(valueLocation, value)
 
         def dynWritesToObject(onlyNumbers: Boolean): Unit = {
             for (obj <- objs) {
-                if(dynWrite(target, obj, value, onlyNumbers, writeMutator)) {
-                    valueLocationWasWritten = true
-                }
+                dynWrite(target, obj, assignmentLocation, value, onlyNumbers, writeMutator)
             }
         }
         val result = properties match {
@@ -44,25 +42,22 @@ trait HeapWriting extends Node {
             case StringLattice.SpecificStrings(propertyNames) =>
 
                 val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
+                var valueLocationWasWritten = false
                 for (obj <- objs; propertyName <- propertyNames) {
-                    val res = write(target, obj, propertyName, value, isCertainWrite, writeMutator)
+                    val res = write(target, obj, propertyName, assignmentLocation, value, isCertainWrite, writeMutator)
                     if (res) {
                         valueLocationWasWritten = true
                     }
                 }
 
                 if (valueLocationWasWritten) {
-                    val locSet = Set(valueLocation)
+                    val locSet = Set(assignmentLocation)
                     UnionValue(
                         propertyNames.iterator map { Ref(target, _, locSet) }
                     )
                 } else {
                     value
                 }
-        }
-
-        if (valueLocationWasWritten) {
-            writeMutator.setValue(valueLocation, value)
         }
 
         val resultHeap = heapAfterCoersion.end(writeMutator)
@@ -75,13 +70,17 @@ trait HeapWriting extends Node {
     /*protected def write(target: ObjectLike, propertyName: String, value: Entity): Entity = {
 
     }*/
-    private def dynWrite(base: Entity, obj: ObjectLike, value: Entity, onlyNumbers: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
+    private def dynWrite(base: Entity,
+                         obj: ObjectLike,
+                         valueLocation: ValueLocation,
+                         value: Entity,
+                         onlyNumbers: Boolean,
+                         mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Unit = {
         mutator.writeToProperties(obj, valueLocation, onlyNumbers, value)
-        mutator.isConcreteObject(obj)
     }
 
     // returns whether a property was changed
-    private def write(base: Entity, obj: ObjectLike, propertyName: String, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
+    private def write(base: Entity, obj: ObjectLike, propertyName: String, valueLocation: =>ValueLocation, value: Entity, onlyOneTarget: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Boolean = {
 
         mutator.writeToProperty(obj, propertyName, valueLocation, isCertainWrite = onlyOneTarget, value) match {
             case AbstractProperty(_, _, _, _, _, setter, _) =>

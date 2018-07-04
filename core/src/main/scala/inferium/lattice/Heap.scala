@@ -79,7 +79,8 @@ object Heap {
         //def listProperties(obj: ObjectLike): Seq[Entity]
 
         def getValue(loc: ValueLocation): Entity
-        def setValue(loc: ValueLocation, value: Entity): Unit
+        def setValue(loc: Location, value: Entity): ValueLocation
+        def changeValue(loc: ValueLocation, value: Entity): Unit
 
         def getPropertyValueIgnoringGetter(obj: ObjectLike, propertyName: String): Entity = {
             getProperty(obj, propertyName) match {
@@ -95,9 +96,9 @@ object Heap {
             }
         }
 
-        def forceSetPropertyValue(obj: ObjectLike, propertyName: String, writeLoc: ValueLocation, value: Entity): Unit = {
-            setProperty(obj, propertyName, ConcreteProperty.defaultWriteToObject(Set(writeLoc)))
-            setValue(writeLoc, value)
+        def forceSetPropertyValue(obj: ObjectLike, propertyName: String, writeLoc: Location, value: Entity): Unit = {
+            val valueLocation = setValue(writeLoc, value)
+            setProperty(obj, propertyName, ConcreteProperty.defaultWriteToObject(Set(valueLocation)))
         }
     }
 

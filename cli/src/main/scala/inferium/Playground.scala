@@ -22,34 +22,44 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |function test(x) {
-              |  debug(x).print()
-              |  debug(this).print()
-              |  this.prop = x
+              |var lastObj
+              |var someObj
+              |while (debug.boolean) {
+              |     debug(lastObj).print("l")
+              |    lastObj = { prop: "init" }
+              |    debug(someObj).print("some-before")
+              |    if (debug.boolean) {
+              |        someObj = lastObj
+              |    }
+              |
+              |    debug(someObj).print("some")
+              |    debug(someObj.prop).print("some.prop")
+              |
+              |    debug(lastObj.prop).is("init")
+              |    lastObj.prop = "next"
+              |    debug(lastObj.prop).is("next")
+              |
+              |
+              |    if (debug.boolean) {
+              |        someObj.prop = "blub"
+              |    }
+              |    debug(lastObj).print("end")
               |}
               |
-              |if (debug.boolean) {
-              |  test.prototype = { p: "hihi" }
-              |} else {
-              |  test.prototype = { p: "haha" }
-              |}
+              |debug(lastObj.prop).is("next", "blub")
+              |debug(someObj.prop).is("next", "blub")
               |
-              |var o = new test("xxx")
-              |debug(o).print("o")
-              |debug(o.prop).print("o.prop")
-              |debug(o.p).print("o.p")
               |
             """.stripMargin
 
         /*val code =
             """
               |var o = {}
+              |o.o = o
               |
-              |if (debug.boolean) {
-              |  o.p = "test"
+              |while(debug.boolean) {
+              |  o = o.o
               |}
-              |
-              |debug(o.p).print("o.p")
               |
             """.stripMargin*/
 
@@ -59,7 +69,7 @@ object Playground {
         val config = InferiumConfig.Env.NodeDebug
         val graph = new GraphBuilder(config).buildTemplate(prog).instantiate()
 
-        println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
+        //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
         val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState(config))

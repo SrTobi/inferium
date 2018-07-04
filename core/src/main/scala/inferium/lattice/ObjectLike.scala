@@ -49,7 +49,7 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
 
     override def objectType: ObjectType = ObjectType.OrdinaryObject
 
-    override def toString: String = s"Obj($loc)"
+    override def toString: String = s"Obj($loc:$abstractCount)"
 
     override def withAbstractCount(ac: Long): ObjectLike = OrdinaryObjectEntity(loc)(ac)
 
@@ -66,7 +66,7 @@ case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override va
 
     override def objectType: ObjectType = ObjectType.FunctionObject
 
-    override def toString: String = s"Func($loc${callableInfo.name map { ":" + _ } getOrElse ""})"
+    override def toString: String = s"Func($loc${callableInfo.name map { ":" + _ } getOrElse ""}:$abstractCount)"
 
     override def withAbstractCount(ac: Long): ObjectLike = FunctionEntity(loc, lexicalFrame)(ac, callableInfo)
 
@@ -84,6 +84,8 @@ case object AnyEntity extends ObjectLike {
         assert(ac == 0)
         this
     }
+
+    override def toString: String = "Any"
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.Top

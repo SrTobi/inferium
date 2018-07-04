@@ -22,7 +22,7 @@ object NodeJs {
             }
             val gObj = mutator.allocOrdinaryObject(Location())
 
-            mutator.forceSetPropertyValue(gObj, "global", ValueLocation(Location()), gObj)
+            mutator.forceSetPropertyValue(gObj, "global", Location(), gObj)
 
             (initialHeap.end(mutator), gObj)
         }

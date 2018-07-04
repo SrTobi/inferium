@@ -1,6 +1,7 @@
 package inferium.lattice
 
 import inferium.dataflow.CallableInfo
+import inferium.lattice
 import inferium.lattice.assertions.Assertion
 import inferium.utils.macros.blockRec
 
@@ -94,7 +95,7 @@ object UnionValue {
         var numberValue: NumberValue = null
         var stringValues = mutable.SortedSet.empty[SpecificStringValue](Ordering.by(_.value))
         var objLocations = mutable.Map.empty[Location, (Boolean, ObjectLike)]
-        var refs = mutable.Set.empty[Ref]
+        var refs = mutable.Map.empty[Ref, Either[Ref, ValueLocation.SetBuilder]]
 
         entities.flatMap(unpackUnion) foreach {
             case bool: BoolValue =>
@@ -130,7 +131,17 @@ object UnionValue {
                 }
                 objLocations += obj.loc -> v
             case ref: Ref =>
-                refs += ref
+                refs.get(ref) match {
+                    case Some(Left(otherRef)) =>
+                        val builder = new ValueLocation.SetBuilder
+                        builder.add(otherRef.target)
+                        builder.add(ref.target)
+                        refs += ref -> Right(builder)
+                    case Some(Right(builder)) =>
+                        builder.add(ref.target)
+                    case None =>
+                        refs += ref -> Left(ref)
+                }
             case entity =>
                 throw new IllegalArgumentException(s"Unknown entity $entity")
         }
@@ -141,12 +152,17 @@ object UnionValue {
                 max +: (if (hadAbstract) Seq(max.withAbstractCount(0)) else Seq())
         }
 
+        def refSeq: Seq[Ref] = refs.iterator.map {
+            case (_, Left(ref)) => ref
+            case (ref, Right(builder)) => ref.copy(target = builder.toSet)
+        }.toSeq
+
         if (hasAny) {
             // keep object locations to be more precise
             unionFromSeq(
                 Seq(AnyEntity) ++
                 objLocationSeq ++
-                refs.toSeq
+                    refSeq
             )
         } else {
             unionFromSeq(
@@ -156,7 +172,7 @@ object UnionValue {
                     Option(numberValue).toSeq ++
                     Option(stringValues).getOrElse(Seq(StringValue)) ++
                     objLocationSeq ++
-                    refs.toSeq
+                    refSeq
             )
         }
     }

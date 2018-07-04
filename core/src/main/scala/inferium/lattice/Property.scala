@@ -34,7 +34,7 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
         ConcreteProperty(
             this.configurable.unify(other.configurable),
             this.enumerable.unify(other.enumerable),
-            this.value | other.value,
+            ValueLocation.merge(this.value, other.value),
             this.writable.unify(other.writable),
             this.getter | other.getter,
             this.setter | other.setter,
@@ -53,7 +53,7 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
         )
     }
 
-    def addValue(value: ValueLocation): ConcreteProperty = copy(value = this.value + value)
+    def addValue(value: ValueLocation): ConcreteProperty = copy(value = ValueLocation.add(this.value, value))
 
     override def mightBeAbsent: Boolean = value.contains(ValueLocation.AbsentLocation)
     def withAbsent: ConcreteProperty = if (mightBeAbsent) this else addValue(ValueLocation.AbsentLocation)
@@ -75,7 +75,7 @@ sealed case class AbstractProperty(configurable: GeneralBoolLattice,
             this.writable.unify(other.writable),
             this.getter | other.getter,
             this.setter | other.setter,
-            this.mightBeAbsent | other.mightBeAbsent
+            this.mightBeAbsent || other.mightBeAbsent
         )
 
     def addValue(value: Entity): AbstractProperty = copy(value = this.value | value)
