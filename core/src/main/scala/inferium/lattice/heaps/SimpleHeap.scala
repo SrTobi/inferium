@@ -18,7 +18,8 @@ object SimpleHeap extends Heap.Factory {
     private class SimpleHeapImpl(_shared: Heap.Shared, private val objects: Map[Location, Obj] = Map.empty, private val boxedValues: Map[ValueLocation, Entity] = Map.empty) extends Heap(_shared) {
 
 
-        override def begin(location: Location): Heap.Mutator = new SimpleMutator(objects, boxedValues, this)
+        private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, this)
+        override def begin(location: Location): SimpleMutator = createMutator()
 
         override def end(actor: Heap.Mutator): Heap = {
             val mutator = actor.asInstanceOf[SimpleMutator]
@@ -29,9 +30,22 @@ object SimpleHeap extends Heap.Factory {
 
         override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
             val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeapImpl] }
+            val mutator = createMutator()
             val newObjects = Utils.mergeMaps(allHeaps map { _.objects }: _*) {
                 case (Obj(ad1, cd1, c1), Obj(ad2, cd2, c2)) =>
-                    Obj(mergeAbsDesc(ad1, ad2), mergeConcreteDesc(cd1, cd2), Math.max(c1, c2))
+                    val (abstractDesc, concreteDesc) = if (c1 < c2) {
+                        val abstractified = abstractifyConcreteDesc(cd1, mutator)
+                        val newAd1 = if (wasAbstractified(c1)) mergeAbsDesc(abstractified, ad1) else abstractified
+                        mergeAbsDesc(newAd1, ad2) -> cd2
+                    } else if (c1 > c2) {
+                        val abstractified = abstractifyConcreteDesc(cd2, mutator)
+                        val newAd2 = if (wasAbstractified(c2)) mergeAbsDesc(abstractified, ad2) else abstractified
+                        mergeAbsDesc(ad1, newAd2) -> cd1
+                    } else {
+                        mergeAbsDesc(ad1, ad2) -> mergeConcreteDesc(cd1, cd2)
+                    }
+
+                    Obj(abstractDesc, concreteDesc, Math.max(c1, c2))
             }
 
             val newBoxedValues = Utils.mergeMaps(allHeaps map { _.boxedValues }: _*) { _ unify _}
@@ -88,6 +102,8 @@ object SimpleHeap extends Heap.Factory {
         def isAbstractObject(o: ObjectLike): Boolean = abstractCount != o.abstractCount
         def descFor(o: ObjectLike): Desc = if (isAbstractObject(o)) abstractDesc else concreteDesc
 
+        override def hashCode(): Int = abstractDesc.hashCode() ^ concreteDesc.hashCode()
+
         override def equals(o: scala.Any): Boolean = o match {
             case other: Obj =>
                 abstractDesc == other.abstractDesc && concreteDesc == other.concreteDesc
@@ -118,6 +134,13 @@ object SimpleHeap extends Heap.Factory {
         (d1._1 unify d2._1, mergeConcreteProperties(d1._2, d2._2))
     }
 
+    private def abstractifyConcreteDesc(desc: ConcreteDesc, mutator: SimpleMutator): AbstractDesc = {
+        val (concreteFields, concreteProps) = desc
+        (concreteFields.abstractify(mutator), concreteProps mapValues { _.abstractify(mutator) })
+    }
+
+    private def wasAbstractified(ac: Long): Boolean = ac != 1
+
     private val initialAbstractDesc: AbstractDesc = (AbstractInternalFields(AbstractProperty.internalProperty, Seq.empty), Map.empty)
 
     private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[ValueLocation, Entity], override val origin: SimpleHeapImpl) extends Mutator {
@@ -126,10 +149,11 @@ object SimpleHeap extends Heap.Factory {
             val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, prototypeObjs), Map.empty)
 
             val ac = objects.get(location) match {
-                case Some(Obj(abstractDesc, (concreteFields, conreteProps), oldAbstractCount)) =>
+                case Some(Obj(abstractDesc, concreteDesc, oldAbstractCount)) =>
                     val abstractCount = oldAbstractCount + 1
-                    val newAbstractDesc = (concreteFields.abstractify(this), conreteProps mapValues { _.abstractify(this) })
-                    objects += location -> Obj(mergeAbsDesc(abstractDesc, newAbstractDesc), initialConcreteDesc, abstractCount)
+                    val newAbstractDesc = abstractifyConcreteDesc(concreteDesc, this)
+                    val finalAbstractDesc = if (!wasAbstractified(oldAbstractCount)) newAbstractDesc else mergeAbsDesc(abstractDesc, newAbstractDesc)
+                    objects += location -> Obj(finalAbstractDesc, initialConcreteDesc, abstractCount)
 
                     abstractCount
                 case None =>
