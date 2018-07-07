@@ -1,14 +1,10 @@
 package inferium.dataflow.graph
 
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv, LexicalFrame}
-import inferium.dataflow.calls.{CallInstance, RecursiveCallInstance}
-import inferium.dataflow.graph.MergeNode.MergeType
-import inferium.dataflow.graph.Node.{CatchTarget, StateOrigin}
-import inferium.dataflow.graph.traits.{Calling, HeapWriting, LinearNode, SingleSuccessor}
+import inferium.dataflow.DataFlowAnalysis
+import inferium.dataflow.calls.CallInstance
+import inferium.dataflow.graph.Node.CatchTarget
+import inferium.dataflow.graph.traits._
 import inferium.lattice._
-import inferium.utils.Utils._
-
-import scala.collection.mutable
 
 class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends LinearNode with SingleSuccessor {
 
@@ -18,9 +14,9 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
     def argumentCount: Int = spreadArguments.length
     def calls: Iterable[CallInstance.Info] = calling.calls
 
-    private object calling extends Calling {
+    private object calling extends Calling with Async.CompleteWithSuccessor {
         override def succ: Node = CallNode.this.succ
-        override val callOrigin: Node.StateOrigin = thisOrigin
+        override val thisOrigin: Node.StateOrigin = CallNode.this._thisOrigin
         override def basePriority: Int = info.priority
         override def catchTarget: CatchTarget = info.catchTarget
         override def callFrame: Node.CallFrame = info.callFrame

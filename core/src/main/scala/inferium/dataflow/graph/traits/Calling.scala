@@ -1,14 +1,13 @@
 package inferium.dataflow.graph.traits
 
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalFrame}
 import inferium.dataflow.calls.{CallInstance, RecursiveCallInstance}
-import inferium.dataflow.graph.Node
-import inferium.dataflow.graph.Node.{CallFrame, CatchTarget, StateOrigin}
+import inferium.dataflow.graph.Node.CallFrame
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalFrame}
 import inferium.lattice._
 
 import scala.collection.mutable
 
-trait Calling {
+trait Calling extends Async[Unit] with Failing {
     protected val callInstances = mutable.Map.empty[Location, CallInstance]
     protected var savedLocalStack: ExecutionState.Stack = _
     protected var savedLocalThisEntity: Entity = _
@@ -17,17 +16,10 @@ trait Calling {
     protected var savedReturnValue: Entity = _
     protected var savedReturnHeap: Heap = _
 
-    def succ: Node
-    def callOrigin: StateOrigin
     def basePriority: Int
-    def catchTarget: CatchTarget
     def callFrame: CallFrame
-
     def calls: Iterable[CallInstance.Info] = callInstances.values.map(_.info)
 
-    private def fail(state: ExecutionState, exception: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
-        Node.fail(catchTarget, state, exception)(callOrigin, analysis)
-    }
 
     protected def ret(result: Entity, heap: Heap, analysis: DataFlowAnalysis): Unit = {
         if (savedReturnValue == null) {
@@ -41,7 +33,8 @@ trait Calling {
         }
 
         val resultState = ExecutionState(savedReturnValue :: savedLocalStack, savedReturnHeap, savedLocalThisEntity, savedLocalLexicalFrame)
-        succ.setNewInState(resultState, callOrigin)(analysis)
+        //succ.setNewInState(resultState, callOrigin)(analysis)
+        complete(Unit, resultState, analysis)
     }
 
     def call(stateBeforeCall: ExecutionState, callables: Seq[Entity], thisEntity: Entity, arguments: Seq[Entity], mergedRest: Entity)(implicit dataFlowAnalysis: DataFlowAnalysis): Unit = {

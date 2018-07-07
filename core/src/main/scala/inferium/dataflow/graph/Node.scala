@@ -12,7 +12,7 @@ import scala.language.implicitConversions
 abstract class Node(implicit val info: Node.Info) {
     import Node._
 
-    protected implicit val thisOrigin: StateOrigin = StateOrigin()
+    protected implicit val _thisOrigin: StateOrigin = StateOrigin()
 
     val id: NodeId = NodeId.newId()
     def label: String = info.label.getOrElse(s"L${id.id}")

@@ -15,9 +15,9 @@ class NewNode(spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends 
     def argumentCount: Int = spreadArguments.length
     def calls: Iterable[CallInstance.Info] = calling.calls
 
-    private object calling extends Calling {
+    private object calling extends Calling with Async.CompleteWithSuccessor {
         override def succ: Node = NewNode.this.succ
-        override val callOrigin: Node.StateOrigin = thisOrigin
+        override val thisOrigin: Node.StateOrigin = _thisOrigin
         override def basePriority: Int = info.priority
         override def catchTarget: CatchTarget = info.catchTarget
         override def callFrame: Node.CallFrame = info.callFrame
@@ -39,7 +39,7 @@ class NewNode(spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends 
             val constructionResult = Entity.unify(savedReturnValue.coerceToConstructionObject(heap.begin(heapAccessLoc), newObj))
 
             val resultState = ExecutionState(constructionResult :: localStack, savedReturnHeap, savedLocalThisEntity, savedLocalLexicalFrame)
-            succ.setNewInState(resultState, callOrigin)(analysis)
+            complete(Unit, resultState, analysis)
         }
     }
 
