@@ -346,6 +346,18 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
                         buildAssignment(left, Some(right), priority, env, pushWrittenValueToStack = true)
 
+                    case ast.ArrayExpression(elements) =>
+                        val (elementsGraph, spreaded) = elements.map {
+                            case Some(spread: SpreadElement) =>
+                                (buildExpression(spread.argument), Some(true))
+                            case Some(e: ast.Expression) =>
+                                (buildExpression(e), Some(false))
+                            case None =>
+                                (EmptyGraph, None)
+                        }.unzip
+
+                        Graph.concat(elementsGraph) ~> new graph.AllocateArrayNode(spreaded)
+
                     case ast.ObjectExpression(properties) =>
                         val propertyInitGraphs = properties map {
                             case ast.SpreadElement(arg) =>

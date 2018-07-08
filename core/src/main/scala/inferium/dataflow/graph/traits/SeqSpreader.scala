@@ -1,38 +1,23 @@
 package inferium.dataflow.graph.traits
 
-import inferium.dataflow.ExecutionState
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice.{Entity, Location}
 
 
-abstract class SeqSpreader {
-    def spread(seq: Seq[Entity], state: ExecutionState): (Seq[Entity], Option[Entity], ExecutionState)
-}
+abstract class SeqSpreader(spreads: Seq[Boolean]) extends Async[(Seq[Entity], Option[Entity])] {
+    def spread(seq: Seq[Entity], state: ExecutionState)(implicit dataFlowAnalysis: DataFlowAnalysis): Unit = {
+        assert(seq.length <= spreads.length)
+        var rest: Option[Entity] = None
 
-object SeqSpreader {
-    private case class SeqSpreaderImpl(spreads: Seq[Boolean]) extends SeqSpreader {
-        assert(spreads contains true)
-
-        private val accessLocations = Stream.continually(Location())
-
-        def spread(seq: Seq[Entity], state: ExecutionState): (Seq[Entity], Option[Entity], ExecutionState) = {
-            assert(seq.length <= spreads.length)
-            var rest: Option[Entity] = None
-
-            val result = seq zip spreads flatMap {
-                case (arg, isSpread) =>
-                    if (isSpread) {
-                        ???
-                    } else {
-                        Seq(arg)
-                    }
-            }
-            (result, rest, state)
+        val result = seq zip spreads flatMap {
+            case (arg, isSpread) =>
+                if (isSpread) {
+                    ???
+                } else {
+                    Seq(arg)
+                }
         }
-    }
 
-    private object InactiveSeqSpreader extends SeqSpreader {
-        override def spread(seq: Seq[Entity], state: ExecutionState): (Seq[Entity], Option[Entity], ExecutionState) = (seq, None, state)
+        complete((result, rest), state, dataFlowAnalysis)
     }
-
-    def apply(spreads: Seq[Boolean]): SeqSpreader = if (spreads contains true) SeqSpreaderImpl(spreads) else InactiveSeqSpreader
 }

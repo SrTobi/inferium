@@ -92,6 +92,9 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case node: graph.AllocateObjectNode =>
                 s"obj#${node.id}" :: stack
 
+            case node: graph.AllocateArrayNode =>
+                s"arr#${node.id}" :: stack.drop(node.elementsOnStackCount)
+
             case _: graph.PropertyWriteNode =>
                 val writeValue :: /* base object */ _ :: rest = stack
                 writeValue :: rest

@@ -20,6 +20,11 @@ object NodeJs {
                 val Function = mutator.allocOrdinaryObject(Location())
                 specialObjects += SpecialObjects.Function -> Function
             }
+            {
+                val Array = mutator.allocOrdinaryObject(Location())
+                specialObjects += SpecialObjects.Array -> Array
+            }
+
             val gObj = mutator.allocOrdinaryObject(Location())
 
             mutator.forceSetPropertyValue(gObj, "global", Location(), gObj)

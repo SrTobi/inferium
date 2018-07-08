@@ -76,9 +76,22 @@ class NewNode(spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends 
         val callables = calling.coerceCallables(func, mutator, stateAfterSetup)
 
         // normalize spread
-        val spreadedArguments = calling.spreadArguments(arguments, spreadArguments)
+        spreading.thisObject = newObj
+        spreading.callables = callables
+        spreading.spread(arguments, stateAfterSetup)
+    }
 
-        calling.call(stateAfterSetup, callables, newObj, spreadedArguments, NeverValue)
+    private object spreading extends SeqSpreader(spreadArguments) {
+        var callables: Seq[FunctionEntity] = _
+        var thisObject: Entity = _
+
+        override protected def onComplete(result: (Seq[Entity], Option[Entity]), state: ExecutionState, analysis: DataFlowAnalysis): Unit = {
+            assert(callables ne null)
+            assert(thisObject ne null)
+            val (spreadedArguments, restArgument) = result
+
+            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue)(analysis)
+        }
     }
 
     override def asAsmStmt: String = s"new ($argumentCount args)"

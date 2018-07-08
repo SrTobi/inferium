@@ -1,6 +1,6 @@
 package inferium.dataflow.graph
 
-import inferium.dataflow.DataFlowAnalysis
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.dataflow.calls.CallInstance
 import inferium.dataflow.graph.Node.CatchTarget
 import inferium.dataflow.graph.traits._
@@ -46,16 +46,29 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
         }
 
         val mutator = initialHeap.begin(heapAccessLoc)
-        lazy val heapAfterSetup = initialHeap.end(mutator)
-        lazy val stateAfterSetup = inState.copy(stack = restStack, heap = heapAfterSetup)
+        val heapAfterSetup = initialHeap.end(mutator)
+        val stateAfterSetup = inState.copy(stack = restStack, heap = heapAfterSetup)
 
         // get callables
         val callables = calling.coerceCallables(func, mutator, stateAfterSetup)
 
         // normalize spread
-        val (spreadedArguments, restArgument) = calling.spreadArguments(arguments, spreadArguments)
+        spreading.thisObject = thisObject
+        spreading.callables = callables
+        spreading.spread(arguments, stateAfterSetup)
+    }
 
-        calling.call(stateAfterSetup, callables, thisObject, spreadedArguments, restArgument)
+    private object spreading extends SeqSpreader(spreadArguments) {
+        var callables: Seq[FunctionEntity] = _
+        var thisObject: Entity = _
+
+        override protected def onComplete(result: (Seq[Entity], Option[Entity]), state: ExecutionState, analysis: DataFlowAnalysis): Unit = {
+            assert(callables ne null)
+            assert(thisObject ne null)
+            val (spreadedArguments, restArgument) = result
+
+            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue)(analysis)
+        }
     }
 
     override def asAsmStmt: String = (if (thisIsOnStack) "invoke" else "call") + s" ($argumentCount args)"
