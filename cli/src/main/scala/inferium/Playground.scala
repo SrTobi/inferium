@@ -42,7 +42,7 @@ object Playground {
         val graph = new GraphBuilder(config).buildTemplate(prog).instantiate()
 
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
-        val analysis = new DataFlowAnalysis(graph, new TestDebugAdapter)
+        val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(NodeJs.initialState(config))
 

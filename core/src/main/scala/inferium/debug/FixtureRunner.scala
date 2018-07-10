@@ -33,7 +33,7 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
     }
 
     def run(): Boolean = {
-        val analysis = new DataFlowAnalysis(graph, debugAdapter)
+        val analysis = new ScriptAnalysis(graph, debugAdapter)
         analysis.runAnalysis(iniState)
         return !debugAdapter.hasError
     }

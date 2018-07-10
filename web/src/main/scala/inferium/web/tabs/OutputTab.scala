@@ -2,7 +2,7 @@ package inferium.web.tabs
 
 import com.thoughtworks.binding.Binding.{BindingSeq, Constants, Var, Vars}
 import com.thoughtworks.binding.{Binding, dom}
-import inferium.dataflow.{DataFlowAnalysis, DebugAdapter}
+import inferium.dataflow.{DataFlowAnalysis, DebugAdapter, ScriptAnalysis}
 import inferium.dataflow.graph.{Graph, Node, ScriptGraph}
 import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor}
 import inferium.prelude.NodeJs
@@ -99,7 +99,7 @@ class OutputTab extends Tabs.Tab {
                     val p = Promise[Unit]
 
                     p.complete(Try {
-                        val analysis = new DataFlowAnalysis(g, OutputDebugAdapter)
+                        val analysis = new ScriptAnalysis(g, OutputDebugAdapter)
 
                         analysis.runAnalysis(NodeJs.initialState(IndexMain.inferiumConfig))
                     })
