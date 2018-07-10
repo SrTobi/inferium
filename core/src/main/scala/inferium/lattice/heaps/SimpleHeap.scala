@@ -1,7 +1,8 @@
 package inferium.lattice.heaps
 
 import inferium.Unifiable
-import inferium.lattice.Heap.{Mutator, SpecialObjectMap}
+import inferium.lattice.Heap.SpecialObjects.SpecialObject
+import inferium.lattice.Heap.{Mutator, Shared, SpecialObjectMap}
 import inferium.lattice.heaps.SimpleHeap.{Obj, SimpleMutator}
 import inferium.lattice._
 import inferium.utils.Utils
@@ -20,7 +21,7 @@ object SimpleHeap extends Heap.Factory {
                                  private val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap(_shared) {
 
 
-        private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, this)
+        private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, shared)
         override def begin(location: Location): SimpleMutator = createMutator()
 
         override def end(actor: Heap.Mutator): Heap = {
@@ -62,7 +63,21 @@ object SimpleHeap extends Heap.Factory {
             case _ =>
                 false
         }
+
+        override def createGlobalHeap(): GlobalHeap = new SimpleGlobalHeap(shared, objects, boxedValues)
     }
+
+    private class SimpleGlobalHeap(private val shared: Shared,
+                                   private val objects: Map[Location, Obj],
+                                   private val boxedValues: Map[Location, BoxedValue]) extends GlobalHeap {
+        override def feed(heap: Heap): Unit = {
+            ???
+        }
+
+        override def accessor: Mutator = new SimpleMutator(objects, boxedValues, shared)
+    }
+
+
 
     private type PropertyKey = String
 
@@ -165,7 +180,10 @@ object SimpleHeap extends Heap.Factory {
         def unapply(arg: BoxedValue): Option[(Entity, Entity, Long)] = Some((arg.abstractValue, arg.concreteValue, arg.abstractCount))
     }
 
-    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[Location, BoxedValue], override val origin: SimpleHeapImpl) extends Mutator {
+    private class SimpleMutator(var objects: Map[Location, Obj] = Map.empty, var boxedValues: Map[Location, BoxedValue], val shared: Shared) extends Mutator {
+        override def config: Heap.Config = shared.config
+        override def specialObject(specialObject: SpecialObject): ObjectLike = shared.specialObjects(specialObject)
+
         override def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike = {
             val prototypeObjs = prototype.coerceToObjects(this)
             val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, prototypeObjs), Map.empty)
@@ -314,6 +332,29 @@ object SimpleHeap extends Heap.Factory {
                         objects += obj.loc -> Obj(abstractDesc, (concreteFields, newProperties), abstractCount)
                         newProp
                     }
+
+                case None =>
+                    // TODO: the object does not exist... can that even happen? maybe create a new object?
+                    ???
+            }
+        }
+
+        override def getOwnProperties(obj: ObjectLike): TraversableOnce[(Option[String], Property)] = {
+            if (obj == AnyEntity) {
+                return Iterator(None -> AbstractProperty.anyProperty)
+            }
+
+            objects.get(obj.loc) match {
+                case Some(desc) =>
+                    val (fields, properties) = desc.descFor(obj)
+
+                    var result = Iterator((None: Option[String], fields.dynamicProp))
+
+                    result ++= properties.iterator.map {
+                        case (key: String, p) => (Some(key), p)
+                    }
+
+                    result
 
                 case None =>
                     // TODO: the object does not exist... can that even happen? maybe create a new object?

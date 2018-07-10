@@ -41,17 +41,20 @@ sealed case class ConcreteProperty(configurable: GeneralBoolLattice,
         )
 
     override def abstractify(heap: Heap.Mutator): AbstractProperty = {
-        def toValue(locs: Set[ValueLocation]): Entity = Entity.unify(locs.toSeq.map(loc => heap.getValue(loc).normalized(heap)))
         AbstractProperty(
             configurable,
             enumerable,
-            toValue(value),
+            toValue(value, heap),
             writable,
-            toValue(getter),
-            toValue(setter),
+            toValue(getter, heap),
+            toValue(setter, heap),
             mightBeAbsent
         )
     }
+
+    def normalizedValue(heap: Heap.Mutator): Entity = toValue(value, heap)
+
+    private def toValue(locs: Set[ValueLocation], heap: Heap.Mutator): Entity = Entity.unify(locs.toSeq.map(loc => heap.getValue(loc).normalized(heap)))
 
     def addValue(value: ValueLocation): ConcreteProperty = copy(value = ValueLocation.add(this.value, value))
 

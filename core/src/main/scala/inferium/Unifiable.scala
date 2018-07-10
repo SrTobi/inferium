@@ -3,7 +3,7 @@ package inferium
 import inferium.Unifiable.Fixpoint
 import scala.language.implicitConversions
 
-abstract class Unifiable[T <: Unifiable[T]] {
+trait Unifiable[T <: Unifiable[T]] {
     this: T =>
     import Unifiable._
 

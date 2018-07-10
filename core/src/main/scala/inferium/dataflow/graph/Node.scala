@@ -154,6 +154,7 @@ object Node {
 
     type ExprStackInfo = List[ExprStackFrame]
 
+    def NoCallFrame: CallFrame = new CallFrame(None, None)
     class CallFrame(val outer: Option[CallFrame], val callSite: Option[(AnyRef, CallInstance.RecursionAble)]) {
         assert(callSite.isDefined == outer.isDefined)
         val depth: Int = outer map { _.depth + 1 } getOrElse 0

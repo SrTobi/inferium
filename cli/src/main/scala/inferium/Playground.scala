@@ -22,12 +22,10 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |let a = [1, 2,,, "test"]
-              |debug(a[1]).is(2)
-              |debug(a[4]).is("test")
-              |debug(a.length).is(5)
+              |exports.func = function() {
+              |  return "test"
+              |}
               |
-              |debug(a[debug.number]).is(undefined, debug.number, "test")
             """.stripMargin
 
         /*val code =
@@ -39,12 +37,13 @@ object Playground {
         val prog = bridge.parseModule(code)
 
         val config = InferiumConfig.Env.NodeDebug
-        val graph = new GraphBuilder(config).buildTemplate(prog).instantiate()
+        val graph = new GraphBuilder(config).buildTemplate(prog, hasModule = true).instantiate()
 
+        val (initialHeap, globalObject) = NodeJs.initialHeap(config)
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
-        val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
+        val analysis = new NodeModuleAnalysis(graph, globalObject, new TestDebugAdapter)
 
-        analysis.runAnalysis(NodeJs.initialState(config))
+        analysis.runAnalysis(initialHeap)
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 

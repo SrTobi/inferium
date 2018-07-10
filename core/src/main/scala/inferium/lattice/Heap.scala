@@ -19,10 +19,17 @@ abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
 
     def split(): Heap
 
+    def createGlobalHeap(): GlobalHeap
+
     override def unify(other: Heap)(implicit fixpoint: Fixpoint): Heap = unify(Seq(other))
     override def unify(heaps: Seq[Heap])(implicit fixpoint: Fixpoint): Heap
 }
 
+abstract class GlobalHeap {
+    def feed(heap: Heap): Boolean
+
+    def accessor: Heap.Mutator
+}
 
 object Heap {
     object SpecialObjects extends Enumeration {
@@ -64,19 +71,20 @@ object Heap {
     }
 
     abstract class Mutator {
-        final def config: Config = origin.config
-        def origin: Heap
+        def config: Config
+        def specialObject(specialObject: SpecialObject): ObjectLike
 
         def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike
         def allocOrdinaryObject(location: Location, prototype: Entity): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), prototype)
         def allocOrdinaryObject(location: Location): ObjectLike = {
-            val objectPrototype = origin.specialObject(SpecialObjects.Object)
+            val objectPrototype = specialObject(SpecialObjects.Object)
             allocOrdinaryObject(location, objectPrototype)
         }
         def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit
         def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit
         def writeToProperty(obj: ObjectLike, propertyName: String, valueLocs: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property
+        def getOwnProperties(obj: ObjectLike): TraversableOnce[(Option[String], Property)]
         def getProperties(obj: ObjectLike, numbersOnly: Boolean): TraversableOnce[(Option[String], Property)]
         def getProperty(obj: ObjectLike, propertyName: String): Property
         //def listProperties(obj: ObjectLike): Seq[Entity]

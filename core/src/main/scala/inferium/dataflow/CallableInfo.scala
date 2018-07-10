@@ -8,6 +8,7 @@ import inferium.lattice.{Entity, Heap}
 abstract class CallableInfo {
     def name: Option[String]
     def anchor: AnyRef
+    def yieldsGraph: Boolean
 
     def instantiate(onReturn: ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame): CallInstance
 }

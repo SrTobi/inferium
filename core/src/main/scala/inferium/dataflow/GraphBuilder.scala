@@ -896,18 +896,22 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
 
 
-        def buildTopLevel(program: ast.Program, strict: Boolean): ScriptGraph = {
+        def buildTopLevel(program: ast.Program, hasModule: Boolean, strict: Boolean): ScriptGraph = {
             assert(functionPriority == 0)
             val priority = 0
             assert(!done)
+
             val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
-            val firstVarsEnv = new LexicalEnv(Some(globalEnv), true, LexicalEnv.Behavior.Declarative(Map.empty))
+            val firstVarsEnv = new LexicalEnv(Some(globalEnv), pushesObject = !hasModule, LexicalEnv.Behavior.Declarative(Map.empty))
+            val hoistingEnv = if (hasModule) firstVarsEnv else globalEnv
+
             implicit val info: Node.Info = Node.Info(priority, globalEnv, functionFrame, None)
             hoistingNodeInfo = info
-            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), globalEnv, firstVarsEnv, priority)
+            val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), hoistingEnv, firstVarsEnv, priority)
             val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt })
             val endNode = new EndNode
-            val scriptGraph = new PushLexicalFrameNode("main-block", takeFromStack = false) ~> hoistableGraph ~> graph ~> endNode
+            val mainBlock: Graph = if (hasModule) EmptyGraph else new PushLexicalFrameNode("main-block", takeFromStack = false)
+            val scriptGraph = mainBlock ~> hoistableGraph ~> graph ~> endNode
 
             done = true
             ScriptGraph(scriptGraph.begin(endNode), endNode)
@@ -976,10 +980,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
     }
 
-    def buildTemplate(scriptAst: ast.Program): Templates.Script =  new Templates.Script {
+    def buildTemplate(scriptAst: ast.Program, hasModule: Boolean = false): Templates.Script =  new Templates.Script {
         override def instantiate(): ScriptGraph = {
             val builder = new FunctionBuilder(isTopLevel = true, new Node.CallFrame(None, None), 0)
-            val graph = builder.buildTopLevel(scriptAst, strict = false)
+            val graph = builder.buildTopLevel(scriptAst, hasModule, strict = false)
             new StackAnnotationVisitor(isFunction = false).start(graph)
             graph
         }

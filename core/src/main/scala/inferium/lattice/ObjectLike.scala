@@ -6,7 +6,7 @@ import inferium.lattice.assertions._
 import inferium.utils.macros.blockRec
 
 
-abstract class ObjectLike extends Entity {
+sealed abstract class ObjectLike extends Entity {
     def objectType: ObjectType
     def loc: Location
     def abstractCount: Long
