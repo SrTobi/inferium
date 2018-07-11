@@ -6,6 +6,8 @@ import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.PrintVisitor
 import inferium.prelude.NodeJs
 
+import scala.util.Random
+
 
 object Playground {
 
@@ -22,9 +24,13 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |exports.func = function() {
-              |  return "test"
-              |}
+              |exports.func = function(proc) {
+              |  return (function(x) {
+              |    return proc(function(y) { return (x(x))(y);});
+              |  })(function(x) {
+              |    return proc(function(y) { return (x(x))(y);});
+              |  });
+              |};
               |
             """.stripMargin
 
@@ -49,6 +55,8 @@ object Playground {
 
         //println("-------")
         //println(new DotPrintVisitor(showStackInfo = false).start(graph))
+
+
     }
 
 }

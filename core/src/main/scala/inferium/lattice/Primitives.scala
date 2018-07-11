@@ -22,11 +22,14 @@ sealed abstract class Primitive extends Entity {
         (entity, entity != this, Assertion.noEffect(entity))
     }
 
+    @blockRec(nonrec = true)
+    override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = Seq.empty
+
     override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = ???
 
     override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = Seq(constructionObject)
 
-    def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
+    def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         fail()
         Seq()
     }

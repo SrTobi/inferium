@@ -7,15 +7,17 @@ import inferium.lattice._
 trait HeapReading extends Node {
     private val heapResolveLoc = Location()
     private val heapReadingLoc = Location()
+    private lazy val readProbe = new ProbeEntity
 
     protected final def read(target: Entity, properties: StringLattice, state: ExecutionState)(implicit analysis: DataFlowAnalysis): Option[(Entity, ExecutionState)] = {
         val initialHeap = state.heap
 
         val resolveMutator = initialHeap.begin(heapResolveLoc)
         val objs = target.coerceToObjects(resolveMutator)
+        val probes = target.asProbes(resolveMutator)
         val heapAfterCoersion = initialHeap.end(resolveMutator)
 
-        if (objs == Seq()) {
+        if (objs.isEmpty && probes.isEmpty) {
             // todo: generate exception object
             fail(state.copy(heap = heapAfterCoersion), UndefinedValue)
             return None
@@ -28,22 +30,29 @@ trait HeapReading extends Node {
             }
         )
 
+
         val result = properties match {
             case StringLattice.Top =>
+                probes foreach { _.dynRead(readProbe) }
                 dynReadsFromObject(false)
             case StringLattice.NumberString =>
+                probes foreach { _.numberRead(readProbe) }
                 dynReadsFromObject(true)
             case StringLattice.SpecificStrings(propertyNames) =>
+                for (probe <- probes; propertyName <- propertyNames)
+                    probe.read(propertyName, readProbe)
                 UnionValue(
                     for (obj <- objs; propertyName <- propertyNames)
-                        yield read(target, obj, propertyName, readMutator)
+                        yield {
+                            read(target, obj, propertyName, readMutator)
+                        }
                 )
         }
 
         val resultHeap = heapAfterCoersion.end(readMutator)
 
         val resultState = state.copy(heap = resultHeap)
-        Some((result, resultState))
+        Some((if (probes.isEmpty) result else result unify readProbe, resultState))
     }
 
     private final def dynRead(base: Entity, obj: ObjectLike, numbersOnly: Boolean, mutator: Heap.Mutator)(implicit analysis: DataFlowAnalysis): Entity = UnionValue(

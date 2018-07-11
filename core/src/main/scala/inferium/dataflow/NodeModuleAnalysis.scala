@@ -36,23 +36,41 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
         }
     }
 
-    private class FunctionAnalyser(val function: FunctionEntity) {
+    private class FunctionAnalyser(analysable: Analysable) {
 
-        private val analysis = {
-            val graph = function.callableInfo.instantiate(onReturn, 1, None, Node.NoCallFrame)
-            new CodeAnalysis(graph)
+        private val argumentProbe = new ProbeEntity
+        private val location = Location()
+        private val analysis = new CodeAnalysis(analysable)
+        private var lexicalFrame: LexicalFrame = _
+        private var returnValue: Entity = NeverValue
+
+        def addLexicalFrame(lexicalFrame: LexicalFrame): Unit = {
+            if (this.lexicalFrame == null) {
+                this.lexicalFrame = lexicalFrame
+            } else {
+                this.lexicalFrame = this.lexicalFrame unify lexicalFrame
+            }
         }
 
-        var returnValue: Entity = NeverValue
+        def run(): Boolean = {
+            val heap = userState.toHeap(location)
+            val state = ExecutionState(argumentProbe :: Nil, heap, globalObject, lexicalFrame)
+            val ExecutionState(resultStack, resultHeap, _, _) = analysis.run(state)
+            val returnValue :: Nil = resultStack
 
-        def run(): Unit = {
+            val unifiedReturnValue = this.returnValue unify returnValue
+            val returnValueChanged = unifiedReturnValue != this.returnValue
+            this.returnValue = unifiedReturnValue
 
-        }
 
-        private var returnStuff: (Entity, Heap) = _
+            val changed = userState.feed(resultHeap) || returnValueChanged
 
-        private def onReturn(returnValue: Entity, heap: Heap, analysis: DataFlowAnalysis): Unit = {
-            returnStuff = (returnValue, heap)
+            val inspector = new Inspector
+            inspector.inspectEntity(unifiedReturnValue)
+            inspector.inspectObject(globalObject)
+            inspector.inspectProbe(argumentProbe)
+
+            changed
         }
     }
 
@@ -99,7 +117,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
     }
 
     private var userState: GlobalHeap = _
-    private val foundFunctions = mutable.Map.empty[FunctionEntity, FunctionAnalyser]
+    private val foundFunctions = mutable.Map.empty[CallableInfo.Anchor, FunctionAnalyser]
     private var analyzingList = mutable.ListBuffer.empty[FunctionAnalyser]
 
     def runAnalysis(heap: Heap): Unit = {
@@ -125,7 +143,12 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
         assert(worklist.size == foundFunctions.size)
 
         for (func <- worklist) {
-            func.run()
+            if (func.run()) {
+                changed = true
+                analyzingList.prepend(func)
+            } else {
+                analyzingList.append(func)
+            }
         }
 
         changed
@@ -144,6 +167,9 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
                 case obj: ObjectLike =>
                     inspectObject(obj)
 
+                case probe: ProbeEntity =>
+                    inspectProbe(probe)
+
                 case _ =>
             }
         }
@@ -160,11 +186,15 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
                 // nothing to do
 
                 case func: FunctionEntity =>
-                    foundFunctions.getOrElseUpdate(func, {
-                        val analyser = new FunctionAnalyser(func)
-                        analyzingList.prepend(analyser)
-                        analyser
-                    })
+                    val info = func.callableInfo
+                    if (info.yieldsGraph) {
+                        val analyser = foundFunctions.getOrElseUpdate(info.anchor, {
+                            val analyser = new FunctionAnalyser(info.asAnalysable)
+                            analyzingList.prepend(analyser)
+                            analyser
+                        })
+                        analyser.addLexicalFrame(func.lexicalFrame)
+                    }
 
 
                 case obj: OrdinaryObjectEntity =>
@@ -175,6 +205,17 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
                 case (_, prop: AbstractProperty) => inspectEntity(prop.value)
                 case (_, prop: ConcreteProperty) => inspectEntity(prop.normalizedValue(accessor))
             }
+        }
+
+        private val foundProbes = mutable.Set.empty[ProbeEntity]
+
+        def inspectProbe(probe: ProbeEntity): Unit = {
+            if (foundProbes(probe)) {
+                return
+            }
+
+            foundProbes += probe
+            probe.entities foreach { inspectEntity }
         }
     }
 }

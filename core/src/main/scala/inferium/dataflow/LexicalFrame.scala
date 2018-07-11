@@ -16,7 +16,7 @@ case class LexicalFrame(obj: Entity, outer: Option[LexicalFrame] = None) extends
             this
         else {
             val unified = obj unify other.obj
-            outer.map { unified :: _ unify other.outer.get } getOrElse LexicalFrame(unified)
+            outer.map { outer => unified :: (outer unify other.outer.get) } getOrElse LexicalFrame(unified)
         }
     }
 

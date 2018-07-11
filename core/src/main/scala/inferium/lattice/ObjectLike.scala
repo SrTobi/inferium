@@ -21,6 +21,9 @@ sealed abstract class ObjectLike extends Entity {
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice.True
 
+    @blockRec(nonrec = true)
+    override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = Seq.empty
+
     //@blockRec(nonrec = true)
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity = if (cond(this)) this else NeverValue
 
@@ -53,13 +56,13 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
 
     override def withAbstractCount(ac: Long): ObjectLike = OrdinaryObjectEntity(loc)(ac)
 
-    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
+    override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         fail()
         Seq.empty
     }
 }
 
-case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override val abstractCount: Long, val callableInfo: CallableInfo) extends ObjectLike {
+case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override val abstractCount: Long, val callableInfo: CallableInfo) extends ObjectLike with Callable {
 
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
@@ -70,7 +73,7 @@ case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override va
 
     override def withAbstractCount(ac: Long): ObjectLike = FunctionEntity(loc, lexicalFrame)(ac, callableInfo)
 
-    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = Seq(this)
+    override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = Seq(this)
 }
 
 case object AnyEntity extends ObjectLike {
@@ -93,7 +96,7 @@ case object AnyEntity extends ObjectLike {
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
 
-    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
+    override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         // todo: return a function that takes any and returns any
         ???
     }

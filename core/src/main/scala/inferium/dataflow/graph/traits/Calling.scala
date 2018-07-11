@@ -15,6 +15,9 @@ trait Calling extends Async[Unit] with Failing {
 
     protected var savedReturnValue: Entity = _
     protected var savedReturnHeap: Heap = _
+    private lazy val returnProbe = new ProbeEntity
+
+    private val heapReadLoc = Location()
 
     def basePriority: Int
     def callFrame: CallFrame
@@ -37,32 +40,44 @@ trait Calling extends Async[Unit] with Failing {
         complete(Unit, resultState, analysis)
     }
 
-    def call(stateBeforeCall: ExecutionState, callables: Seq[Entity], thisEntity: Entity, arguments: Seq[Entity], mergedRest: Entity)(implicit dataFlowAnalysis: DataFlowAnalysis): Unit = {
+    def call(stateBeforeCall: ExecutionState, callables: Seq[Callable], thisEntity: Entity, arguments: Seq[Entity], mergedRest: Entity, isConstruction: Boolean)(implicit dataFlowAnalysis: DataFlowAnalysis): Unit = {
         // save local frame stuff
         savedLocalStack = stateBeforeCall.stack
         savedLocalThisEntity = stateBeforeCall.thisEntity
         savedLocalLexicalFrame = stateBeforeCall.lexicalFrame
 
+        val accessor = stateBeforeCall.heap.begin(heapReadLoc)
+        lazy val normalizedThis = thisEntity.normalized(accessor)
+        lazy val normalizedArguments = arguments.map { _.normalized(accessor) }
         // make the calls
-        for (func@FunctionEntity(loc, frame) <- callables) {
-            val call = callInstances.getOrElseUpdate(loc, {
-                val callable = func.callableInfo
+        callables foreach {
+            case func@FunctionEntity(loc, frame) =>
+                val call = callInstances.getOrElseUpdate(loc, {
+                    val callable = func.callableInfo
 
-                callFrame.getRecursiveSite(callable.anchor) match {
-                    case Some(inst) =>
-                        new RecursiveCallInstance(inst, ret)
-                    case None =>
-                        callable.instantiate(ret, basePriority + 1, catchTarget, callFrame)
+                    callFrame.getRecursiveSite(callable.anchor) match {
+                        case Some(inst) =>
+                            new RecursiveCallInstance(inst, ret)
+                        case None =>
+                            callable.instantiate(ret, basePriority + 1, catchTarget, callFrame)
+                    }
+                })
+
+                call.call(stateBeforeCall.heap, thisEntity, frame, arguments, mergedRest)
+
+            case probe: ProbeEntity =>
+                if (isConstruction) {
+                    probe.construct(normalizedArguments, returnProbe)
+                } else {
+                    probe.call(normalizedThis, normalizedArguments, returnProbe)
                 }
-            })
-
-            call.call(stateBeforeCall.heap, thisEntity, frame, arguments, mergedRest)
+                ret(returnProbe, stateBeforeCall.heap, dataFlowAnalysis)
         }
     }
 
-    def coerceCallables(func: Entity, mutator: Heap.Mutator, failState: => ExecutionState)(implicit dataFlowAnalysis: DataFlowAnalysis): Seq[FunctionEntity] = {
+    def coerceCallables(func: Entity, mutator: Heap.Mutator, failState: => ExecutionState)(implicit dataFlowAnalysis: DataFlowAnalysis): Seq[Callable] = {
         var coercingFail = false
-        val callables = func.coerceToFunctions(mutator, () => {
+        val callables = func.coerceToCallables(mutator, () => {
             coercingFail = true
         })
 

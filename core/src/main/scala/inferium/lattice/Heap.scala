@@ -26,6 +26,7 @@ abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
 }
 
 abstract class GlobalHeap {
+    def toHeap(location: Location): Heap
     def feed(heap: Heap): Boolean
 
     def accessor: Heap.Mutator

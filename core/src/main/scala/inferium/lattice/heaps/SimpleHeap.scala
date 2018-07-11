@@ -17,8 +17,8 @@ object SimpleHeap extends Heap.Factory {
     }
 
     private class SimpleHeapImpl(_shared: Heap.Shared,
-                                 private val objects: Map[Location, Obj] = Map.empty,
-                                 private val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap(_shared) {
+                                 val objects: Map[Location, Obj] = Map.empty,
+                                 val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap(_shared) {
 
 
         private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, shared)
@@ -68,13 +68,42 @@ object SimpleHeap extends Heap.Factory {
     }
 
     private class SimpleGlobalHeap(private val shared: Shared,
-                                   private val objects: Map[Location, Obj],
-                                   private val boxedValues: Map[Location, BoxedValue]) extends GlobalHeap {
-        override def feed(heap: Heap): Unit = {
-            ???
+                                   private var objects: Map[Location, Obj],
+                                   private var boxedValues: Map[Location, BoxedValue]) extends GlobalHeap {
+
+        override def toHeap(location: Location): Heap = new SimpleHeapImpl(shared, objects, boxedValues)
+
+        override def feed(heap: Heap): Boolean = {
+            val other = heap.asInstanceOf[SimpleHeapImpl]
+            val accessor = this.accessor
+            val newObjects = Utils.mergeMaps(objects, other.objects) {
+                case (Obj(ad1, cd1, c1), Obj(ad2, cd2, c2)) =>
+                    val (abstractDesc, concreteDesc) = if (c1 < c2) {
+                        val abstractified = abstractifyConcreteDesc(cd1, accessor)
+                        val newAd1 = if (wasAbstractified(c1)) mergeAbsDesc(abstractified, ad1) else abstractified
+                        mergeAbsDesc(newAd1, ad2) -> cd2
+                    } else if (c1 > c2) {
+                        val abstractified = abstractifyConcreteDesc(cd2, accessor)
+                        val newAd2 = if (wasAbstractified(c2)) mergeAbsDesc(abstractified, ad2) else abstractified
+                        mergeAbsDesc(ad1, newAd2) -> cd1
+                    } else {
+                        mergeAbsDesc(ad1, ad2) -> mergeConcreteDesc(cd1, cd2)
+                    }
+
+                    Obj(abstractDesc, concreteDesc, Math.max(c1, c2))
+            }
+
+            val newBoxedValues = Utils.mergeMaps(boxedValues, other.boxedValues) { _ unify _}
+
+            val changed = newBoxedValues != boxedValues || newObjects != objects
+
+            objects = newObjects
+            boxedValues = newBoxedValues
+
+            changed
         }
 
-        override def accessor: Mutator = new SimpleMutator(objects, boxedValues, shared)
+        override def accessor: SimpleMutator = new SimpleMutator(objects, boxedValues, shared)
     }
 
 
@@ -165,6 +194,9 @@ object SimpleHeap extends Heap.Factory {
         def valueFor(loc: ValueLocation): Entity = if (isAbstract(loc)) abstractValue else concreteValue
         def unify(other: BoxedValue): BoxedValue = {
             BoxedValue(abstractValue unify other.abstractValue, concreteValue unify other.concreteValue, Math.max(abstractCount, other.abstractCount))
+        }
+        def unifyNormalize(other: BoxedValue, accessor: SimpleMutator): BoxedValue = {
+            BoxedValue((abstractValue unify other.abstractValue).normalized(accessor), (concreteValue unify other.concreteValue).normalized(accessor), Math.max(abstractCount, other.abstractCount))
         }
 
         override def hashCode(): Int = abstractValue.hashCode() ^ concreteValue.hashCode()

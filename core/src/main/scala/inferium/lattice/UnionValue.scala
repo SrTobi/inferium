@@ -35,6 +35,11 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
     }
 
     @blockRec(nonrec = true)
+    override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = {
+        entities.flatMap { _.asProbes(heap) }
+    }
+
+    @blockRec(nonrec = true)
     protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
         var changedEntityEffects: Assertion.Effect = null
         var hasChanged = false
@@ -70,13 +75,13 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
         entities flatMap { _.coerceToConstructionObject(heap, constructionObject) }
     }
 
-    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = entities flatMap { _.coerceToFunctions(heap, fail) }
+    override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[Callable] = entities flatMap { _.coerceToCallables(heap, fail) }
 
     override def hashCode(): Int = entities.hashCode()
 
     override def equals(o: scala.Any): Boolean = o match {
         case o: UnionValue =>
-            o.entities == this.entities
+            (entities forall {e => o.entities.contains(e)}) && entities.length == o.entities.length
 
         case _ =>
             false
@@ -96,6 +101,7 @@ object UnionValue {
         var stringValues = mutable.SortedSet.empty[SpecificStringValue](Ordering.by(_.value))
         var objLocations = mutable.Map.empty[Location, (Boolean, ObjectLike)]
         var refs = mutable.Map.empty[Ref, Either[Ref, ValueLocation.SetBuilder]]
+        val probes = mutable.Set.empty[ProbeEntity]
 
         entities.flatMap(unpackUnion) foreach {
             case bool: BoolValue =>
@@ -142,6 +148,8 @@ object UnionValue {
                     case None =>
                         refs += ref -> Left(ref)
                 }
+            case probe: ProbeEntity =>
+                probes.add(probe)
             case entity =>
                 throw new IllegalArgumentException(s"Unknown entity $entity")
         }
@@ -162,7 +170,8 @@ object UnionValue {
             unionFromSeq(
                 Seq(AnyEntity) ++
                 objLocationSeq ++
-                    refSeq
+                refSeq ++
+                probes
             )
         } else {
             unionFromSeq(
@@ -172,7 +181,8 @@ object UnionValue {
                     Option(numberValue).toSeq ++
                     Option(stringValues).getOrElse(Seq(StringValue)) ++
                     objLocationSeq ++
-                    refSeq
+                    refSeq ++
+                    probes
             )
         }
     }

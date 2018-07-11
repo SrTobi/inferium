@@ -14,9 +14,10 @@ trait HeapWriting extends Node {
 
         val resolveMutator = initialHeap.begin(heapResolveLoc)
         val objs = target.coerceToObjects(resolveMutator)
+        val probes = target.asProbes(resolveMutator)
         val heapAfterCoersion = initialHeap.end(resolveMutator)
 
-        if (objs == Seq()) {
+        if (objs.isEmpty && probes.isEmpty) {
             // todo: generate exception object
             fail(state.copy(heap = heapAfterCoersion), UndefinedValue)
             return None
@@ -24,6 +25,7 @@ trait HeapWriting extends Node {
 
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
         var assignmentLocation = writeMutator.setValue(valueLocation, value)
+        lazy val normalizedValue = value.normalized(writeMutator)
 
         def dynWritesToObject(onlyNumbers: Boolean): Unit = {
             for (obj <- objs) {
@@ -32,14 +34,19 @@ trait HeapWriting extends Node {
         }
         val result = properties match {
             case StringLattice.AnyString =>
+                probes foreach { _.dynWrite(normalizedValue) }
                 dynWritesToObject(false)
                 value
 
             case StringLattice.NumberString =>
+                probes foreach { _.numberWrite(normalizedValue) }
                 dynWritesToObject(true)
                 value
 
             case StringLattice.SpecificStrings(propertyNames) =>
+
+                for (probe <- probes; propertyName <- propertyNames)
+                    probe.write(propertyName, normalizedValue)
 
                 val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
                 var valueLocationWasWritten = false

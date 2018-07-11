@@ -59,7 +59,7 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
     }
 
     private object spreading extends SeqSpreader(spreadArguments) {
-        var callables: Seq[FunctionEntity] = _
+        var callables: Seq[Callable] = _
         var thisObject: Entity = _
 
         override protected def onComplete(result: (Seq[Entity], Option[Entity]), state: ExecutionState, analysis: DataFlowAnalysis): Unit = {
@@ -67,7 +67,7 @@ class CallNode(val thisIsOnStack: Boolean, spreadArguments: Seq[Boolean])(implic
             assert(thisObject ne null)
             val (spreadedArguments, restArgument) = result
 
-            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue)(analysis)
+            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue, false)(analysis)
         }
     }
 

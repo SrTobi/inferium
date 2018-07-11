@@ -27,6 +27,9 @@ abstract class Entity extends Unifiable[Entity] {
     @blockRec
     def asStringLattice(heap: Heap.Mutator): StringLattice
 
+    @blockRec
+    def asProbes(heap: Heap.Mutator): Seq[ProbeEntity]
+
     //@blockRec
     //def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Entity
 
@@ -42,7 +45,7 @@ abstract class Entity extends Unifiable[Entity] {
 
     def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike]
 
-    def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity]
+    def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[Callable]
 }
 
 object Entity {

@@ -10,6 +10,7 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
 
     override def isNormalized: Boolean = false
 
+    @blockRec(nonrec = true)
     private def resolve(heap: Heap.Mutator): Seq[Entity] = target.toSeq map { heap.getValue(_).normalized(heap) }
 
     @blockRec(NeverValue)
@@ -26,6 +27,11 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
     @blockRec(StringLattice.Bottom)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = {
         StringLattice.unify(target.iterator map { t => heap.getValue(t).asStringLattice(heap) })
+    }
+
+    @blockRec(Seq.empty)
+    override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = {
+        target.iterator.flatMap(heap.getValue(_).asProbes(heap)).toSeq
     }
 
     //@blockRec(nonrec = true)
@@ -80,7 +86,7 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
         }
     }
 
-    override def coerceToFunctions(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = normalized(heap).coerceToFunctions(heap, fail)
+    override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[Callable] = normalized(heap).coerceToCallables(heap, fail)
 
     override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = normalized(heap).coerceToConstructionObject(heap, constructionObject)
 

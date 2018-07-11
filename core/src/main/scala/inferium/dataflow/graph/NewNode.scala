@@ -82,7 +82,7 @@ class NewNode(spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends 
     }
 
     private object spreading extends SeqSpreader(spreadArguments) {
-        var callables: Seq[FunctionEntity] = _
+        var callables: Seq[Callable] = _
         var thisObject: Entity = _
 
         override protected def onComplete(result: (Seq[Entity], Option[Entity]), state: ExecutionState, analysis: DataFlowAnalysis): Unit = {
@@ -90,7 +90,7 @@ class NewNode(spreadArguments: Seq[Boolean])(implicit _info: Node.Info) extends 
             assert(thisObject ne null)
             val (spreadedArguments, restArgument) = result
 
-            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue)(analysis)
+            calling.call(state, callables, thisObject, spreadedArguments, restArgument getOrElse NeverValue, isConstruction = true)(analysis)
         }
     }
 

@@ -917,7 +917,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             ScriptGraph(scriptGraph.begin(endNode), endNode)
         }
 
-        def buildFunction(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, callSite: CallInstance.RecursionAble, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): Graph = {
+        private def buildFunctionBody(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, catchTarget: Option[MergeNode], initialEnv: LexicalEnv): (Graph, Node.Info) = {
             assert(!done)
             val priority = functionPriority
             val hasPatternMatching = params.exists(!_.isInstanceOf[ast.Identifier])
@@ -973,10 +973,31 @@ class GraphBuilder(config: GraphBuilder.Config) {
             val bodyGraph = builder.build(normalizedBody)
 
             // build default return
-            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode ~> new RetNode(callSite)(initialNodeInfo)
+            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
 
             // put everything together
-            prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph
+            (prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph, initialNodeInfo)
+        }
+
+        def buildFunctionAsScript(name: Option[String],
+                          params: Seq[ast.Pattern],
+                          body: ast.ArrowFunctionBody,
+                          catchTarget: Option[MergeNode],
+                          initialEnv: LexicalEnv): ScriptGraph = {
+            val (bodyGraph, nodeInfo) = buildFunctionBody(name, params, body, catchTarget, initialEnv)
+            val endNode = new graph.EndNode()(nodeInfo)
+            bodyGraph ~> endNode
+            ScriptGraph(bodyGraph.begin(endNode), endNode)
+        }
+
+        def buildFunction(name: Option[String],
+                          params: Seq[ast.Pattern],
+                          body: ast.ArrowFunctionBody,
+                          callSite: CallInstance.RecursionAble,
+                          catchTarget: Option[MergeNode],
+                          initialEnv: LexicalEnv): Graph = {
+            val (bodyGraph, nodeInfo) = buildFunctionBody(name, params, body, catchTarget, initialEnv)
+            bodyGraph ~> new RetNode(callSite)(nodeInfo)
         }
     }
 
@@ -991,6 +1012,13 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
     private case class FunctionTemplate(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, lexicalEnv: LexicalEnv) extends CallableInfo {
         override def anchor: AnyRef = body
+        override def yieldsGraph: Boolean = true
+
+        override def asAnalysable: Analysable = {
+            val functionBuilder = new FunctionBuilder(isTopLevel = false, Node.NoCallFrame, 0)
+            val funcGraph = functionBuilder.buildFunctionAsScript(name, params, body, None, lexicalEnv)
+            funcGraph
+        }
 
         override def instantiate(onReturn: CallableInfo.ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame): CallInstance = {
             class InlinedCallInstanceImpl(protected override val onReturn: CallableInfo.ReturnHandler) extends InlinedCallInstance {
