@@ -10,14 +10,13 @@ import scala.collection.mutable
 import scala.language.implicitConversions
 
 
-abstract class Heap(protected val shared: Shared) extends Unifiable[Heap] {
+abstract class Heap extends Unifiable[Heap] {
+    protected def shared: Shared
     final def config: Heap.Config = shared.config
     final def specialObject(specialObject: SpecialObject): ObjectLike = shared.specialObjects(specialObject)
 
     def begin(location: Location): Mutator
     def end(actor: Mutator): Heap
-
-    def split(): Heap
 
     def createGlobalHeap(): GlobalHeap
 
@@ -42,7 +41,7 @@ object Heap {
 
 
     type SpecialObjectMap = mutable.Map[SpecialObject, ObjectLike]
-    case class Shared(config: Config, specialObjects: SpecialObjectMap = mutable.Map.empty)
+    class Shared(val config: Config, val specialObjects: SpecialObjectMap = mutable.Map.empty)
 
     sealed class PropertyMutationResult
     case class SuccessfulPropertyMutation(result: Ref) extends PropertyMutationResult

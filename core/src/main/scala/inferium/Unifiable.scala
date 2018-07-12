@@ -23,5 +23,5 @@ object Unifiable {
     }
 
     implicit val noFixpoint: Fixpoint = new Fixpoint(false)
-    def useFixpoint: Fixpoint = new Fixpoint(true)
+    val useFixpoint: Fixpoint = new Fixpoint(true)
 }

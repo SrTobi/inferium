@@ -22,7 +22,6 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     override def setNewInState(state: ExecutionState, origin: NodeId)(implicit analysis: DataFlowAnalysis): Unit = {
         assert(origin != this.id)
 
-        implicit val useFixpoint: Unifiable.Fixpoint = new Unifiable.Fixpoint(isFixpoint)
         val fixedState = fixLexicalFrame(state)
 
         inStates.put(origin, state)
@@ -35,7 +34,7 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
 
         val states = inStates.values.toSeq
         val resState = if (isFixpoint && mergeState != null) {
-            mergeState.unify(states)
+            mergeState.unify(states)(Unifiable.useFixpoint)
         } else {
             states.head unify states.tail
         }

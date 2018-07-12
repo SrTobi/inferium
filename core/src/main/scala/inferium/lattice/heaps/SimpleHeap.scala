@@ -11,14 +11,14 @@ import inferium.utils.Utils
 
 object SimpleHeap extends Heap.Factory {
     override def create(config: Heap.Config): (Heap, SpecialObjectMap) = {
-        val shared = Heap.Shared(config)
+        val shared = new Heap.Shared(config)
         val heap = new SimpleHeapImpl(shared)
         (heap, shared.specialObjects)
     }
 
-    private class SimpleHeapImpl(_shared: Heap.Shared,
+    private class SimpleHeapImpl(override val shared: Heap.Shared,
                                  val objects: Map[Location, Obj] = Map.empty,
-                                 val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap(_shared) {
+                                 val boxedValues: Map[Location, BoxedValue] = Map.empty) extends Heap {
 
 
         private def createMutator(): SimpleMutator = new SimpleMutator(objects, boxedValues, shared)
@@ -28,8 +28,6 @@ object SimpleHeap extends Heap.Factory {
             val mutator = actor.asInstanceOf[SimpleMutator]
             new SimpleHeapImpl(shared, mutator.objects, mutator.boxedValues)
         }
-
-        override def split(): Heap = this
 
         override def unify(heaps: Seq[Heap])(implicit fixpoint: Unifiable.Fixpoint): Heap = {
             val allHeaps = (this +: heaps) map { _.asInstanceOf[SimpleHeapImpl] }
