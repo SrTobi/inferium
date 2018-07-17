@@ -81,7 +81,7 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
 
     override def equals(o: scala.Any): Boolean = o match {
         case o: UnionValue =>
-            (entities forall {e => o.entities.contains(e)}) && entities.length == o.entities.length
+            (this eq o) || (entities.length == o.entities.length && (entities forall {e => o.entities.contains(e)}))
 
         case _ =>
             false

@@ -25,6 +25,7 @@ abstract class Heap extends Unifiable[Heap] {
 }
 
 abstract class GlobalHeap {
+    def hasEffect(location: Location): Boolean
     def toHeap(location: Location): Heap
     def feed(heap: Heap): Boolean
 

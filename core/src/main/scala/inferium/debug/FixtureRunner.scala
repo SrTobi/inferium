@@ -6,7 +6,7 @@ import inferium.Config
 import inferium.dataflow.graph.{Node, ScriptGraph}
 import inferium.dataflow._
 import inferium.lattice.{Location, ObjectLike, UndefinedValue}
-import inferium.lattice.heaps.SimpleHeap
+import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
 
 class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScript) {

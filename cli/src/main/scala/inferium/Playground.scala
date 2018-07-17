@@ -4,6 +4,7 @@ import escalima.ECMAScript
 import inferium.dataflow._
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.PrintVisitor
+import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
 
 import scala.util.Random
@@ -45,11 +46,13 @@ object Playground {
         val config = InferiumConfig.Env.NodeDebug
         val graph = new GraphBuilder(config).buildTemplate(prog, hasModule = true).instantiate()
 
-        val (initialHeap, globalObject) = NodeJs.initialHeap(config)
+        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap)
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
         val analysis = new NodeModuleAnalysis(graph, globalObject, new TestDebugAdapter)
+        //val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(initialHeap)
+        //analysis.runAnalysis(NodeJs.initialState(config))
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 

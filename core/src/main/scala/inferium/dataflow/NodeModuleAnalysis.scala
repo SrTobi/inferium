@@ -53,6 +53,11 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
         }
 
         def run(): Boolean = {
+            if (!userState.hasEffect(location)) {
+                println("skipped")
+                return false
+            }
+
             val heap = userState.toHeap(location)
             val state = ExecutionState(argumentProbe :: Nil, heap, globalObject, lexicalFrame)
             val ExecutionState(resultStack, resultHeap, _, _) = analysis.run(state)
