@@ -27,7 +27,18 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |debug(Math.sin("blub")).print()
+              |debug(0 || "test").print()
+              |debug("test" || "blub").print()
+              |debug("" && "blub").print()
+              |debug("test" && "blub").print()
+              |var num = debug.number
+              |debug(num && "blub").print()
+              |
+              |if (num) {
+              |  debug(num).print("then")
+              |} else {
+              |  debug(num).print("else")
+              |}
               |
             """.stripMargin
 
@@ -43,7 +54,7 @@ object Playground {
         val config = InferiumConfig.Env.NodeDebug
         val graph = new GraphBuilder(config).buildTemplate(prog, hasModule = true).instantiate()
 
-        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap, addPrelude = true)
+        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap, addPrelude = false)
         /*val heap = {
             val mutator = initialHeap.begin(Location())
 

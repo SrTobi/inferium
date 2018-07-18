@@ -298,6 +298,8 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     })
                 }
 
+                import ast.LogicalOperator._
+
                 expr match {
                     case AbstractDebugLiteral(literal) =>
                         buildLiteral(literal)
@@ -452,6 +454,32 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         Graph.concat(graphs)
+
+                    case ast.BinaryExpression(op, left, right) =>
+                        ???
+                    case ast.LogicalExpression(`||`, left, right) =>
+                        val leftGraph = buildExpression(left)
+                        val rightGraph = buildExpression(right, priority + 1)
+                        val merger = new graph.MergeNode
+
+                        assert(rightGraph != EmptyGraph)
+                        val elseGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph.begin
+                        val ifNode = new graph.CondJumpNode(merger, elseGraph.begin)
+                        leftGraph ~> new graph.DupNode(1) ~> ifNode
+                        elseGraph ~> merger
+                        Graph(leftGraph.begin, merger)
+
+                    case ast.LogicalExpression(`&&`, left, right) =>
+                        val leftGraph = buildExpression(left)
+                        val rightGraph = buildExpression(right, priority + 1)
+                        val merger = new graph.MergeNode
+
+                        assert(rightGraph != EmptyGraph)
+                        val thenGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph.begin
+                        val ifNode = new graph.CondJumpNode(thenGraph.begin, merger)
+                        leftGraph ~> new graph.DupNode(1) ~> ifNode
+                        thenGraph ~> merger
+                        Graph(leftGraph.begin, merger)
                 }
             }
 
