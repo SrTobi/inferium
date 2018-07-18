@@ -87,7 +87,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable, val globalObject: Object
         def load(heap: Heap): Heap = {
             val analysis = new CodeAnalysis(code)
 
-            val state = ExecutionState(UndefinedValue :: Nil, heap, globalObject, LexicalFrame(moduleCtx, None))
+            val state = ExecutionState(UndefinedValue :: Nil, heap, globalObject, moduleCtx :: LexicalFrame(globalObject, None))
             val resultState = analysis.run(state)
             resultState.heap
         }

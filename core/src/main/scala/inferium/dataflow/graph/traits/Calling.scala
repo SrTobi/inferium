@@ -59,7 +59,7 @@ trait Calling extends Async[Unit] with Failing {
                         case Some(inst) =>
                             new RecursiveCallInstance(inst, ret)
                         case None =>
-                            callable.instantiate(ret, basePriority + 1, catchTarget, callFrame)
+                            callable.instantiate(ret, basePriority + 1, catchTarget, callFrame, isConstruction)
                     }
                 })
 

@@ -16,8 +16,8 @@ abstract class CallInstance {
 object CallInstance {
     sealed abstract class Info
     final case class InlinedCallInfo(entryNode: Node) extends Info
-    final case class NativeCallInfo(subcalls: Seq[Subcall]) extends Info
-    final case class SignatureCallInfo() extends Info
+    final case class NativeCallInfo(name: String, subcalls: Seq[Subcall]) extends Info
+    final case class SignatureCallInfo(name: String, subcalls: Seq[Subcall]) extends Info
     final case class RecursiveCallInfo() extends Info
 
     case class Subcall()
@@ -87,6 +87,6 @@ object CallInstance {
 }
 /*
 final case class InlinedCallInstance(entryNode: Node) extends CallInstance
-final case class NativeCallInstance() extends CallInstance
+final case class NativeCall() extends CallInstance
 final case class SignatureCallInstance() extends CallInstance
 */

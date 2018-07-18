@@ -76,6 +76,23 @@ case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override va
     override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = Seq(this)
 }
 
+class BuiltInFunctionEntity(_loc: Location, _callableInfo: CallableInfo) extends FunctionEntity(_loc, null)(-1,  _callableInfo) {
+    override def toString: String = s"Builtin(${callableInfo.name.get})"
+}
+
+class SignatureFunctionEntity(_loc: Location, _callableInfo: CallableInfo) extends FunctionEntity(_loc, null)(-1,  _callableInfo) {
+    override def toString: String = s"SigFunc(${callableInfo.name.getOrElse("anonymous")})"
+}
+
+
+object BuiltInFunctionEntity {
+    abstract class Implementation {
+        def name: String
+
+
+    }
+}
+
 case object AnyEntity extends ObjectLike {
     override def objectType: ObjectType = AnyObject
 

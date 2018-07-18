@@ -2,8 +2,10 @@ package inferium
 
 import escalima.ECMAScript
 import inferium.dataflow._
+import inferium.dataflow.calls.NativeCall
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.PrintVisitor
+import inferium.lattice.{Location, NumberValue}
 import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
 
@@ -25,13 +27,7 @@ object Playground {
     def main(args: Array[String]): Unit = {
         val code =
             """
-              |exports.func = function(proc) {
-              |  return (function(x) {
-              |    return proc(function(y) { return (x(x))(y);});
-              |  })(function(x) {
-              |    return proc(function(y) { return (x(x))(y);});
-              |  });
-              |};
+              |debug(Math.sin("blub")).print()
               |
             """.stripMargin
 
@@ -40,13 +36,33 @@ object Playground {
               |
             """.stripMargin*/
 
+
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
         val config = InferiumConfig.Env.NodeDebug
         val graph = new GraphBuilder(config).buildTemplate(prog, hasModule = true).instantiate()
 
-        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap)
+        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap, addPrelude = true)
+        /*val heap = {
+            val mutator = initialHeap.begin(Location())
+
+            mutator.forceSetPropertyValue(globalObject, "rand", Location(), NativeCall.createSimpleFunction("rand",
+                (heap, ths, args, rest, analysis) => {
+                    (heap, NumberValue)
+                }, mutator)
+            )
+
+            initialHeap.end(mutator)
+        }*/
+
+
+
+
+
+
+
+        //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
         val analysis = new NodeModuleAnalysis(graph, globalObject, new TestDebugAdapter)
         //val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)

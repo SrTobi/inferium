@@ -32,7 +32,7 @@ class AllocateArrayNode(private val elements: Seq[Option[Boolean]])(implicit _in
         assert(!eIt.hasNext)
 
         val mutator = initialHeap.begin(heapAccessLoc)
-        val array = mutator.allocObject(allocSite, (loc, ac) => OrdinaryObjectEntity(loc)(ac), initialHeap.specialObject(SpecialObjects.Array))
+        val array = mutator.allocArray(allocSite)
 
         val heapAfterCreation = initialHeap.end(mutator)
         val stateAfterCreation = inState.copy(stack = restStack, heap = heapAfterCreation)
@@ -45,7 +45,6 @@ class AllocateArrayNode(private val elements: Seq[Option[Boolean]])(implicit _in
         var array: ObjectLike = _
 
         private val heapAccessLoc: Location = Location()
-        private val lengthWriteLocation = Location()
         private val elementsWriteLocations = Stream.continually(Location())
 
         override protected def onComplete(result: (Seq[Entity], Option[Entity]), state: ExecutionState, analysis: DataFlowAnalysis): Unit = {
@@ -54,19 +53,7 @@ class AllocateArrayNode(private val elements: Seq[Option[Boolean]])(implicit _in
 
             val (elements, restElement) = result
 
-            restElement foreach {
-                mutator.writeToProperties(array, null, numbersOnly = true, _)
-            }
-
-            val locIt = elementsWriteLocations.iterator
-            for ((element, idx) <- elements.zipWithIndex) {
-                if (element != UndefinedValue) {
-                    assert(locIt.hasNext)
-                    mutator.forceSetPropertyValue(array, idx.toString, locIt.next(), element)
-                }
-            }
-
-            mutator.forceSetPropertyValue(array, "length", lengthWriteLocation, SpecificNumberValue(elementsCount))
+            ArrayUtils.fillArray(array, elements, restElement, mutator, elementsWriteLocations.iterator)
 
             val resultHeap = initialHeap.end(mutator)
             val resultState = state.copy(stack = array :: state.stack, heap = resultHeap)

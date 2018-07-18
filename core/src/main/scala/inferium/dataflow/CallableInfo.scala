@@ -11,7 +11,7 @@ abstract class CallableInfo {
     def yieldsGraph: Boolean
 
     def asAnalysable: Analysable
-    def instantiate(onReturn: ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame): CallInstance
+    def instantiate(onReturn: ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame, isConstruction: Boolean): CallInstance
 
     override def hashCode(): Int = anchor.hashCode()
 

@@ -1020,7 +1020,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
             funcGraph
         }
 
-        override def instantiate(onReturn: CallableInfo.ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame): CallInstance = {
+        override def instantiate(onReturn: CallableInfo.ReturnHandler, priority: Int, catchTarget: Option[MergeNode], callSiteFrame: Node.CallFrame, isConstruction: Boolean): CallInstance = {
             class InlinedCallInstanceImpl(protected override val onReturn: CallableInfo.ReturnHandler) extends InlinedCallInstance {
                 /*override*/ var entryNode: Node = _
             }

@@ -75,14 +75,18 @@ object Heap {
         def config: Config
         def specialObject(specialObject: SpecialObject): ObjectLike
 
-        def allocObject(location: Location, creator: (Location, Long) => ObjectLike, prototype: Entity): ObjectLike
+        def allocObject[O <: ObjectLike](location: Location, creator: (Location, Long) => O, prototype: Entity): O
         def allocOrdinaryObject(location: Location, prototype: Entity): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), prototype)
         def allocOrdinaryObject(location: Location): ObjectLike = {
             val objectPrototype = specialObject(SpecialObjects.Object)
             allocOrdinaryObject(location, objectPrototype)
         }
+        def allocArray(location: Location): ObjectLike = {
+            allocOrdinaryObject(location, specialObject(SpecialObjects.Array))
+        }
         def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit
+        def setProperty(obj: ObjectLike, propertyName: String, property: AbstractProperty): Unit
         def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit
         def writeToProperty(obj: ObjectLike, propertyName: String, valueLocs: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property
         def getOwnProperties(obj: ObjectLike): TraversableOnce[(Option[String], Property)]
@@ -109,8 +113,14 @@ object Heap {
         }
 
         def forceSetPropertyValue(obj: ObjectLike, propertyName: String, writeLoc: Location, value: Entity): Unit = {
+            assert(isConcreteObject(obj))
             val valueLocation = setValue(writeLoc, value)
             setProperty(obj, propertyName, ConcreteProperty.defaultWriteToObject(Set(valueLocation)))
+        }
+
+        def forceSetAbstractPropertyValue(obj: ObjectLike, propertyName: String, value: Entity): Unit = {
+            assert(!isConcreteObject(obj))
+            setProperty(obj, propertyName, AbstractProperty.defaultWriteToObject(value))
         }
     }
 

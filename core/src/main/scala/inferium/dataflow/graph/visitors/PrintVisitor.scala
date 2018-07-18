@@ -127,11 +127,12 @@ private class PrintVisitor(val showStackInfo: Boolean,
                             }
                             cmd(s"  -inlined: ${begin.id}")
 
-                        case NativeCallInfo(_) =>
-                            ???
+                        case NativeCallInfo(name, _) =>
+                            // todo: print subcalls
+                            cmd(s"  -native: $name")
 
-                        case SignatureCallInfo() =>
-                            ???
+                        case SignatureCallInfo(name, _) =>
+                            cmd(s"   -sig: $name")
 
                         case RecursiveCallInfo() =>
                             ???

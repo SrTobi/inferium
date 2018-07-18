@@ -373,20 +373,23 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
         }
     }
 
+    Object
+
     const types: Type[] = []
     const foundTypes = new Set<number>()
 
     function resolveType(type: ts.Type): TypeInfo {
         const id = idof(type)
 
+        if (id == 84) {
+            debugger
+        }
+
         if (type.aliasSymbol) {
             const sym = type.aliasSymbol
             const typeParameter = (type.aliasTypeArguments || []).map(ty => resolveType(ty))
 
             if (!foundTypes.has(id)) {
-                if (sym.name == "Readonly") {
-                    debugger
-                }
                 foundTypes.add(id)
                 const alias: Type = {
                     id: idof(type),
@@ -463,7 +466,7 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
                     const sym = type.getSymbol()
                     assert(sym)
                     ensureObject(target)
-                    return ref(id, typeArgs)
+                    return ref(idof(target), typeArgs)
                 }
 
                 const sym = type.getSymbol()

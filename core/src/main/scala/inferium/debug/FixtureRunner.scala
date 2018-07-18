@@ -5,11 +5,11 @@ import escalima.ast.Program
 import inferium.Config
 import inferium.dataflow.graph.{Node, ScriptGraph}
 import inferium.dataflow._
-import inferium.lattice.{Location, ObjectLike, UndefinedValue}
-import inferium.lattice.heaps.ChainHeap
+import inferium.lattice.{Heap, Location, ObjectLike, UndefinedValue}
+import inferium.lattice.heaps.{ChainHeap, SimpleHeap}
 import inferium.prelude.NodeJs
 
-class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScript) {
+class FixtureRunner(val fixture: Fixture, heapFactory: Heap.Factory, val bridge: ECMAScript = new ECMAScript) {
 
     val name: String = fixture.name
     val description: String = fixture.description
@@ -20,7 +20,7 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
 
     val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog).instantiate()
 
-    val iniState: ExecutionState = NodeJs.initialState(config)
+    val iniState: ExecutionState = NodeJs.initialState(config, heapFactory)
     val debugAdapter: DebugAdapter = new DebugAdapter {
         private var _hasError = false
         override def error(node: Node, message: String): Unit = {
@@ -42,12 +42,17 @@ class FixtureRunner(val fixture: Fixture, val bridge: ECMAScript = new ECMAScrip
 object FixtureRunner {
     private lazy val bridge = new ECMAScript
     def test(code: String): Unit = {
-        val baseConfig = Config(
-            GraphBuilder.Config.buildDebugNodes := true
-        )
-        val fixture = Fixture.fromSource(code, baseConfig)
-        val runner = new FixtureRunner(fixture, bridge)
-        val runResult = runner.run()
-        assert(runResult)
+        def testWithHeap(heapFactory: Heap.Factory) = {
+            val baseConfig = Config(
+                GraphBuilder.Config.buildDebugNodes := true
+            )
+            val fixture = Fixture.fromSource(code, baseConfig)
+            val runner = new FixtureRunner(fixture, heapFactory, bridge)
+            val runResult = runner.run()
+            assert(runResult, "Found problems with " + heapFactory)
+        }
+
+        testWithHeap(SimpleHeap)
+        testWithHeap(ChainHeap)
     }
 }
