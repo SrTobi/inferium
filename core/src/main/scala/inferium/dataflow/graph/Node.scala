@@ -3,10 +3,12 @@ package inferium.dataflow.graph
 import inferium.dataflow.calls.CallInstance
 
 import scala.collection.mutable
-import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv}
+import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalEnv, LexicalFrame}
 import inferium.lattice.{Entity, Location}
 import inferium.utils.{Id, IdGenerator}
 
+import scala.annotation.elidable
+import scala.annotation.elidable.ASSERTION
 import scala.language.implicitConversions
 
 abstract class Node(implicit val info: Node.Info) {
@@ -69,6 +71,11 @@ abstract class Node(implicit val info: Node.Info) {
 
     final def fail(state: ExecutionState, exception: Entity)(implicit analysis: DataFlowAnalysis): Unit = {
         Node.fail(info.catchTarget, state, exception)
+    }
+
+    @elidable(ASSERTION)
+    final def checkLexicalFrame(frame: LexicalFrame): Unit = {
+        assert(frame.depth == info.lexicalEnv.objDepth)
     }
 
     final def fixLexicalFrame(state: ExecutionState): ExecutionState = state.copy(lexicalFrame = info.lexicalEnv.fixLexicalStack(state.lexicalFrame))

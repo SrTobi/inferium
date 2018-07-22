@@ -28,6 +28,9 @@ abstract class Entity extends Unifiable[Entity] {
     def asStringLattice(heap: Heap.Mutator): StringLattice
 
     @blockRec
+    def asTypeof(heap: Heap.Mutator): Set[String]
+
+    @blockRec
     def asProbes(heap: Heap.Mutator): Seq[ProbeEntity]
 
     //@blockRec

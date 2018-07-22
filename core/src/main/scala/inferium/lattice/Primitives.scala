@@ -53,6 +53,9 @@ object NeverValue extends Primitive {
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): NeverValue.type = NeverValue
 
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set.empty
+
     override def toString: String = "never"
 }
 
@@ -64,6 +67,9 @@ object UndefinedValue extends Primitive {
 
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("undefined")
+
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("undefined")
 
     @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
@@ -85,6 +91,9 @@ object NullValue extends Primitive {
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("null")
 
     @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("object")
+
+    @blockRec(nonrec = true)
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => NeverValue
         case Falsyfied => this
@@ -98,6 +107,11 @@ object NullValue extends Primitive {
 /************************ String ************************/
 sealed abstract class BoolValue extends Primitive {
     def toLattice: BoolLattice
+
+    def negate: BoolValue
+
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("boolean")
 }
 object BoolValue extends BoolValue {
     def apply(value: BoolLattice): BoolValue = value match {
@@ -105,6 +119,14 @@ object BoolValue extends BoolValue {
         case BoolLattice.False => FalseValue
         case BoolLattice.True => TrueValue
     }
+
+    def apply(value: GeneralBoolLattice): Entity = value match {
+        case BoolLattice.Top => BoolValue
+        case BoolLattice.False => FalseValue
+        case BoolLattice.True => TrueValue
+        case GeneralBoolLattice.Bottom => NeverValue
+    }
+
 
     def apply(value: Boolean): BoolValue = apply(BoolLattice(value))
 
@@ -129,6 +151,8 @@ object BoolValue extends BoolValue {
         case Falsyfied => FalseValue
         case Propertyfied(_, _) => ???
     }
+
+    override def negate: BoolValue = BoolValue
 
     override def toString: String = "boolean"
 }
@@ -156,6 +180,8 @@ object TrueValue extends SpecificBoolValue(true) {
     }
 
     override def toString: String = "true"
+
+    override def negate: BoolValue = FalseValue
 }
 
 object FalseValue extends SpecificBoolValue(false) {
@@ -174,6 +200,8 @@ object FalseValue extends SpecificBoolValue(false) {
     }
 
     override def toString: String = "false"
+
+    override def negate: BoolValue = TrueValue
 }
 
 object SpecificBoolValue {
@@ -185,7 +213,10 @@ object SpecificBoolValue {
 
 
 /************************ Number ************************/
-sealed abstract class NumberValue extends Primitive
+sealed abstract class NumberValue extends Primitive {
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("number")
+}
 object NumberValue extends NumberValue {
 
     override def mightBe(entity: Entity): Boolean = entity match {
@@ -209,7 +240,7 @@ object NumberValue extends NumberValue {
     override def toString: String = "number"
 }
 
-case class SpecificNumberValue(value: Int) extends NumberValue {
+case class SpecificNumberValue(value: Long) extends NumberValue {
 
     @blockRec(nonrec = true)
     override def asBoolLattice(heap: Heap.Mutator): BoolLattice = BoolLattice(value != 0)
@@ -229,7 +260,9 @@ case class SpecificNumberValue(value: Int) extends NumberValue {
 
 
 /************************ String ************************/
-sealed abstract class StringValue extends Primitive
+sealed abstract class StringValue extends Primitive {
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("string")}
 
 object StringValue extends StringValue {
 

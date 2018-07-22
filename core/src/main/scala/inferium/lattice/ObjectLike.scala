@@ -50,6 +50,9 @@ case class OrdinaryObjectEntity(loc: Location)(override val abstractCount: Long)
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice("[object Object]")
 
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("object")
+
     override def objectType: ObjectType = ObjectType.OrdinaryObject
 
     override def toString: String = s"Obj($loc:$abstractCount)"
@@ -66,6 +69,9 @@ case class FunctionEntity(loc: Location, lexicalFrame: LexicalFrame)(override va
 
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
+
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("function")
 
     override def objectType: ObjectType = ObjectType.FunctionObject
 
@@ -112,6 +118,9 @@ case object AnyEntity extends ObjectLike {
 
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
+
+    @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("any")
 
     override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         // todo: return a function that takes any and returns any

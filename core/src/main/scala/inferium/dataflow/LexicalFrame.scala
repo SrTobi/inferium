@@ -7,6 +7,8 @@ case class LexicalFrame(obj: Entity, outer: Option[LexicalFrame] = None) extends
     val depth: Int = outer map { _.depth + 1 } getOrElse 0
     val objects: Vector[Entity] = (outer map { _.objects } getOrElse Vector()) :+ obj
 
+    assert(depth == objects.length - 1)
+
     def ::(obj: Entity): LexicalFrame = LexicalFrame(obj, Some(this))
 
     override def unify(other: LexicalFrame)(implicit fixpoint: Unifiable.Fixpoint): LexicalFrame = {

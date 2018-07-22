@@ -29,6 +29,11 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
         StringLattice.unify(target.iterator map { t => heap.getValue(t).asStringLattice(heap) })
     }
 
+    @blockRec(Set.empty)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = {
+        target.iterator.flatMap(heap.getValue(_).asTypeof(heap)).toSet
+    }
+
     @blockRec(Seq.empty)
     override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = {
         target.iterator.flatMap(heap.getValue(_).asProbes(heap)).toSeq

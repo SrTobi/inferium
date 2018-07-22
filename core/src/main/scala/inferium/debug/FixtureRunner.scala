@@ -18,7 +18,7 @@ class FixtureRunner(val fixture: Fixture, heapFactory: Heap.Factory, val bridge:
 
     val prog: Program = bridge.parseScript(fixture.code)
 
-    val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog).instantiate()
+    val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog, Map.empty).instantiate()
 
     val iniState: ExecutionState = NodeJs.initialState(config, heapFactory)
     val debugAdapter: DebugAdapter = new DebugAdapter {

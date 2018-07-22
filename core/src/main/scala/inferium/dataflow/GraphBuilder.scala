@@ -1,6 +1,7 @@
 package inferium.dataflow
 import escalima.ast
-import escalima.ast.{SpreadElement, SpreadableExpression}
+import escalima.ast.UnaryOperator._
+import escalima.ast.{BinaryOperator, SpreadElement, SpreadableExpression}
 import inferium.Config.ConfigKey
 import inferium.dataflow.calls.{CallInstance, InlinedCallInstance}
 import inferium.dataflow.graph.MergeNode.MergeType
@@ -163,7 +164,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     Left(StringValue(value))
 
                 case num: ast.NumberLiteral =>
-                    val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
+                    val value = Try(num.raw.toLong).map(SpecificNumberValue).getOrElse(NumberValue)
                     Left(value)
 
                 case _: ast.NullLiteral =>
@@ -324,7 +325,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         buildLiteral(StringValue(value))
 
                     case num: ast.NumberLiteral =>
-                        val value = Try(num.raw.toInt).map(SpecificNumberValue).getOrElse(NumberValue)
+                        val value = Try(num.raw.toLong).map(SpecificNumberValue).getOrElse(NumberValue)
                         buildLiteral(value)
 
                     case _: ast.NullLiteral =>
@@ -455,8 +456,6 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                         Graph.concat(graphs)
 
-                    case ast.BinaryExpression(op, left, right) =>
-                        ???
                     case ast.LogicalExpression(`||`, left, right) =>
                         val leftGraph = buildExpression(left)
                         val rightGraph = buildExpression(right, priority + 1)
@@ -480,6 +479,63 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         leftGraph ~> new graph.DupNode(1) ~> ifNode
                         thenGraph ~> merger
                         Graph(leftGraph.begin, merger)
+
+                    case ast.BinaryExpression(binOp, left, right) =>
+                        import ast.{BinaryOperator => astOp}
+                        import graph.{BinaryOperatorNode => nodeOp}
+                        val leftGraph = buildExpression(left)
+                        val rightGraph = buildExpression(right, priority + 1)
+
+                        val op = binOp match {
+                            case astOp.`==` => nodeOp.`==`
+                            case astOp.`!=` => nodeOp.`!=`
+                            case astOp.`===` => nodeOp.`===`
+                            case astOp.`!==` => nodeOp.`!==`
+                            case astOp.`<` => nodeOp.`<`
+                            case astOp.`<=` => nodeOp.`<=`
+                            case astOp.`>` => nodeOp.`>`
+                            case astOp.`>=` => nodeOp.`>=`
+                            case astOp.`<<` => nodeOp.`<<`
+                            case astOp.`>>` => nodeOp.`>>`
+                            case astOp.`>>>` => nodeOp.`>>>`
+                            case astOp.`+` => nodeOp.`+`
+                            case astOp.`-` => nodeOp.`-`
+                            case astOp.`*` => nodeOp.`*`
+                            case astOp.`/` => nodeOp.`/`
+                            case astOp.`%` => nodeOp.`%`
+                            case astOp.`|` => nodeOp.`|`
+                            case astOp.`^` => nodeOp.`^`
+                            case astOp.`&` => nodeOp.`&`
+                            case astOp.`in` => nodeOp.`in`
+                            case astOp.`instanceof` => nodeOp.`instanceof`
+                            case astOp.`**` => nodeOp.`**`
+                        }
+
+                        leftGraph ~> rightGraph ~> new graph.BinaryOperatorNode(op)
+
+                    case ast.UnaryExpression(ast.UnaryOperator.void, _, operand) =>
+                        val operandGraph = buildExpression(operand)
+                        operandGraph ~> new graph.PopNode ~> new graph.LiteralNode(UndefinedValue)
+
+                    case ast.UnaryExpression(ast.UnaryOperator.delete, _, operand) =>
+                        ???
+
+                    case ast.UnaryExpression(unOp, _, operand) =>
+                        import ast.{UnaryOperator => astOp}
+                        import graph.{UnaryOperatorNode => nodeOp}
+                        val operandGraph = buildExpression(operand)
+
+                        val op = unOp match {
+                            case astOp.`-` => nodeOp.`-`
+                            case astOp.`+` => nodeOp.`+`
+                            case astOp.`!` => nodeOp.`!`
+                            case astOp.`~` => nodeOp.`~`
+                            case astOp.`typeof` => nodeOp.`typeof`
+                            case astOp.`void` => throw new IllegalStateException("void operator should already be handeled")
+                            case astOp.`delete` => throw new IllegalStateException("void operator should already be handeled")
+                        }
+
+                        operandGraph ~> new graph.UnaryOperatorNode(op)
                 }
             }
 
@@ -924,22 +980,21 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
 
 
-        def buildTopLevel(program: ast.Program, hasModule: Boolean, strict: Boolean): ScriptGraph = {
+        def buildTopLevel(program: ast.Program, initinalVars: Map[String, String], hasModule: Boolean, strict: Boolean): ScriptGraph = {
             assert(functionPriority == 0)
             val priority = 0
             assert(!done)
 
             val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
-            val firstVarsEnv = new LexicalEnv(Some(globalEnv), pushesObject = !hasModule, LexicalEnv.Behavior.Declarative(Map.empty))
-            val hoistingEnv = if (hasModule) firstVarsEnv else globalEnv
+            val firstVarsEnv = new LexicalEnv(Some(globalEnv), pushesObject = true, LexicalEnv.Behavior.Declarative(initinalVars))
+            val hoistingEnv = firstVarsEnv
 
-            implicit val info: Node.Info = Node.Info(priority, globalEnv, functionFrame, None)
+            implicit val info: Node.Info = Node.Info(priority, firstVarsEnv, functionFrame, None)
             hoistingNodeInfo = info
             val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), hoistingEnv, firstVarsEnv, priority)
             val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt })
             val endNode = new EndNode
-            val mainBlock: Graph = if (hasModule) EmptyGraph else new PushLexicalFrameNode("main-block", takeFromStack = false)
-            val scriptGraph = mainBlock ~> hoistableGraph ~> graph ~> endNode
+            val scriptGraph = hoistableGraph ~> graph ~> endNode
 
             done = true
             ScriptGraph(scriptGraph.begin(endNode), endNode)
@@ -996,15 +1051,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     Seq(ast.ReturnStatement(Some(expr), expr.loc))
             }
             returnBlockInfo = new BlockInfo(None, Map.empty, None, catchTarget, None)
-            returnMergeNode = new MergeNode()(initialNodeInfo)
+            returnMergeNode = new MergeNode()(hoistingNodeInfo)
             val builder = new BlockBuilder(false, returnBlockInfo, funcHoistingEnv, funcHoistingEnv, priority + 1)
             val bodyGraph = builder.build(normalizedBody)
 
             // build default return
-            val epilogGraph = new LiteralNode(UndefinedValue)(initialNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
+            val epilogGraph = new LiteralNode(UndefinedValue)(hoistingNodeInfo.copy(priority = priority + 1)) ~> returnMergeNode
 
             // put everything together
-            (prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph, initialNodeInfo)
+            (prologGraph ~> hoistableGraph ~> bodyGraph ~> epilogGraph, hoistingNodeInfo)
         }
 
         def buildFunctionAsScript(name: Option[String],
@@ -1029,10 +1084,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
     }
 
-    def buildTemplate(scriptAst: ast.Program, hasModule: Boolean = false): Templates.Script =  new Templates.Script {
+    def buildTemplate(scriptAst: ast.Program, initinalVars: Map[String, String], hasModule: Boolean = false): Templates.Script =  new Templates.Script {
         override def instantiate(): ScriptGraph = {
             val builder = new FunctionBuilder(isTopLevel = true, new Node.CallFrame(None, None), 0)
-            val graph = builder.buildTopLevel(scriptAst, hasModule, strict = false)
+            val graph = builder.buildTopLevel(scriptAst, initinalVars, hasModule, strict = false)
             new StackAnnotationVisitor(isFunction = false).start(graph)
             graph
         }

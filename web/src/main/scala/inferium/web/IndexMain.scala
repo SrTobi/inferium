@@ -84,7 +84,7 @@ object IndexMain {
 
                 p.complete(Try {
                     val prog = parser.parseScript(code)
-                    val graph = new GraphBuilder(inferiumConfig).buildTemplate(prog).instantiate()
+                    val graph = new GraphBuilder(inferiumConfig).buildTemplate(prog, Map.empty).instantiate()
                     println(graph)
                     (code, prog, graph)
                 })

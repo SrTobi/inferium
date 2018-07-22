@@ -9,6 +9,8 @@ sealed abstract class GeneralBoolLattice {
     def mightBe(bool: Boolean): Boolean = if (bool) mightBeTrue else mightBeFalse
     def mightBeTrue: Boolean
     def mightBeFalse: Boolean
+
+    def negate: GeneralBoolLattice
 }
 
 sealed abstract class BoolLattice extends GeneralBoolLattice {
@@ -22,16 +24,22 @@ object BoolLattice {
     case object Top extends BoolLattice {
         override def mightBeTrue: Boolean = true
         override def mightBeFalse: Boolean = true
+
+        override def negate: GeneralBoolLattice = Top
     }
 
     case object True extends BoolLattice {
         override def mightBeTrue: Boolean = true
         override def mightBeFalse: Boolean = false
+
+        override def negate: GeneralBoolLattice = False
     }
 
     case object False extends BoolLattice {
         override def mightBeTrue: Boolean = false
         override def mightBeFalse: Boolean = true
+
+        override def negate: GeneralBoolLattice = True
     }
 
     def apply(value: Boolean): BoolLattice = if (value) True else False
@@ -54,6 +62,8 @@ object GeneralBoolLattice {
 
         override def mightBeTrue: Boolean = false
         override def mightBeFalse: Boolean = false
+
+        override def negate: GeneralBoolLattice = Bottom
     }
 
     def unify(bools: TraversableOnce[GeneralBoolLattice]): GeneralBoolLattice = {

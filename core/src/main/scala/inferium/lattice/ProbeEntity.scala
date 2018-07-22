@@ -66,6 +66,8 @@ class ProbeEntity extends Entity with Callable {
     @blockRec(nonrec = true)
     override def asStringLattice(heap: Heap.Mutator): StringLattice = StringLattice.Top
     @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = Set("any")
+    @blockRec(nonrec = true)
     override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = Seq(this)
     @blockRec(nonrec = true)
     override protected[lattice] def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Effect) = (this, false, Assertion.noEffect(this))

@@ -40,16 +40,19 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case merger: graph.MergeNode =>
                 assert(isFunction || (preds forall { _.exprStackInfo.nonEmpty }))
 
+                // this merge node might be the first node in the graph and has no forward predecessors
+                val predStack = if (preds.isEmpty) startStack else preds.head.exprStackInfo
+
                 if(merger.isCatchMerger) {
                     assert(preds.count(!_.catchTarget.contains(merger)) == 1)
                     "exception" :: undefined :: Nil
                 } else {
-                    val stackIsEmpty = preds.head.exprStackInfo.isEmpty
+                    val stackIsEmpty = predStack.isEmpty
                     if (stackIsEmpty) {
                         assert(isFunction)
                         Nil
                     } else {
-                        val restStack = preds.head.exprStackInfo.tail
+                        val restStack = predStack.tail
                         assert(preds forall {
                             _.exprStackInfo.tail eq restStack
                         })
@@ -133,6 +136,14 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
                 val stackWithoutArgs = stack.drop(node.argumentCount)
                 val func :: restStack = stackWithoutArgs
                 ExprStackFrame("new:", func) :: restStack
+
+            case node: graph.BinaryOperatorNode =>
+                val right :: left :: restStack = stack
+                ExprStackFrame(node.op.toString, left, right) :: restStack
+
+            case node: graph.UnaryOperatorNode =>
+                val operand :: restStack = stack
+                ExprStackFrame(node.op.toString, operand) :: restStack
         }
     }
 }

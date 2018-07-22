@@ -35,6 +35,12 @@ class UnionValue private (val entities: Seq[Entity]) extends Entity {
     }
 
     @blockRec(nonrec = true)
+    override def asTypeof(heap: Heap.Mutator): Set[String] = {
+        entities.iterator.flatMap { _.asTypeof(heap) } .toSet
+    }
+
+
+    @blockRec(nonrec = true)
     override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = {
         entities.flatMap { _.asProbes(heap) }
     }

@@ -52,6 +52,9 @@ object NodeJs {
     }
     def initialState(config: Config, heapFactory: Heap.Factory = SimpleHeap, addPrelude: Boolean = false): ExecutionState = {
         val (heap, globalObj) = initialHeap(config, heapFactory, addPrelude)
-        new ExecutionState(UndefinedValue :: Nil, heap, globalObj, LexicalFrame(globalObj))
+        val mutator = heap.begin(Location())
+        val mainCtx = mutator.allocOrdinaryObject(Location())
+        val finalHeap = heap.end(mutator)
+        new ExecutionState(UndefinedValue :: Nil, finalHeap, globalObj, mainCtx :: LexicalFrame(globalObj))
     }
 }

@@ -25,7 +25,7 @@ class UnionValueSpec extends PropSpec with Assertions with Matchers with Generat
 
     private val latticeMemberGen = Gen.oneOf(
         Gen.alphaNumStr.map(SpecificStringValue.apply),
-        Gen.chooseNum(-1000, 1000).map(SpecificNumberValue.apply),
+        Gen.chooseNum(-1000L, 1000L).map(SpecificNumberValue.apply),
         singletonPrimitives.map(Gen.const): _*
     )
 
