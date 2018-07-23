@@ -1,10 +1,11 @@
 package inferium.dataflow
 
 import inferium.dataflow.graph.Node.StateOrigin
+import inferium.js.types.js.Instantiator
 
 import scala.collection.mutable
 
-class ScriptAnalysis(analysable: Analysable, _debugAdapter: DebugAdapter = DebugAdapter.Empty) extends DataFlowAnalysis(_debugAdapter) {
+class ScriptAnalysis(analysable: Analysable, override val instantiator: Instantiator, _debugAdapter: DebugAdapter = DebugAdapter.Empty) extends DataFlowAnalysis(_debugAdapter) {
 
     private implicit def useThisAsAnalysis: DataFlowAnalysis = this
     private val initialStateOrigin = StateOrigin()

@@ -5,6 +5,7 @@ import escalima.ast.Program
 import inferium.Config
 import inferium.dataflow.graph.{Node, ScriptGraph}
 import inferium.dataflow._
+import inferium.js.types.js
 import inferium.lattice.{Heap, Location, ObjectLike, UndefinedValue}
 import inferium.lattice.heaps.{ChainHeap, SimpleHeap}
 import inferium.prelude.NodeJs
@@ -20,7 +21,7 @@ class FixtureRunner(val fixture: Fixture, heapFactory: Heap.Factory, val bridge:
 
     val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog, Map.empty).instantiate()
 
-    val iniState: ExecutionState = NodeJs.initialState(config, heapFactory)
+    val (iniState: ExecutionState, _, instantiator: js.Instantiator) = NodeJs.initialState(config, heapFactory)
     val debugAdapter: DebugAdapter = new DebugAdapter {
         private var _hasError = false
         override def error(node: Node, message: String): Unit = {
@@ -33,7 +34,7 @@ class FixtureRunner(val fixture: Fixture, heapFactory: Heap.Factory, val bridge:
     }
 
     def run(): Boolean = {
-        val analysis = new ScriptAnalysis(graph, debugAdapter)
+        val analysis = new ScriptAnalysis(graph, instantiator, debugAdapter)
         analysis.runAnalysis(iniState)
         return !debugAdapter.hasError
     }

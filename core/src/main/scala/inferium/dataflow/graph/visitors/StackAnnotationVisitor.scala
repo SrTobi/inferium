@@ -144,6 +144,9 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case node: graph.UnaryOperatorNode =>
                 val operand :: restStack = stack
                 ExprStackFrame(node.op.toString, operand) :: restStack
+
+            case node: graph.ThrowNode =>
+                stack.tail
         }
     }
 }

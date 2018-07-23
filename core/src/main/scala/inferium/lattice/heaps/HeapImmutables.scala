@@ -208,7 +208,7 @@ trait HeapImmutables {
                         val newProperties = abstractProps + (propertyName -> property)
                         setObject(obj.loc, Obj((abstractFields, newProperties), concreteDesc, abstractCount))
                     } else {
-                        throw new UnsupportedOperationException("can't set concrete property to abstract obj")
+                        throw new UnsupportedOperationException("can't set abstract property to concrete obj")
                     }
 
                 case None =>

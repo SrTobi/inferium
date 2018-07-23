@@ -29,7 +29,7 @@ lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when exec
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, web, coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM, nodePreludeDataJS)
+    .aggregate(cli, /*web,*/ coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM, nodePreludeDataJS)
     .dependsOn(testCreator)
     .settings(
         name := "inferium",
@@ -99,7 +99,7 @@ lazy val cli = project
 
 
 //--------------------- web ---------------------//
-lazy val web = project
+/*lazy val web = project
     .in(file("web"))
     .enablePlugins(ScalaJSPlugin)
     .enablePlugins(WorkbenchPlugin)
@@ -111,7 +111,7 @@ lazy val web = project
         workbenchDefaultRootObject := Some(("web/index.html", "web/")),  // (defaultRootObject, rootDirectory)
         libraryDependencies += "com.thoughtworks.binding" %%% "dom" % "11.0.1"
     )
-
+*/
 
 //--------------------- node prelude defs -------------//
 lazy val nodePreludeData = crossProject

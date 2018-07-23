@@ -6,6 +6,7 @@ import inferium.Unifiable
 import inferium.dataflow.calls.SignatureCall
 import inferium.lattice.Heap.SpecialObjects
 import inferium.lattice._
+import inferium.utils.Utils
 import ujson.Js
 
 import scala.collection.mutable
@@ -32,10 +33,22 @@ object js {
         }
     }
 
+    object InstType extends Enumeration {
+        type Type = Value
+        val Prototype, Paragon = Value
+    }
+
+    class Instantiator(locations: Stream[Location], val thisEntity: Entity, val instantiated: mutable.Map[(Type, InstType.Type, Seq[Entity]), ObjectLike]) {
+
+        val locs: Iterator[Location] = locations.iterator
+
+        def newLoc(): Location = locs.next()
+    }
+
 
     sealed abstract class Type extends Unifiable[Type] {
         def matches(arg: Entity): Boolean
-        def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity
+        def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity
 
         override def unify(other: Type)(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this, other)
         override def unify(others: Seq[Type])(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this +: others)
@@ -53,7 +66,7 @@ object js {
     }
 
     case object AnyType extends Type {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = AnyEntity
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity = AnyEntity
 
         override def matches(arg: Entity): Boolean = true
     }
@@ -61,54 +74,54 @@ object js {
     sealed abstract class Primitive extends Type
 
     case object NeverType extends Primitive {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = NeverValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= NeverValue
 
         override def matches(arg: Entity): Boolean = false
     }
     case object UndefinedType extends Primitive {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = UndefinedValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= UndefinedValue
 
         override def matches(arg: Entity): Boolean = arg == UndefinedValue
     }
     case object NullType extends Primitive {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = NullValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= NullValue
 
         override def matches(arg: Entity): Boolean = arg == NullValue
     }
 
     sealed abstract class BooleanType extends Primitive
     case object BooleanType extends BooleanType {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = BoolValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= BoolValue
 
         override def matches(arg: Entity): Boolean = arg.isInstanceOf[BoolValue]
     }
 
     case object TrueType extends BooleanType {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = TrueValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= TrueValue
 
         override def matches(arg: Entity): Boolean = arg == TrueValue
     }
     case object FalseType extends BooleanType {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = FalseValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= FalseValue
 
         override def matches(arg: Entity): Boolean = arg == FalseValue
     }
 
     case object NumberType extends Primitive {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = NumberValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= NumberValue
 
         override def matches(arg: Entity): Boolean = arg.isInstanceOf[NumberValue]
     }
 
     sealed abstract class StringType extends Primitive
     case object StringType extends StringType {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = StringValue
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= StringValue
 
         override def matches(arg: Entity): Boolean = arg.isInstanceOf[StringValue]
     }
 
     final case class LiteralType(value: String) extends StringType {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = SpecificStringValue(value)
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= SpecificStringValue(value)
 
         override def matches(arg: Entity): Boolean = arg match {
             case SpecificStringValue(otherValue) => this.value == otherValue
@@ -117,7 +130,8 @@ object js {
     }
 
     case object ThisType extends Type {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
+            val thisEntity = instantiator.thisEntity
             assert(thisEntity != NeverValue)
             thisEntity
         }
@@ -128,10 +142,10 @@ object js {
     final class TupleType extends Type {
         var members: Seq[Type] = _
 
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
-            val arrayLoc = locGen.loc()
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
+            val arrayLoc = instantiator.newLoc()
             val array = heap.allocArray(arrayLoc).withAbstractCount(-1)
-            ArrayUtils.fillAbstractArray(array, members.map { _.instantiate(locGen, heap, substitutions, thisEntity, objs) }, None, heap)
+            ArrayUtils.fillAbstractArray(array, members.map { _.instantiate(heap, instantiator, substitutions) }, None, heap)
             array
         }
 
@@ -139,7 +153,7 @@ object js {
     }
 
     case object ObjectType extends Type {
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             AnyEntity
         }
 
@@ -149,7 +163,7 @@ object js {
     final class GenericType(/*val name: String, */) extends Type {
         var constraint: Option[Type] = None
 
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             substitutions.getOrElse(this, AnyEntity)
         }
 
@@ -166,8 +180,8 @@ object js {
         override def hashCode: Int = types.hashCode()
         override def toString: String = types.mkString(" | ")
 
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
-            Entity.unify(types map { _.instantiate(locGen, heap, substitutions, thisEntity, objs) })
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
+            Entity.unify(types map { _.instantiate(heap, instantiator, substitutions) })
         }
 
         override def matches(arg: Entity): Boolean = true
@@ -184,37 +198,76 @@ object js {
 
     val VoidType: UnionType = UnionType(UndefinedType, NullType)
 
-    final class Instantiate extends Type {
+    trait ClassLike extends Type {
+        def ownProperties: Map[String, Property]
+        def allProperties: Map[String, Property]
+        def instProperties: Map[String, Property]
+
+        def instantiatePrototype(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): ObjectLike
+    }
+
+    final class Instantiate extends Type with ClassLike {
         // todo: check if typeArguments has the same length as the target's typeParameters
         var typeArguments: Seq[Type] = _
         var target: CompoundType = _
 
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
-            assert(typeArguments.length == target.typeParameter.length)
+        override def ownProperties: Map[String, Property] = target.ownProperties
+        override def allProperties: Map[String, Property] = target.allProperties
+        override def instProperties: Map[String, Property] = target.instProperties
 
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             // todo: respect default type parameter
-            val newSubstitution = (target.typeParameter zip typeArguments).map {
-                case (generic, ty) => (generic, ty.instantiate(locGen, heap, substitutions, thisEntity, objs))
-            }.toMap
+            val newSubstitution = instantiateSubstitution(heap, instantiator, substitutions)
 
-            target.instantiate(locGen, heap, newSubstitution, thisEntity, objs, this)
+            target.instantiate(heap, instantiator, newSubstitution)
+        }
+
+        override def instantiatePrototype(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): ObjectLike = {
+            // todo: respect default type parameter
+            val newSubstitution = instantiateSubstitution(heap, instantiator, substitutions)
+
+            target.instantiatePrototype(heap, instantiator, newSubstitution)
+        }
+
+        private def instantiateSubstitution(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]) = {
+            assert(typeArguments.length == target.typeParameter.length)
+            (target.typeParameter zip typeArguments).map {
+                case (generic, ty) => (generic, ty.instantiate(heap, instantiator, substitutions))
+            }.toMap
         }
 
         override def matches(arg: Entity): Boolean = true
     }
 
-    final class CompoundType(val name: Option[String]) extends Type {
-        var bases: Seq[Type] = _
+    final class CompoundType(val name: Option[String], val isClass: Boolean) extends Type with ClassLike {
+        lazy val defaultConstructor = {
+            assert(isClass)
+            val o = new Overload(Seq.empty, Seq.empty)
+            o.returnType = this
+            Seq(o)
+        }
+
+        var bases: Seq[ClassLike] = _
         var typeParameter: Seq[GenericType] = _
         var signature: Signature = _
         var constructor: Signature = _
 
-        var properties: Map[String, Property] = _
+        private def baseClasses = bases collect { case c: CompoundType if c.isClass => c }
+        def baseClass: Option[CompoundType] = {
+            assert(baseClasses.size <= 1)
+            baseClasses.headOption
+        }
+
+        def baseInterfaces: Seq[CompoundType] = bases collect { case c: CompoundType if !c.isClass => c}
+
+        var ownProperties: Map[String, Property] = _
+        lazy val allProperties: Map[String, Property] = Utils.mergeMaps(bases map {_.allProperties}: _*)((a, b) => a) ++ ownProperties
+        lazy val instProperties: Map[String, Property] = Utils.mergeMaps(baseInterfaces map {_.instProperties}: _*)((a, b) => a) ++ ownProperties
 
         def callable: Boolean = signature.nonEmpty
         def constructable: Boolean = constructor.nonEmpty
 
-        private[js] def _resolve(bases: Seq[Type],
+        private[js] def _resolve(bases: Seq[ClassLike],
                                  typeParameter: Seq[GenericType],
                                  signature: Signature,
                                  constructor: Signature,
@@ -223,45 +276,86 @@ object js {
             this.typeParameter = typeParameter
             this.signature = signature
             this.constructor = constructor
-            this.properties = properties.map(p => p.name -> p).toMap
-            assert(this.properties.size == properties.size)
-        }
-
-        override def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity]): Entity = {
-           instantiate(locGen, heap, substitutions, thisEntity, objs, this)
+            this.ownProperties = properties.map(p => p.name -> p).toMap
+            assert(this.ownProperties.size == properties.size)
         }
 
 
-        def instantiate(locGen: LocGen, heap: Heap.Mutator, substitutions: Map[GenericType, Entity], thisEntity: Entity, objs: mutable.Map[Type, Entity], inst: Type): Entity = {
-            objs.get(inst) foreach {
-                return _
-            }
+        private def addProperties(obj: ObjectLike, heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Unit = {
 
-            val objLoc = locGen.loc()
-
-            val prototype = if (bases.isEmpty) {
-                heap.specialObject(SpecialObjects.Function)
-            } else{
-                Entity.unify(bases map { _.instantiate(locGen, heap, substitutions, thisEntity, objs) })
-            }
-
-            val obj = heap.allocObject(objLoc, (loc, ac) => {
-                if (signature.isEmpty && constructor.isEmpty)
-                    OrdinaryObjectEntity(loc)(-1)
-                else
-                    new SignatureFunctionEntity(loc, SignatureCall.createCallableInfo(name, signature, constructor))
-            }, prototype)
-
-            objs += inst -> obj
-
-            properties foreach {
+            instProperties foreach {
                 case (name, prop) =>
-                    val value = prop.ty.instantiate(locGen, heap, substitutions, thisEntity, objs)
+                    val value = prop.ty.instantiate(heap, instantiator, substitutions)
                     // todo: writable?
                     heap.setProperty(obj, name, AbstractProperty.defaultWriteToObject(value, prop.optional))
             }
 
-            obj
+        }
+
+        def instantiatePrototype(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): ObjectLike = {
+            import instantiator.instantiated
+            assert(isClass)
+
+            val instKey = (this, InstType.Prototype, typeParameter map { substitutions(_) })
+
+            instantiated.get(instKey) match {
+                case Some(existing) =>
+                    return existing
+                case _ =>
+            }
+
+            val prototypeLoc = instantiator.newLoc()
+
+            val basePrototype = baseClass match {
+                case Some(base) =>
+                    base.instantiatePrototype(heap, instantiator, substitutions)
+                case _ =>
+                    heap.specialObject(SpecialObjects.Object)
+            }
+
+            val prototype = heap.allocOrdinaryObject(prototypeLoc, basePrototype).withAbstractCount(-1)
+            instantiator.instantiated += instKey -> prototype
+            prototype
+        }
+
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): ObjectLike = {
+
+            import instantiator.instantiated
+
+            val instKey = (this, InstType.Paragon, typeParameter map { substitutions(_) })
+
+            instantiated.get(instKey) match {
+                case Some(existing) =>
+                    return existing
+                case _ =>
+            }
+
+            val paragonLoc = instantiator.newLoc()
+
+            val isFunctionEntity = callable || constructable
+            val prorotype = if (isClass) {
+                instantiatePrototype(heap, instantiator, substitutions)
+            } else if (isFunctionEntity) {
+                heap.specialObject(SpecialObjects.Function)
+            } else {
+                heap.specialObject(SpecialObjects.Object)
+            }
+
+            val paragon = heap.allocObject(paragonLoc, (loc, ac) => {
+                if (isFunctionEntity) {
+                    val callableInfo = SignatureCall.createCallableInfo(name, signature, constructor)
+                    new SignatureFunctionEntity(loc, callableInfo)
+                } else
+                    OrdinaryObjectEntity(loc)(ac)
+            }, prorotype).withAbstractCount(-1)
+            instantiator.instantiated += instKey -> paragon
+
+            if (!isClass) {
+                addProperties(paragon, heap, instantiator, substitutions)
+            }
+
+
+            paragon
         }
 
         //override def toString: String = s"${name.getOrElse("")}{${properties.mkString(", ")}}"
@@ -288,7 +382,7 @@ object js {
     }
 
 
-    case class Prelude(global: Type, modules: Map[String, Type])
+    case class Prelude(global: CompoundType, modules: Map[String, CompoundType])
 
     object Prelude {
         def load(prelude: Js.Obj): Prelude = {
@@ -404,9 +498,9 @@ object js {
                             val callSignatures = getCallSignature(properties("callSignatures").arr)
                             val constructor = getCallSignature(properties("constructionSignatures").arr)
                             val propertiesObj = properties("properties").obj
-                            val intf = new CompoundType(name)
+                            val intf = new CompoundType(name, isClass)
                             resolve(() => {
-                                val bases = basesArr map { getType }
+                                val bases = basesArr map { getType } map { _.asInstanceOf[ClassLike] }
                                 val properties = propertiesObj.map{
                                     case (pname, prop) =>
                                         Property(
@@ -458,8 +552,8 @@ object js {
             }
 
             val global = getType(prelude("globalType"))
-            val modules = prelude("ambientModules").arr map { module => module("name").str -> getType(module("type")) }
-            Prelude(global, modules.toMap)
+            val modules = prelude("ambientModules").arr map { module => module("name").str -> getType(module("type")).asInstanceOf[CompoundType] }
+            Prelude(global.asInstanceOf[CompoundType], modules.toMap)
         }
     }
 }

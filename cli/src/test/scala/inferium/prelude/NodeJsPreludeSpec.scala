@@ -50,7 +50,7 @@ class NodeJsPreludeSpec extends FlatSpec with Matchers {
                     checkSignature(comp.constructor)
                     checkSignature(comp.signature)
                     comp.bases foreach { check }
-                    comp.properties.values foreach { p => check(p.ty) }
+                    comp.ownProperties.values foreach { p => check(p.ty) }
 
                 case _ =>
             }

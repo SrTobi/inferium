@@ -462,7 +462,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val merger = new graph.MergeNode
 
                         assert(rightGraph != EmptyGraph)
-                        val elseGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph.begin
+                        val elseGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph
                         val ifNode = new graph.CondJumpNode(merger, elseGraph.begin)
                         leftGraph ~> new graph.DupNode(1) ~> ifNode
                         elseGraph ~> merger
@@ -474,7 +474,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val merger = new graph.MergeNode
 
                         assert(rightGraph != EmptyGraph)
-                        val thenGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph.begin
+                        val thenGraph = new graph.PopNode()(info.copy(priority = priority + 1)) ~> rightGraph
                         val ifNode = new graph.CondJumpNode(thenGraph.begin, merger)
                         leftGraph ~> new graph.DupNode(1) ~> ifNode
                         thenGraph ~> merger
@@ -806,6 +806,41 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         assert(testGraph != EmptyGraph)
                         Graph(testGraph.begin, merger)
 
+                    case ast.SwitchStatement(discriminant, cases) =>
+                        val discriminantGraph = buildExpression(discriminant, priority, env)
+                        val breakTarget = here
+                        val afterMerger = breakTarget.exit
+
+                        assert(cases.count(_.test.isEmpty) <= 1)
+                        val testPrio = priority + cases.length + 1
+                        val defaultCaseIdx = cases.indexWhere(_.test.isEmpty)
+                        val defaultMerger = if (defaultCaseIdx >= 0) new MergeNode()(info.copy(testPrio - defaultCaseIdx - 1)) else afterMerger
+                        val testInfo = info.copy(testPrio)
+                        val failedTests = new graph.PopNode()(testInfo) ~> defaultMerger
+                        val (_, firstTest) = cases.zipWithIndex.foldRight[(Graph, Graph)] (afterMerger, failedTests) {
+                            case ((ast.SwitchCase(testOpt, body), idx), (nextBody, nextTest)) =>
+                                assert(nextBody != EmptyGraph)
+                                assert(nextTest != EmptyGraph)
+                                val caseMerger: Graph = if (testOpt.isEmpty) defaultMerger else if (idx == 0) EmptyGraph else new MergeNode()(info.copy(testPrio - idx - 1))
+                                val bodyGraph = buildInnerBlock(innerBlock.inner(loopTarget = Some(breakTarget)), body, testPrio, newInnerBlockEnv())
+                                val caseGraph = caseMerger ~> bodyGraph ~> nextBody
+                                val hereTest = testOpt match {
+                                    case Some(test) =>
+                                        val testPop = new graph.PopNode()(testInfo)
+                                        testPop ~> caseGraph
+                                        new DupNode(1)(testInfo) ~>
+                                            buildExpression(test, testPrio, env) ~>
+                                            new graph.BinaryOperatorNode(BinaryOperatorNode.`==`)(testInfo) ~>
+                                            new graph.CondJumpNode(testPop, nextTest.begin)(testInfo)
+                                    case None =>
+                                        nextTest
+                                }
+                                (caseGraph, hereTest)
+                        }
+
+                        discriminantGraph ~> firstTest
+                        Graph(discriminantGraph.begin, afterMerger)
+
                     case ast.WhileStatement(test, body) =>
                         val loopMergerInfo = info.copy(priority = priority + 1)
                         val loopMerger = new graph.MergeNode(MergeType.Fixpoint)(loopMergerInfo)
@@ -929,6 +964,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         val returnJumpGraph = buildJump(returnBlockInfo, returnMergeNode, priority, env)
 
                         returnExprGraph ~> returnJumpGraph ~> new PopNode()
+
+                    case ast.ThrowStatement(exception) =>
+                        val exceptionGraph = buildExpression(exception, priority, env)
+                        exceptionGraph ~> new graph.ThrowNode
                 }
 
                 return (result, newEnv)

@@ -3,6 +3,7 @@ package inferium.lattice
 import inferium.Config.ConfigKey
 import inferium.Unifiable
 import inferium.Unifiable.Fixpoint
+import inferium.dataflow.calls.NativeCallableInfo
 import inferium.lattice.Heap.{Mutator, Shared}
 import inferium.lattice.Heap.SpecialObjects.SpecialObject
 
@@ -83,6 +84,9 @@ object Heap {
         }
         def allocArray(location: Location): ObjectLike = {
             allocOrdinaryObject(location, specialObject(SpecialObjects.Array))
+        }
+        def allocBuiltin(callableInfo: NativeCallableInfo, location: Location = Location()): ObjectLike = {
+            allocObject(location, (loc, ac) => new BuiltInFunctionEntity(loc, callableInfo), specialObject(SpecialObjects.Function))
         }
         def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit

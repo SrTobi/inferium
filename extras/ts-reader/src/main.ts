@@ -110,6 +110,10 @@ function getDependencies(path: string, found: Set<string>) {
         })
 }
 
+function mkn(i: number) {
+    return `_inferium_import_${i}`
+}
+
 
 async function main(pkgname: string) {
 
@@ -167,10 +171,6 @@ async function main(pkgname: string) {
     console.log(`Gather types for ${imports.length} packages:`)
     console.log("=>", imports.join(", "), "\n")
 
-    function mkn(i: number) {
-        return `_inferium_import_${i}`
-    }
-
     const importNames = imports.map((_, i) => mkn(i))
 
     {
@@ -220,7 +220,7 @@ async function main(pkgname: string) {
 
     console.log("")
     
-    let predef = createPredefTypes(program, gatherFile, globalSymbol)
+    let predef = createPredefTypes(program, gatherFile, imports, globalSymbol)
     
     console.log("Done.\n")
 
@@ -339,7 +339,7 @@ interface Reference extends TypeInfoBase {
 }
 
 
-function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbol: ts.Symbol): PredefTypes {
+function createPredefTypes(program: ts.Program, gatherFile: ts.Node, imports: string[], globalSymbol: ts.Symbol): PredefTypes {
         
     function p(type: PrimitveType, value?: string | number | boolean): Primitive {
         const prim: Primitive = { type, value }
@@ -634,9 +634,24 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, globalSymbo
 
     const globalType = resolveSymbol(globalSymbol)
     
+    let importSymbols = tc.getSymbolsInScope(gatherFile, ts.SymbolFlags.ModuleMember)
     const ambientModules = tc.getAmbientModules().map(m => ({
         name: m.name,
         type: resolveSymbol(m)
+    })).concat(imports.map((moduleName, i) => {
+        //syms.forEach(sym => console.log("=>", sym.name))
+        const symName = mkn(i)
+        const importSymbol = importSymbols.find(({name}) => name == symName)
+        console.log("Resolve", moduleName)
+
+        if (!importSymbol) {
+            throw new Error(`Failed to find symbol ${symName} for import of ${moduleName}`)
+        }
+
+        return {
+            name: moduleName,
+            type: resolveSymbol(importSymbol)
+        }
     }))
 
     return {

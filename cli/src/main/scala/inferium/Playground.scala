@@ -4,7 +4,7 @@ import escalima.ECMAScript
 import inferium.dataflow._
 import inferium.dataflow.calls.NativeCall
 import inferium.dataflow.graph.Node
-import inferium.dataflow.graph.visitors.PrintVisitor
+import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor}
 import inferium.lattice.{Location, NumberValue}
 import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
@@ -52,7 +52,6 @@ object Playground {
               |
               |    var cb = f || function () {};
               |    p = path.resolve(p);
-              |
               |    xfs.mkdir(p, mode, function (er) {
               |        if (!er) {
               |            made = made || p;
@@ -133,21 +132,23 @@ object Playground {
               |    name: do-while loop
               |    desc: Do-while loops should work correctly
               | */
+              |function test() {
+              |   return test()
+              |}
               |
-              |debug(exports).print()
-              |
+              |var x = test()
             """.stripMargin
 
-        val code = code2
+        val code = code1
 
 
         val bridge = new ECMAScript
         val prog = bridge.parseModule(code)
 
         val config = InferiumConfig.Env.NodeDebug
-        val graph = new GraphBuilder(config).buildTemplate(prog, Map.empty, hasModule = true).instantiate()
+        val graph = new GraphBuilder(config).buildTemplate(prog, NodeModuleAnalysis.defaultModuleEnv, hasModule = true).instantiate()
 
-        val (initialHeap, globalObject) = NodeJs.initialHeap(config, ChainHeap, addPrelude = true)
+        val (initialHeap, globalObject, modules, instantiator) = NodeJs.initialHeap(config, ChainHeap, addPrelude = true)
         /*val heap = {
             val mutator = initialHeap.begin(Location())
 
@@ -168,7 +169,7 @@ object Playground {
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
-        val analysis = new NodeModuleAnalysis(graph, globalObject, new TestDebugAdapter)
+        val analysis = new NodeModuleAnalysis(graph, globalObject, modules, instantiator, new TestDebugAdapter)
         //val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
 
         analysis.runAnalysis(initialHeap)
@@ -177,7 +178,7 @@ object Playground {
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 
         //println("-------")
-        //println(new DotPrintVisitor(showStackInfo = false).start(graph))
+        println(new DotPrintVisitor(showStackInfo = false).start(graph))
 
 
     }

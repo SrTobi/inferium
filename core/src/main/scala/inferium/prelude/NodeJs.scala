@@ -12,11 +12,11 @@ import inferium.prelude.data.NodeJsPreludeData
 import scala.collection.mutable
 
 object NodeJs {
-    def initialHeap(config: Config, heapFactory: Heap.Factory = SimpleHeap, addPrelude: Boolean = false): (Heap, ObjectLike) = {
+    def initialHeap(config: Config, heapFactory: Heap.Factory = SimpleHeap, addPrelude: Boolean = false): (Heap, ObjectLike, Map[String, ObjectLike], js.Instantiator) = {
         val (initialHeap, specialObjects) = heapFactory.create(config)
         val mutator = initialHeap.begin(Location())
 
-        val gObj = if (addPrelude) {
+        val (gObj, modules, instantiator) = if (addPrelude) {
             {
                 val `{}` = mutator.allocOrdinaryObject(Location(), NullValue)
                 specialObjects += SpecialObjects.Object -> `{}`
@@ -25,9 +25,12 @@ object NodeJs {
                 val Function = mutator.allocOrdinaryObject(Location())
                 specialObjects += SpecialObjects.Function -> Function
             }
-            val Prelude(gObjType, modules) = js.Prelude.load(NodeJsPreludeData.json)
+            val Prelude(gObjType, moduleTypes) = js.Prelude.load(NodeJsPreludeData.json)
 
-            gObjType.instantiate(new js.LocGen, mutator, Map.empty, NeverValue, mutable.Map.empty).asInstanceOf[ObjectLike]
+            val instantiator = new js.Instantiator(Stream.continually(Location()), NeverValue, mutable.Map.empty)
+            val gObj = gObjType.instantiate(mutator, instantiator, Map.empty)
+            val modules = moduleTypes map { case (key, value) => key -> value.instantiate(mutator, instantiator, Map.empty) }
+            (gObj, modules, instantiator)
         } else {
             {
                 val `{}` = mutator.allocOrdinaryObject(Location(), NullValue)
@@ -45,16 +48,18 @@ object NodeJs {
             val gObj = mutator.allocOrdinaryObject(Location())
 
             mutator.forceSetPropertyValue(gObj, "global", Location(), gObj)
-            gObj
+            (gObj, Map.empty[String, ObjectLike], null)
         }
 
-        (initialHeap.end(mutator), gObj)
+        (initialHeap.end(mutator), gObj, modules, instantiator)
     }
-    def initialState(config: Config, heapFactory: Heap.Factory = SimpleHeap, addPrelude: Boolean = false): ExecutionState = {
-        val (heap, globalObj) = initialHeap(config, heapFactory, addPrelude)
+
+    def initialState(config: Config, heapFactory: Heap.Factory = SimpleHeap, addPrelude: Boolean = false): (ExecutionState, Map[String, ObjectLike], js.Instantiator) = {
+        val (heap, globalObj, modules, instantiator) = initialHeap(config, heapFactory, addPrelude)
         val mutator = heap.begin(Location())
         val mainCtx = mutator.allocOrdinaryObject(Location())
         val finalHeap = heap.end(mutator)
-        new ExecutionState(UndefinedValue :: Nil, finalHeap, globalObj, mainCtx :: LexicalFrame(globalObj))
+        val resultState = new ExecutionState(UndefinedValue :: Nil, finalHeap, globalObj, mainCtx :: LexicalFrame(globalObj))
+        (resultState, modules, instantiator)
     }
 }

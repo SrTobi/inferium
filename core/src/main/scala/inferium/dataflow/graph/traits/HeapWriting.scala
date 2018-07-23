@@ -48,7 +48,7 @@ trait HeapWriting extends Node {
                 for (probe <- probes; propertyName <- propertyNames)
                     probe.write(propertyName, normalizedValue)
 
-                val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
+                lazy val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
                 var valueLocationWasWritten = false
                 for (obj <- objs; propertyName <- propertyNames) {
                     val res = write(target, obj, propertyName, assignmentLocation, value, isCertainWrite, writeMutator)

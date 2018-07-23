@@ -82,7 +82,8 @@ trait Calling extends Async[Unit] with Failing {
         })
 
         if (coercingFail) {
-            fail(failState, ???)
+            // todo: fail with better exception
+            fail(failState, AnyEntity)
         }
 
         callables
