@@ -5,6 +5,7 @@ import inferium.dataflow.graph.Node.StateOrigin
 import inferium.js.types.js.Instantiator
 import inferium.lattice.{Entity, Heap, UnionValue, _}
 import inferium.prelude.NodeBuiltins
+import inferium.typescript.IniEntity
 
 import scala.collection.mutable
 
@@ -48,11 +49,9 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
 
     private class FunctionAnalyser(val info: CallableInfo) {
         assert(info.yieldsGraph)
-        private val argumentProbe = new ProbeEntity
         private val location = Location()
         private val analysis = new CodeAnalysis(info.asAnalysable)
         private var lexicalFrame: LexicalFrame = _
-        private var returnValue: Entity = NeverValue
 
         def addLexicalFrame(lexicalFrame: LexicalFrame): Unit = {
             if (this.lexicalFrame == null) {
@@ -70,14 +69,14 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
             println("Analyse " + info.name)
 
             val heap = userState.toHeap(location)
-            val state = ExecutionState(argumentProbe :: Nil, heap, globalObject, lexicalFrame)
+            val state = ExecutionState(info.argumentProbe :: Nil, heap, globalObject, lexicalFrame)
             analysis.run(state) match {
                 case Some(ExecutionState(resultStack, resultHeap, _, _)) =>
                     val returnValue :: Nil = resultStack
 
-                    val unifiedReturnValue = this.returnValue unify returnValue
-                    val returnValueChanged = unifiedReturnValue != this.returnValue
-                    this.returnValue = unifiedReturnValue
+                    val unifiedReturnValue = info.returnValue unify returnValue
+                    val returnValueChanged = unifiedReturnValue != info.returnValue
+                    info.returnValue = unifiedReturnValue
 
 
                     val changed = userState.feed(resultHeap) || returnValueChanged
@@ -85,7 +84,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
                     val inspector = new Inspector
                     inspector.inspectEntity(unifiedReturnValue)
                     inspector.inspectObject(globalObject)
-                    inspector.inspectProbe(argumentProbe)
+                    inspector.inspectProbe(info.argumentProbe)
 
                     changed
 
@@ -146,7 +145,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
     private val foundFunctions = mutable.Map.empty[CallableInfo.Anchor, FunctionAnalyser]
     private var analyzingList = mutable.ListBuffer.empty[FunctionAnalyser]
 
-    def runAnalysis(heap: Heap): Unit = {
+    def runAnalysis(heap: Heap): IniEntity = {
         val (mainModule, heapAfter) = getModule(initialModuleCode, "/main", heap)
 
         userState = heapAfter.createGlobalHeap()
@@ -158,6 +157,9 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
         while (analyseFunctions()) {
             // just wait till the user state is stable
         }
+
+        val acc = userState.accessor
+        IniEntity.from(acc.getProperty(mainModule.moduleObj, "exports").abstractify(acc).value, userState.accessor)
     }
 
     private def analyseFunctions(): Boolean = {
@@ -242,7 +244,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
             }
 
             foundProbes += probe
-            probe.entities foreach { inspectEntity }
+            //probeprobe.entities foreach { inspectEntity }
         }
     }
 }

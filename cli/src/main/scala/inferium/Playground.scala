@@ -5,9 +5,10 @@ import inferium.dataflow._
 import inferium.dataflow.calls.NativeCall
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor}
-import inferium.lattice.{Location, NumberValue}
+import inferium.lattice.{Location, NullValue, NumberValue, UndefinedValue}
 import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
+import inferium.typescript.{IniObject, IniRec, IniValue, TypeScriptPrinter}
 
 import scala.util.Random
 
@@ -23,6 +24,18 @@ object Playground {
 
         override def hasError: Boolean = ???
     }
+/*
+    def main(args: Array[String]): Unit = {
+        val v1 = new IniObject(Map("test" -> (true, IniValue(UndefinedValue))), None)
+        var v2: IniObject = null
+        v2 = new IniObject(Map("test" -> (true, new IniRec({v2}))), None)
+
+        var v3: IniObject = null
+        v3 = new IniObject(Map("test" -> (true, new IniRec({v3}))), None)
+
+        println(v2 == v3)
+        println((v2 | v3.members("test")._2) == v2)
+    }*/
 
     def main(args: Array[String]): Unit = {
         val code1 =
@@ -80,7 +93,7 @@ object Playground {
               |    });
               |}
               |
-              |mkdirP.sync = function sync (p, opts, made) {
+              |/*mkdirP.sync = function sync (p, opts, made) {
               |    if (!opts || typeof opts !== 'object') {
               |        opts = { mode: opts };
               |    }
@@ -123,20 +136,19 @@ object Playground {
               |    }
               |
               |    return made;
-              |};
+              |};*/
             """.stripMargin
 
         val code2 =
             """
-              |/*
-              |    name: do-while loop
-              |    desc: Do-while loops should work correctly
-              | */
-              |function test() {
-              |   return test()
+              |function Point(x, y) {
+              |  this.x = x
+              |  this.y = y
               |}
               |
-              |var x = test()
+              |exports.xxx = function xxx(test) {
+              |  return new Point(5, test)
+              |}
             """.stripMargin
 
         val code = code1
@@ -172,13 +184,15 @@ object Playground {
         val analysis = new NodeModuleAnalysis(graph, globalObject, modules, instantiator, new TestDebugAdapter)
         //val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
 
-        analysis.runAnalysis(initialHeap)
+        val exports = analysis.runAnalysis(initialHeap)
+
+        println(new TypeScriptPrinter(exports).print())
         //analysis.runAnalysis(NodeJs.initialState(config))
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
 
         //println("-------")
-        println(new DotPrintVisitor(showStackInfo = false).start(graph))
+        //println(new DotPrintVisitor(showStackInfo = false).start(graph))
 
 
     }

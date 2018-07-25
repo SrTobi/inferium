@@ -1,21 +1,22 @@
 package inferium.lattice
 import inferium.lattice.assertions.Assertion
 import inferium.lattice.assertions.Assertion.Effect
+import inferium.typescript.{IniEntity, IniGeneric, IniNever}
 import inferium.utils.macros.blockRec
 
 import scala.collection.mutable
 
 class ProbeEntity extends Entity with Callable {
-    private val _reads = mutable.Map.empty[String, mutable.Set[ProbeEntity]]
-    private val _writes = mutable.Map.empty[String, Entity]
+    val _properties = mutable.Map.empty[String, IniEntity]
+
     private val _dynReads = mutable.Set.empty[ProbeEntity]
     private val _numberReads = mutable.Set.empty[ProbeEntity]
-    private var _dynWrites: Entity = NeverValue
-    private var _numberWrites: Entity = NeverValue
-    private val _calls = mutable.Map.empty[ProbeEntity, (Seq[Entity], Entity)]
-    private val _constructors = mutable.Map.empty[ProbeEntity, Seq[Entity]]
+    private var _dynWrites: IniEntity = IniNever
+    private var _numberWrites: IniEntity = IniNever
+    val _calls = mutable.Map.empty[ProbeEntity, (Seq[IniEntity], IniEntity)]
+    private val _constructors = mutable.Map.empty[ProbeEntity, Seq[IniEntity]]
 
-    def entities: Iterator[Entity] = {
+    /*def entities: Iterator[Entity] = {
         _reads.values.iterator.flatMap(_.iterator) ++
             _writes.values.iterator ++
             _dynReads.iterator ++
@@ -28,32 +29,27 @@ class ProbeEntity extends Entity with Callable {
             _constructors.flatMap {
                 case (ret, args) => Iterator(ret) ++ args.iterator
             }
-    }
+    }*/
+
 
     def read(property: String, probe: ProbeEntity): Unit = {
-        _reads.getOrElseUpdate(property, mutable.Set.empty) += probe
+        _properties += property -> (_properties.getOrElseUpdate(property, IniNever) | new IniGeneric(probe))
     }
-    def write(property: String, value: Entity): Unit = {
-        assert(value.isNormalized)
-        val newValue = _writes.getOrElse(property, NeverValue) unify value
-        _writes += property -> newValue
+    def write(property: String, value: IniEntity): Unit = {
+        _properties += property -> (_properties.getOrElseUpdate(property, IniNever) | value)
     }
     def dynRead(probe: ProbeEntity): Unit = _dynReads += probe
     def numberRead(probe: ProbeEntity): Unit = _numberReads += probe
-    def dynWrite(value: Entity): Unit = {
-        assert(value.isNormalized)
+    def dynWrite(value: IniEntity): Unit = {
         _dynWrites |= value
     }
-    def numberWrite(value: Entity): Unit = {
-        assert(value.isNormalized)
+    def numberWrite(value: IniEntity): Unit = {
         _numberWrites |= value
     }
-    def call(thisEntity: Entity, arguments: Seq[Entity], probe: ProbeEntity): Unit = {
-        assert(arguments.forall(_.isNormalized))
+    def call(thisEntity: IniEntity, arguments: Seq[IniEntity], probe: ProbeEntity): Unit = {
         _calls += probe -> (arguments, thisEntity)
     }
-    def construct(arguments: Seq[Entity], probe: ProbeEntity): Unit = {
-        assert(arguments.forall(_.isNormalized))
+    def construct(arguments: Seq[IniEntity], probe: ProbeEntity): Unit = {
         _constructors += probe -> arguments
     }
 

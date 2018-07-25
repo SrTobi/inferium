@@ -3,7 +3,7 @@ package inferium.dataflow
 import inferium.dataflow.CallableInfo.{Anchor, ReturnHandler}
 import inferium.dataflow.calls.CallInstance
 import inferium.dataflow.graph.{CallNode, MergeNode, Node}
-import inferium.lattice.{Entity, Heap}
+import inferium.lattice.{Entity, Heap, NeverValue, ProbeEntity}
 
 abstract class CallableInfo {
     def name: Option[String]
@@ -19,6 +19,9 @@ abstract class CallableInfo {
         case other: CallableInfo => other.anchor == anchor
         case _ => false
     }
+
+    val argumentProbe = new ProbeEntity
+    var returnValue: Entity = NeverValue
 }
 
 object CallableInfo {

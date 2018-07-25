@@ -3,6 +3,7 @@ package inferium.dataflow.graph.traits
 import inferium.dataflow.graph.Node
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.lattice._
+import inferium.typescript.IniEntity
 
 trait HeapWriting extends Node {
     private val heapWritingLoc = Location()
@@ -25,7 +26,7 @@ trait HeapWriting extends Node {
 
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
         var assignmentLocation = writeMutator.setValue(valueLocation, value)
-        lazy val normalizedValue = value.normalized(writeMutator)
+        lazy val iniValue = IniEntity.from(value, writeMutator)
 
         def dynWritesToObject(onlyNumbers: Boolean): Unit = {
             for (obj <- objs) {
@@ -34,19 +35,19 @@ trait HeapWriting extends Node {
         }
         val result = properties match {
             case StringLattice.AnyString =>
-                probes foreach { _.dynWrite(normalizedValue) }
+                probes foreach { _.dynWrite(iniValue) }
                 dynWritesToObject(false)
                 value
 
             case StringLattice.NumberString =>
-                probes foreach { _.numberWrite(normalizedValue) }
+                probes foreach { _.numberWrite(iniValue) }
                 dynWritesToObject(true)
                 value
 
             case StringLattice.SpecificStrings(propertyNames) =>
 
                 for (probe <- probes; propertyName <- propertyNames)
-                    probe.write(propertyName, normalizedValue)
+                    probe.write(propertyName, iniValue)
 
                 lazy val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
                 var valueLocationWasWritten = false

@@ -4,6 +4,7 @@ import inferium.dataflow.calls.{CallInstance, RecursiveCallInstance}
 import inferium.dataflow.graph.Node.CallFrame
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalFrame}
 import inferium.lattice._
+import inferium.typescript.IniEntity
 
 import scala.collection.mutable
 
@@ -47,8 +48,8 @@ trait Calling extends Async[Unit] with Failing {
         savedLocalLexicalFrame = stateBeforeCall.lexicalFrame
 
         val accessor = stateBeforeCall.heap.begin(heapReadLoc)
-        lazy val normalizedThis = thisEntity.normalized(accessor)
-        lazy val normalizedArguments = arguments.map { _.normalized(accessor) }
+        lazy val normalizedThis = IniEntity.from(thisEntity, accessor)
+        lazy val iniArguments = arguments.map { IniEntity.from(_, accessor) }
         // make the calls
         callables foreach {
             case func@FunctionEntity(loc, frame) =>
@@ -67,9 +68,9 @@ trait Calling extends Async[Unit] with Failing {
 
             case probe: ProbeEntity =>
                 if (isConstruction) {
-                    probe.construct(normalizedArguments, returnProbe)
+                    probe.construct(iniArguments, returnProbe)
                 } else {
-                    probe.call(normalizedThis, normalizedArguments, returnProbe)
+                    probe.call(normalizedThis, iniArguments, returnProbe)
                 }
                 ret(returnProbe, stateBeforeCall.heap, dataFlowAnalysis)
         }

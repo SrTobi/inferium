@@ -29,7 +29,7 @@ lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when exec
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, /*web,*/ coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM, nodePreludeDataJS)
+    .aggregate(cli, /*web,*/ coreJVM, /*coreJS,*/ testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM)
     .dependsOn(testCreator)
     .settings(
         name := "inferium",
@@ -85,7 +85,7 @@ lazy val core = crossProject
     )
 
 lazy val coreJVM = core.jvm
-lazy val coreJS = core.js
+//lazy val coreJS = core.js
 
 
 //--------------------- cli ---------------------//
@@ -123,7 +123,7 @@ lazy val nodePreludeData = crossProject
     )
 
 lazy val nodePreludeDataJVM = nodePreludeData.jvm
-lazy val nodePreludeDataJS = nodePreludeData.js
+//lazy val nodePreludeDataJS = nodePreludeData.js
 
 //--------------------- jsEval tools ---------------------//
 lazy val jsEval = crossProject

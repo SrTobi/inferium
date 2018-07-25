@@ -189,9 +189,12 @@ object js {
 
     object UnionType {
         def apply(types: Type*): UnionType = apply(types.toSet)
-        def apply(types: Set[Type]): UnionType = {
+        def apply(types: TraversableOnce[Type]): UnionType = {
             val res = new UnionType
-            res.types = types
+            res.types = types.flatMap {
+                case u: UnionType => u.types
+                case any => Seq(any)
+            }.toSet
             res
         }
     }
