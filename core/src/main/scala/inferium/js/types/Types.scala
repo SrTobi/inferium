@@ -2,6 +2,7 @@ package inferium.js.types
 
 import java.security.Signature
 
+import escalima.ast.MethodKind.constructor
 import inferium.Unifiable
 import inferium.dataflow.calls.SignatureCall
 import inferium.lattice.Heap.SpecialObjects
@@ -41,7 +42,7 @@ object js {
         val Prototype, Paragon = Value
     }
 
-    class Instantiator(locations: Stream[Location], val thisEntity: Entity, val instantiated: mutable.Map[(Type, InstType.Type, Seq[Entity]), ObjectLike]) {
+    class Instantiator(locations: Stream[Location], val thisEntity: Entity, val instantiated: mutable.Map[(Type, InstType.Type, Seq[Entity]), ObjectLike], val makeAbstract: Boolean = true) {
 
         val locs: Iterator[Location] = locations.iterator
 
@@ -114,10 +115,13 @@ object js {
         def intersection(types: Traversable[Type])(rec: Map[CompoundType, Instantiate]): js.Type = {
             var obj: Option[CompoundType] = None
             var selfInst = new Instantiate()
+            var hasAny = false
 
             def flat(tys: Traversable[Type]): Seq[Type] = tys.toSeq flatMap {
                 case NeverType => Seq.empty
-                case AnyType => Seq.empty
+                case AnyType =>
+                    hasAny = true
+                    Seq(AnyType)
                 case inst: Instantiate =>
                     assert(!inst.typeArguments.exists(_.isInstanceOf[GenericType]))
                     if (inst.typeArguments.nonEmpty || inst.target == null)
@@ -127,7 +131,7 @@ object js {
 
                 case ty: AtomarType => Seq(ty)
                 case union: UnionType =>
-                    ???
+                    Seq(union)
                 case intersection: IntersectionType =>
                     flat(intersection.types)
                 case comp: CompoundType =>
@@ -152,6 +156,10 @@ object js {
 
             val atoms = flat(types)
             obj foreach { selfInst.target = _ }
+
+            if (hasAny) {
+                return AnyType
+            }
 
             IntersectionType(atoms ++ obj.toSeq )
         }
@@ -267,6 +275,46 @@ object js {
 
         override def matches(arg: Entity): Boolean = true
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity = probe
+
+        def bound: Type = {
+            val readProps = probe._reads.map {
+                case (name, ty) => name -> Property(name, ty)
+            }.toMap
+
+            val writeProps = probe._writes.map {
+                case (name, ty) => name -> Property(name, ty, optional = true)
+            }.toMap
+
+            val properties = Utils.mergeMaps(readProps, writeProps) {
+                case (rp, wp) => Property(rp.name, UnionType(rp.ty, wp.ty))
+            }
+
+            val signature = probe._calls.map {
+                case (ret, (args, _)) =>
+                    Overload(Seq.empty, args map { Param("_", _, optional = true) }, new ProbeType(ret))
+            }.toSeq
+            val constructor = probe._constructors.map {
+                case (ret, args) =>
+                    Overload(Seq.empty, args map { Param("_", _, optional = true) }, new ProbeType(ret))
+            }.toSeq
+
+
+            val obj = if (readProps.isEmpty && writeProps.isEmpty && properties.isEmpty && signature.isEmpty && constructor.isEmpty) {
+                NeverType
+            } else {
+                val obj = new CompoundType(None, false)
+
+                obj._resolve(Seq.empty, Seq.empty, signature, constructor, properties.values.toSeq)
+                obj
+            }
+
+            val union = UnionType(obj, probe._usedAs)
+            if (union == NeverType) {
+                AnyType
+            } else {
+                union
+            }
+        }
     }
 
 
@@ -308,7 +356,9 @@ object js {
 
             if (set.size == 1)
                 set.head
-            else {
+            else if (set.isEmpty) {
+                NeverType
+            } else {
                 val res = new UnionType
                 res.types = set
                 res
@@ -339,13 +389,15 @@ object js {
         def apply(types: TraversableOnce[Type]): Type = {
             val set = types.flatMap {
                 case NeverType => Seq.empty
-                case u: UnionType => u.types
+                case u: IntersectionType => u.types
                 case any => Seq(any)
             }.toSet
 
             if (set.size == 1)
                 set.head
-            else {
+            else if (set.isEmpty) {
+                NeverType
+            } else  {
                 val res = new IntersectionType
                 res.types = set
                 res
@@ -357,6 +409,8 @@ object js {
 
     sealed trait ClassLike extends Type {
         def isClass: Boolean
+
+        def constructor: Signature
 
         def ownProperties: Map[String, Property]
         def allProperties: Map[String, Property]
@@ -370,6 +424,7 @@ object js {
         var typeArguments: Seq[Type] = _
         var target: CompoundType = _
 
+        override def constructor: Signature = target.constructor
         override def ownProperties: Map[String, Property] = target.ownProperties
         override def allProperties: Map[String, Property] = target.allProperties
         override def instProperties: Map[String, Property] = target.instProperties
@@ -451,13 +506,18 @@ object js {
         }
 
 
-        private def addProperties(obj: ObjectLike, heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Unit = {
+        def addProperties(obj: ObjectLike, heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Unit = {
 
             instProperties foreach {
                 case (name, prop) =>
                     val value = prop.ty.instantiate(heap, instantiator, substitutions)
                     // todo: writable?
-                    heap.setProperty(obj, name, AbstractProperty.defaultWriteToObject(value, prop.optional))
+                    if (instantiator.makeAbstract || obj.isInstanceOf[FunctionEntity]) {
+                        heap.setProperty(obj, name, AbstractProperty.defaultWriteToObject(value, prop.optional))
+                    } else {
+                        val loc = heap.setValue(Location(), value)
+                        heap.setProperty(obj, name, ConcreteProperty.defaultWriteToObject(Set(loc), prop.optional))
+                    }
             }
 
         }
@@ -476,14 +536,14 @@ object js {
 
             val prototypeLoc = instantiator.newLoc()
 
-            val basePrototype = baseClass match {
+            lazy val basePrototype = baseClass match {
                 case Some(base) =>
                     base.instantiatePrototype(heap, instantiator, substitutions)
                 case _ =>
                     heap.specialObject(SpecialObjects.Object)
             }
 
-            val prototype = heap.allocOrdinaryObject(prototypeLoc, basePrototype, makeAbstract = true)
+            val prototype = heap.allocOrdinaryObject(prototypeLoc, basePrototype, makeAbstract = instantiator.makeAbstract)
             instantiator.instantiated += instKey -> prototype
             prototype
         }
@@ -503,7 +563,7 @@ object js {
             val paragonLoc = instantiator.newLoc()
 
             val isFunctionEntity = callable || constructable
-            val prorotype = if (isClass) {
+            lazy val prorotype = if (isClass) {
                 instantiatePrototype(heap, instantiator, substitutions)
             } else if (isFunctionEntity) {
                 heap.specialObject(SpecialObjects.Function)
@@ -511,16 +571,24 @@ object js {
                 heap.specialObject(SpecialObjects.Object)
             }
 
-            val paragon = heap.allocObject(paragonLoc, (loc, ac) => {
-                if (isFunctionEntity) {
-                    val callableInfo = SignatureCall.createCallableInfo(name, signature, constructor)
-                    new SignatureFunctionEntity(loc, callableInfo)
-                } else
-                    OrdinaryObjectEntity(loc)(ac)
-            }, prorotype, makeAbstract = true)
+            val paragon = name match {
+                case Some("Array") =>
+                    heap.allocArray(paragonLoc, makeAbstract = instantiator.makeAbstract)
+                case _ =>
+                    heap.allocObject(paragonLoc, (loc, ac) => {
+                        if (isFunctionEntity) {
+                            val callableInfo = SignatureCall.createCallableInfo(name, signature, constructor)
+                            new SignatureFunctionEntity(loc, callableInfo)
+                        } else
+                            OrdinaryObjectEntity(loc)(ac)
+                    }, prorotype, makeAbstract = instantiator.makeAbstract || isFunctionEntity)
+            }
             instantiator.instantiated += instKey -> paragon
 
-            if (!isClass) {
+            if (name.contains("Array")) {
+                val loc = heap.setValue(Location(), substitutions(typeParameter.head))
+                heap.writeToProperties(paragon, loc, numbersOnly = true, AnyEntity)
+            } else if (!isClass) {
                 addProperties(paragon, heap, instantiator, substitutions)
             }
 
@@ -618,6 +686,10 @@ object js {
             overload.returnType = returnType
             overload
         }
+
+        def union(other: Property, rec: Map[CompoundType, Instantiate]): Overload = {
+            ???
+        }
     }
 
     class Param(val name: String, val optional: Boolean) {
@@ -685,6 +757,8 @@ object js {
                     val ths = info.thisProbe
                     val thisHasWrites = ths._writes.nonEmpty
 
+                    lazy val prototype = from(heap.getProperty(obj, "prototype").abstractify(heap).value, heap)
+
                     val parameter = info.argumentProbe._reads.flatMap {
                         case (name, prop) if Try(name.toInt).isSuccess =>
                             Seq(name.toInt -> prop)
@@ -697,7 +771,7 @@ object js {
                     def overl(r: Type) = Seq(Overload(Seq.empty, parameter, r))
 
                     if (returnType == UndefinedType && thisHasWrites) {
-                        (Seq.empty, overl(new ProbeType(ths)))
+                        (Seq.empty, overl(IntersectionType(new ProbeType(ths), prototype)))
                     } else {
                         (overl(returnType), Seq.empty)
                     }
@@ -882,120 +956,8 @@ object js {
             }
 
             val global = getType(prelude("globalType"))
-            val modules = prelude("ambientModules").arr map { module => module("name").str -> getType(module("type")).asInstanceOf[CompoundType] }
+            val modules = prelude("ambientModules").arr map { module => module("name").str -> getType(module("type")) } collect { case (name, c: CompoundType) => name -> c }
             Prelude(global.asInstanceOf[CompoundType], modules.toMap)
         }
     }
-
-
-
-    private class Printer {
-
-        private var _nextId = 0
-        private def nextId(): Int = {
-            _nextId += 1
-            return _nextId
-        }
-        private val builder = new StringBuilder()
-
-        private def addLine(line: String): Unit = {
-            builder.append(line)
-            builder.append("\n")
-        }
-
-        private class Writer(val builder: mutable.StringBuilder = new mutable.StringBuilder(), val indent: Int = 0) {
-            def print(line: String): Unit = {
-                for (i <- 0 until indent)
-                    builder.append(" ")
-                builder.append(line)
-                print()
-            }
-            def print(): Unit = builder.append("\n")
-
-            def indent(i: Int): Writer = new Writer(builder, i)
-            def end(): Unit = Printer.this.builder.append(builder)
-        }
-
-        private val interfaceNames = mutable.Map.empty[CompoundType, String]
-        def getName(c: CompoundType): String = interfaceNames.getOrElseUpdate(c, "I" + nextId())
-        private val printedInterfaces = mutable.Set.empty[CompoundType]
-
-        def printParam(arg: Param): String = arg.name + (if (arg.optional) "?" else "") + ": " + printInline(arg.ty)
-
-        def printGlobal(compoundType: CompoundType): Unit = {
-            if (printedInterfaces(compoundType)) {
-                return
-            }
-            printedInterfaces += compoundType
-
-            val writer = new Writer
-            writer.print("interface " + getName(compoundType) + " {")
-
-            val innerWriter = writer.indent(2)
-
-            compoundType.signature foreach {
-                o =>
-                    innerWriter.print(o.params.map(printParam).mkString("(", ", ", ")") + ": " + printInline(o.returnType))
-            }
-
-            compoundType.constructor foreach {
-                o =>
-                    innerWriter.print(o.params.map(printParam).mkString("new (", ", ", ")") + ": " + printInline(o.returnType))
-            }
-
-            compoundType.allProperties foreach {
-                case (name, prop) =>
-                    val readonly = if (prop.readonly) "readonly " else ""
-                    val optional = if (prop.optional) "?" else ""
-                    innerWriter.print(readonly + name + optional + ": " + printInline(prop.ty))
-            }
-
-            writer.print("}")
-            writer.end()
-        }
-
-
-        def printInline(ty: Type) : String = {
-            ty match {
-                case NeverType => "never"
-                case UndefinedType => "undefined"
-                case NullType => "null"
-                case NumberType => "number"
-                case StringType => "string"
-                case ObjectType => "object"
-                case ThisType => "this"
-                case BooleanType => "boolean"
-                case TrueType => "true"
-                case FalseType => "false"
-                case AnyType => "any"
-                case LiteralType(value) => '"' + value + '"'
-                case tuple: TupleType => tuple.members.map(printInline).mkString("[", ", ", "]")
-                case union: UnionType => union.types.iterator.map(printInline).mkString("(", " | ", ")")
-                case intersection: IntersectionType => intersection.types.iterator.map(printInline).mkString("(", " & ", ")")
-                case inst: Instantiate =>
-                    if (inst.typeArguments.isEmpty) {
-                        printInline(inst.target)
-                    } else {
-                        inst.target.name.get + inst.typeArguments.map(printInline).mkString("<", ", ", ">")
-                    }
-                case obj: CompoundType =>
-                    if (obj.constructor.isEmpty && obj.signature.isEmpty && obj.allProperties.isEmpty) {
-                        "{}"
-                    } else {
-                        printGlobal(obj)
-                        getName(obj)
-                    }
-
-                case _: GenericType => "generic"
-                case p: ProbeType => "probe" + p.hashCode()
-            }
-        }
-
-        def print(ty: Type): String = {
-            val res = "\n=> " + printInline(ty)
-            builder.toString() + res
-        }
-    }
-
-    def print(ty: Type): String = new Printer().print(ty)
 }

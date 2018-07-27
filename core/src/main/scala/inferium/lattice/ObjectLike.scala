@@ -124,7 +124,7 @@ case object AnyEntity extends ObjectLike {
 
     override def coerceToCallables(heap: Heap.Mutator, fail: () => Unit): Seq[FunctionEntity] = {
         // todo: return a function that takes any and returns any
-        ???
+        Seq.empty
     }
 }
 

@@ -105,7 +105,15 @@ function getDependencies(path: string, found: Set<string>) {
     Object.keys(deps)
         .filter((key) => !/^@types\//.test(key))
         .forEach(dep => {
-            const deppath = require.resolve(dep, {paths: [pkgpath]})
+            try {
+                var deppath = require.resolve(dep, {paths: [pkgpath]})
+            } catch (e) {
+                console.log(`=> Couldn't find ${dep}! Skip!`)
+                return
+            }
+            if (!deppath.startsWith("/")) {
+                return
+            }
             getDependencies(findPackageRoot(dep, deppath), found)
         })
 }
@@ -122,8 +130,12 @@ async function main(pkgname: string) {
     async function installType(path: string) {
         const pkg = basename(path)
         console.log("Install types for", pkg)
-        const res = await shell(`npm install "@types/${pkg}" --prefix "${dir}"`)
-        if (res.failed) {
+        try {
+            const res = await shell(`npm install "@types/${pkg}" --prefix "${dir}"`)
+            if (res.failed) {
+                console.log("=> not found")
+            }
+        } catch (e) {
             console.log("=> not found")
         }
     }
@@ -224,7 +236,7 @@ async function main(pkgname: string) {
     
     console.log("Done.\n")
 
-    const resultPath = join(orgcwd, "result.json")
+    const resultPath = join(dir, "result.json")
     console.log("Write result to", here(resultPath))
     fs.writeFileSync(resultPath, JSON.stringify(predef))
     console.log("Done.")
@@ -380,10 +392,6 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, imports: st
 
     function resolveType(type: ts.Type): TypeInfo {
         const id = idof(type)
-
-        if (id == 84) {
-            debugger
-        }
 
         if (type.aliasSymbol) {
             const sym = type.aliasSymbol
@@ -663,10 +671,5 @@ function createPredefTypes(program: ts.Program, gatherFile: ts.Node, imports: st
 
 main(process.argv[2]).catch(err => {
     console.error("Error:", err)
+    process.exit(1)
 })
-
-export namespace ns {
-	export function test() {
-		
-	}
-}

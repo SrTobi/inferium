@@ -64,21 +64,31 @@ trait HeapImmutables {
     }
 
     protected def mergeAbsProperties(p1: AbstractProperties, p2: AbstractProperties): AbstractProperties = {
-        if (p1 eq p2)
+        if (p1 == null)
+            p2
+        else if (p2 == null)
+            p1
+        else if (p1 eq p2)
             p1
         else
             Utils.mergeMapsWithMapper(p1, p2)(a => a.withAbsent)({ _ unify _ })
     }
 
     protected def mergeConcreteProperties(p1: ConcreteProperties, p2: ConcreteProperties): ConcreteProperties = {
-        if (p1 eq p2)
+        if (p1 == null)
+            p2
+        else if (p2 == null)
+            p1
+        else if (p1 eq p2)
             p1
         else
             Utils.mergeMapsWithMapper(p1, p2)(a => a.withAbsent)({ _ unify _ })
     }
 
     protected def mergeAbsDesc(d1: AbstractDesc, d2: AbstractDesc): AbstractDesc = {
-        if (d2 == null)
+        if (d1 == null)
+            d2
+        else if (d2 == null)
             d1
         else if (d1 eq d2)
             d1
@@ -87,7 +97,11 @@ trait HeapImmutables {
     }
 
     protected def mergeConcreteDesc(d1: ConcreteDesc, d2: ConcreteDesc): ConcreteDesc = {
-        if (d1 eq d2)
+        if (d1 == null)
+            d2
+        else if (d2 == null)
+            d1
+        else if (d1 eq d2)
             d1
         else
             (d1._1 unify d2._1, mergeConcreteProperties(d1._2, d2._2))
@@ -138,6 +152,8 @@ trait HeapImmutables {
         val newAbstractDesc = abstractifyConcreteDesc(concreteDesc, accessor)
         assert(newAbstractDesc != null || wasAbstractified(oldAbstractCount))
         val finalAbstractDesc = if (!wasAbstractified(oldAbstractCount)) newAbstractDesc else mergeAbsDesc(abstractDesc, newAbstractDesc)
+        assert(finalAbstractDesc._1.dynamicProp.value.isNormalized)
+        assert(finalAbstractDesc._2.forall(_._2.value.isNormalized))
         Obj(finalAbstractDesc, initialConcreteDesc, abstractCount)
     }
 
@@ -161,13 +177,14 @@ trait HeapImmutables {
                     newObj.abstractCount
                 case None =>
                     if (makeAbstract) {
-
+                        val abstractCount = 1000
+                        setObject(location, Obj(initialAbstractDesc, null, abstractCount))
+                        -1
                     } else {
-                        
+                        val abstractCount = 1
+                        setObject(location, Obj(null, initialConcreteDesc, abstractCount))
+                        abstractCount
                     }
-                    val abstractCount = if (makeAbstract) 1000 else 1
-                    setObject(location, Obj(initialAbstractDesc, initialConcreteDesc, abstractCount))
-                    if (makeAbstract) -1 else abstractCount
             }
             creator(location, ac)
         }
@@ -193,7 +210,7 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc, concreteDesc, abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
                         throw new UnsupportedOperationException("can't set concrete property to abstract obj")
@@ -219,9 +236,10 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc, concreteDesc, abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
+                        val (abstractFields, abstractProps) = abstractDesc
                         val newProperties = abstractProps + (propertyName -> property)
                         setObject(obj.loc, Obj((abstractFields, newProperties), concreteDesc, abstractCount))
                     } else {
@@ -247,8 +265,9 @@ trait HeapImmutables {
                     (config.dynamicWriteAffectsOnlyEnumerable ==> p.enumerable.mightBeTrue)
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc, concreteDesc, abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
+                        val (abstractFields, abstractProps) = abstractDesc
                         val oldDyn = abstractFields.dynamicProp
                         val newDyn = oldDyn.addValue(resolvedValue)
                         var props = abstractProps
@@ -299,8 +318,9 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
+                case Some(desc@Obj(abstractDesc, concreteDesc, abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
+                        val (abstractFields, abstractProps) = abstractDesc
                         val newProp = abstractProps.get(propertyName) match {
                             case Some(prop) =>
                                 prop.copy(value = prop.value | resolvedValue)

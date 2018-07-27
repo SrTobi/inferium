@@ -1,0 +1,8 @@
+#!/bin/sh
+
+set -e
+rm -r /tmp/inferium
+npm run build --prefix extras/ts-reader
+node ./extras/ts-reader $1
+
+sbt "cli/run /tmp/inferium/node_modules/$1 /tmp/inferium/result.json"

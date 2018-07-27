@@ -75,6 +75,11 @@ trait Calling extends Async[Unit] with Failing {
                 }
                 ret(returnProbe, stateBeforeCall.heap, dataFlowAnalysis)
         }
+
+        if (callables.isEmpty) {
+            // just return any
+            ret(AnyEntity, stateBeforeCall.heap, dataFlowAnalysis)
+        }
     }
 
     def coerceCallables(func: Entity, mutator: Heap.Mutator, failState: => ExecutionState)(implicit dataFlowAnalysis: DataFlowAnalysis): Seq[Callable] = {

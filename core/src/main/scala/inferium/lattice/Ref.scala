@@ -42,7 +42,7 @@ case class Ref(base: Entity, property: String, target: Set[ValueLocation]) exten
     //@blockRec(nonrec = true)
     //override def withAssertion(cond: Entity => Boolean, heap: Heap.Mutator): Ref = ???
 
-    @blockRec(nonrec = true)
+    @blockRec((NeverValue, false, Assertion.noEffect(NeverValue)))
     protected[lattice] override def gatherAssertionEffects(assertion: Assertion, heap: Heap.Mutator): (Entity, Boolean, Assertion.Effect) = {
 
         //def filterBase(obj: Entity): Boolean = true

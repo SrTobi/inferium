@@ -1,5 +1,6 @@
 package inferium.dataflow
 
+import inferium.dataflow.NodeModuleAnalysis.ModuleSource
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.Node.StateOrigin
 import inferium.js.types.js
@@ -10,14 +11,12 @@ import inferium.typescript.IniEntity
 
 import scala.collection.mutable
 
-class NodeModuleAnalysis(initialModuleCode: Analysable,
-                         val globalObject: ObjectLike,
-                         val typedModules: Map[String, ObjectLike],
-                         val instantiator: Instantiator,
+class NodeModuleAnalysis(val source: ModuleSource,
                          val debugAdapter: DebugAdapter = DebugAdapter.Empty) {
 
+    private def globalObject = source.globalObject
 
-    private class CodeAnalysis(analysable: Analysable) extends DataFlowAnalysis(debugAdapter) {
+    private class CodeAnalysis(analysable: Analysable, module: Option[Module]) extends DataFlowAnalysis(debugAdapter) {
         private implicit def useThisAsAnalysis: DataFlowAnalysis = this
         private val initialStateOrigin = StateOrigin()
 
@@ -43,15 +42,32 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
             Option(analysable.end.inState)
         }
 
-        override def instantiator: Instantiator = NodeModuleAnalysis.this.instantiator
+        override def instantiator: Instantiator = source.instantiator
 
-        override def requireModule(name: String): Option[ObjectLike] = typedModules.get('"' + name + '"')
+        override def requireModule(name: String, heap: Heap): Option[(Entity, Heap)] = {
+            source.typedModules.get('"' + name + '"') map { (_, heap) } orElse[(Entity, Heap)] {
+                module.flatMap {
+                    m =>
+                        source.requireFind(m.path, name)
+
+                } flatMap {
+                    path =>
+                        source.require(path) flatMap  {
+                            code =>
+                                getModule(code, path, heap) map {
+                                    case (foundModule, resultHeap) =>
+                                        (foundModule.exportObject getOrElse { throw new Exception("Can not analyze recursive module!")}, resultHeap)
+                                }
+                        }
+                }
+            }
+        }
     }
 
     private class FunctionAnalyser(val info: CallableInfo) {
         assert(info.yieldsGraph)
         private val location = Location()
-        private val analysis = new CodeAnalysis(info.asAnalysable)
+        private val analysis = new CodeAnalysis(info.asAnalysable, None)
         private var lexicalFrame: LexicalFrame = _
 
         def addLexicalFrame(lexicalFrame: LexicalFrame): Unit = {
@@ -101,22 +117,30 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
                          val path: String,
                          val moduleCtx: ObjectLike,
                          val moduleObj: ObjectLike,
-                         val exportsObj: ObjectLike) {
+                         val initialExportObj: ObjectLike) {
+        var exportObject: Option[Entity] = None
+
         def load(heap: Heap): Option[Heap] = {
-            val analysis = new CodeAnalysis(code)
+            val analysis = new CodeAnalysis(code, Some(this))
 
             val state = ExecutionState(UndefinedValue :: Nil, heap, globalObject, moduleCtx :: LexicalFrame(globalObject, None))
             val resultState = analysis.run(state)
-            resultState map { _.heap }
+            resultState map {
+                state =>
+                    assert(exportObject.isEmpty)
+                    val accessor = state.heap.begin(Location())
+                    exportObject = Some(accessor.getProperty(moduleObj, "exports").abstractify(accessor).value)
+                    state.heap
+            }
         }
     }
 
     private val modules = mutable.Map.empty[String, Module]
 
-    private def getModule(code: Analysable, path: String, initialHeap: Heap): (Module, Heap) = {
+    private def getModule(code: => Analysable, path: String, initialHeap: Heap): Option[(Module, Heap)] = {
         modules.get(path) match {
             case Some(module) =>
-                (module, initialHeap)
+                Some(module -> initialHeap)
             case None =>
                 val mutator = initialHeap.begin(Location())
 
@@ -137,9 +161,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
                 val module = new Module(code, path, moduleCtx, moduleObj, exportsObj)
                 modules += path -> module
 
-                val resultHeap = module.load(heapAfterSetup) getOrElse { throw new IllegalStateException("The main module couldn't be executed")}
-
-                (module, resultHeap)
+                module.load(heapAfterSetup) map (module -> _)
 
         }
     }
@@ -149,18 +171,23 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
     private var analyzingList = mutable.ListBuffer.empty[FunctionAnalyser]
 
     def runAnalysis(heap: Heap): js.Type = {
-        val (mainModule, heapAfter) = getModule(initialModuleCode, "/main", heap)
+        val mainPath = source.initialPath
+        val mainCode = source.require(mainPath) getOrElse { throw new Exception(s"Can not find main module '$mainPath'") }
+        val (mainModule, heapAfter) = getModule(mainCode, mainPath, heap).getOrElse(throw new Exception("Failed to analyze main module!"))
 
         userState = heapAfter.createGlobalHeap()
 
-        val exports = userState.accessor.getProperty(mainModule.moduleObj, "exports").abstractify(userState.accessor).value
+        val exports = mainModule.exportObject.get
         val inspector = new Inspector
         inspector.inspectObject(globalObject)
         inspector.inspectEntity(exports)
 
-        while (analyseFunctions()) {
+        var i = 0
+        do {
             // just wait till the user state is stable
-        }
+            println(s"Round $i")
+            i += 1
+        } while (analyseFunctions())
 
         val acc = userState.accessor//.begin(Location()) //.accessor
         js.from(exports, acc)
@@ -190,7 +217,8 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
         private val foundObjects = mutable.Set.empty[ObjectLike]
 
         def inspectEntity(entity: Entity): Unit = {
-            entity.normalized(accessor) match {
+            assert(entity.isNormalized)
+            entity match {
                 case union: UnionValue =>
                     union.entities foreach { inspectEntity }
 
@@ -252,5 +280,17 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
 }
 
 object NodeModuleAnalysis {
+
+    trait ModuleSource {
+        def initialPath: String
+        def instantiator: Instantiator
+        def globalObject: ObjectLike
+        def typedModules: Map[String, ObjectLike]
+
+        def requireFind(path: String, searched: String): Option[String]
+        def require(path: String): Option[Analysable]
+    }
+
+
     val defaultModuleEnv: Map[String, String] = Seq("exports", "module", "require").map(n => n -> n).toMap
 }

@@ -94,7 +94,10 @@ lazy val cli = project
     .dependsOn(coreJVM)
     .settings(commonSettings)
     .settings(
-        fork in Test := true
+        fork in run := true,
+        fork in Test := true,
+        mainClass in (Compile, run) := Some("inferium.CliMain"),
+        mainClass in (Compile, packageBin) := Some("inferium.CliMain")
     )
 
 

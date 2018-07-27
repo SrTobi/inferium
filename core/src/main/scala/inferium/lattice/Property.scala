@@ -70,6 +70,7 @@ sealed case class AbstractProperty(configurable: GeneralBoolLattice,
                                    getter: Entity,
                                    setter: Entity,
                                    mightBeAbsent: Boolean) extends Property  {
+    assert(value.isNormalized)
     def unify(other: AbstractProperty): AbstractProperty =
         AbstractProperty(
             this.configurable.unify(other.configurable),

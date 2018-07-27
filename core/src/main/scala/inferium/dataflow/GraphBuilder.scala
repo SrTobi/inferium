@@ -1,11 +1,11 @@
 package inferium.dataflow
 import escalima.ast
 import escalima.ast.UnaryOperator._
-import escalima.ast.{BinaryOperator, SpreadElement, SpreadableExpression}
+import escalima.ast.{AssignmentOperator, BinaryOperator, SpreadElement, SpreadableExpression}
 import inferium.Config.ConfigKey
 import inferium.dataflow.calls.{CallInstance, InlinedCallInstance}
 import inferium.dataflow.graph.MergeNode.MergeType
-import inferium.dataflow.graph._
+import inferium.dataflow.graph.{BinaryOperatorNode, _}
 import inferium.dataflow.graph.visitors.StackAnnotationVisitor
 import inferium.lattice._
 
@@ -330,6 +330,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     case _: ast.NullLiteral =>
                         buildLiteral(NullValue)
 
+                    case ast.RegExpLiteral(_) =>
+                        buildLiteral(AnyEntity)
+
                     case ast.Identifier("undefined") =>
                         buildLiteral(UndefinedValue)
 
@@ -345,8 +348,39 @@ class GraphBuilder(config: GraphBuilder.Config) {
                     case memberExpr: ast.MemberExpression =>
                         buildMemberAccess(memberExpr, priority, env)
 
-                    case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
+                    case ast.AssignmentExpression(AssignmentOperator.`=`, left: ast.Pattern, right) =>
                         buildAssignment(left, Some(right), priority, env, pushWrittenValueToStack = true)
+
+                    case ast.AssignmentExpression(op, left: ast.Pattern, right) =>
+                        import ast.{AssignmentOperator => astOp}
+                        import graph.{BinaryOperatorNode => nodeOp}
+
+                        val nop = op match {
+                            case astOp.`=` => throw new AssertionError("already handled")
+                            case astOp.`+=` => nodeOp.`+`
+                            case astOp.`-=` => nodeOp.`-`
+                            case astOp.`*=` => nodeOp.`*`
+                            case astOp.`/=` => nodeOp.`/`
+                            case astOp.`%=` => nodeOp.`%`
+                            case astOp.`<<=` => nodeOp.`<<`
+                            case astOp.`>>=` => nodeOp.`>>`
+                            case astOp.`>>>=` => nodeOp.`>>>`
+                            case astOp.`|=` => nodeOp.`|`
+                            case astOp.`^=` => nodeOp.`^`
+                            case astOp.`&=` => nodeOp.`&`
+                            case astOp.`**=` => nodeOp.`**`
+                        }
+
+                        val rightGraph = buildExpression(right)
+
+                        left match {
+                            case ast.MemberExpression(obj: ast.Expression, property, computed) =>
+                                val objGraph = buildExpression(obj)
+                                buildPropertyOpReadWrite(nop, property, computed, objGraph, rightGraph, priority, env)
+
+                            case ast.Identifier(name) =>
+                                new LexicalReadNode(name) ~> rightGraph ~> new BinaryOperatorNode(nop) ~> new LexicalWriteNode(name)
+                        }
 
                     case ast.ArrayExpression(elements) =>
                         val (elementsGraph, spreaded) = elements.map {
@@ -517,7 +551,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         operandGraph ~> new graph.PopNode ~> new graph.LiteralNode(UndefinedValue)
 
                     case ast.UnaryExpression(ast.UnaryOperator.delete, _, operand) =>
-                        ???
+                        EmptyGraph
 
                     case ast.UnaryExpression(unOp, _, operand) =>
                         import ast.{UnaryOperator => astOp}
@@ -535,6 +569,15 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         }
 
                         operandGraph ~> new graph.UnaryOperatorNode(op)
+
+                    case ast.UpdateExpression(op, argument, _) =>
+                        import ast.{UpdateOperator => unOp}
+                        import ast.{AssignmentOperator => binOp}
+                        val aop = op match {
+                            case unOp.`--` => binOp.`-=`
+                            case unOp.`++` => binOp.`+=`
+                        }
+                        buildExpression(ast.AssignmentExpression(aop, argument, ast.NumberLiteral("1", None), None))
                 }
             }
 
@@ -613,6 +656,27 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         assert(computed)
                         val propertyGraph = buildExpression(expr, priority, lexicalEnv)
                         propertyGraph ~> valueGraph ~> new PropertyDynamicWriteNode
+
+                }
+            }
+
+            private def buildPropertyOpReadWrite(op: BinaryOperatorNode.BinaryOperation, property: ast.Expression, computed: Boolean, objGraph: Graph, valueGraph: Graph, priority: Int, lexicalEnv: LexicalEnv): Graph = {
+                implicit val info: Node.Info = makeBlockInfo(priority, lexicalEnv)
+                def makeNonDynGraph(propertyName: String) = {
+                    objGraph ~> new DupNode(1) ~> new PropertyReadNode(propertyName) ~> valueGraph ~> new BinaryOperatorNode(op) ~> new PropertyWriteNode(propertyName)
+                }
+
+                property match {
+                    case ConstantProperty(propertyName) =>
+                        makeNonDynGraph(propertyName)
+
+                    case ast.Identifier(propertyName) if !computed =>
+                        makeNonDynGraph(propertyName)
+
+                    case expr =>
+                        assert(computed)
+                        val propertyGraph = buildExpression(expr, priority, lexicalEnv)
+                        objGraph ~> propertyGraph ~> new Dup2Node ~> new PropertyDynamicReadNode ~> valueGraph ~> new BinaryOperatorNode(op) ~> new PropertyDynamicWriteNode
 
                 }
             }
@@ -774,13 +838,14 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                                 val catchEnv = newInnerBlockEnv()
                                 val expBindingGraph = buildPatternBinding(pattern, priority + 1, catchEnv, pushWrittenValueToStack = false)
+                                val ansGraph: Graph = if (isTopLevel) new LiteralNode(UndefinedValue)(info.copy(priority = priority + 1, lexicalEnv = catchEnv)) else EmptyGraph
                                 val catchBlock = innerBlock.inner(finalizer = finallyBuilder)
                                 val catchGraph = buildInnerBlock(catchBlock, catchBody.body, priority + 1, catchEnv)
 
                                 val afterMerger = new graph.MergeNode
                                 // we need the jump or we wont find the catch branch with visitors
                                 val jmpInfo = info.copy(priority = info.priority + 2)
-                                tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> expBindingGraph ~> catchGraph ~> afterMerger
+                                tryGraph ~> new graph.JumpNode(afterMerger)(jmpInfo) ~> catchMerger ~> expBindingGraph ~> ansGraph ~> catchGraph ~> afterMerger
 
                             case None =>
                                 buildInnerBlock(innerBlock.inner(finalizer = finallyBuilder), tryBody.body, priority + 1, newInnerBlockEnv())

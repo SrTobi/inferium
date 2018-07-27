@@ -2,6 +2,7 @@ package inferium.lattice
 
 import inferium.Unifiable
 import inferium.dataflow.CallableInfo
+import inferium.lattice.Heap.SpecialObjects
 import inferium.lattice.assertions.{Assertion, Falsyfied, Propertyfied, Truthyfied}
 import inferium.utils.macros.blockRec
 
@@ -25,7 +26,7 @@ sealed abstract class Primitive extends Entity {
     @blockRec(nonrec = true)
     override def asProbes(heap: Heap.Mutator): Seq[ProbeEntity] = Seq.empty
 
-    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = ???
+    override def coerceToObjects(heap: Heap.Mutator): Seq[ObjectLike] = Seq(heap.specialObject(SpecialObjects.Object))
 
     override def coerceToConstructionObject(heap: Heap.Mutator, constructionObject: ObjectLike): Seq[ObjectLike] = Seq(constructionObject)
 

@@ -3,6 +3,7 @@ package inferium.dataflow.graph
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
 import inferium.dataflow.graph.UnaryOperatorNode.UnaryOperation
 import inferium.dataflow.graph.traits.TransformerNode
+import inferium.js.types.js
 import inferium.lattice._
 
 class UnaryOperatorNode(val op: UnaryOperation)(implicit _info: Node.Info) extends TransformerNode()(_info) {
@@ -28,9 +29,12 @@ object UnaryOperatorNode {
 
     class NumericOperator(op: Long => Long, name: String) extends UnaryOperation {
         //noinspection VariablePatternShadow
-        override def apply(operand: Entity, mutator: Heap.Mutator): NumberValue = operand match {
-            case SpecificNumberValue(operand) => SpecificNumberValue(op(operand))
-            case _ => NumberValue
+        override def apply(operand: Entity, mutator: Heap.Mutator): NumberValue = {
+            operand.asProbes(mutator).foreach { _.usedAs(js.NumberType) }
+            operand match {
+                case SpecificNumberValue(operand) => SpecificNumberValue(op(operand))
+                case _ => NumberValue
+            }
         }
         override def toString: String = name
     }
@@ -43,6 +47,7 @@ object UnaryOperatorNode {
     object `!` extends UnaryOperation {
         //noinspection VariablePatternShadow
         override def apply(operand: Entity, mutator: Heap.Mutator): Entity = {
+            operand.asProbes(mutator).foreach { _.usedAs(js.BooleanType) }
             BoolValue(operand.asBoolLattice(mutator).negate)
         }
         override def toString: String = "!"

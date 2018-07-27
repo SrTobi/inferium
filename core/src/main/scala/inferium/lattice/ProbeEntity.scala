@@ -1,5 +1,6 @@
 package inferium.lattice
 import inferium.js.types.js
+import inferium.js.types.js.NeverType
 import inferium.lattice.assertions.Assertion
 import inferium.lattice.assertions.Assertion.Effect
 import inferium.typescript.IniEntity
@@ -11,12 +12,13 @@ class ProbeEntity extends Entity with Callable {
     val _writes = mutable.Map.empty[String, js.Type]
     val _reads = mutable.Map.empty[String, js.Type]
 
-    private var _dynReads: js.Type = js.NeverType
-    private var _numberReads: js.Type = js.NeverType
-    private var _dynWrites: js.Type = js.NeverType
-    private var _numberWrites: js.Type = js.NeverType
+    var _dynReads: js.Type = js.NeverType
+    var _numberReads: js.Type = js.NeverType
+    var _dynWrites: js.Type = js.NeverType
+    var _numberWrites: js.Type = js.NeverType
     val _calls = mutable.Map.empty[ProbeEntity, (Seq[js.Type], js.Type)]
-    private val _constructors = mutable.Map.empty[ProbeEntity, Seq[js.Type]]
+    val _constructors = mutable.Map.empty[ProbeEntity, Seq[js.Type]]
+    var _usedAs: js.Type = NeverType
 
     /*def entities: Iterator[Entity] = {
         _reads.values.iterator.flatMap(_.iterator) ++
@@ -33,6 +35,9 @@ class ProbeEntity extends Entity with Callable {
             }
     }*/
 
+    def usedAs(ty: js.Type): Unit = {
+        _usedAs = _usedAs intersectWith ty
+    }
 
     def read(property: String, probe: ProbeEntity): Unit = {
         _reads += property -> (_reads.getOrElseUpdate(property, js.NeverType) intersectWith new js.ProbeType(probe))

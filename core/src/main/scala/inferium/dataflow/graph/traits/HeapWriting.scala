@@ -28,10 +28,11 @@ trait HeapWriting extends Node {
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
         var assignmentLocation = writeMutator.setValue(valueLocation, value)
         lazy val iniValue = js.from(value, writeMutator)
+        lazy val normalizedValue = value.normalized(writeMutator)
 
         def dynWritesToObject(onlyNumbers: Boolean): Unit = {
             for (obj <- objs) {
-                dynWrite(target, obj, assignmentLocation, value, onlyNumbers, writeMutator)
+                dynWrite(target, obj, assignmentLocation, normalizedValue, onlyNumbers, writeMutator)
             }
         }
         val result = properties match {
@@ -53,7 +54,7 @@ trait HeapWriting extends Node {
                 lazy val isCertainWrite = objs.tail.isEmpty && propertyNames.size == 1
                 var valueLocationWasWritten = false
                 for (obj <- objs; propertyName <- propertyNames) {
-                    val res = write(target, obj, propertyName, assignmentLocation, value, isCertainWrite, writeMutator)
+                    val res = write(target, obj, propertyName, assignmentLocation, normalizedValue, isCertainWrite, writeMutator)
                     if (res) {
                         valueLocationWasWritten = true
                     }

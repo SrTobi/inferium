@@ -9,12 +9,19 @@ object NodeBuiltins {
     val require: NativeCallableInfo = NativeCall.createSimpleCallableInfo("require",
         (heap: Heap, thisEntity: Entity, args: Seq[Entity], rest: Entity, analysis: DataFlowAnalysis) => {
             val arg = args.headOption getOrElse rest
-            val mutator = heap.begin(Location())
-            val result = arg.asStringLattice(mutator) match {
+            var moduleNames = arg.asStringLattice(heap.begin(Location()))
+            var h = heap
+            val result = moduleNames match {
                 case SpecificStrings(strings) if strings.nonEmpty =>
-                    Entity.unify(strings.iterator map { analysis.requireModule(_).getOrElse(AnyEntity) })
+                    Entity.unify(strings.toSeq map {
+                        moduleName =>
+                            val (module, newHeap) = analysis.requireModule(moduleName, h).getOrElse(AnyEntity -> h)
+                            h = newHeap
+                            module
+                    })
+
                 case _ => AnyEntity
             }
-            (heap.end(mutator), result)
+            (h, result)
         })
 }

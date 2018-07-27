@@ -45,7 +45,7 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
 
                 if(merger.isCatchMerger) {
                     assert(preds.count(!_.catchTarget.contains(merger)) == 1)
-                    "exception" :: undefined :: Nil
+                    "exception" :: Nil
                 } else {
                     val stackIsEmpty = predStack.isEmpty
                     if (stackIsEmpty) {
@@ -117,6 +117,10 @@ class StackAnnotationVisitor(isFunction: Boolean) extends Node.AllVisitor {
             case node: graph.DupNode =>
                 val top :: _ = stack
                 List.fill(node.times)(top) ++ stack
+
+            case node: graph.Dup2Node =>
+                val fst :: snd :: rest = stack
+                fst :: snd :: fst :: snd :: rest
 
             case node: graph.AllocateFunctionNode =>
                 s"func(${node.name})" :: stack
