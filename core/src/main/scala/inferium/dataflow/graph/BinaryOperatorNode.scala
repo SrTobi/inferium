@@ -73,7 +73,7 @@ object BinaryOperatorNode {
             case (SpecificNumberValue(left), SpecificStringValue(right)) => SpecificStringValue(left + right)
             case (SpecificNumberValue(left), SpecificStringValue(right)) => SpecificStringValue(left + right)
             case (SpecificStringValue(left), SpecificStringValue(right)) => SpecificStringValue(left + right)
-            case _ => StringValue
+            case _ => UnionValue(StringValue, NumberValue)
         }
 
         override def toString: String = "+"

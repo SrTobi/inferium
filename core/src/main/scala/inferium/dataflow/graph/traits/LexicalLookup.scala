@@ -3,7 +3,7 @@ package inferium.dataflow.graph.traits
 import inferium.dataflow.{ExecutionState, LexicalEnv}
 import inferium.dataflow.LexicalEnv.{LookupItem, LookupType}
 import inferium.dataflow.graph.Node
-import inferium.lattice.{Entity, ObjectLike}
+import inferium.lattice.{Entity, Location, ObjectLike}
 
 trait LexicalLookup extends Node{
 
@@ -24,6 +24,7 @@ trait LexicalLookup extends Node{
                 // lookup in global object
                 val obj = lexObjs(objIdx)
                 Some((obj, property, state))
+
         }.head
     }
 

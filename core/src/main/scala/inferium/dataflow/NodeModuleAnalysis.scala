@@ -2,6 +2,7 @@ package inferium.dataflow
 
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.Node.StateOrigin
+import inferium.js.types.js
 import inferium.js.types.js.Instantiator
 import inferium.lattice.{Entity, Heap, UnionValue, _}
 import inferium.prelude.NodeBuiltins
@@ -69,10 +70,11 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
             println("Analyse " + info.name)
 
             val heap = userState.toHeap(location)
-            val state = ExecutionState(info.argumentProbe :: Nil, heap, globalObject, lexicalFrame)
+            val state = ExecutionState(info.argumentProbe :: Nil, heap, info.thisProbe, lexicalFrame)
             analysis.run(state) match {
                 case Some(ExecutionState(resultStack, resultHeap, _, _)) =>
-                    val returnValue :: Nil = resultStack
+                    val unnormalizedReturnValue :: Nil = resultStack
+                    val returnValue = unnormalizedReturnValue.normalized(resultHeap.begin(Location()))
 
                     val unifiedReturnValue = info.returnValue unify returnValue
                     val returnValueChanged = unifiedReturnValue != info.returnValue
@@ -84,6 +86,7 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
                     val inspector = new Inspector
                     inspector.inspectEntity(unifiedReturnValue)
                     inspector.inspectObject(globalObject)
+                    inspector.inspectProbe(info.thisProbe)
                     inspector.inspectProbe(info.argumentProbe)
 
                     changed
@@ -134,9 +137,9 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
                 val module = new Module(code, path, moduleCtx, moduleObj, exportsObj)
                 modules += path -> module
 
-                val resultHeap = module.load(heapAfterSetup)
+                val resultHeap = module.load(heapAfterSetup) getOrElse { throw new IllegalStateException("The main module couldn't be executed")}
 
-                (module, resultHeap getOrElse initialHeap)
+                (module, resultHeap)
 
         }
     }
@@ -145,21 +148,22 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
     private val foundFunctions = mutable.Map.empty[CallableInfo.Anchor, FunctionAnalyser]
     private var analyzingList = mutable.ListBuffer.empty[FunctionAnalyser]
 
-    def runAnalysis(heap: Heap): IniEntity = {
+    def runAnalysis(heap: Heap): js.Type = {
         val (mainModule, heapAfter) = getModule(initialModuleCode, "/main", heap)
 
         userState = heapAfter.createGlobalHeap()
 
+        val exports = userState.accessor.getProperty(mainModule.moduleObj, "exports").abstractify(userState.accessor).value
         val inspector = new Inspector
         inspector.inspectObject(globalObject)
-        inspector.inspectObject(mainModule.exportsObj)
+        inspector.inspectEntity(exports)
 
         while (analyseFunctions()) {
             // just wait till the user state is stable
         }
 
-        val acc = userState.accessor
-        IniEntity.from(acc.getProperty(mainModule.moduleObj, "exports").abstractify(acc).value, userState.accessor)
+        val acc = userState.accessor//.begin(Location()) //.accessor
+        js.from(exports, acc)
     }
 
     private def analyseFunctions(): Boolean = {
@@ -173,10 +177,8 @@ class NodeModuleAnalysis(initialModuleCode: Analysable,
         for (func <- worklist) {
             if (func.run()) {
                 changed = true
-                analyzingList.prepend(func)
-            } else {
-                analyzingList.append(func)
             }
+            analyzingList.append(func)
         }
 
         changed

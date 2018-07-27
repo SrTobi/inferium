@@ -3,6 +3,7 @@ package inferium.dataflow.graph.traits
 import inferium.dataflow.calls.{CallInstance, RecursiveCallInstance}
 import inferium.dataflow.graph.Node.CallFrame
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState, LexicalFrame}
+import inferium.js.types.js
 import inferium.lattice._
 import inferium.typescript.IniEntity
 
@@ -48,8 +49,8 @@ trait Calling extends Async[Unit] with Failing {
         savedLocalLexicalFrame = stateBeforeCall.lexicalFrame
 
         val accessor = stateBeforeCall.heap.begin(heapReadLoc)
-        lazy val normalizedThis = IniEntity.from(thisEntity, accessor)
-        lazy val iniArguments = arguments.map { IniEntity.from(_, accessor) }
+        lazy val normalizedThis = js.from(thisEntity, accessor)
+        lazy val iniArguments = arguments.map { js.from(_, accessor) }
         // make the calls
         callables foreach {
             case func@FunctionEntity(loc, frame) =>

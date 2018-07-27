@@ -5,11 +5,14 @@ import java.security.Signature
 import inferium.Unifiable
 import inferium.dataflow.calls.SignatureCall
 import inferium.lattice.Heap.SpecialObjects
-import inferium.lattice._
+import inferium.lattice.{Primitive, _}
+import inferium.typescript._
 import inferium.utils.Utils
+import javax.print.attribute.standard.MediaSize.Other
 import ujson.Js
 
 import scala.collection.mutable
+import scala.util.Try
 
 // noinspection ScalaFileName
 object js {
@@ -46,32 +49,126 @@ object js {
     }
 
 
-    sealed abstract class Type extends Unifiable[Type] {
+    sealed abstract class Type {
+        def unionWith(other: Type): Type = Type.union(this, other)
+        def intersectWith(other: Type): Type = Type.intersection(this, other)
+
         def matches(arg: Entity): Boolean
         def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity
 
-        override def unify(other: Type)(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this, other)
-        override def unify(others: Seq[Type])(implicit fixpoint: Unifiable.Fixpoint): Type = Type.unify(this +: others)
     }
 
     object Type {
-        def unify(ty: Type, rest: Type*): Type = unify(ty +: rest)
-        def unify(types: Seq[Type]): Type = types match {
-            case Seq() => NeverType
-            case Seq(ty) => ty
-            case _ => unifyRest(types)
+        def union(ty: Type, rest: Type*): Type = union(ty +: rest)(Map.empty)
+        def union(types: Traversable[Type])(rec: Map[CompoundType, Instantiate]): Type = {
+            var obj: Option[CompoundType] = None
+            var selfInst = new Instantiate()
+            var hasAny = false
+
+            def flat(tys: Traversable[Type]): Seq[Type] = tys.toSeq flatMap {
+                case NeverType => Seq.empty
+                case inst: Instantiate =>
+                    assert(!inst.typeArguments.exists(_.isInstanceOf[GenericType]))
+                    if (inst.typeArguments.nonEmpty || inst.target == null)
+                        Seq(inst)
+                    else
+                        flat(Seq(inst.target))
+
+                case AnyType =>
+                    hasAny = true
+                    Seq.empty
+
+                case ty: AtomarType => Seq(ty)
+                case union: UnionType => flat(union.types)
+                case intersection: IntersectionType => Seq(intersection)
+                case comp: CompoundType =>
+                    rec.get(comp) match {
+                        case Some(r) => Seq(r)
+                        case None =>
+                            obj match {
+                                case Some(other) =>
+                                    obj = Some(comp.union(other,rec + (comp -> selfInst)))
+                                case None =>
+                                    obj = Some(comp)
+                            }
+                            Seq.empty
+                    }
+                case probe: ProbeType =>
+                    Seq(probe)
+                case tuple: TupleType =>
+                    ???
+                case _: GenericType =>
+                    ???
+            }
+
+            val atoms = flat(types)
+            obj foreach { selfInst.target = _ }
+
+            if (hasAny)
+                return AnyType
+
+            UnionType(atoms ++ obj.toSeq)
         }
 
-        private def unifyRest(types: Seq[Type]): Type = ???
+        def intersection(ty: Type, rest: Type*): Type = intersection(ty +: rest)(Map.empty)
+        def intersection(types: Traversable[Type])(rec: Map[CompoundType, Instantiate]): js.Type = {
+            var obj: Option[CompoundType] = None
+            var selfInst = new Instantiate()
+
+            def flat(tys: Traversable[Type]): Seq[Type] = tys.toSeq flatMap {
+                case NeverType => Seq.empty
+                case AnyType => Seq.empty
+                case inst: Instantiate =>
+                    assert(!inst.typeArguments.exists(_.isInstanceOf[GenericType]))
+                    if (inst.typeArguments.nonEmpty || inst.target == null)
+                        Seq(inst)
+                    else
+                        flat(Seq(inst.target))
+
+                case ty: AtomarType => Seq(ty)
+                case union: UnionType =>
+                    ???
+                case intersection: IntersectionType =>
+                    flat(intersection.types)
+                case comp: CompoundType =>
+                    rec.get(comp) match {
+                        case Some(r) => Seq(r)
+                        case None =>
+                            obj match {
+                                case Some(other) =>
+                                    obj = Some(comp.intersect(other,rec + (comp -> selfInst)))
+                                case None =>
+                                    obj = Some(comp)
+                            }
+                            Seq.empty
+                    }
+                case probe: ProbeType =>
+                    Seq(probe)
+                case tuple: TupleType =>
+                    ???
+                case _: GenericType =>
+                    ???
+            }
+
+            val atoms = flat(types)
+            obj foreach { selfInst.target = _ }
+
+            IntersectionType(atoms ++ obj.toSeq )
+        }
+
+
+
     }
 
-    case object AnyType extends Type {
+    sealed abstract class AtomarType extends Type
+
+    case object AnyType extends AtomarType {
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity = AnyEntity
 
         override def matches(arg: Entity): Boolean = true
     }
 
-    sealed abstract class Primitive extends Type
+    sealed abstract class Primitive extends AtomarType
 
     case object NeverType extends Primitive {
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= NeverValue
@@ -129,7 +226,7 @@ object js {
         }
     }
 
-    case object ThisType extends Type {
+    case object ThisType extends AtomarType {
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             val thisEntity = instantiator.thisEntity
             assert(thisEntity != NeverValue)
@@ -144,7 +241,7 @@ object js {
 
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             val arrayLoc = instantiator.newLoc()
-            val array = heap.allocArray(arrayLoc).withAbstractCount(-1)
+            val array = heap.allocArray(arrayLoc, makeAbstract = true)
             ArrayUtils.fillAbstractArray(array, members.map { _.instantiate(heap, instantiator, substitutions) }, None, heap)
             array
         }
@@ -152,13 +249,26 @@ object js {
         override def matches(arg: Entity): Boolean = arg.isInstanceOf[ObjectLike]
     }
 
-    case object ObjectType extends Type {
+    case object ObjectType extends AtomarType {
         override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
             AnyEntity
         }
 
         override def matches(arg: Entity): Boolean = arg.isInstanceOf[ObjectLike]
     }
+
+    final class ProbeType(val probe: ProbeEntity) extends Type {
+        override def hashCode(): Int = probe.hashCode()
+
+        override def equals(o: scala.Any): Boolean = o match {
+            case o: ProbeType => probe == o.probe
+            case _ => false
+        }
+
+        override def matches(arg: Entity): Boolean = true
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity = probe
+    }
+
 
     final class GenericType(/*val name: String, */) extends Type {
         var constraint: Option[Type] = None
@@ -188,20 +298,66 @@ object js {
     }
 
     object UnionType {
-        def apply(types: Type*): UnionType = apply(types.toSet)
-        def apply(types: TraversableOnce[Type]): UnionType = {
-            val res = new UnionType
-            res.types = types.flatMap {
+        def apply(types: Type*): Type = apply(types.toSet)
+        def apply(types: TraversableOnce[Type]): Type = {
+            val set = types.flatMap {
+                case NeverType => Seq.empty
                 case u: UnionType => u.types
                 case any => Seq(any)
             }.toSet
-            res
+
+            if (set.size == 1)
+                set.head
+            else {
+                val res = new UnionType
+                res.types = set
+                res
+            }
         }
     }
 
-    val VoidType: UnionType = UnionType(UndefinedType, NullType)
 
-    trait ClassLike extends Type {
+    final class IntersectionType extends Type {
+        var types: Set[Type] = _
+
+        override def equals(other: scala.Any): Boolean = other match {
+            case other: IntersectionType => this.types == other.types
+            case _ => false
+        }
+        override def hashCode: Int = types.hashCode()
+        override def toString: String = types.mkString(" & ")
+
+        override def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity= {
+            Entity.unify(types map { _.instantiate(heap, instantiator, substitutions) })
+        }
+
+        override def matches(arg: Entity): Boolean = true
+    }
+
+    object IntersectionType {
+        def apply(types: Type*): Type = apply(types.toSet)
+        def apply(types: TraversableOnce[Type]): Type = {
+            val set = types.flatMap {
+                case NeverType => Seq.empty
+                case u: UnionType => u.types
+                case any => Seq(any)
+            }.toSet
+
+            if (set.size == 1)
+                set.head
+            else {
+                val res = new IntersectionType
+                res.types = set
+                res
+            }
+        }
+    }
+
+    val VoidType: Type = UnionType(UndefinedType, NullType)
+
+    sealed trait ClassLike extends Type {
+        def isClass: Boolean
+
         def ownProperties: Map[String, Property]
         def allProperties: Map[String, Property]
         def instProperties: Map[String, Property]
@@ -209,7 +365,7 @@ object js {
         def instantiatePrototype(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): ObjectLike
     }
 
-    final class Instantiate extends Type with ClassLike {
+    final class Instantiate extends AtomarType with ClassLike {
         // todo: check if typeArguments has the same length as the target's typeParameters
         var typeArguments: Seq[Type] = _
         var target: CompoundType = _
@@ -240,9 +396,20 @@ object js {
         }
 
         override def matches(arg: Entity): Boolean = true
+
+        override def isClass: Boolean = target.isClass
     }
 
-    final class CompoundType(val name: Option[String], val isClass: Boolean) extends Type with ClassLike {
+    object Instantiate {
+        def apply(target: CompoundType, typeArguments: Seq[Type] = Seq.empty): Instantiate = {
+            val inst = new Instantiate()
+            inst.target = target
+            inst.typeArguments = typeArguments
+            inst
+        }
+    }
+
+    final class CompoundType(val name: Option[String], var isClass: Boolean = false) extends Type with ClassLike {
         lazy val defaultConstructor = {
             assert(isClass)
             val o = new Overload(Seq.empty, Seq.empty)
@@ -316,7 +483,7 @@ object js {
                     heap.specialObject(SpecialObjects.Object)
             }
 
-            val prototype = heap.allocOrdinaryObject(prototypeLoc, basePrototype).withAbstractCount(-1)
+            val prototype = heap.allocOrdinaryObject(prototypeLoc, basePrototype, makeAbstract = true)
             instantiator.instantiated += instKey -> prototype
             prototype
         }
@@ -350,7 +517,7 @@ object js {
                     new SignatureFunctionEntity(loc, callableInfo)
                 } else
                     OrdinaryObjectEntity(loc)(ac)
-            }, prorotype).withAbstractCount(-1)
+            }, prorotype, makeAbstract = true)
             instantiator.instantiated += instKey -> paragon
 
             if (!isClass) {
@@ -363,6 +530,47 @@ object js {
 
         //override def toString: String = s"${name.getOrElse("")}{${properties.mkString(", ")}}"
         override def matches(arg: Entity): Boolean = true
+
+
+        def union(other: CompoundType, rec: Map[CompoundType, Instantiate]): CompoundType = {
+            assert(bases.isEmpty && typeParameter.isEmpty)
+            assert(other.bases.isEmpty && other.bases.isEmpty)
+
+            if (other == this) {
+                this
+            } else {
+                val result = new CompoundType(None, false)
+
+                val newSignature = this.signature ++ other.signature
+                val newConstructor = this.constructor ++ other.constructor
+                val newProperties = Utils.mergeMapsWithMapper(ownProperties, other.ownProperties) { _.withOptional } {
+                    _.union(_, rec)
+                }
+
+                result._resolve(Seq.empty, Seq.empty, newSignature, newConstructor, newProperties.values.toSeq)
+                result
+            }
+        }
+
+        def intersect(other: CompoundType, rec: Map[CompoundType, Instantiate]): CompoundType = {
+            assert(bases.isEmpty && typeParameter.isEmpty)
+            assert(other.bases.isEmpty && other.bases.isEmpty)
+
+            if (other == this) {
+                this
+            } else {
+                val result = new CompoundType(None, false)
+
+                val newSignature = this.signature ++ other.signature
+                val newConstructor = this.constructor ++ other.constructor
+                val newProperties = Utils.mergeMaps(ownProperties, other.ownProperties) {
+                    _.intersection(_, rec)
+                }
+
+                result._resolve(Seq.empty, Seq.empty, newSignature, newConstructor, newProperties.values.toSeq)
+                result
+            }
+        }
     }
 
     /*object FunctionType {
@@ -374,15 +582,134 @@ object js {
         def apply(properties: => Seq[Property], name: String = null, extend: Type = null): CompoundType = new CompoundType(Some(name), Seq.empty, properties, Option(extend))
     }*/
 
-    final case class Property(name: String, ty: Type, optional: Boolean = false, readonly: Boolean = false)
+    final case class Property(name: String, ty: Type, optional: Boolean = false, readonly: Boolean = false) {
+        def withOptional: Property = copy(optional = true)
+
+        def union(other: Property, rec: Map[CompoundType, Instantiate]): Property = {
+            assert(name == other.name)
+            Property(
+                name,
+                Type.union(Seq(ty, other.ty))(rec),
+                optional || other.optional,
+                readonly || other.readonly
+            )
+        }
+
+        def intersection(other: Property, rec: Map[CompoundType, Instantiate]): Property = {
+            assert(name == other.name)
+            Property(
+                name,
+                Type.union(Seq(ty, other.ty))(rec),
+                optional && other.optional,
+                readonly && other.readonly
+            )
+        }
+    }
+
     type Signature = Seq[Overload]
 
     final class Overload(val generics: Seq[GenericType], val params: Seq[Param]) {
         var returnType: Type = _
     }
+
+    object Overload {
+        def apply(generics: Seq[GenericType], params: Seq[Param], returnType: Type): Overload = {
+            val overload = new Overload(generics, params)
+            overload.returnType = returnType
+            overload
+        }
+    }
+
     class Param(val name: String, val optional: Boolean) {
         var ty: Type = _
     }
+
+    object Param {
+        def apply(name: String, ty: Type, optional: Boolean): Param = {
+            val param = new Param(name,optional)
+            param.ty = ty
+            param
+        }
+    }
+
+    def from(entity: Entity, heap: Heap.Mutator, objs: mutable.Map[(Location, Boolean), CompoundType] = mutable.Map.empty): Type = entity.normalized(heap) match {
+        case NeverValue => NeverType
+        case NullValue => NullType
+        case UndefinedValue => UndefinedType
+        case _: BoolValue => BooleanType
+        case _: NumberValue => NumberType
+        case StringValue => StringType
+        case SpecificStringValue(string) => LiteralType(string)
+        case union: UnionValue => UnionType(union.entities.iterator.map{from(_, heap, objs)})
+        case probe: ProbeEntity => new ProbeType(probe)
+        case obj: ObjectLike =>
+            val isConcrete = heap.isConcreteObject(obj)
+            val key = (obj.loc, isConcrete)
+            objs.get(key) foreach {
+                cty =>
+                    return cty
+            }
+
+            val cty = new CompoundType(None)
+            objs += (key -> cty)
+
+            var props = Map.empty[String, (Boolean, IniEntity)]
+
+
+
+            /*def onlyClassLikes(tys: Seq[Type]): Seq[ClassLike] = tys flatMap {
+                case union: UnionType => onlyClassLikes(union.types.toSeq)
+                case classLike: ClassLike => Seq(classLike)
+                case _ => Seq.empty
+            }*/
+
+            //val protoType = onlyClassLikes(heap.getPrototypeOf(obj) map { from(_, heap) })
+
+
+            val properties = heap.getProperties(obj, numbersOnly = false).flatMap {
+                case (Some(name), prop) if name != "prototype" || !obj.isInstanceOf[FunctionEntity] =>
+                    val ap = prop.abstractify(heap)
+                    val ty = from(ap.value, heap, objs)
+
+                    val propTy = Property(name, ty, optional = prop.mightBeAbsent, readonly = prop.writable.mightBeFalse)
+                    Some(propTy)
+                case _ =>
+                    // todo give out general info
+                    None
+            }.toSeq
+
+            val (signature, constructor) = obj match {
+                case f: FunctionEntity =>
+                    val info = f.callableInfo
+
+                    val ths = info.thisProbe
+                    val thisHasWrites = ths._writes.nonEmpty
+
+                    val parameter = info.argumentProbe._reads.flatMap {
+                        case (name, prop) if Try(name.toInt).isSuccess =>
+                            Seq(name.toInt -> prop)
+                        case _ =>
+                            Seq.empty
+                    }.toSeq.sortBy(_._1).map { case (i, ty) => Param(info.argumentNames(i), ty, optional = false) }
+
+                    val returnType = from(info.returnValue, heap)
+
+                    def overl(r: Type) = Seq(Overload(Seq.empty, parameter, r))
+
+                    if (returnType == UndefinedType && thisHasWrites) {
+                        (Seq.empty, overl(new ProbeType(ths)))
+                    } else {
+                        (overl(returnType), Seq.empty)
+                    }
+                case _ =>
+                    (Seq.empty, Seq.empty)
+            }
+
+            cty._resolve(bases = Seq.empty, typeParameter = Seq.empty, signature, constructor, properties)
+            cty
+    }
+
+
 
 
     case class Prelude(global: CompoundType, modules: Map[String, CompoundType])
@@ -559,4 +886,116 @@ object js {
             Prelude(global.asInstanceOf[CompoundType], modules.toMap)
         }
     }
+
+
+
+    private class Printer {
+
+        private var _nextId = 0
+        private def nextId(): Int = {
+            _nextId += 1
+            return _nextId
+        }
+        private val builder = new StringBuilder()
+
+        private def addLine(line: String): Unit = {
+            builder.append(line)
+            builder.append("\n")
+        }
+
+        private class Writer(val builder: mutable.StringBuilder = new mutable.StringBuilder(), val indent: Int = 0) {
+            def print(line: String): Unit = {
+                for (i <- 0 until indent)
+                    builder.append(" ")
+                builder.append(line)
+                print()
+            }
+            def print(): Unit = builder.append("\n")
+
+            def indent(i: Int): Writer = new Writer(builder, i)
+            def end(): Unit = Printer.this.builder.append(builder)
+        }
+
+        private val interfaceNames = mutable.Map.empty[CompoundType, String]
+        def getName(c: CompoundType): String = interfaceNames.getOrElseUpdate(c, "I" + nextId())
+        private val printedInterfaces = mutable.Set.empty[CompoundType]
+
+        def printParam(arg: Param): String = arg.name + (if (arg.optional) "?" else "") + ": " + printInline(arg.ty)
+
+        def printGlobal(compoundType: CompoundType): Unit = {
+            if (printedInterfaces(compoundType)) {
+                return
+            }
+            printedInterfaces += compoundType
+
+            val writer = new Writer
+            writer.print("interface " + getName(compoundType) + " {")
+
+            val innerWriter = writer.indent(2)
+
+            compoundType.signature foreach {
+                o =>
+                    innerWriter.print(o.params.map(printParam).mkString("(", ", ", ")") + ": " + printInline(o.returnType))
+            }
+
+            compoundType.constructor foreach {
+                o =>
+                    innerWriter.print(o.params.map(printParam).mkString("new (", ", ", ")") + ": " + printInline(o.returnType))
+            }
+
+            compoundType.allProperties foreach {
+                case (name, prop) =>
+                    val readonly = if (prop.readonly) "readonly " else ""
+                    val optional = if (prop.optional) "?" else ""
+                    innerWriter.print(readonly + name + optional + ": " + printInline(prop.ty))
+            }
+
+            writer.print("}")
+            writer.end()
+        }
+
+
+        def printInline(ty: Type) : String = {
+            ty match {
+                case NeverType => "never"
+                case UndefinedType => "undefined"
+                case NullType => "null"
+                case NumberType => "number"
+                case StringType => "string"
+                case ObjectType => "object"
+                case ThisType => "this"
+                case BooleanType => "boolean"
+                case TrueType => "true"
+                case FalseType => "false"
+                case AnyType => "any"
+                case LiteralType(value) => '"' + value + '"'
+                case tuple: TupleType => tuple.members.map(printInline).mkString("[", ", ", "]")
+                case union: UnionType => union.types.iterator.map(printInline).mkString("(", " | ", ")")
+                case intersection: IntersectionType => intersection.types.iterator.map(printInline).mkString("(", " & ", ")")
+                case inst: Instantiate =>
+                    if (inst.typeArguments.isEmpty) {
+                        printInline(inst.target)
+                    } else {
+                        inst.target.name.get + inst.typeArguments.map(printInline).mkString("<", ", ", ">")
+                    }
+                case obj: CompoundType =>
+                    if (obj.constructor.isEmpty && obj.signature.isEmpty && obj.allProperties.isEmpty) {
+                        "{}"
+                    } else {
+                        printGlobal(obj)
+                        getName(obj)
+                    }
+
+                case _: GenericType => "generic"
+                case p: ProbeType => "probe" + p.hashCode()
+            }
+        }
+
+        def print(ty: Type): String = {
+            val res = "\n=> " + printInline(ty)
+            builder.toString() + res
+        }
+    }
+
+    def print(ty: Type): String = new Printer().print(ty)
 }

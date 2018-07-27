@@ -36,6 +36,7 @@ case class LexicalEnv(outer: Option[LexicalEnv], pushesObject: Boolean, behavior
             case Behavior.Argument(names) => behaviorWithNames("Argument", names.keys)
             case Behavior.Declarative(names) => behaviorWithNames("Decl", names.keys)
             case Behavior.Computed => behaviorWithNames("Computed", Seq())
+            case Behavior.Global => behaviorWithNames("Globale", Seq())
         }
 
         thisString + outer.map(" :: " + _.toString(envNames)).getOrElse("")
@@ -106,6 +107,8 @@ case class LexicalEnv(outer: Option[LexicalEnv], pushesObject: Boolean, behavior
                     case None =>
                         superChain
                 }
+            case Global =>
+                LookupItem(LookupType.Global, varName, objIdx) :: Nil
             case Computed =>
                 LookupItem(LookupType.Computed, varName, objIdx) :: superChain
         }
@@ -130,6 +133,7 @@ object LexicalEnv {
         final case class Declarative(mapping: Map[String, String]) extends Behavior
         final case class Argument(mapping: Map[String, Int]) extends Behavior
         case object Computed extends Behavior
+        case object Global extends Behavior
     }
 
     def lookupChainToString(lookupChain: List[LookupItem]): String = lookupChain.map(item => s"${item.lookupType}(${item.property} at ${item.objIdx})").mkString(" :: ")

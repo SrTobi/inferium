@@ -2,15 +2,9 @@ package inferium
 
 import escalima.ECMAScript
 import inferium.dataflow._
-import inferium.dataflow.calls.NativeCall
 import inferium.dataflow.graph.Node
-import inferium.dataflow.graph.visitors.{DotPrintVisitor, PrintVisitor}
-import inferium.lattice.{Location, NullValue, NumberValue, UndefinedValue}
 import inferium.lattice.heaps.ChainHeap
 import inferium.prelude.NodeJs
-import inferium.typescript.{IniObject, IniRec, IniValue, TypeScriptPrinter}
-
-import scala.util.Random
 
 
 object Playground {
@@ -64,7 +58,9 @@ object Playground {
               |    if (!made) made = null;
               |
               |    var cb = f || function () {};
+              |    debug(process).print("path")
               |    p = path.resolve(p);
+              |    debug(xfs).print("test")
               |    xfs.mkdir(p, mode, function (er) {
               |        if (!er) {
               |            made = made || p;
@@ -141,17 +137,15 @@ object Playground {
 
         val code2 =
             """
-              |function Point(x, y) {
-              |  this.x = x
-              |  this.y = y
-              |}
-              |
-              |exports.xxx = function xxx(test) {
-              |  return new Point(5, test)
+              |debug(global).print()
+              |debug(process).print()
+              |exports.x = function X(a, b) {
+              |  debug(global).print()
+              |  return a + b
               |}
             """.stripMargin
 
-        val code = code1
+        val code = code2
 
 
         val bridge = new ECMAScript
@@ -179,14 +173,16 @@ object Playground {
 
 
 
-        //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))
+        //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = false))
         //println(PrintVisitor.print(graph, printMergeNodes = true, showStackInfo = true))
         val analysis = new NodeModuleAnalysis(graph, globalObject, modules, instantiator, new TestDebugAdapter)
         //val analysis = new ScriptAnalysis(graph, new TestDebugAdapter)
 
         val exports = analysis.runAnalysis(initialHeap)
 
-        println(new TypeScriptPrinter(exports).print())
+        println("====================")
+        println(inferium.js.types.js.print(exports))
+        //println(new TypeScriptPrinter(exports).print())
         //analysis.runAnalysis(NodeJs.initialState(config))
 
         //println(PrintVisitor.print(graph, showStackInfo = true, showNodeInfo = true))

@@ -76,23 +76,23 @@ object Heap {
         def config: Config
         def specialObject(specialObject: SpecialObject): ObjectLike
 
-        def allocObject[O <: ObjectLike](location: Location, creator: (Location, Long) => O, prototype: Entity): O
-        def allocOrdinaryObject(location: Location, prototype: Entity): ObjectLike = allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), prototype)
-        def allocOrdinaryObject(location: Location): ObjectLike = {
-            val objectPrototype = specialObject(SpecialObjects.Object)
-            allocOrdinaryObject(location, objectPrototype)
+        def allocObject[O <: ObjectLike](location: Location, creator: (Location, Long) => O, prototype: Entity, makeAbstract: Boolean = false): O
+        def allocOrdinaryObject(location: Location, prototype: Entity = specialObject(SpecialObjects.Object), makeAbstract: Boolean = false): ObjectLike = {
+            allocObject(location, (loc, ac) => OrdinaryObjectEntity(loc)(ac), prototype, makeAbstract)
         }
-        def allocArray(location: Location): ObjectLike = {
-            allocOrdinaryObject(location, specialObject(SpecialObjects.Array))
+        def allocArray(location: Location, makeAbstract: Boolean = false): ObjectLike = {
+            allocOrdinaryObject(location, specialObject(SpecialObjects.Array), makeAbstract)
         }
-        def allocBuiltin(callableInfo: NativeCallableInfo, location: Location = Location()): ObjectLike = {
-            allocObject(location, (loc, ac) => new BuiltInFunctionEntity(loc, callableInfo), specialObject(SpecialObjects.Function))
+        def allocBuiltin(callableInfo: NativeCallableInfo, location: Location = Location(), makeAbstract: Boolean = false): ObjectLike = {
+            allocObject(location, (loc, ac) => new BuiltInFunctionEntity(loc, callableInfo), specialObject(SpecialObjects.Function), makeAbstract)
         }
         def isConcreteObject(obj: ObjectLike): Boolean
         def setProperty(obj: ObjectLike, propertyName: String, property: ConcreteProperty): Unit
         def setProperty(obj: ObjectLike, propertyName: String, property: AbstractProperty): Unit
         def writeToProperties(obj: ObjectLike, valueLocs: ValueLocation, numbersOnly: Boolean, resolvedValue: Entity): Unit
         def writeToProperty(obj: ObjectLike, propertyName: String, valueLocs: ValueLocation, isCertainWrite: Boolean, resolvedValue: Entity): Property
+
+        def getPrototypeOf(obj: ObjectLike): Seq[ObjectLike]
         def getOwnProperties(obj: ObjectLike): TraversableOnce[(Option[String], Property)]
         def getProperties(obj: ObjectLike, numbersOnly: Boolean): TraversableOnce[(Option[String], Property)]
         def getProperty(obj: ObjectLike, propertyName: String): Property

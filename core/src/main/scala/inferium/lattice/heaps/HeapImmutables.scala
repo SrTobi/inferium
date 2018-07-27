@@ -78,7 +78,9 @@ trait HeapImmutables {
     }
 
     protected def mergeAbsDesc(d1: AbstractDesc, d2: AbstractDesc): AbstractDesc = {
-        if (d1 eq d2)
+        if (d2 == null)
+            d1
+        else if (d1 eq d2)
             d1
         else
             (d1._1 unify d2._1, mergeAbsProperties(d1._2, d2._2))
@@ -92,6 +94,9 @@ trait HeapImmutables {
     }
 
     protected def abstractifyConcreteDesc(desc: ConcreteDesc, mutator: Heap.Mutator): AbstractDesc = {
+        if (desc == null) {
+            return null
+        }
         val (concreteFields, concreteProps) = desc
         (concreteFields.abstractify(mutator), concreteProps mapValues { _.abstractify(mutator) })
     }
@@ -127,6 +132,14 @@ trait HeapImmutables {
         def unapply(arg: BoxedValue): Option[(Entity, Entity, Long)] = Some((arg.abstractValue, arg.concreteValue, arg.abstractCount))
     }
 
+    protected def abstractifyObject(obj: Obj, accessor: Heap.Mutator, initialConcreteDesc: ConcreteDesc): Obj = {
+        val Obj(abstractDesc, concreteDesc, oldAbstractCount) = obj
+        val abstractCount = oldAbstractCount + 1
+        val newAbstractDesc = abstractifyConcreteDesc(concreteDesc, accessor)
+        assert(newAbstractDesc != null || wasAbstractified(oldAbstractCount))
+        val finalAbstractDesc = if (!wasAbstractified(oldAbstractCount)) newAbstractDesc else mergeAbsDesc(abstractDesc, newAbstractDesc)
+        Obj(finalAbstractDesc, initialConcreteDesc, abstractCount)
+    }
 
     abstract class HeapMutatorImplementation extends Heap.Mutator {
 
@@ -136,22 +149,25 @@ trait HeapImmutables {
         def getBox(loc: Location): Option[BoxedValue]
         def setBox(loc: Location, box: BoxedValue): Unit
 
-        override def allocObject[O <: ObjectLike](location: Location, creator: (Location, Long) => O, prototype: Entity): O = {
+        override def allocObject[O <: ObjectLike](location: Location, creator: (Location, Long) => O, prototype: Entity, makeAbstract: Boolean = false): O = {
             val prototypeObjs = prototype.coerceToObjects(this)
             val initialConcreteDesc: ConcreteDesc = (ConcreteInternalFields(AbstractProperty.internalProperty, prototypeObjs), Map.empty)
 
             val ac = getObject(location) match {
-                case Some(Obj(abstractDesc, concreteDesc, oldAbstractCount)) =>
-                    val abstractCount = oldAbstractCount + 1
-                    val newAbstractDesc = abstractifyConcreteDesc(concreteDesc, this)
-                    val finalAbstractDesc = if (!wasAbstractified(oldAbstractCount)) newAbstractDesc else mergeAbsDesc(abstractDesc, newAbstractDesc)
-                    setObject(location, Obj(finalAbstractDesc, initialConcreteDesc, abstractCount))
+                case Some(obj) =>
+                    val newObj = abstractifyObject(obj, this, initialConcreteDesc)
+                    setObject(location, newObj)
 
-                    abstractCount
+                    newObj.abstractCount
                 case None =>
-                    val abstractCount = 1
+                    if (makeAbstract) {
+
+                    } else {
+                        
+                    }
+                    val abstractCount = if (makeAbstract) 1000 else 1
                     setObject(location, Obj(initialAbstractDesc, initialConcreteDesc, abstractCount))
-                    abstractCount
+                    if (makeAbstract) -1 else abstractCount
             }
             creator(location, ac)
         }
@@ -177,13 +193,14 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
                         throw new UnsupportedOperationException("can't set concrete property to abstract obj")
                         //val newProperties = abstractProps + (propertyName -> property.abstractify(this))
                         //setObject(obj.loc, Obj((abstractFields, newProperties), concreteDesc, abstractCount))
                     } else {
+                        val (concreteFields, concreteProps) = concreteDesc
                         val newProperties = concreteProps + (propertyName -> property)
                         setObject(obj.loc, Obj(abstractDesc, (concreteFields, newProperties), abstractCount))
                     }
@@ -202,7 +219,7 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
                     // we found the object, now set the property
                     if (desc.isAbstractObject(obj)) {
                         val newProperties = abstractProps + (propertyName -> property)
@@ -230,7 +247,7 @@ trait HeapImmutables {
                     (config.dynamicWriteAffectsOnlyEnumerable ==> p.enumerable.mightBeTrue)
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
                         val oldDyn = abstractFields.dynamicProp
                         val newDyn = oldDyn.addValue(resolvedValue)
@@ -250,6 +267,7 @@ trait HeapImmutables {
                         // todo: only copy when changed
                         setObject(obj.loc, Obj((abstractFields.copy(dynamicProp = newDyn), props), concreteDesc, abstractCount))
                     } else {
+                        val (concreteFields, concreteProps) = concreteDesc
                         val oldProp = concreteFields.dynamicProp
                         val newProp = oldProp.addValue(resolvedValue)
                         var props = concreteProps
@@ -281,7 +299,7 @@ trait HeapImmutables {
             }
 
             getObject(obj.loc) match {
-                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc@(concreteFields, concreteProps), abstractCount)) =>
+                case Some(desc@Obj(abstractDesc@(abstractFields, abstractProps), concreteDesc, abstractCount)) =>
                     if (desc.isAbstractObject(obj)) {
                         val newProp = abstractProps.get(propertyName) match {
                             case Some(prop) =>
@@ -295,6 +313,7 @@ trait HeapImmutables {
                         setObject(obj.loc, Obj((abstractFields, newProperties), concreteDesc, abstractCount))
                         newProp
                     } else {
+                        val (concreteFields, concreteProps) = concreteDesc
                         val newProp = concreteProps.get(propertyName) match {
                             case Some(prop) =>
                                 if (isCertainWrite) prop.copy(value = Set(valueLoc)) else prop.addValue(valueLoc)
@@ -309,6 +328,23 @@ trait HeapImmutables {
                         newProp
                     }
 
+                case None =>
+                    // TODO: the object does not exist... can that even happen? maybe create a new object?
+                    ???
+            }
+        }
+
+
+        override def getPrototypeOf(obj: ObjectLike): Seq[ObjectLike] = {
+            if (obj == AnyEntity) {
+                return Seq(AnyEntity)
+            }
+
+            getObject(obj.loc) match {
+                case Some(desc) =>
+                    val (fields, properties) = desc.descFor(obj)
+
+                    fields.prototype
                 case None =>
                     // TODO: the object does not exist... can that even happen? maybe create a new object?
                     ???

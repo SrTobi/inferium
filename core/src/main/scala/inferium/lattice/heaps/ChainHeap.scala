@@ -30,6 +30,7 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
         def shared: Shared
         def depth: Int
         def parent: HeapStage
+        def anchor: AnyRef
     }
 
     private class HeapRoot(override val shared: Shared) extends HeapStage {
@@ -38,6 +39,8 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
 
         override def getObject(loc: Location): Option[Obj] = None
         override def getBox(loc: Location): Option[BoxedValue] = None
+
+        override def anchor: AnyRef = this
     }
 
     private class HeapElement(override val shared: Shared,
@@ -85,16 +88,15 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
 
             new HeapElement(shared, newObjects, newBoxedValues)*/
 
-
-            val unifiers = new util.IdentityHashMap[HeapStage, Unifier]
+            val unifiers = mutable.Map.empty[AnyRef, Unifier]
             val queue = mutable.PriorityQueue.empty[Unifier](Ordering.by(_.depth))
 
             def addToUnifiers(unifier: Unifier): Unit = {
-                unifiers.get(unifier.parent) match {
-                    case null =>
-                        unifiers.put(unifier.parent, unifier)
+                unifiers.get(unifier.parent.anchor) match {
+                    case None =>
+                        unifiers += unifier.parent.anchor -> unifier
                         queue += unifier
-                    case equalUnifier =>
+                    case Some(equalUnifier) =>
                         equalUnifier.merge(unifier)
                 }
             }
@@ -108,7 +110,7 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
                     return unifier.toHeapElement(shared)
                 }
 
-                unifiers.remove(unifier.parent)
+                unifiers.remove(unifier.parent.anchor)
                 unifier.up()
                 addToUnifiers(unifier)
             }
@@ -125,10 +127,20 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
                 false
         }
 
-        override def createGlobalHeap(): GlobalHeap = new ChainGlobalHeap(shared, objects, boxedValues)
+        override def createGlobalHeap(): GlobalHeap = {
+            val unifier = new Unifier(this)
+            while (unifier.canUp) {
+                unifier.up()
+            }
+            val self = unifier.toHeapElement(shared)
+            val acc = self.createMutator()
+            new ChainGlobalHeap(shared, objects map { case (k, v) => k -> abstractifyObject(v, acc, null)  })
+        }
 
         override def getObject(loc: Location): Option[Obj] = objects.get(loc).orElse(parent.getObject(loc))
         override def getBox(loc: Location): Option[BoxedValue] = boxedValues.get(loc).orElse(parent.getBox(loc))
+
+        override val anchor: AnyRef = new AnyRef
     }
 
     private class Unifier(iniHeap: HeapElement) {
@@ -145,7 +157,10 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
         private def getObject(loc: Location) = objects.get(loc).orElse(parent.getObject(loc))
         private def getBox(loc: Location) = boxedValues.get(loc).orElse(parent.getBox(loc))
 
+        def canUp: Boolean = parent.isInstanceOf[HeapElement]
+
         def up(): Unit = {
+            assert(canUp)
             for (entry@(loc, _) <- objects if !objects.contains(loc)) {
                 objects += entry
             }
@@ -203,31 +218,27 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
     }
 
 
-    private class GlobalHeapLink(_shared: Shared,
-                                 _heapRoot: HeapRoot,
-                                 _objects: Map[Location, Obj] = Map.empty,
-                                 _boxedValues: Map[Location, BoxedValue] = Map.empty) extends HeapElement(_shared, _heapRoot, _objects, _boxedValues) {
+    private class GlobalHeapLink(override val shared: Shared,
+                                 val globalHeap: ChainGlobalHeap,
+                                 objects: Map[Location, Obj] = Map.empty) extends HeapStage {
 
         val objectReads = mutable.Map.empty[Location, Obj]
-        val boxReads = mutable.Map.empty[Location, BoxedValue]
 
         override def getObject(loc: Location): Option[Obj] = {
             val objOpt = objects.get(loc)
-            objOpt foreach { objectReads += loc -> _ }
+            objectReads += loc -> objOpt.orNull
             objOpt
         }
-        override def getBox(loc: Location): Option[ChainHeap.BoxedValue] = {
-            val boxOpt = boxedValues.get(loc)
-            boxOpt foreach { boxReads += loc -> _ }
-            boxOpt
-        }
+        override def getBox(loc: Location): Option[ChainHeap.BoxedValue] = None
+
+        override def depth: Int = 0
+        override def parent: HeapStage = this
+
+        override def anchor: AnyRef = globalHeap
     }
 
-    private class ChainGlobalHeap(val shared: Shared,
-                                   private var objects: Map[Location, Obj],
-                                   private var boxedValues: Map[Location, BoxedValue]) extends GlobalHeap with HeapStage {
+    private class ChainGlobalHeap(val shared: Shared, var objects: Map[Location, Obj]) extends GlobalHeap with HeapStage {
 
-        private val heapRoot = new HeapRoot(shared)
         private val links = mutable.Map.empty[Location, GlobalHeapLink]
 
         override def hasEffect(location: Location): Boolean = {
@@ -242,61 +253,44 @@ object ChainHeap extends Heap.Factory with HeapImmutables {
                     }
                 }
 
-                for ((boxLoc, box) <- link.boxReads) {
-                    boxedValues.get(boxLoc) match {
-                        case Some(box2) =>
-                            if (box != box2)
-                                return true
-                        case None =>
-                            return true
-                    }
-                }
                 return false
             }
             return true
         }
 
         override def toHeap(location: Location): Heap = {
-            val link = new GlobalHeapLink(shared, heapRoot, objects, boxedValues)
+            val link = new GlobalHeapLink(shared, this, objects )
             links += location -> link
-            link
+            new HeapElement(shared, link)
         }
 
         override def feed(heap: Heap): Boolean = {
-            val other = heap.asInstanceOf[HeapElement]
-            val accessor = this.accessor
-            val newObjects = Utils.mergeMaps(objects, other.objects) {
-                case (Obj(ad1, cd1, c1), Obj(ad2, cd2, c2)) =>
-                    val (abstractDesc, concreteDesc) = if (c1 < c2) {
-                        val abstractified = abstractifyConcreteDesc(cd1, accessor)
-                        val newAd1 = if (wasAbstractified(c1)) mergeAbsDesc(abstractified, ad1) else abstractified
-                        mergeAbsDesc(newAd1, ad2) -> cd2
-                    } else if (c1 > c2) {
-                        val abstractified = abstractifyConcreteDesc(cd2, accessor)
-                        val newAd2 = if (wasAbstractified(c2)) mergeAbsDesc(abstractified, ad2) else abstractified
-                        mergeAbsDesc(ad1, newAd2) -> cd1
-                    } else {
-                        mergeAbsDesc(ad1, ad2) -> mergeConcreteDesc(cd1, cd2)
-                    }
+            val unifier = new Unifier(heap.asInstanceOf[HeapElement])
+            while (unifier.canUp) {
+                unifier.up()
+            }
+            val other = unifier.toHeapElement(shared)
 
-                    Obj(abstractDesc, concreteDesc, Math.max(c1, c2))
+            val acc = heap.begin(Location())
+            val newObjects = Utils.mergeMaps(objects, other.objects mapValues { abstractifyObject(_, acc, null) }) {
+                case (Obj(ad1, _, abs1), Obj(ad2, _, abs2)) =>
+                    Obj(mergeAbsDesc(ad1, ad2), null, Math.max(abs1, abs2))
             }
 
-            val newBoxedValues = Utils.mergeMaps(boxedValues, other.boxedValues) { _ unify _}
-
-            val changed = newBoxedValues != boxedValues || newObjects != objects
+            val changed = newObjects != objects
 
             objects = newObjects
-            boxedValues = newBoxedValues
 
             changed
         }
 
-        override def accessor: HeapStageMutator = new HeapStageMutator(this, objects, boxedValues)
+        override def accessor: HeapStageMutator = new HeapStageMutator(this, objects, Map.empty)
         override def depth: Int = 0
         override def parent: HeapStage = this
         override def getObject(loc: Location): Option[ChainHeap.Obj] = objects.get(loc)
-        override def getBox(loc: Location): Option[ChainHeap.BoxedValue] = boxedValues.get(loc)
+        override def getBox(loc: Location): Option[ChainHeap.BoxedValue] = None
+
+        override def anchor: AnyRef = this
     }
 
 

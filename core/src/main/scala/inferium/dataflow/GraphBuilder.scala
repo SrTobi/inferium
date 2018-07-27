@@ -136,12 +136,11 @@ class GraphBuilder(config: GraphBuilder.Config) {
                 }
             }
 
-            @tailrec
             private def addVarsToLexicalEnv(lexicalEnv: LexicalEnv, vars: Seq[(String, String)]): LexicalEnv = lexicalEnv.behavior match {
                 case LexicalEnv.Behavior.Declarative(old) => lexicalEnv.copy(behavior = LexicalEnv.Behavior.Declarative(old ++ vars))
                 case _ =>
                     val outer = lexicalEnv.outer.getOrElse(throw new AssertionError("Expected to find a declarative lexical environment"))
-                    addVarsToLexicalEnv(outer, vars)
+                    lexicalEnv.copy(outer = Some(addVarsToLexicalEnv(outer, vars)))
             }
 
             private def buildLiteral(entity: Entity)(implicit info: Node.Info): Graph = {
@@ -1024,16 +1023,19 @@ class GraphBuilder(config: GraphBuilder.Config) {
             val priority = 0
             assert(!done)
 
-            val globalEnv = new LexicalEnv(None, true, LexicalEnv.Behavior.Hoisted(hoistables))
-            val firstVarsEnv = new LexicalEnv(Some(globalEnv), pushesObject = true, LexicalEnv.Behavior.Declarative(initinalVars))
-            val hoistingEnv = firstVarsEnv
+            val globalEnv = new LexicalEnv(None, pushesObject = true, LexicalEnv.Behavior.Global)
+            val moduleEnv = new LexicalEnv(Some(globalEnv), pushesObject = true, LexicalEnv.Behavior.Declarative(initinalVars))
+            val initialNodeInfo = Node.Info(priority, moduleEnv, functionFrame, None)
+            val moduleBlock = new PushLexicalFrameNode("module-block", false)(initialNodeInfo)
+            val hoistingEnv = new LexicalEnv(Some(moduleEnv), pushesObject = true, LexicalEnv.Behavior.Hoisted(hoistables))
+            val firstVarsEnv = new LexicalEnv(Some(hoistingEnv), pushesObject = false, LexicalEnv.Behavior.Declarative(Map.empty))
 
-            implicit val info: Node.Info = Node.Info(priority, firstVarsEnv, functionFrame, None)
+            implicit val info: Node.Info = initialNodeInfo.copy(lexicalEnv = firstVarsEnv)
             hoistingNodeInfo = info
             val builder = new BlockBuilder(false, new BlockInfo(None, Map.empty, None, None, None), hoistingEnv, firstVarsEnv, priority)
             val graph = builder.build(program.body collect { case stmt: ast.Statement => stmt })
             val endNode = new EndNode
-            val scriptGraph = hoistableGraph ~> graph ~> endNode
+            val scriptGraph = moduleBlock ~> hoistableGraph ~> graph ~> endNode
 
             done = true
             ScriptGraph(scriptGraph.begin(endNode), endNode)
@@ -1065,9 +1067,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
             // first write arguments object to hoisting object
             val argumentNames = params.flatMap(gatherBindingNamesFromPattern).toSet
-            if (argumentNames.contains("arguments")) {
-                prologGraph ~>= new DupNode(1)(hoistingNodeInfo)
+            if (!argumentNames.contains("arguments")) {
+                //prologGraph ~>= new DupNode(1)(hoistingNodeInfo)
                 prologGraph ~>= new LexicalWriteNode("arguments")(hoistingNodeInfo)
+                hoistables += "arguments"
             }
 
             if (hasPatternMatching) {
@@ -1139,6 +1142,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
         override def asAnalysable: Analysable = {
             val functionBuilder = new FunctionBuilder(isTopLevel = false, Node.NoCallFrame, 0)
             val funcGraph = functionBuilder.buildFunctionAsScript(name, params, body, None, lexicalEnv)
+            new StackAnnotationVisitor(isFunction = true).start(funcGraph)
             funcGraph
         }
 

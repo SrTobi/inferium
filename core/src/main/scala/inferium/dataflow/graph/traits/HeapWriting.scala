@@ -2,6 +2,7 @@ package inferium.dataflow.graph.traits
 
 import inferium.dataflow.graph.Node
 import inferium.dataflow.{DataFlowAnalysis, ExecutionState}
+import inferium.js.types.js
 import inferium.lattice._
 import inferium.typescript.IniEntity
 
@@ -26,7 +27,7 @@ trait HeapWriting extends Node {
 
         val writeMutator = heapAfterCoersion.begin(heapWritingLoc)
         var assignmentLocation = writeMutator.setValue(valueLocation, value)
-        lazy val iniValue = IniEntity.from(value, writeMutator)
+        lazy val iniValue = js.from(value, writeMutator)
 
         def dynWritesToObject(onlyNumbers: Boolean): Unit = {
             for (obj <- objs) {

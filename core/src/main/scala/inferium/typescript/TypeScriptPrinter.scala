@@ -63,8 +63,7 @@ object IniNever extends IniEntity {
 }
 sealed trait IniAtom extends IniEntity
 
-sealed class IniRec(_target: => IniObject) extends IniEntity with IniAtom {
-    lazy val target: IniObject = _target
+sealed class IniRec(var target: IniObject) extends IniEntity with IniAtom {
 
     override def equals(other: Any): Boolean = other match {
         case other: IniRec =>
@@ -96,7 +95,7 @@ sealed class IniGeneric(val probe: ProbeEntity) extends IniEntity with IniAtom {
     override def recHashCode(): Int  = probe.hashCode()
 
     override def recEqual(other: Any, objs: util.IdentityHashMap[IniObject, IniObject]): Boolean = other match {
-        case other: IniGeneric => this eq other
+        case other: IniGeneric => this.probe eq other.probe
         case _ => false
     }
 }
@@ -177,7 +176,7 @@ class IniUnion(val atoms: Set[IniAtom], val obj: Option[IniObject]) extends IniE
 object IniUnion {
     def apply(values: Traversable[IniEntity])(implicit objs: Map[IniObject, IniRec] = Map.empty): IniEntity = {
         var obj: Option[IniObject] = None
-        val rec = new IniRec(obj.get)
+        val rec = new IniRec(null)
 
         def flat(e: Traversable[IniEntity]): Traversable[IniAtom] = e.flatMap {
             case IniNever => Seq.empty
@@ -193,18 +192,14 @@ object IniUnion {
                         Seq.empty
                 }
             case r: IniRec =>
-                flat(Seq(r.target))
+                 if (r.target == null) Seq(r) else flat(Seq(r.target))
             case p: IniAtom =>
                 Seq(p)
-            case _ =>
-                Seq.empty
         }
 
         val atoms = flat(values).toSet
 
-        if (obj.isDefined) {
-            rec.target
-        }
+        obj foreach { o => rec.target = o }
 
         (atoms.isEmpty, obj) match {
             case (true, Some(o)) => o
@@ -216,7 +211,7 @@ object IniUnion {
 
 object IniEntity {
     def from(entity: Entity, heap: Heap.Mutator, objs: Map[ObjectLike, IniRec] = Map.empty): IniEntity = entity.normalized(heap) match {
-        case NeverValue => IniNever
+        /*case NeverValue => IniNever
         case p: Primitive => IniValue(p)
         case union: UnionValue => IniUnion(union.entities.map{from(_, heap, objs)})
         case obj: ObjectLike =>
@@ -262,7 +257,8 @@ object IniEntity {
             iniObj
 
         case probe: ProbeEntity =>
-            new IniGeneric(probe)
+            new IniGeneric(probe)*/
+        case _ => ???
     }
 }
 
@@ -560,7 +556,7 @@ class TypeScriptPrinter(val returnObject: IniEntity) {
             case rec: IniRec =>
                 entries(rec.target)
             case g: IniGeneric =>
-                generics.getOrElseUpdate(g.probe, {
+                /*generics.getOrElseUpdate(g.probe, {
                     val generic = new GenericEntry()
                     val props = g.probe._properties.map {
                         case (name, prop) => (name, makeEntry(prop))
@@ -570,7 +566,8 @@ class TypeScriptPrinter(val returnObject: IniEntity) {
                         genericExtends += generic.name -> new InterfaceEntry(props, None, true)
 
                     generic
-                } )
+                } )*/
+                ???
             case obj: IniObject =>
                 entries.getOrElseUpdate(obj, {
                     /*val isInterface = obj.functionInfo.isEmpty || obj.members.nonEmpty

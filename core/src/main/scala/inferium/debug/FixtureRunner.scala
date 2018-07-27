@@ -21,7 +21,7 @@ class FixtureRunner(val fixture: Fixture, heapFactory: Heap.Factory, val bridge:
 
     val graph: ScriptGraph = new GraphBuilder(config).buildTemplate(prog, Map.empty).instantiate()
 
-    val (iniState: ExecutionState, _, instantiator: js.Instantiator) = NodeJs.initialState(config, heapFactory)
+    val (iniState: ExecutionState, _, instantiator) = NodeJs.initialState(config, heapFactory)
     val debugAdapter: DebugAdapter = new DebugAdapter {
         private var _hasError = false
         override def error(node: Node, message: String): Unit = {

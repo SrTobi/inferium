@@ -1,20 +1,22 @@
 package inferium.lattice
+import inferium.js.types.js
 import inferium.lattice.assertions.Assertion
 import inferium.lattice.assertions.Assertion.Effect
-import inferium.typescript.{IniEntity, IniGeneric, IniNever}
+import inferium.typescript.IniEntity
 import inferium.utils.macros.blockRec
 
 import scala.collection.mutable
 
 class ProbeEntity extends Entity with Callable {
-    val _properties = mutable.Map.empty[String, IniEntity]
+    val _writes = mutable.Map.empty[String, js.Type]
+    val _reads = mutable.Map.empty[String, js.Type]
 
-    private val _dynReads = mutable.Set.empty[ProbeEntity]
-    private val _numberReads = mutable.Set.empty[ProbeEntity]
-    private var _dynWrites: IniEntity = IniNever
-    private var _numberWrites: IniEntity = IniNever
-    val _calls = mutable.Map.empty[ProbeEntity, (Seq[IniEntity], IniEntity)]
-    private val _constructors = mutable.Map.empty[ProbeEntity, Seq[IniEntity]]
+    private var _dynReads: js.Type = js.NeverType
+    private var _numberReads: js.Type = js.NeverType
+    private var _dynWrites: js.Type = js.NeverType
+    private var _numberWrites: js.Type = js.NeverType
+    val _calls = mutable.Map.empty[ProbeEntity, (Seq[js.Type], js.Type)]
+    private val _constructors = mutable.Map.empty[ProbeEntity, Seq[js.Type]]
 
     /*def entities: Iterator[Entity] = {
         _reads.values.iterator.flatMap(_.iterator) ++
@@ -33,23 +35,23 @@ class ProbeEntity extends Entity with Callable {
 
 
     def read(property: String, probe: ProbeEntity): Unit = {
-        _properties += property -> (_properties.getOrElseUpdate(property, IniNever) | new IniGeneric(probe))
+        _reads += property -> (_reads.getOrElseUpdate(property, js.NeverType) intersectWith new js.ProbeType(probe))
     }
-    def write(property: String, value: IniEntity): Unit = {
-        _properties += property -> (_properties.getOrElseUpdate(property, IniNever) | value)
+    def write(property: String, ty: js.Type): Unit = {
+        _writes += property -> (_writes.getOrElseUpdate(property, js.NeverType) unionWith ty)
     }
-    def dynRead(probe: ProbeEntity): Unit = _dynReads += probe
-    def numberRead(probe: ProbeEntity): Unit = _numberReads += probe
-    def dynWrite(value: IniEntity): Unit = {
-        _dynWrites |= value
+    def dynRead(probe: ProbeEntity): Unit = _dynReads = _dynReads intersectWith new js.ProbeType(probe)
+    def numberRead(probe: ProbeEntity): Unit = _numberReads = _numberReads unionWith new js.ProbeType(probe)
+    def dynWrite(ty: js.Type): Unit = {
+        _dynWrites = _dynWrites unionWith ty
     }
-    def numberWrite(value: IniEntity): Unit = {
-        _numberWrites |= value
+    def numberWrite(ty: js.Type): Unit = {
+        _numberWrites = _dynWrites unionWith ty
     }
-    def call(thisEntity: IniEntity, arguments: Seq[IniEntity], probe: ProbeEntity): Unit = {
+    def call(thisEntity: js.Type, arguments: Seq[js.Type], probe: ProbeEntity): Unit = {
         _calls += probe -> (arguments, thisEntity)
     }
-    def construct(arguments: Seq[IniEntity], probe: ProbeEntity): Unit = {
+    def construct(arguments: Seq[js.Type], probe: ProbeEntity): Unit = {
         _constructors += probe -> arguments
     }
 

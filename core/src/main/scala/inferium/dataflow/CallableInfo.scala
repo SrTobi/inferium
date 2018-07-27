@@ -7,6 +7,7 @@ import inferium.lattice.{Entity, Heap, NeverValue, ProbeEntity}
 
 abstract class CallableInfo {
     def name: Option[String]
+    def argumentNames: Array[String] = ('a' to 'z').map { _.toString }.toArray
     def anchor: Anchor
     def yieldsGraph: Boolean
 
@@ -20,6 +21,7 @@ abstract class CallableInfo {
         case _ => false
     }
 
+    val thisProbe = new ProbeEntity
     val argumentProbe = new ProbeEntity
     var returnValue: Entity = NeverValue
 }
