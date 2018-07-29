@@ -11,6 +11,9 @@ import scala.collection.mutable
 
 abstract class SignatureCall(override val name: Option[String], val callSig: js.Signature, val constructSig: js.Signature) extends CallableInfo {
     override def anchor: Anchor = this
+
+    override def hashCode(): Int = name.hashCode()
+
     override def yieldsGraph: Boolean = false
     override def asAnalysable: Analysable = throw new UnsupportedOperationException("Signature call can not be analysed")
 }

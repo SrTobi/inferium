@@ -1,0 +1,116 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.forinright into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.forinright
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.forinright/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.forinright/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.forinright /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.forinright
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.forinright/./index.js'
+[info] Done Parsing module.
+[info] Found Some(forInRight)
+[info] Round 0
+[info] Analyse Some(forInRight)
+[error] Exception in thread "main" inferium.dataflow.BuildException: (109:2): Internal builder problem: scala.MatchError: escalima.ast.ForInStatement@4c6ebaf2 (of class escalima.ast.ForInStatement)
+[error] 	at inferium.dataflow.BuildException$.enrich(BuildException.scala:35)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder$BlockBuilder.buildStatement(GraphBuilder.scala:731)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder$BlockBuilder.$anonfun$build$3(GraphBuilder.scala:1080)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder$BlockBuilder.$anonfun$build$3$adapted(GraphBuilder.scala:1061)
+[error] 	at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:59)
+[error] 	at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:52)
+[error] 	at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder$BlockBuilder.build(GraphBuilder.scala:1061)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder.buildFunctionBody(GraphBuilder.scala:1167)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder.buildFunction(GraphBuilder.scala:1193)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionTemplate.instantiate(GraphBuilder.scala:1227)
+[error] 	at inferium.dataflow.graph.traits.Calling.$anonfun$call$3(Calling.scala:64)
+[error] 	at scala.collection.mutable.HashMap.getOrElseUpdate(HashMap.scala:82)
+[error] 	at inferium.dataflow.graph.traits.Calling.$anonfun$call$2(Calling.scala:57)
+[error] 	at inferium.dataflow.graph.traits.Calling.$anonfun$call$2$adapted(Calling.scala:55)
+[error] 	at scala.collection.immutable.List.foreach(List.scala:389)
+[error] 	at inferium.dataflow.graph.traits.Calling.call(Calling.scala:55)
+[error] 	at inferium.dataflow.graph.traits.Calling.call$(Calling.scala:45)
+[error] 	at inferium.dataflow.graph.CallNode$calling$.call(CallNode.scala:17)
+[error] 	at inferium.dataflow.graph.CallNode$spreading$.onComplete(CallNode.scala:70)
+[error] 	at inferium.dataflow.graph.CallNode$spreading$.onComplete(CallNode.scala:61)
+[error] 	at inferium.dataflow.graph.traits.Async.complete(Async.scala:9)
+[error] 	at inferium.dataflow.graph.traits.Async.complete$(Async.scala:8)
+[error] 	at inferium.dataflow.graph.traits.SeqSpreader.complete(SeqSpreader.scala:7)
+[error] 	at inferium.dataflow.graph.traits.SeqSpreader.spread(SeqSpreader.scala:21)
+[error] 	at inferium.dataflow.graph.CallNode.process(CallNode.scala:58)
+[error] 	at inferium.dataflow.NodeModuleAnalysis$CodeAnalysis.run(NodeModuleAnalysis.scala:40)
+[error] 	at inferium.dataflow.NodeModuleAnalysis$FunctionAnalyser.run(NodeModuleAnalysis.scala:93)
+[error] 	at inferium.dataflow.NodeModuleAnalysis.$anonfun$analyseFunctions$1(NodeModuleAnalysis.scala:208)
+[error] 	at inferium.dataflow.NodeModuleAnalysis.$anonfun$analyseFunctions$1$adapted(NodeModuleAnalysis.scala:207)
+[error] 	at scala.collection.immutable.List.foreach(List.scala:389)
+[error] 	at scala.collection.generic.TraversableForwarder.foreach(TraversableForwarder.scala:35)
+[error] 	at scala.collection.generic.TraversableForwarder.foreach$(TraversableForwarder.scala:35)
+[error] 	at scala.collection.mutable.ListBuffer.foreach(ListBuffer.scala:44)
+[error] 	at inferium.dataflow.NodeModuleAnalysis.analyseFunctions(NodeModuleAnalysis.scala:207)
+[error] 	at inferium.dataflow.NodeModuleAnalysis.runAnalysis(NodeModuleAnalysis.scala:193)
+[error] 	at inferium.CliMain$.main(CliMain.scala:124)
+[error] 	at inferium.CliMain.main(CliMain.scala)
+[error] Caused by: scala.MatchError: escalima.ast.ForInStatement@4c6ebaf2 (of class escalima.ast.ForInStatement)
+[error] 	at inferium.dataflow.GraphBuilder$FunctionBuilder$BlockBuilder.$anonfun$buildStatement$1(GraphBuilder.scala:1032)
+[error] 	at inferium.dataflow.BuildException$.enrich(BuildException.scala:28)
+[error] 	... 37 more
+[error] java.lang.RuntimeException: Nonzero exit code returned from runner: 1
+[error] 	at sbt.ForkRun.processExitCode$1(Run.scala:33)
+[error] 	at sbt.ForkRun.run(Run.scala:42)
+[error] 	at sbt.Defaults$.$anonfun$bgRunTask$5(Defaults.scala:1172)
+[error] 	at sbt.Defaults$.$anonfun$bgRunTask$5$adapted(Defaults.scala:1167)
+[error] 	at sbt.internal.BackgroundThreadPool.$anonfun$run$1(DefaultBackgroundJobService.scala:366)
+[error] 	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:12)
+[error] 	at scala.util.Try$.apply(Try.scala:209)
+[error] 	at sbt.internal.BackgroundThreadPool$BackgroundRunnable.run(DefaultBackgroundJobService.scala:289)
+[error] 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+[error] 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+[error] 	at java.lang.Thread.run(Thread.java:748)
+[error] (cli / Compile / run) Nonzero exit code returned from runner: 1
+[error] Total time: 3 s, completed Jul 29, 2018 7:37:06 PM

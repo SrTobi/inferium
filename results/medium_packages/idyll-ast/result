@@ -1,0 +1,479 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install idyll-ast into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/idyll-ast
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/idyll-ast/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/idyll-ast/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/idyll-ast /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/idyll-ast
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/idyll-ast/./dist/cjs/index.js'
+[info] Done Parsing module.
+[info] Found Some(getNodesByName)
+[info] Found Some(createNode)
+[info] Found Some(walkNodes)
+[info] Found Some(setProperties)
+[info] Found Some(filterNodes)
+[info] Found Some(modifyChildren)
+[info] Found Some(appendNode)
+[info] Found Some(getProperty)
+[info] Found Some(setProperty)
+[info] Found Some(appendNodes)
+[info] Found Some(removeNodesByName)
+[info] Found Some(modifyNodesByName)
+[info] Found Some(findNodes)
+[info] Found Some(getChildren)
+[info] Found Some(getPropertiesByType)
+[info] Found Some(prependNode)
+[info] Found Some(prependNodes)
+[info] Found Some(removeProperty)
+[info] Found Some(getProperties)
+[info] Found Some(filterChildren)
+[info] Found Some(getText)
+[info] Round 0
+[info] Analyse Some(getText)
+[info] Analyse Some(filterChildren)
+[info] Analyse Some(getProperties)
+[info] Analyse Some(removeProperty)
+[info] Analyse Some(prependNodes)
+[info] Analyse Some(prependNode)
+[info] Analyse Some(getPropertiesByType)
+[info] Analyse Some(getChildren)
+[info] Analyse Some(findNodes)
+[info] Found None
+[info] Analyse Some(modifyNodesByName)
+[info] Analyse Some(removeNodesByName)
+[info] Found None
+[info] Found None
+[info] Analyse Some(appendNodes)
+[info] Analyse Some(setProperty)
+[info] Analyse Some(getProperty)
+[info] Analyse Some(appendNode)
+[info] Analyse Some(modifyChildren)
+[info] Analyse Some(filterNodes)
+[info] Analyse Some(setProperties)
+[info] Analyse Some(walkNodes)
+[info] Analyse Some(createNode)
+[info] Analyse Some(getNodesByName)
+[info] Found Some(handleNode)
+[info] Round 1
+[info] Analyse Some(handleNode)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(getText)
+[info] Analyse Some(filterChildren)
+[info] Analyse Some(getProperties)
+[info] Analyse Some(removeProperty)
+[info] Analyse Some(prependNodes)
+[info] Analyse Some(prependNode)
+[info] Analyse Some(getPropertiesByType)
+[info] Analyse Some(getChildren)
+[info] Analyse Some(findNodes)
+[info] Analyse Some(modifyNodesByName)
+[info] Analyse Some(removeNodesByName)
+[info] Analyse Some(appendNodes)
+[info] Analyse Some(setProperty)
+[info] Analyse Some(getProperty)
+[info] Analyse Some(appendNode)
+[info] Analyse Some(modifyChildren)
+[info] Analyse Some(filterNodes)
+[info] Analyse Some(setProperties)
+[info] Analyse Some(walkNodes)
+[info] Analyse Some(createNode)
+[info] Analyse Some(getNodesByName)
+[info] Round 2
+[info] Analyse Some(handleNode)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(getText)
+[info] Analyse Some(filterChildren)
+[info] skipped
+[info] Analyse Some(removeProperty)
+[info] skipped
+[info] Analyse Some(prependNode)
+[info] Analyse Some(getPropertiesByType)
+[info] skipped
+[info] Analyse Some(findNodes)
+[info] Analyse Some(modifyNodesByName)
+[info] Analyse Some(removeNodesByName)
+[info] skipped
+[info] skipped
+[info] Analyse Some(getProperty)
+[info] Analyse Some(appendNode)
+[info] Analyse Some(modifyChildren)
+[info] skipped
+[info] skipped
+[info] Analyse Some(walkNodes)
+[info] Analyse Some(createNode)
+[info] Analyse Some(getNodesByName)
+[info] Round 3
+[info] Analyse Some(handleNode)
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I224<T76> {
+[info]   (): T76
+[info] }
+[info] interface I223<T75 extends I224<T76>, T76> {
+[info]   toLowerCase: T75
+[info] }
+[info] interface I222<T74 extends I223<T75, T76>, T75 extends I224<T76>, T76> {
+[info]   [0]: T74
+[info] }
+[info] interface I228<T65> {
+[info]   (_?: {}): T65
+[info] }
+[info] interface I227<T65, T71 extends I228<T65>> {
+[info]   map: T71
+[info] }
+[info] interface I229<T145 extends I222<T74, T75, T76>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76> {
+[info]   (node: (T145)): boolean
+[info] }
+[info] interface I226<T145 extends I222<T74, T75, T76>, T65, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (_?: (I229<T145, T74, T75, T76> | T84)): T70
+[info] }
+[info] interface I225<T145 extends I222<T74, T75, T76>, T65, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   filter: T69
+[info] }
+[info] interface I221<T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   [2]: (T68 | T65)
+[info] }
+[info] interface I231<T42> {
+[info]   (_?: {}): T42
+[info] }
+[info] interface I232<T41 extends I231<T42>, T42> {
+[info]   forEach: T41
+[info] }
+[info] interface I230<T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   [2]: (T44)
+[info] }
+[info] interface I237<T16> {
+[info]   (): T16
+[info] }
+[info] interface I236<T15 extends I237<T16>, T16> {
+[info]   toLowerCase: T15
+[info] }
+[info] interface I242<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   (_?: T27): T8
+[info] }
+[info] interface I241<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   [2]: (T25)
+[info]   [0]: T14
+[info] }
+[info] interface I240<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   reduce: T21
+[info] }
+[info] interface I239<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   push: T7
+[info] }
+[info] interface I243<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   (acc: (T23), node: (T27)): ({} | T23 | T5)
+[info] }
+[info] interface I238<T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8> {
+[info]   (_?: I243<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, _?: T23): T5
+[info] }
+[info] interface I235 {
+[info]   <T14 extends I236<T15, T16>, T15 extends I237<T16>, T16, T21 extends I238<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T23 extends I239<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T25 extends (I240<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8> | boolean), T27 extends I241<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T5, T7 extends I242<T14, T15, T16, T21, T23, T25, T27, T5, T7, T8>, T8>(acc: (T23), node: (T27)): ({} | T23 | T5)
+[info] }
+[info] interface I244 {
+[info]   length: number
+[info] }
+[info] interface I234<T1> {
+[info]   (_?: I235, _?: I244): T1
+[info] }
+[info] interface I233<T1> {
+[info]   reduce: I234<T1>
+[info] }
+[info] interface I246 {
+[info]   (): any
+[info] }
+[info] interface I245 {
+[info]   toLowerCase: I246
+[info] }
+[info] interface I248 {
+[info]   length: number
+[info] }
+[info] interface I249 {
+[info]   length: number
+[info] }
+[info] interface I247<T31, T32> {
+[info]   [0]: T31
+[info]   [1]: I248
+[info]   [2]: (I249 | T32)
+[info]   length: number
+[info] }
+[info] interface I252<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (node: (T157)): undefined
+[info] }
+[info] interface I251<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (_?: I252<T157, T41, T42, T44>): any
+[info] }
+[info] interface I250<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   forEach: I251<T157, T41, T42, T44>
+[info] }
+[info] interface I253<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (_?: T157): any
+[info] }
+[info] interface I258<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (node: (T144)): (T144)
+[info] }
+[info] interface I257<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T57, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (_?: I258<T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>): T57
+[info] }
+[info] interface I256<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T57, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   map: I257<T144, T145, T57, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I255<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T57, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (_?: T84): I256<T144, T145, T57, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I254<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T57, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   filter: I255<T144, T145, T57, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I260<T88> {
+[info]   (_?: {}): T88
+[info] }
+[info] interface I261<T88, T93 extends I260<T88>> {
+[info]   map: T93
+[info] }
+[info] interface I259<T88, T93 extends I260<T88>, T95 extends I261<T88, T93>> {
+[info]   [2]: ((T95) | T88 | {})
+[info] }
+[info] interface I264 {
+[info]   (_?: {}): any
+[info] }
+[info] interface I263 {
+[info]   forEach: I264
+[info] }
+[info] interface I262 {
+[info]   [1]: I263
+[info] }
+[info] interface I266<T115> {
+[info]   (_?: {}): T115
+[info] }
+[info] interface I265<T114 extends I266<T115>, T115> {
+[info]   map: T114
+[info] }
+[info] interface I271<T133 extends never> {
+[info]   [0]: "value"
+[info]   [1]: T133
+[info]   length: number
+[info] }
+[info] interface I270<T122, T133 extends never> {
+[info]   [0]: T122
+[info]   [1]: (I271<T133> | T133)
+[info]   length: number
+[info] }
+[info] interface I269<T122, T133 extends never> {
+[info]   [0]: I270<T122, T133>
+[info]   length: number
+[info] }
+[info] interface I268<T118, T122, T133 extends never> {
+[info]   (_?: I269<T122, T133>): T118
+[info] }
+[info] interface I267<T118, T121 extends I268<T118, T122, T133>, T122, T133 extends never> {
+[info]   concat: T121
+[info] }
+[info] interface I272<T113 extends I265<T114, T115>, T114 extends I266<T115>, T115, T118, T120 extends I267<T118, T121, T122, T133>, T121 extends I268<T118, T122, T133>, T122, T133 extends never> {
+[info]   [1]: (T120 | T118 | T115 | T113)
+[info] }
+[info] interface I275<T145 extends I222<T74, T75, T76>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76> {
+[info]   (node: (T145)): boolean
+[info] }
+[info] interface I278<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (node: (T144)): (T144)
+[info] }
+[info] interface I277<T136, T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (_?: I278<T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>): T136
+[info] }
+[info] interface I276<T136, T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   map: I277<T136, T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I274<T136, T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   (_?: I275<T145, T74, T75, T76>): I276<T136, T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I273<T136, T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   filter: I274<T136, T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>
+[info] }
+[info] interface I280 {
+[info]   (): any
+[info] }
+[info] interface I279 {
+[info]   toLowerCase: I280
+[info] }
+[info] interface I281<T152> {
+[info]   (_?: {}): T152
+[info] }
+[info] interface I282<T151 extends I281<T152>, T152> {
+[info]   map: T151
+[info] }
+[info] interface I285<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (node: (T157)): undefined
+[info] }
+[info] interface I284<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (_?: I285<T157, T41, T42, T44>): any
+[info] }
+[info] interface I283<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   forEach: I284<T157, T41, T42, T44>
+[info] }
+[info] interface I286<T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>> {
+[info]   (_?: T157): any
+[info] }
+[info] interface I287 {
+[info]   length: number
+[info] }
+[info] interface I288<T160, T161> {
+[info]   [2]: (T161 | T160 | any)
+[info] }
+[info] interface I289 {
+[info]   length: number
+[info] }
+[info] interface I290<T160> {
+[info]   [0]: T160
+[info]   length: number
+[info] }
+[info] interface I291 {
+[info]   length: number
+[info] }
+[info] interface I294<T170> {
+[info]   (_?: {}): T170
+[info] }
+[info] interface I293<T170> {
+[info]   filter: I294<T170>
+[info] }
+[info] interface I292<T170> {
+[info]   [1]: I293<T170>
+[info] }
+[info] interface I295 {
+[info]   length: number
+[info] }
+[info] interface I297<T183> {
+[info]   (_?: {}): T183
+[info] }
+[info] interface I296<T183, T186 extends I297<T183>> {
+[info]   filter: T186
+[info] }
+[info] interface I298<T183, T185 extends I296<T183, T186>, T186 extends I297<T183>> {
+[info]   [1]: (T185 | T183)
+[info] }
+[info] interface I299<T192> {
+[info]   [1]: T192
+[info] }
+[info] interface I300 {
+[info]   length: number
+[info] }
+[info] interface I301 {
+[info]   length: number
+[info] }
+[info] interface I302<T199> {
+[info]   (_?: {}): T199
+[info] }
+[info] interface I303<T199, T204 extends I302<T199>> {
+[info]   filter: T204
+[info] }
+[info] interface I304<T199, T204 extends I302<T199>, T206 extends I303<T199, T204>> {
+[info]   [2]: ((T206) | T199 | {})
+[info] }
+[info] interface I307 {
+[info]   (_?: {}): any
+[info] }
+[info] interface I306 {
+[info]   forEach: I307
+[info] }
+[info] interface I305 {
+[info]   [2]: (I306)
+[info] }
+[info] interface I220<T144 extends I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, T145 extends I222<T74, T75, T76>, T157 extends I230<T41, T42, T44>, T41 extends I231<T42>, T42, T44 extends I232<T41, T42>, T65, T68 extends I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, T69 extends I226<T145, T65, T70, T71, T74, T75, T76, T84>, T70 extends I227<T65, T71>, T71 extends I228<T65>, T74 extends I223<T75, T76>, T75 extends I224<T76>, T76, T84 extends never> {
+[info]   getNodesByName<T1>(ast: I233<T1>, name: I245): T1
+[info]   createNode<T31, T32>(name: T31, props: any, children: T32): I247<T31, T32>
+[info]   walkNodes(ast: I250<T157, T41, T42, T44>, f: (I253<T157, T41, T42, T44>)): undefined
+[info]   setProperties<T55 extends never>(node: (T55), properties: any): (T55)
+[info]   filterNodes<T57>(ast: I254<T144, T145, T57, T65, T68, T69, T70, T71, T74, T75, T76, T84>, filter: (T84)): T57
+[info]   modifyChildren<T100 extends I259<T88, T93, T95>, T88, T93 extends I260<T88>, T95 extends I261<T88, T93>>(node: (T100)): (T100)
+[info]   appendNode(ast: any, node: any): ({})
+[info]   getProperty(node: (I262)): (undefined | null)
+[info]   setProperty<T113 extends I265<T114, T115>, T114 extends I266<T115>, T115, T118, T120 extends I267<T118, T121, T122, T133>, T121 extends I268<T118, T122, T133>, T122, T130 extends I272<T113, T114, T115, T118, T120, T121, T122, T133>, T133 extends never>(node: (T130), key: T122, value: (T133)): (T130)
+[info]   appendNodes(ast: any, nodes: any): ({})
+[info]   removeNodesByName<T136>(ast: I273<T136, T144, T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, name: I279): T136
+[info]   modifyNodesByName<T151 extends I281<T152>, T152, T153 extends I282<T151, T152>>(ast: (T153)): T153
+[info]   findNodes(ast: I283<T157, T41, T42, T44>, filter: I286<T157, T41, T42, T44>): I287
+[info]   getChildren<T160, T161>(node: (I288<T160, T161>)): (I289 | I290<T160> | I291 | T161)
+[info]   getPropertiesByType<T170>(node: (I292<T170>)): ({} | I295 | T170)
+[info]   prependNode(ast: any, node: any): ({})
+[info]   prependNodes(ast: any, nodes: any): ({})
+[info]   removeProperty<T183, T185 extends I296<T183, T186>, T186 extends I297<T183>, T191 extends I298<T183, T185, T186>>(node: (T191)): (T191)
+[info]   getProperties<T192>(node: (I299<T192>)): (I300 | I301 | T192)
+[info]   filterChildren<T199, T204 extends I302<T199>, T206 extends I303<T199, T204>, T211 extends I304<T199, T204, T206>>(node: (T211)): (T211)
+[info]   getText(node: I305): string
+[info] }
+[info] => I220<I221<T145, T65, T68, T69, T70, T71, T74, T75, T76, T84>, I222<T74, T75, T76>, I230<T41, T42, T44>, I231<T42>, any, I232<T41, T42>, any, I225<T145, T65, T69, T70, T71, T74, T75, T76, T84>, I226<T145, T65, T70, T71, T74, T75, T76, T84>, I227<T65, T71>, I228<T65>, I223<T75, T76>, I224<T76>, any, never>
+[success] Total time: 4 s, completed Jul 29, 2018 11:18:28 PM

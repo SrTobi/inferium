@@ -1,6 +1,6 @@
 package inferium.dataflow
 
-import inferium.dataflow.CallableInfo.{Anchor, ReturnHandler}
+import inferium.dataflow.CallableInfo.{AnalysisInfo, Anchor, ReturnHandler}
 import inferium.dataflow.calls.CallInstance
 import inferium.dataflow.graph.{CallNode, MergeNode, Node}
 import inferium.lattice.{Entity, Heap, NeverValue, ProbeEntity}
@@ -17,16 +17,19 @@ abstract class CallableInfo {
     override def hashCode(): Int = anchor.hashCode()
 
     override def equals(other: scala.Any): Boolean = other match {
-        case other: CallableInfo => other.anchor == anchor
+        case other: CallableInfo => other.anchor eq anchor
         case _ => false
     }
 
-    val thisProbe = new ProbeEntity
-    val argumentProbe = new ProbeEntity
-    var returnValue: Entity = NeverValue
+    var analysisInfo: Option[AnalysisInfo] = None
 }
 
 object CallableInfo {
+    class AnalysisInfo  {
+        val thisProbe = new ProbeEntity
+        val argumentProbe = new ProbeEntity
+        var returnValue: Entity = NeverValue
+    }
     type Anchor = AnyRef
     type ReturnHandler = (Entity, Heap, DataFlowAnalysis) => Unit
 }

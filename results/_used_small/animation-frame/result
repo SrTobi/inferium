@@ -1,0 +1,183 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install animation-frame into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/animation-frame
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/animation-frame/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/animation-frame/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/animation-frame /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/animation-frame
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/./index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/animation-frame.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/./native.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/././root.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/./now.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/./performance.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/././now.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/././performance-timing.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/./././now.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/././root.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/animation-frame/././lib/./root.js'
+[info] Done Parsing module.
+[info] Found Some(AnimationFrame)
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Found None
+[info] Found None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(AnimationFrame)
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(AnimationFrame)
+[info] Round 2
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse Some(AnimationFrame)
+[info] Round 3
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] Analyse None
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I24<T4 extends number, T6> {
+[info]   frameRate: T4
+[info]   useNative: (T6 | boolean)
+[info] }
+[info] interface I25<T11, T14> {
+[info]   useNative: (boolean | T14)
+[info]   frameRate: T11
+[info] }
+[info] interface I27 {
+[info]   useNative?: (undefined | boolean)
+[info] }
+[info] interface I28<T11, T14, T22 extends ((I24<T4, T6> | number) & I25<T11, T14>), T4 extends number, T6> {
+[info]   frameRate: (I27 | T22)
+[info]   useNative?: (undefined | boolean)
+[info] }
+[info] interface I26<T11, T14, T22 extends ((I24<T4, T6> | number) & I25<T11, T14>), T4 extends number, T6> {
+[info]   frameRate?: (number | I27 | T4 | T22 | undefined)
+[info]   _isCustomFrameRate?: boolean
+[info]   options?: (I27 | I28<T11, T14, T22, T4, T6> | T22)
+[info]   _callbacks?: {}
+[info]   _lastTickTime?: number
+[info]   _tickCounter?: number
+[info]   _frameLength?: number
+[info]   _timeoutId?: null
+[info] }
+[info] interface I29<T11, T14, T22 extends ((I24<T4, T6> | number) & I25<T11, T14>), T4 extends number, T6> {
+[info]   frameRate?: (number | I27 | T4 | T22 | undefined)
+[info]   _isCustomFrameRate?: boolean
+[info]   options?: (I27 | I28<T11, T14, T22, T4, T6> | T22)
+[info]   _callbacks?: {}
+[info]   _lastTickTime?: number
+[info]   _tickCounter?: number
+[info]   _frameLength?: number
+[info]   _timeoutId?: null
+[info] }
+[info] interface I30<T2 extends number, T3> {
+[info]   frameRate: T2
+[info]   useNative: (T3 | boolean)
+[info] }
+[info] interface I32 {
+[info]   useNative?: (undefined | boolean)
+[info] }
+[info] interface I33<T1 extends (I30<T2, T3> | number), T2 extends number, T3> {
+[info]   frameRate: (I32 | T1)
+[info]   useNative?: (undefined | boolean)
+[info] }
+[info] interface I31<T1 extends (I30<T2, T3> | number), T2 extends number, T3> {
+[info]   frameRate?: (number | T2 | I32 | T1 | undefined)
+[info]   _isCustomFrameRate?: boolean
+[info]   options?: (I33<T1, T2, T3> | I32 | T1)
+[info]   _callbacks?: {}
+[info]   _lastTickTime?: number
+[info]   _tickCounter?: (number | string)
+[info]   _frameLength?: number
+[info]   _timeoutId?: {}
+[info] }
+[info] interface I34<T1 extends (I30<T2, T3> | number), T2 extends number, T3> {
+[info]   frameRate?: (number | T2 | I32 | T1 | undefined)
+[info]   _isCustomFrameRate?: boolean
+[info]   options?: (I33<T1, T2, T3> | I32 | T1)
+[info]   _callbacks?: {}
+[info]   _lastTickTime?: number
+[info]   _tickCounter?: (number | string)
+[info]   _frameLength?: number
+[info]   _timeoutId?: {}
+[info] }
+[info] interface I23 {
+[info]   <T11, T14, T22 extends ((I24<T4, T6> | number) & I25<T11, T14>), T4 extends number, T6>(options: (T22)): (undefined | I26<T11, T14, T22, T4, T6> | I29<T11, T14, T22, T4, T6>)
+[info]   FRAME_RATE: number
+[info]   shim<T1 extends (I30<T2, T3> | number), T2 extends number, T3>(options: T1): (I31<T1, T2, T3> | I34<T1, T2, T3>)
+[info] }
+[info] => I23
+[success] Total time: 4 s, completed Jul 29, 2018 7:29:11 PM

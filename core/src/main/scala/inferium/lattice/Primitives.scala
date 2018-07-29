@@ -76,7 +76,7 @@ object UndefinedValue extends Primitive {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => NeverValue
         case Falsyfied => this
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "undefined"
@@ -98,7 +98,7 @@ object NullValue extends Primitive {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => NeverValue
         case Falsyfied => this
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "null"
@@ -150,7 +150,7 @@ object BoolValue extends BoolValue {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => TrueValue
         case Falsyfied => FalseValue
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def negate: BoolValue = BoolValue
@@ -177,7 +177,7 @@ object TrueValue extends SpecificBoolValue(true) {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => NeverValue
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "true"
@@ -197,7 +197,7 @@ object FalseValue extends SpecificBoolValue(false) {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => NeverValue
         case Falsyfied => this
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "false"
@@ -235,7 +235,7 @@ object NumberValue extends NumberValue {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => SpecificNumberValue(0)
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "number"
@@ -253,7 +253,7 @@ case class SpecificNumberValue(value: Long) extends NumberValue {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => if (value == 0) NeverValue else this
         case Falsyfied => if (value == 0) this else NeverValue
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = value.toString
@@ -284,7 +284,7 @@ object StringValue extends StringValue {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => this
         case Falsyfied => SpecificStringValue.emptyString
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "string"
@@ -302,7 +302,7 @@ class SpecificStringValue private (val value: String) extends StringValue {
     override def withAssertion(assertion: Assertion, heap: Heap.Mutator): Primitive = assertion match {
         case Truthyfied => if (value == "") NeverValue else this
         case Falsyfied => if (value == "") this else NeverValue
-        case Propertyfied(_, _) => ???
+        case Propertyfied(_, _) => NeverValue // todo: check for properties
     }
 
     override def toString: String = "\"" + value + "\""

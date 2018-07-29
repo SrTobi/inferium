@@ -1,0 +1,73 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.isnative into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.isnative
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.isnative/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.isnative/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.isnative /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.isnative
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.isnative/./index.js'
+[info] Done Parsing module.
+[info] Found Some(isNative)
+[info] Round 0
+[info] Analyse Some(isNative)
+[info] Round 1
+[info] Analyse Some(isNative)
+[info] Round 2
+[info] Analyse Some(isNative)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I6 {
+[info]   toString: any
+[info] }
+[info] interface I5 {
+[info]   (value: ((boolean & (I6 | (boolean & (number | string)))))): {}
+[info] }
+[info] => I5
+[success] Total time: 3 s, completed Jul 29, 2018 8:54:40 PM

@@ -63,7 +63,9 @@ function findPackageRoot(pkgname: string, path: string): string {
             && fs.existsSync(join(path, "package.json"))
     }
 
-    while (!found()) {
+    let old = undefined
+    while (!found() && path != old) {
+        old = path
         path = dirname(path)
     }
 
@@ -107,14 +109,15 @@ function getDependencies(path: string, found: Set<string>) {
         .forEach(dep => {
             try {
                 var deppath = require.resolve(dep, {paths: [pkgpath]})
+
+                if (!deppath.startsWith("/")) {
+                    return
+                }
+                getDependencies(findPackageRoot(dep, deppath), found)
             } catch (e) {
                 console.log(`=> Couldn't find ${dep}! Skip!`)
                 return
             }
-            if (!deppath.startsWith("/")) {
-                return
-            }
-            getDependencies(findPackageRoot(dep, deppath), found)
         })
 }
 

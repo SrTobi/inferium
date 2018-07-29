@@ -1,5 +1,6 @@
 package inferium.dataflow
 
+import inferium.dataflow.CallableInfo.AnalysisInfo
 import inferium.dataflow.NodeModuleAnalysis.ModuleSource
 import inferium.dataflow.graph.Node
 import inferium.dataflow.graph.Node.StateOrigin
@@ -64,10 +65,12 @@ class NodeModuleAnalysis(val source: ModuleSource,
         }
     }
 
-    private class FunctionAnalyser(val info: CallableInfo) {
-        assert(info.yieldsGraph)
+    private class FunctionAnalyser(val cinfo: CallableInfo) {
+        assert(cinfo.yieldsGraph)
+        assert(cinfo.analysisInfo.isDefined)
+        def info: AnalysisInfo = cinfo.analysisInfo.get
         private val location = Location()
-        private val analysis = new CodeAnalysis(info.asAnalysable, None)
+        private val analysis = new CodeAnalysis(cinfo.asAnalysable, None)
         private var lexicalFrame: LexicalFrame = _
 
         def addLexicalFrame(lexicalFrame: LexicalFrame): Unit = {
@@ -78,12 +81,12 @@ class NodeModuleAnalysis(val source: ModuleSource,
             }
         }
 
-        def run(): Boolean = {
-            if (!userState.hasEffect(location)) {
+        def run(force: Boolean = false): Boolean = {
+            if (!force && !userState.hasEffect(location)) {
                 println("skipped")
                 return false
             }
-            println("Analyse " + info.name)
+            println("Analyse " + cinfo.name)
 
             val heap = userState.toHeap(location)
             val state = ExecutionState(info.argumentProbe :: Nil, heap, info.thisProbe, lexicalFrame)
@@ -193,7 +196,7 @@ class NodeModuleAnalysis(val source: ModuleSource,
         js.from(exports, acc)
     }
 
-    private def analyseFunctions(): Boolean = {
+    private def analyseFunctions(force: Boolean = false): Boolean = {
         var changed = false
 
         val worklist = analyzingList
@@ -202,7 +205,7 @@ class NodeModuleAnalysis(val source: ModuleSource,
         assert(worklist.size == foundFunctions.size)
 
         for (func <- worklist) {
-            if (func.run()) {
+            if (func.run(force)) {
                 changed = true
             }
             analyzingList.append(func)
@@ -248,11 +251,13 @@ class NodeModuleAnalysis(val source: ModuleSource,
                     if (info.yieldsGraph) {
                         val analyser = foundFunctions.getOrElseUpdate(info.anchor, {
                             println("Found " + info.name)
+                            info.analysisInfo = Some(new AnalysisInfo)
                             val analyser = new FunctionAnalyser(info)
                             analyzingList.prepend(analyser)
                             analyser
                         })
                         analyser.addLexicalFrame(func.lexicalFrame)
+                        info.analysisInfo = Some(analyser.info)
                     }
 
 
@@ -274,7 +279,7 @@ class NodeModuleAnalysis(val source: ModuleSource,
             }
 
             foundProbes += probe
-            //probeprobe.entities foreach { inspectEntity }
+            probe.entities foreach { inspectEntity }
         }
     }
 }

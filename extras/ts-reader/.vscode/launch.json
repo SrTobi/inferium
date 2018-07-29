@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/dist/main.js",
             "cwd": "${workspaceFolder}",
             "args": [
-                "ace"
+                "got"
             ],
             "outFiles": [
                 "${workspaceFolder}/**/*.js"

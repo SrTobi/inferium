@@ -1,0 +1,157 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install pure-render-decorator into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/pure-render-decorator
+Look into <inf>/fbjs
+Look into <inf>/core-js
+Look into <inf>/isomorphic-fetch
+Look into <inf>/node-fetch
+Look into <inf>/encoding
+Look into <inf>/iconv-lite
+Look into <inf>/safer-buffer
+Look into <inf>/is-stream
+Look into <inf>/whatwg-fetch
+Look into <inf>/loose-envify
+Look into <inf>/js-tokens
+Look into <inf>/object-assign
+Look into <inf>/promise
+Look into <inf>/asap
+Look into <inf>/setimmediate
+Look into <inf>/ua-parser-js
+Install types for fbjs
+=> not found
+Install types for core-js
+Install types for isomorphic-fetch
+Install types for node-fetch
+Install types for encoding
+=> not found
+Install types for iconv-lite
+Install types for safer-buffer
+=> not found
+Install types for is-stream
+Install types for whatwg-fetch
+Install types for loose-envify
+=> not found
+Install types for js-tokens
+=> not found
+Install types for object-assign
+Install types for promise
+Install types for asap
+Install types for setimmediate
+=> not found
+Install types for ua-parser-js
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/pure-render-decorator/_inferium_gather.ts
+Gather types for 16 packages:
+=> fbjs, core-js, isomorphic-fetch, node-fetch, encoding, iconv-lite, safer-buffer, is-stream, whatwg-fetch, loose-envify, js-tokens, object-assign, promise, asap, setimmediate, ua-parser-js 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15
+ambient modules: "core-js", "core-js/shim", "core-js/core", "core-js/core/$for", "core-js/core/_", "core-js/core/array", "core-js/core/date", "core-js/core/delay", "core-js/core/dict", "core-js/core/function", "core-js/core/global", "core-js/core/log", "core-js/core/number", "core-js/core/object", "core-js/core/string", "core-js/fn/$for", "core-js/fn/_", "core-js/fn/clear-immediate", "core-js/fn/delay", "core-js/fn/dict", "core-js/fn/get-iterator", "core-js/fn/global", "core-js/fn/is-iterable", "core-js/fn/log", "core-js/fn/map", "core-js/fn/promise", "core-js/fn/set", "core-js/fn/set-immediate", "core-js/fn/set-interval", "core-js/fn/set-timeout", "core-js/fn/weak-map", "core-js/fn/weak-set", "core-js/fn/array", "core-js/fn/array/concat", "core-js/fn/array/copy-within", "core-js/fn/array/entries", "core-js/fn/array/every", "core-js/fn/array/fill", "core-js/fn/array/filter", "core-js/fn/array/find", "core-js/fn/array/find-index", "core-js/fn/array/for-each", "core-js/fn/array/from", "core-js/fn/array/includes", "core-js/fn/array/index-of", "core-js/fn/array/is-array", "core-js/fn/array/join", "core-js/fn/array/keys", "core-js/fn/array/last-index-of", "core-js/fn/array/map", "core-js/fn/array/of", "core-js/fn/array/pop", "core-js/fn/array/push", "core-js/fn/array/reduce", "core-js/fn/array/reduce-right", "core-js/fn/array/reverse", "core-js/fn/array/shift", "core-js/fn/array/slice", "core-js/fn/array/some", "core-js/fn/array/sort", "core-js/fn/array/splice", "core-js/fn/array/turn", "core-js/fn/array/unshift", "core-js/fn/array/values", "core-js/fn/date", "core-js/fn/date/add-locale", "core-js/fn/date/format", "core-js/fn/date/formatUTC", "core-js/fn/function", "core-js/fn/function/has-instance", "core-js/fn/function/name", "core-js/fn/function/part", "core-js/fn/math", "core-js/fn/math/acosh", "core-js/fn/math/asinh", "core-js/fn/math/atanh", "core-js/fn/math/cbrt", "core-js/fn/math/clz32", "core-js/fn/math/cosh", "core-js/fn/math/expm1", "core-js/fn/math/fround", "core-js/fn/math/hypot", "core-js/fn/math/imul", "core-js/fn/math/log10", "core-js/fn/math/log1p", "core-js/fn/math/log2", "core-js/fn/math/sign", "core-js/fn/math/sinh", "core-js/fn/math/tanh", "core-js/fn/math/trunc", "core-js/fn/number", "core-js/fn/number/epsilon", "core-js/fn/number/is-finite", "core-js/fn/number/is-integer", "core-js/fn/number/is-nan", "core-js/fn/number/is-safe-integer", "core-js/fn/number/max-safe-integer", "core-js/fn/number/min-safe-integer", "core-js/fn/number/parse-float", "core-js/fn/number/parse-int", "core-js/fn/number/random", "core-js/fn/object", "core-js/fn/object/assign", "core-js/fn/object/classof", "core-js/fn/object/create", "core-js/fn/object/define", "core-js/fn/object/define-properties", "core-js/fn/object/define-property", "core-js/fn/object/entries", "core-js/fn/object/freeze", "core-js/fn/object/get-own-property-descriptor", "core-js/fn/object/get-own-property-descriptors", "core-js/fn/object/get-own-property-names", "core-js/fn/object/get-own-property-symbols", "core-js/fn/object/get-prototype-of", "core-js/fn/object/is", "core-js/fn/object/is-extensible", "core-js/fn/object/is-frozen", "core-js/fn/object/is-object", "core-js/fn/object/is-sealed", "core-js/fn/object/keys", "core-js/fn/object/make", "core-js/fn/object/prevent-extensions", "core-js/fn/object/seal", "core-js/fn/object/set-prototype-of", "core-js/fn/object/values", "core-js/fn/reflect", "core-js/fn/reflect/apply", "core-js/fn/reflect/construct", "core-js/fn/reflect/define-property", "core-js/fn/reflect/delete-property", "core-js/fn/reflect/enumerate", "core-js/fn/reflect/get", "core-js/fn/reflect/get-own-property-descriptor", "core-js/fn/reflect/get-prototype-of", "core-js/fn/reflect/has", "core-js/fn/reflect/is-extensible", "core-js/fn/reflect/own-keys", "core-js/fn/reflect/prevent-extensions", "core-js/fn/reflect/set", "core-js/fn/reflect/set-prototype-of", "core-js/fn/regexp", "core-js/fn/regexp/escape", "core-js/fn/string", "core-js/fn/string/at", "core-js/fn/string/code-point-at", "core-js/fn/string/ends-with", "core-js/fn/string/escape-html", "core-js/fn/string/from-code-point", "core-js/fn/string/includes", "core-js/fn/string/pad-end", "core-js/fn/string/pad-start", "core-js/fn/string/raw", "core-js/fn/string/repeat", "core-js/fn/string/starts-with", "core-js/fn/string/unescape-html", "core-js/fn/symbol", "core-js/fn/symbol/for", "core-js/fn/symbol/has-instance", "core-js/fn/symbol/is-concat-spreadable", "core-js/fn/symbol/iterator", "core-js/fn/symbol/key-for", "core-js/fn/symbol/match", "core-js/fn/symbol/replace", "core-js/fn/symbol/search", "core-js/fn/symbol/species", "core-js/fn/symbol/split", "core-js/fn/symbol/to-primitive", "core-js/fn/symbol/to-string-tag", "core-js/fn/symbol/unscopables", "core-js/es5", "core-js/es6", "core-js/es6/array", "core-js/es6/function", "core-js/es6/map", "core-js/es6/math", "core-js/es6/number", "core-js/es6/object", "core-js/es6/promise", "core-js/es6/reflect", "core-js/es6/regexp", "core-js/es6/set", "core-js/es6/string", "core-js/es6/symbol", "core-js/es6/weak-map", "core-js/es6/weak-set", "core-js/es7", "core-js/es7/array", "core-js/es7/map", "core-js/es7/object", "core-js/es7/regexp", "core-js/es7/set", "core-js/es7/string", "core-js/js", "core-js/js/array", "core-js/web", "core-js/web/dom", "core-js/web/immediate", "core-js/web/timers", "core-js/library", "core-js/library/shim", "core-js/library/core", "core-js/library/core/$for", "core-js/library/core/_", "core-js/library/core/array", "core-js/library/core/date", "core-js/library/core/delay", "core-js/library/core/dict", "core-js/library/core/function", "core-js/library/core/global", "core-js/library/core/log", "core-js/library/core/number", "core-js/library/core/object", "core-js/library/core/string", "core-js/library/fn/$for", "core-js/library/fn/_", "core-js/library/fn/clear-immediate", "core-js/library/fn/delay", "core-js/library/fn/dict", "core-js/library/fn/get-iterator", "core-js/library/fn/global", "core-js/library/fn/is-iterable", "core-js/library/fn/log", "core-js/library/fn/map", "core-js/library/fn/promise", "core-js/library/fn/set", "core-js/library/fn/set-immediate", "core-js/library/fn/set-interval", "core-js/library/fn/set-timeout", "core-js/library/fn/weak-map", "core-js/library/fn/weak-set", "core-js/library/fn/array", "core-js/library/fn/array/concat", "core-js/library/fn/array/copy-within", "core-js/library/fn/array/entries", "core-js/library/fn/array/every", "core-js/library/fn/array/fill", "core-js/library/fn/array/filter", "core-js/library/fn/array/find", "core-js/library/fn/array/find-index", "core-js/library/fn/array/for-each", "core-js/library/fn/array/from", "core-js/library/fn/array/includes", "core-js/library/fn/array/index-of", "core-js/library/fn/array/is-array", "core-js/library/fn/array/join", "core-js/library/fn/array/keys", "core-js/library/fn/array/last-index-of", "core-js/library/fn/array/map", "core-js/library/fn/array/of", "core-js/library/fn/array/pop", "core-js/library/fn/array/push", "core-js/library/fn/array/reduce", "core-js/library/fn/array/reduce-right", "core-js/library/fn/array/reverse", "core-js/library/fn/array/shift", "core-js/library/fn/array/slice", "core-js/library/fn/array/some", "core-js/library/fn/array/sort", "core-js/library/fn/array/splice", "core-js/library/fn/array/turn", "core-js/library/fn/array/unshift", "core-js/library/fn/array/values", "core-js/library/fn/date", "core-js/library/fn/date/add-locale", "core-js/library/fn/date/format", "core-js/library/fn/date/formatUTC", "core-js/library/fn/function", "core-js/library/fn/function/has-instance", "core-js/library/fn/function/name", "core-js/library/fn/function/part", "core-js/library/fn/math", "core-js/library/fn/math/acosh", "core-js/library/fn/math/asinh", "core-js/library/fn/math/atanh", "core-js/library/fn/math/cbrt", "core-js/library/fn/math/clz32", "core-js/library/fn/math/cosh", "core-js/library/fn/math/expm1", "core-js/library/fn/math/fround", "core-js/library/fn/math/hypot", "core-js/library/fn/math/imul", "core-js/library/fn/math/log10", "core-js/library/fn/math/log1p", "core-js/library/fn/math/log2", "core-js/library/fn/math/sign", "core-js/library/fn/math/sinh", "core-js/library/fn/math/tanh", "core-js/library/fn/math/trunc", "core-js/library/fn/number", "core-js/library/fn/number/epsilon", "core-js/library/fn/number/is-finite", "core-js/library/fn/number/is-integer", "core-js/library/fn/number/is-nan", "core-js/library/fn/number/is-safe-integer", "core-js/library/fn/number/max-safe-integer", "core-js/library/fn/number/min-safe-integer", "core-js/library/fn/number/parse-float", "core-js/library/fn/number/parse-int", "core-js/library/fn/number/random", "core-js/library/fn/object", "core-js/library/fn/object/assign", "core-js/library/fn/object/classof", "core-js/library/fn/object/create", "core-js/library/fn/object/define", "core-js/library/fn/object/define-properties", "core-js/library/fn/object/define-property", "core-js/library/fn/object/entries", "core-js/library/fn/object/freeze", "core-js/library/fn/object/get-own-property-descriptor", "core-js/library/fn/object/get-own-property-descriptors", "core-js/library/fn/object/get-own-property-names", "core-js/library/fn/object/get-own-property-symbols", "core-js/library/fn/object/get-prototype-of", "core-js/library/fn/object/is", "core-js/library/fn/object/is-extensible", "core-js/library/fn/object/is-frozen", "core-js/library/fn/object/is-object", "core-js/library/fn/object/is-sealed", "core-js/library/fn/object/keys", "core-js/library/fn/object/make", "core-js/library/fn/object/prevent-extensions", "core-js/library/fn/object/seal", "core-js/library/fn/object/set-prototype-of", "core-js/library/fn/object/values", "core-js/library/fn/reflect", "core-js/library/fn/reflect/apply", "core-js/library/fn/reflect/construct", "core-js/library/fn/reflect/define-property", "core-js/library/fn/reflect/delete-property", "core-js/library/fn/reflect/enumerate", "core-js/library/fn/reflect/get", "core-js/library/fn/reflect/get-own-property-descriptor", "core-js/library/fn/reflect/get-prototype-of", "core-js/library/fn/reflect/has", "core-js/library/fn/reflect/is-extensible", "core-js/library/fn/reflect/own-keys", "core-js/library/fn/reflect/prevent-extensions", "core-js/library/fn/reflect/set", "core-js/library/fn/reflect/set-prototype-of", "core-js/library/fn/reflect/es7/define-metadata", "core-js/library/fn/reflect/es7/delete-metadata", "core-js/library/fn/reflect/es7/get-metadata", "core-js/library/fn/reflect/es7/get-metadata-keys", "core-js/library/fn/reflect/es7/get-own-metadata", "core-js/library/fn/reflect/es7/get-own-metadata-keys'", "core-js/library/fn/reflect/es7/has-metadata'", "core-js/library/fn/reflect/es7/has-own-metadata'", "core-js/library/fn/reflect/es7/metadata'", "core-js/library/fn/regexp", "core-js/library/fn/regexp/escape", "core-js/library/fn/string", "core-js/library/fn/string/at", "core-js/library/fn/string/code-point-at", "core-js/library/fn/string/ends-with", "core-js/library/fn/string/escape-html", "core-js/library/fn/string/from-code-point", "core-js/library/fn/string/includes", "core-js/library/fn/string/pad-end", "core-js/library/fn/string/pad-start", "core-js/library/fn/string/raw", "core-js/library/fn/string/repeat", "core-js/library/fn/string/starts-with", "core-js/library/fn/string/unescape-html", "core-js/library/fn/symbol", "core-js/library/fn/symbol/for", "core-js/library/fn/symbol/has-instance", "core-js/library/fn/symbol/is-concat-spreadable", "core-js/library/fn/symbol/iterator", "core-js/library/fn/symbol/key-for", "core-js/library/fn/symbol/match", "core-js/library/fn/symbol/replace", "core-js/library/fn/symbol/search", "core-js/library/fn/symbol/species", "core-js/library/fn/symbol/split", "core-js/library/fn/symbol/to-primitive", "core-js/library/fn/symbol/to-string-tag", "core-js/library/fn/symbol/unscopables", "core-js/library/es5", "core-js/library/es6", "core-js/library/es6/array", "core-js/library/es6/function", "core-js/library/es6/map", "core-js/library/es6/math", "core-js/library/es6/number", "core-js/library/es6/object", "core-js/library/es6/promise", "core-js/library/es6/reflect", "core-js/library/es6/regexp", "core-js/library/es6/set", "core-js/library/es6/string", "core-js/library/es6/symbol", "core-js/library/es6/weak-map", "core-js/library/es6/weak-set", "core-js/library/es7", "core-js/library/es7/array", "core-js/library/es7/map", "core-js/library/es7/object", "core-js/library/es7/regexp", "core-js/library/es7/set", "core-js/library/es7/string", "core-js/library/js", "core-js/library/js/array", "core-js/library/web", "core-js/library/web/dom", "core-js/library/web/immediate", "core-js/library/web/timers", "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "ua-parser-js"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/core-js/index.d.ts
+=> <inf>/@types/isomorphic-fetch/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/node-fetch/index.d.ts
+=> <inf>/iconv-lite/lib/index.d.ts
+=> <inf>/@types/is-stream/index.d.ts
+=> <inf>/@types/whatwg-streams/index.d.ts
+=> <inf>/@types/whatwg-fetch/index.d.ts
+=> <inf>/@types/object-assign/index.d.ts
+=> <inf>/promise/index.d.ts
+=> <inf>/@types/asap/index.d.ts
+=> <inf>/@types/ua-parser-js/index.d.ts
+=> <inf>/pure-render-decorator/_inferium_gather.ts
+=> <inf>/@types/iconv-lite/index.d.ts
+=> <inf>/@types/promise/index.d.ts
+
+Resolve fbjs
+Resolve core-js
+Resolve isomorphic-fetch
+Resolve node-fetch
+Resolve encoding
+Resolve iconv-lite
+Resolve safer-buffer
+Resolve is-stream
+Resolve whatwg-fetch
+Resolve loose-envify
+Resolve js-tokens
+Resolve object-assign
+Resolve promise
+Resolve asap
+Resolve setimmediate
+Resolve ua-parser-js
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/pure-render-decorator /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/pure-render-decorator
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "core-js/library/fn/array/reverse", "module", "core-js/fn/symbol/to-string-tag", "core-js/fn/string/from-code-point", "core-js/fn/reflect/construct", "core-js/fn/symbol/for", "core-js/library/fn/reflect/es7/delete-metadata", "core-js/library/fn/math/expm1", "timers", "core-js/es6/regexp", "core-js/es6/array", "core-js/fn/array/turn", "core-js/fn/object/entries", "core-js/fn/reflect", "core-js/fn/number/min-safe-integer", "core-js/es6/symbol", "core-js/library/fn/math", "core-js/library/fn/array/unshift", "core-js/fn/array/find-index", "core-js/library/fn/symbol/for", "core-js/fn/number/epsilon", "core-js/library/fn/reflect/own-keys", "core-js/library/fn/function/name", "core-js/library/fn/reflect/prevent-extensions", "core-js/library/fn/symbol/unscopables", "core-js/fn/reflect/set", core-js, "https", "core-js/fn/object/make", "core-js/library/core/_", "core-js/library/fn/math/log10", "core-js/library", "core-js/fn/dict", "core-js/fn/math/imul", "core-js/library/fn/object/define-property", "core-js/fn/object/define-property", "core-js/library/fn/array/every", "zlib", "core-js/fn/number/is-integer", "core-js/es6/weak-set", "core-js/library/fn/$for", "core-js/library/fn/_", "core-js/fn/symbol/species", "core-js/library/fn/object/is", "core-js/fn/get-iterator", "core-js/js", "core-js/fn/math/asinh", "core-js/fn/math/expm1", "fs", "core-js/library/fn/math/tanh", "assert", "core-js/fn/math/trunc", "core-js/fn/weak-map", "core-js/library/core/number", "core-js/fn/object/get-own-property-symbols", "core-js/fn/array/push", "core-js/fn/array/splice", "core-js/library/fn/number/random", "core-js/library/es7/object", "core-js/library/core/dict", "core-js/library/fn/object/freeze", "core-js/fn/object/is-frozen", "core-js/library/fn/string/starts-with", "dgram", "core-js/library/es6/function", "core-js/fn/reflect/delete-property", "core-js/shim", "core-js/es7/array", "core-js/library/fn/symbol/key-for", "core-js/library/fn/array/join", "core-js/library/fn/math/log1p", "core-js/core/date", "core-js/library/fn/object/values", "core-js/fn/array/includes", "core-js/es7/regexp", "core-js/library/fn/object/prevent-extensions", "core-js/fn/string/ends-with", "core-js/library/es6/weak-map", "core-js/es6/promise", "core-js/fn/reflect/set-prototype-of", "core-js/library/fn/array/some", "async_hooks", "core-js/library/fn/array/splice", "core-js/fn/object/define-properties", "core-js/library/es6/weak-set", "core-js/library/fn/array/map", "core-js/fn/symbol/is-concat-spreadable", "core-js/fn/date", "core-js/fn/string/starts-with", "core-js/fn/array/for-each", "url", "core-js/library/fn/array/copy-within", "core-js/fn/is-iterable", "core-js/fn/math/cosh", "core-js/library/es7", "core-js/fn/$for", "core-js/fn/string/code-point-at", "core-js/library/fn/array/slice", "core-js/library/fn/array/for-each", "core-js/library/fn/reflect", "core-js/library/fn/reflect/apply", "core-js/fn/array/pop", "core-js/library/fn/reflect/enumerate", "core-js/fn/object/get-own-property-names", "dns", "core-js/library/fn/string/pad-end", "http", "string_decoder", "core-js/fn/number/parse-float", "core-js/library/fn/number/parse-int", "core-js/library/fn/object/seal", "core-js/library/es6/number", "core-js/library/fn/array/shift", "querystring", "core-js/fn/map", "core-js/library/fn/log", "core-js/library/web/immediate", "core-js/library/fn/string/at", "core-js/fn/object/freeze", "core-js/library/es7/regexp", "core-js/fn/set-interval", asap, "core-js/library/fn/array/last-index-of", "core-js/fn/reflect/enumerate", "core-js/library/fn/array/values", "events", "core-js/es7/object", "core-js/fn/symbol/search", "core-js/library/fn/reflect/get-prototype-of", "core-js/js/array", "core-js/library/fn/reflect/delete-property", "core-js/fn/string/unescape-html", "core-js/fn/object/is-object", "core-js/library/fn/symbol/is-concat-spreadable", "core-js/es6/reflect", "core-js/fn/string/escape-html", "core-js/library/fn/symbol/replace", "core-js/es7/set", "core-js/fn/clear-immediate", "core-js/fn/delay", "core-js/core/array", "core-js/library/fn/array/index-of", "core-js/library/web/dom", "core-js/fn/object/is-extensible", "core-js/core/number", "core-js/library/fn/math/sign", "core-js/es7/map", "core-js/library/es6", "os", "core-js/fn/object/is-sealed", "core-js/library/fn/array/reduce-right", "core-js/library/fn/dict", "core-js/es6/set", "core-js/fn/number/parse-int", "core-js/library/fn/string/repeat", "core-js/fn/symbol/match", "core-js/fn/string/includes", "core-js/library/fn/reflect/define-property", "core-js/library/fn/array/find-index", "core-js/library/fn/reflect/es7/has-metadata'", "core-js/library/fn/math/fround", "core-js/library/fn/get-iterator", "core-js/fn/reflect/define-property", "core-js/fn/set-timeout", isomorphic-fetch, "core-js/fn/math/sinh", "core-js/fn/symbol/key-for", "core-js/library/fn/set-timeout", "core-js/library/fn/object/get-own-property-descriptors", "core-js/library/fn/object/define-properties", "core-js/fn/array/concat", "core-js/library/fn/math/asinh", "core-js/library/es7/set", "util", "core-js/fn/set", "core-js/fn/function", "core-js/library/fn/number/is-nan", "core-js/web", "core-js/library/fn/array/sort", "core-js/fn/number/is-nan", "core-js/fn/object/create", "core-js/library/fn/object/is-extensible", "core-js/fn/string/pad-end", "constants", "core-js/fn/array/reduce", "punycode", "core-js/fn/symbol/unscopables", "core-js/fn/object/get-own-property-descriptors", "core-js/core/delay", "core-js/library/fn/math/trunc", "core-js/fn/math/fround", "core-js/library/fn/object/get-own-property-names", "core-js/fn/array/copy-within", "core-js/fn/math/tanh", "core-js/fn/symbol/to-primitive", node-fetch, "core-js/library/fn/symbol/match", "core-js/library/fn/math/log2", "core-js/library/fn/set-interval", "core-js/library/fn/reflect/is-extensible", "core-js/fn/string/raw", "core-js/fn/reflect/is-extensible", "core-js/library/es6/symbol", "core-js/fn/array/every", "readline", "core-js/fn/array/is-array", "perf_hooks", "core-js/fn/array/filter", "core-js/es6/string", "core-js/fn/function/name", "core-js/library/fn/symbol/species", "core-js/fn/string", "core-js/fn/object/assign", "core-js/library/fn/symbol/search", "core-js/library/fn/array/fill", "core-js/fn/array/reduce-right", "core-js/library/fn/reflect/es7/metadata'", "core-js/fn/date/formatUTC", "core-js/library/core/object", "core-js/library/fn/string/raw", "core-js/library/core", "core-js/library/fn/number/max-safe-integer", "core-js/core/dict", "core-js/library/fn/math/hypot", "core-js/library/fn/array/filter", "core-js/fn/object/is", "core-js/fn/global", "core-js/fn/regexp/escape", "core-js/library/fn/regexp/escape", "core-js/fn/array/index-of", "core-js/library/fn/reflect/es7/get-own-metadata-keys'", "core-js/fn/object/keys", "core-js/fn/symbol/replace", "core-js/library/es6/object", "core-js/library/fn/regexp", "core-js/library/fn/reflect/es7/get-metadata", "core-js/core/log", "core-js/fn/array/some", "core-js/library/fn/array/includes", "core-js/fn/regexp", "core-js/es7/string", "core-js/es6/weak-map", "core-js/library/fn/object/make", "core-js/library/fn/reflect/has", "core-js/library/fn/number/is-safe-integer", "buffer", "core-js/library/fn/object/create", "core-js/library/es7/map", "core-js/library/fn/symbol/split", "core-js/library/fn/string/pad-start", "core-js/fn/array/join", "core-js/fn/object/define", "core-js/library/es7/array", "core-js/fn/reflect/get-prototype-of", "core-js/web/dom", "domain", "core-js/library/fn/symbol/to-string-tag", "core-js/fn/object/set-prototype-of", "core-js/fn/reflect/prevent-extensions", "core-js/fn/number", "core-js/library/fn/math/cbrt", "core-js/library/es6/array", "core-js/library/fn/string/code-point-at", "core-js/fn/reflect/apply", "core-js/fn/array/last-index-of", "tty", "core-js/fn/array/keys", "core-js/library/fn/object/entries", "core-js/library/core/date", "core-js/library/fn/array/from", "core-js/fn/object", "core-js/library/fn/math/imul", "core-js/library/core/string", "core-js/library/fn/date/format", "core-js/library/fn/string/includes", "core-js/library/core/delay", "core-js/library/fn/string/escape-html", "core-js/web/immediate", "core-js/library/fn/object/get-own-property-symbols", "core-js/fn/array/reverse", "child_process", "core-js/library/fn/symbol/has-instance", "core-js/library/fn/reflect/set-prototype-of", "core-js/fn/symbol/has-instance", "core-js/core/$for", "core-js/library/fn/math/cosh", "crypto", "core-js/library/fn/object/is-object", "core-js/es6", "core-js/library/es6/regexp", "core-js/es6/math", "core-js/library/fn/array/push", "core-js/library/web", "core-js/fn/math/log10", "core-js/fn/array/of", "core-js/library/fn/string", "core-js/fn/math/log2", "core-js/fn/date/add-locale", "core-js/fn/string/repeat", "core-js/fn/object/values", "core-js/library/fn/number/min-safe-integer", "core-js/library/fn/object/get-prototype-of", "core-js/fn/array/shift", "core-js/library/fn/map", "core-js/library/fn/object/is-sealed", "core-js/library/fn/symbol/iterator", "core-js/library/es6/set", "core-js/fn/math/sign", "core-js/library/fn/function/part", "core-js/fn/set-immediate", "core-js/fn/array/sort", "core-js/library/fn/set-immediate", "core-js/fn/symbol/split", "core-js/library/fn/weak-map", "core-js/library/fn/math/atanh", "core-js/core/global", "core-js/fn/object/seal", "core-js/library/fn/object/get-own-property-descriptor", "core-js/library/fn/reflect/set", "core-js/library/fn/symbol/to-primitive", "core-js/library/es6/math", "inspector", "core-js/library/es6/map", "core-js/core/object", "core-js/core/_", "core-js/library/fn/reflect/es7/get-own-metadata", "core-js/fn/math/clz32", "core-js/fn/array/from", "core-js/library/fn/reflect/es7/define-metadata", "core-js/library/core/log", "core-js/library/fn/object/define", "core-js/library/fn/set", "stream", "core-js/fn/reflect/get", "core-js/fn/_", "core-js/es5", "core-js", "core-js/fn/object/prevent-extensions", "core-js/library/es6/reflect", "core-js/fn/symbol/iterator", "core-js/fn/function/has-instance", object-assign, "core-js/library/fn/date/formatUTC", "core-js/fn/log", "core-js/library/fn/object/assign", "core-js/es6/number", "core-js/fn/array/find", "core-js/library/core/function", "core-js/fn/array/entries", "core-js/library/fn/delay", "core-js/library/web/timers", "core-js/library/fn/object/keys", "core-js/library/core/global", "core-js/fn/array", "core-js/fn/weak-set", "core-js/fn/math/atanh", "core-js/fn/array/fill", "core-js/library/fn/function/has-instance", "core-js/fn/array/unshift", "core-js/web/timers", "core-js/fn/date/format", "core-js/library/fn/object", "core-js/library/fn/number/is-finite", "core-js/library/fn/is-iterable", "core-js/library/fn/date", "core-js/library/es6/promise", "core-js/fn/reflect/own-keys", "core-js/library/fn/reflect/es7/get-metadata-keys", "core-js/library/core/$for", "core-js/fn/object/get-prototype-of", "core-js/fn/object/get-own-property-descriptor", "core-js/library/fn/function", "process", "core-js/library/fn/array/is-array", "core-js/library/fn/object/set-prototype-of", "core-js/library/fn/array/concat", iconv-lite, "core-js/core/function", "core-js/fn/math/log1p", "core-js/library/es7/string", "core-js/fn/reflect/get-own-property-descriptor", "path", "core-js/library/fn/reflect/get-own-property-descriptor", "core-js/library/fn/date/add-locale", "core-js/library/fn/string/ends-with", "core-js/fn/number/random", "core-js/library/fn/array", "core-js/library/es6/string", "core-js/es6/function", "v8", "core-js/library/fn/array/keys", "core-js/library/fn/string/unescape-html", "core-js/library/fn/number/is-integer", "http2", "core-js/library/fn/number/parse-float", "core-js/library/fn/promise", "core-js/es6/object", "core-js/fn/number/is-safe-integer", "cluster", "core-js/library/fn/reflect/get", "core-js/fn/array/values", "core-js/library/fn/global", "core-js/fn/math/cbrt", promise, "core-js/fn/reflect/has", "core-js/library/fn/object/classof", "core-js/library/fn/array/entries", "core-js/library/fn/object/is-frozen", "core-js/fn/string/at", "ua-parser-js", "core-js/library/js/array", "core-js/fn/symbol", "core-js/library/fn/array/pop", "tls", "core-js/library/fn/math/clz32", "core-js/fn/math/acosh", "core-js/library/fn/array/reduce", "core-js/library/fn/reflect/es7/has-own-metadata'", "core-js/library/fn/array/find", "core-js/fn/function/part", "net", "core-js/fn/math", "core-js/library/fn/math/sinh", is-stream, "core-js/library/fn/number", "core-js/library/fn/weak-set", "core-js/fn/array/map", "core-js/library/fn/math/acosh", "core-js/es7", "core-js/library/es5", "core-js/core", "core-js/library/fn/string/from-code-point", "core-js/library/fn/number/epsilon", "core-js/library/fn/symbol", "core-js/library/fn/array/of", "core-js/fn/array/slice", "core-js/library/fn/clear-immediate", "core-js/library/core/array", "core-js/fn/string/pad-start", "repl", "core-js/fn/promise", "console", "core-js/core/string", "core-js/fn/number/max-safe-integer", "vm", "core-js/library/fn/reflect/construct", "core-js/fn/number/is-finite", "core-js/library/shim", "core-js/fn/object/classof", "core-js/library/fn/array/turn", "core-js/es6/map", "core-js/library/js", "core-js/fn/math/hypot"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/pure-render-decorator/./index.js'
+[info] Done Parsing module.
+[info] Found Some(pureRenderDecorator)
+[info] Round 0
+[info] Analyse Some(pureRenderDecorator)
+[info] Round 1
+[info] Analyse Some(pureRenderDecorator)
+[info] Round 2
+[info] Analyse Some(pureRenderDecorator)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I20<T8, T9> {
+[info]   displayName: T8
+[info]   name: T9
+[info] }
+[info] interface I21<T11 extends I20<T8, T9>, T8, T9> {
+[info]   constructor: T11
+[info]   displayName: T8
+[info]   name: T9
+[info] }
+[info] interface I22 {
+[info]   shouldComponentUpdate?: {}
+[info] }
+[info] interface I24<T4> {
+[info]   shouldComponentUpdate: T4
+[info] }
+[info] interface I23<T11 extends I20<T8, T9>, T12 extends I21<T11, T8, T9>, T13, T15 extends I22, T3 extends I24<T4>, T4, T6, T8, T9> {
+[info]   prototype: (T15 | (T12) | T3)
+[info]   displayName: T6
+[info]   name: T13
+[info] }
+[info] interface I19 {
+[info]   <T11 extends I20<T8, T9>, T12 extends I21<T11, T8, T9>, T13, T15 extends I22, T18 extends I23<T11, T12, T13, T15, T3, T4, T6, T8, T9>, T3 extends I24<T4>, T4, T6, T8, T9>(component: (T18)): T18
+[info] }
+[info] => I19
+[success] Total time: 3 s, completed Jul 29, 2018 7:51:47 PM

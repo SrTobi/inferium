@@ -1,0 +1,300 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install semantic-ui-dropdown into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/semantic-ui-dropdown
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/semantic-ui-dropdown/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/semantic-ui-dropdown/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/semantic-ui-dropdown /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/semantic-ui-dropdown
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/semantic-ui-dropdown/./index.js'
+[info] Done Parsing module.
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Round 2
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Analyse None
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I20 {
+[info]   hide: number
+[info]   show: number
+[info]   search: number
+[info]   touch: number
+[info] }
+[info] interface I21 {
+[info]   transition: "scale"
+[info]   duration: number
+[info]   variation: boolean
+[info] }
+[info] interface I22 {
+[info]   method: "The method you called is not defined."
+[info]   noStorage: "Saving remote data requires session storage"
+[info]   noAPI: "The API module is required to load resources remotely"
+[info]   alreadySetup: "Once a select has been initialized behaviors must be called on the created ui dropdown"
+[info]   noTransition: "This module requires ui transitions <https://github.com/Semantic-Org/UI-Transition>"
+[info]   labels: "Allowing user additions currently requires the use of labels."
+[info]   missingMultiple: "<select> requires multiple property to be set to correctly preserve multiple values"
+[info]   action: "You called a dropdown action that was not defined"
+[info] }
+[info] interface I24 {
+[info]   values: any
+[info] }
+[info] interface I25 {
+[info]   values: (any)
+[info]   placeholder: (any | (number | string))
+[info] }
+[info] interface I23 {
+[info]   menu(response: any, fields: I24): ""
+[info]   label(text: (number | string)): (number | string)
+[info]   dropdown(select: (I25)): (number | string)
+[info]   addition<T16>(choice: T16): T16
+[info]   message<T17>(message: T17): T17
+[info] }
+[info] interface I26 {
+[info]   name: "name"
+[info]   text: "text"
+[info]   values: "values"
+[info]   disabled: "disabled"
+[info]   value: "value"
+[info]   remoteValues: "results"
+[info] }
+[info] interface I27 {
+[info]   menu: "menu"
+[info]   filtered: "filtered"
+[info]   empty: "empty"
+[info]   visible: "visible"
+[info]   leftward: "left"
+[info]   label: "ui label"
+[info]   hidden: "hidden transition"
+[info]   loading: "loading"
+[info]   selected: "selected"
+[info]   placeholder: "default"
+[info]   dropdown: "ui dropdown"
+[info]   sizer: "sizer"
+[info]   addition: "addition"
+[info]   selection: "selection"
+[info]   message: "message"
+[info]   disabled: "disabled"
+[info]   animating: "animating"
+[info]   multiple: "multiple"
+[info]   upward: "upward"
+[info]   search: "search"
+[info]   active: "active"
+[info]   item: "item"
+[info] }
+[info] interface I28 {
+[info]   text: "text"
+[info]   placeholderText: "placeholder"
+[info]   defaultValue: "defaultValue"
+[info]   defaultText: "defaultText"
+[info]   value: "value"
+[info] }
+[info] interface I29 {
+[info]   noResults: "No results found."
+[info]   addResult: "Add <b>{term}</b>"
+[info]   count: "{count} selected"
+[info]   maxSelections: "Max {maxCount} selections"
+[info]   serverError: "There was an error contacting the server"
+[info] }
+[info] interface I30 {
+[info] }
+[info] interface I31 {
+[info]   menu: ".menu"
+[info]   unselectable: ".disabled, .filtered"
+[info]   icon: "> .dropdown.icon"
+[info]   label: "> .label"
+[info]   hidden: ".hidden"
+[info]   text: "> .text:not(.icon)"
+[info]   dropdown: ".ui.dropdown"
+[info]   sizer: "> input.sizer"
+[info]   addition: ".addition"
+[info]   remove: "> .label > .delete.icon"
+[info]   message: ".message"
+[info]   siblingLabel: ".label"
+[info]   input: "> input[type="hidden"], > select"
+[info]   menuIcon: ".dropdown.icon"
+[info]   search: "input.search, .menu > .search > input, .menu input.search"
+[info]   item: ".item"
+[info] }
+[info] interface I32 {
+[info]   upArrow: number
+[info]   backspace: number
+[info]   enter: number
+[info]   leftArrow: number
+[info]   deleteKey: number
+[info]   escape: number
+[info]   pageUp: number
+[info]   downArrow: number
+[info]   pageDown: number
+[info]   rightArrow: number
+[info]   delimiter: number
+[info] }
+[info] interface I19 {
+[info]   minCharacters: number
+[info]   duration: number
+[info]   glyphWidth: number
+[info]   name: "Dropdown"
+[info]   delay: I20
+[info]   allowAdditions: boolean
+[info]   silent: boolean
+[info]   onShow(): undefined
+[info]   selectOnKeydown: boolean
+[info]   verbose: boolean
+[info]   keepOnScreen: boolean
+[info]   onLabelSelect(): undefined
+[info]   onChange(): undefined
+[info]   onLabelCreate(): {}
+[info]   allowCategorySelection: boolean
+[info]   fullTextSearch: boolean
+[info]   maxSelections: boolean
+[info]   label: I21
+[info]   apiSettings: boolean
+[info]   allowTab: boolean
+[info]   direction: "auto"
+[info]   saveRemoteData: boolean
+[info]   placeholder: "auto"
+[info]   onHide(): undefined
+[info]   match: "both"
+[info]   debug: boolean
+[info]   onAdd(): undefined
+[info]   onRemove(): undefined
+[info]   on: "click"
+[info]   useLabels: boolean
+[info]   error: I22
+[info]   templates: I23
+[info]   filterRemoteData: boolean
+[info]   fields: I26
+[info]   preserveHTML: boolean
+[info]   showOnFocus: boolean
+[info]   className: I27
+[info]   forceSelection: boolean
+[info]   fireOnInit: boolean
+[info]   ignoreCase: boolean
+[info]   metadata: I28
+[info]   values: boolean
+[info]   message: I29
+[info]   transition: "auto"
+[info]   regExp: I30
+[info]   sortSelect: boolean
+[info]   hideAdditions: boolean
+[info]   throttle: number
+[info]   selector: I31
+[info]   allowReselection: boolean
+[info]   performance: boolean
+[info]   onNoResults(): boolean
+[info]   action: "activate"
+[info]   onLabelRemove(): boolean
+[info]   namespace: "dropdown"
+[info]   keys: I32
+[info]   delimiter: ","
+[info] }
+[info] interface I18 {
+[info]   (): never
+[info]   settings: I19
+[info] }
+[info] => I18
+[success] Total time: 5 s, completed Jul 29, 2018 7:38:16 PM

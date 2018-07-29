@@ -141,12 +141,13 @@ object Playground {
 
         val code2 =
             """
-              |var path = require("path")
-              |exports.x = function(a) {
-              |  return path.join(a, a)
-              |}
+              |exports.func = function(proc) {
+              |  var x = proc
+              |  x = 3
+              |  return x
+              |};
+              |
             """.stripMargin
-
         val code = code2
 
 

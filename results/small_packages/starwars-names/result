@@ -1,0 +1,85 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install starwars-names into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/starwars-names
+Look into <inf>/unique-random-array
+Look into <inf>/unique-random
+Install types for unique-random-array
+=> not found
+Install types for unique-random
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/starwars-names/_inferium_gather.ts
+Gather types for 2 packages:
+=> unique-random-array, unique-random 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/unique-random/index.d.ts
+=> <inf>/starwars-names/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Resolve unique-random-array
+Resolve unique-random
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/starwars-names /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/starwars-names
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", unique-random, "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/starwars-names/./dist/index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/starwars-names/./dist/./starwars-names.json'
+[info] Done Parsing module.
+[info] Found Some(random)
+[info] Round 0
+[info] Analyse Some(random)
+[info] Round 1
+[info] Analyse Some(random)
+[info] Round 2
+[info] Analyse Some(random)
+[info] Round 3
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I5 {
+[info]   length: number
+[info] }
+[info] interface I4 {
+[info]   random(number: (number)): ({} | I5)
+[info] }
+[info] => I4
+[success] Total time: 4 s, completed Jul 29, 2018 8:53:36 PM

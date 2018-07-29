@@ -1,0 +1,1857 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install blessed into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/blessed
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/blessed/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/blessed/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/blessed /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/blessed
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/blessed.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./program.js'
+[info] Failed to parse module!
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./tput.js'
+[info] Failed to parse module!
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./widget.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./colors.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./unicode.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/./helpers.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/blessed/././lib/././unicode.js'
+[info] Done Parsing module.
+[info] Found Some(blessed)
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found Some(blend)
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Found None
+[info] Analyse None
+[info] Analyse None
+[info] Found None
+[info] Analyse None
+[info] Found None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(blend)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(blessed)
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(blend)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(blessed)
+[info] Round 2
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse Some(blend)
+[info] skipped
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I337 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I338 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I339 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I340 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I341 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I342 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I343 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I344 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I345 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I346 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I347 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I348 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I349 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I350 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I351 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I352 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I353 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I354 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I355 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I356 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I357 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I358 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I359 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I360 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I361 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I362 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I363 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I364 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I365 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I366 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I367 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I368 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I369 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I370 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I371 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I372 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I373 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I374 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I375 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I376 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I377 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I378 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I379 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I380 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I381 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I382 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I383 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I384 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I385 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I386 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I387 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I388 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I389 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I390 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I391 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I392 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I393 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I394 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I395 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I396 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I397 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I398 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I399 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I400 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I401 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I402 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I403 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I404 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I405 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I406 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I407 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I408 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I409 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I410 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I411 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I412 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I413 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I414 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I415 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I416 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I417 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I418 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I419 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I420 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I421 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I422 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I423 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I424 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I425 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I426 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I427 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I428 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I429 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I430 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I431 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I432 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I433 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I434 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I435 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I436 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I437 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I438 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I439 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I440 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I441 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I442 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I443 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I444 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I445 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I446 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I447 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I448 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I449 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I450 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I451 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I452 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I453 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I454 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I455 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I456 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I457 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I458 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I459 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I460 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I461 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I462 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I463 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I464 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I465 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I466 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I467 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I468 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I469 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I470 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I471 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I472 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I473 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I474 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I475 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I476 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I477 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I478 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I336 {
+[info]   [45]: I337
+[info]   [98]: I338
+[info]   [113]: I339
+[info]   [34]: I340
+[info]   [67]: I341
+[info]   [120]: I342
+[info]   [93]: I343
+[info]   [12]: I344
+[info]   [66]: I345
+[info]   [89]: I346
+[info]   [51]: I347
+[info]   [124]: I348
+[info]   [84]: I349
+[info]   [8]: I350
+[info]   [73]: I351
+[info]   [78]: I352
+[info]   [19]: I353
+[info]   [100]: I354
+[info]   [23]: I355
+[info]   [62]: I356
+[info]   [135]: I357
+[info]   [128]: I358
+[info]   [4]: I359
+[info]   [121]: I360
+[info]   [88]: I361
+[info]   [77]: I362
+[info]   [40]: I363
+[info]   [110]: I364
+[info]   [15]: I365
+[info]   [11]: I366
+[info]   [104]: I367
+[info]   [90]: I368
+[info]   [9]: I369
+[info]   [141]: I370
+[info]   [139]: I371
+[info]   [132]: I372
+[info]   [44]: I373
+[info]   [33]: I374
+[info]   [117]: I375
+[info]   [22]: I376
+[info]   [56]: I377
+[info]   [55]: I378
+[info]   [26]: I379
+[info]   [134]: I380
+[info]   [50]: I381
+[info]   [123]: I382
+[info]   [37]: I383
+[info]   [68]: I384
+[info]   [61]: I385
+[info]   [107]: I386
+[info]   [13]: I387
+[info]   [46]: I388
+[info]   [99]: I389
+[info]   [24]: I390
+[info]   [94]: I391
+[info]   [83]: I392
+[info]   [35]: I393
+[info]   [16]: I394
+[info]   [79]: I395
+[info]   [5]: I396
+[info]   [103]: I397
+[info]   [112]: I398
+[info]   [72]: I399
+[info]   [10]: I400
+[info]   [59]: I401
+[info]   [87]: I402
+[info]   [48]: I403
+[info]   [21]: I404
+[info]   [116]: I405
+[info]   [76]: I406
+[info]   [138]: I407
+[info]   [54]: I408
+[info]   [43]: I409
+[info]   [127]: I410
+[info]   [65]: I411
+[info]   [71]: I412
+[info]   [57]: I413
+[info]   [108]: I414
+[info]   [32]: I415
+[info]   [80]: I416
+[info]   [106]: I417
+[info]   [137]: I418
+[info]   [82]: I419
+[info]   [49]: I420
+[info]   [6]: I421
+[info]   [126]: I422
+[info]   [36]: I423
+[info]   [1]: I424
+[info]   [39]: I425
+[info]   [140]: I426
+[info]   [17]: I427
+[info]   [25]: I428
+[info]   [60]: I429
+[info]   [14]: I430
+[info]   [133]: I431
+[info]   [47]: I432
+[info]   [122]: I433
+[info]   [111]: I434
+[info]   [102]: I435
+[info]   [31]: I436
+[info]   [96]: I437
+[info]   [69]: I438
+[info]   [95]: I439
+[info]   [58]: I440
+[info]   [64]: I441
+[info]   [53]: I442
+[info]   [42]: I443
+[info]   [75]: I444
+[info]   [115]: I445
+[info]   [109]: I446
+[info]   [0]: I447
+[info]   [20]: I448
+[info]   [27]: I449
+[info]   [70]: I450
+[info]   [2]: I451
+[info]   [86]: I452
+[info]   [38]: I453
+[info]   [81]: I454
+[info]   length: number
+[info]   [118]: I455
+[info]   [92]: I456
+[info]   [125]: I457
+[info]   [18]: I458
+[info]   [101]: I459
+[info]   [30]: I460
+[info]   [7]: I461
+[info]   [97]: I462
+[info]   [130]: I463
+[info]   [114]: I464
+[info]   [129]: I465
+[info]   [29]: I466
+[info]   [41]: I467
+[info]   [105]: I468
+[info]   [63]: I469
+[info]   [3]: I470
+[info]   [74]: I471
+[info]   [91]: I472
+[info]   [52]: I473
+[info]   [85]: I474
+[info]   [131]: I475
+[info]   [28]: I476
+[info]   [119]: I477
+[info]   [136]: I478
+[info] }
+[info] interface I480 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I481 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I482 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I483 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I484 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I485 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I479 {
+[info]   all: ({} | I480)
+[info]   wide: (I481 | I482)
+[info]   combining: ({} | I483)
+[info]   swide: (I484 | I485)
+[info] }
+[info] interface I486 {
+[info]   length: number
+[info] }
+[info] interface I335 {
+[info]   codePointAt(str: (never), position: (never)): {}
+[info]   fromCodePoint(): (undefined | number | string)
+[info]   isSurrogate(str: (number), i: any): boolean
+[info]   combiningTable: I336
+[info]   charWidth(str: (number), i: any): {}
+[info]   chars: I479
+[info]   blessed?: {}
+[info]   strWidth(str: ((number & I486))): (number | string)
+[info]   isCombining(str: (never), i: any): boolean
+[info] }
+[info] interface I488 {
+[info]   [12]: "Textarea"
+[info]   [8]: "BigText"
+[info]   [19]: "RadioButton"
+[info]   [23]: "Loading"
+[info]   [4]: "Text"
+[info]   [15]: "ProgressBar"
+[info]   [11]: "Input"
+[info]   [9]: "List"
+[info]   [33]: "Layout"
+[info]   [22]: "Message"
+[info]   [26]: "Table"
+[info]   [13]: "Textbox"
+[info]   [24]: "Listbar"
+[info]   [16]: "FileManager"
+[info]   [5]: "Line"
+[info]   [10]: "Form"
+[info]   [21]: "Question"
+[info]   [32]: "Video"
+[info]   [6]: "ScrollableBox"
+[info]   [1]: "Screen"
+[info]   [17]: "Checkbox"
+[info]   [25]: "Log"
+[info]   [14]: "Button"
+[info]   [31]: "OverlayImage"
+[info]   [0]: "Node"
+[info]   [20]: "Prompt"
+[info]   [27]: "ListTable"
+[info]   [2]: "Element"
+[info]   length: number
+[info]   [18]: "RadioSet"
+[info]   [30]: "ANSIImage"
+[info]   [7]: "ScrollableText"
+[info]   [29]: "Image"
+[info]   [3]: "Box"
+[info]   [28]: "Terminal"
+[info] }
+[info] interface I489 {
+[info]   ListBar: "Listbar"
+[info]   PNG: "ANSIImage"
+[info] }
+[info] interface I487 {
+[info]   classes: I488
+[info]   aliases: I489
+[info] }
+[info] interface I491 {
+[info]   length: number
+[info] }
+[info] interface I492 {
+[info]   [12]: "#5c5cff"
+[info]   [8]: "#7f7f7f"
+[info]   [4]: "#0000ee"
+[info]   [15]: "#ffffff"
+[info]   [11]: "#ffff00"
+[info]   [9]: "#ff0000"
+[info]   [13]: "#ff00ff"
+[info]   [5]: "#cd00cd"
+[info]   [10]: "#00ff00"
+[info]   [6]: "#00cdcd"
+[info]   [1]: "#cd0000"
+[info]   [14]: "#00ffff"
+[info]   [0]: "#000000"
+[info]   [2]: "#00cd00"
+[info]   length: number
+[info]   [7]: "#e5e5e5"
+[info]   [3]: "#cdcd00"
+[info] }
+[info] interface I495 {
+[info]   length: number
+[info] }
+[info] interface I494 {
+[info]   (_?: number): (I495 | number | string)
+[info] }
+[info] interface I493 {
+[info]   toString: I494
+[info]   [2]: any
+[info]   [0]: any
+[info]   [1]: any
+[info] }
+[info] interface I498 {
+[info]   length: number
+[info] }
+[info] interface I497 {
+[info]   (_?: number): (I498 | number | string)
+[info] }
+[info] interface I496 {
+[info]   toString: I497
+[info] }
+[info] interface I501 {
+[info]   length: number
+[info] }
+[info] interface I500 {
+[info]   (_?: number): (I501 | number | string)
+[info] }
+[info] interface I499 {
+[info]   toString: I500
+[info] }
+[info] interface I503 {
+[info]   (_?: number): any
+[info] }
+[info] interface I502 {
+[info]   [1]: ((number | string))
+[info]   [0]: (number | string)
+[info]   [2]: ((number | string))
+[info]   length: any
+[info]   substring: I503
+[info]   [3]: ((number | string))
+[info] }
+[info] interface I504 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   [2]: number
+[info]   length: number
+[info] }
+[info] interface I505 {
+[info]   lightmagenta: number
+[info]   magenta: number
+[info]   blue: number
+[info]   normal: number
+[info]   fg: number
+[info]   brightgreen: number
+[info]   lightblue: number
+[info]   grey: number
+[info]   lightgreen: number
+[info]   lightgrey: number
+[info]   lightwhite: number
+[info]   lightgray: number
+[info]   bg: number
+[info]   brightcyan: number
+[info]   brightblue: number
+[info]   green: number
+[info]   brightblack: number
+[info]   brightwhite: number
+[info]   brightyellow: number
+[info]   black: number
+[info]   gray: number
+[info]   brightgray: number
+[info]   default: number
+[info]   yellow: number
+[info]   lightyellow: number
+[info]   lightblack: number
+[info]   brightgrey: number
+[info]   brightmagenta: number
+[info]   brightred: number
+[info]   lightred: number
+[info]   cyan: number
+[info]   white: number
+[info]   red: number
+[info]   lightcyan: number
+[info] }
+[info] interface I507 {
+[info]   [12]: number
+[info]   [8]: number
+[info]   [4]: number
+[info]   [15]: number
+[info]   [11]: number
+[info]   [9]: number
+[info]   [13]: number
+[info]   [16]: number
+[info]   [5]: number
+[info]   [10]: number
+[info]   [6]: number
+[info]   [1]: number
+[info]   [14]: number
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [7]: number
+[info]   [3]: number
+[info] }
+[info] interface I509 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I510 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I511 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I512 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I513 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I514 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I515 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I516 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I517 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I518 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I519 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I520 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I521 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I522 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I523 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I524 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I508 {
+[info]   [12]: I509
+[info]   [8]: I510
+[info]   [19]: I511
+[info]   [23]: number
+[info]   [4]: I512
+[info]   [15]: I513
+[info]   [11]: number
+[info]   [9]: I514
+[info]   [22]: number
+[info]   [26]: number
+[info]   [13]: I515
+[info]   [24]: number
+[info]   [16]: number
+[info]   [5]: I516
+[info]   [10]: I517
+[info]   [21]: number
+[info]   [6]: number
+[info]   [1]: number
+[info]   [17]: I518
+[info]   [25]: number
+[info]   [14]: I519
+[info]   [0]: number
+[info]   [20]: I520
+[info]   [2]: I521
+[info]   length: number
+[info]   [18]: I522
+[info]   [7]: I523
+[info]   [3]: I524
+[info] }
+[info] interface I526 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I527 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I528 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I529 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I530 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I531 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I532 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I533 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I534 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I535 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I536 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I537 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I538 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I539 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I525 {
+[info]   [12]: I526
+[info]   [8]: I527
+[info]   [4]: I528
+[info]   [15]: I529
+[info]   [11]: I530
+[info]   [9]: I531
+[info]   [13]: I532
+[info]   [16]: I533
+[info]   [5]: I534
+[info]   [10]: I535
+[info]   [6]: I536
+[info]   [1]: number
+[info]   [14]: I537
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [7]: I538
+[info]   [3]: I539
+[info] }
+[info] interface I541 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I540 {
+[info]   [4]: number
+[info]   [5]: I541
+[info]   [1]: number
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [3]: number
+[info] }
+[info] interface I543 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I544 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I545 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I546 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I542 {
+[info]   [4]: I543
+[info]   [5]: I544
+[info]   [6]: I545
+[info]   [1]: number
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [3]: I546
+[info] }
+[info] interface I547 {
+[info]   [12]: number
+[info]   [8]: number
+[info]   [4]: number
+[info]   [15]: number
+[info]   [11]: number
+[info]   [9]: number
+[info]   [13]: number
+[info]   [16]: number
+[info]   [5]: number
+[info]   [10]: number
+[info]   [6]: number
+[info]   [1]: number
+[info]   [14]: number
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [7]: number
+[info]   [3]: number
+[info] }
+[info] interface I549 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I548 {
+[info]   [4]: number
+[info]   [5]: I549
+[info]   [1]: number
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [3]: number
+[info] }
+[info] interface I551 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I552 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I553 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I554 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I555 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I556 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I557 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I558 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I559 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I560 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I561 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I562 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I563 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I564 {
+[info]   [0]: number
+[info]   [1]: number
+[info]   length: number
+[info] }
+[info] interface I550 {
+[info]   [12]: I551
+[info]   [8]: I552
+[info]   [4]: I553
+[info]   [15]: I554
+[info]   [11]: I555
+[info]   [9]: I556
+[info]   [13]: I557
+[info]   [16]: I558
+[info]   [5]: I559
+[info]   [10]: I560
+[info]   [6]: I561
+[info]   [1]: number
+[info]   [14]: I562
+[info]   [0]: number
+[info]   [2]: number
+[info]   length: number
+[info]   [7]: I563
+[info]   [3]: I564
+[info] }
+[info] interface I506 {
+[info]   magenta: I507
+[info]   blue: I508
+[info]   green: I525
+[info]   black: I540
+[info]   yellow: I542
+[info]   cyan: I547
+[info]   white: I548
+[info]   red: I550
+[info] }
+[info] interface I566 {
+[info]   (_?: number): any
+[info] }
+[info] interface I565 {
+[info]   [1]: (((number | string)) | any)
+[info]   [0]: (((number | string)) | any)
+[info]   [2]: (any | ((number | string)))
+[info]   length: any
+[info]   substring: I566
+[info]   [3]: ((number | string))
+[info] }
+[info] interface I567 {
+[info]   [1]: (number & (number | string))
+[info]   [2]: (number & (number | string))
+[info]   [0]: (number & (number | string))
+[info] }
+[info] interface I568 {
+[info]   [1]: number
+[info]   [0]: number
+[info]   [2]: number
+[info] }
+[info] interface I569<T174> {
+[info]   (_?: {}, _?: ""): T174
+[info] }
+[info] interface I570<T194> {
+[info]   (_?: number): T194
+[info] }
+[info] interface I571<T219> {
+[info]   (_?: number): T219
+[info] }
+[info] interface I572<T181 extends ((number | string) & number), T186 extends ((number | string) & number), T191 extends ((number | string) & number), T192, T193 extends I570<T194>, T194, T197 extends (number | string)> {
+[info]   [1]: (T181)
+[info]   [0]: (T186)
+[info]   [2]: (T191)
+[info]   length: T192
+[info]   substring: T193
+[info]   [3]: (T197)
+[info] }
+[info] interface I573<T206 extends ((number | string) & number), T211 extends ((number | string) & number), T216 extends ((number | string) & number), T217, T218 extends I571<T219>, T219, T222 extends (number | string)> {
+[info]   [1]: (T206)
+[info]   [0]: (T211)
+[info]   [2]: (T216)
+[info]   length: T217
+[info]   substring: T218
+[info]   [3]: (T222)
+[info] }
+[info] interface I574<T173 extends I569<T174>, T174> {
+[info]   replace: T173
+[info] }
+[info] interface I575 {
+[info]   <T244 extends number>(attr: (T244), attr2: (number), alpha: (number)): T244
+[info] }
+[info] interface I490 {
+[info]   ncolors: I491
+[info]   xterm: I492
+[info]   RGBToHex(r: (I493), g: I496, b: I499): (number | string)
+[info]   hexToRGB(hex: (I502)): I504
+[info]   colorNames: I505
+[info]   ccolors: I506
+[info]   match(r1: ((number & I565)), g1: (number), b1: (number)): (undefined | number | string)
+[info]   mixColors(c1: (I567), c2: (I568), alpha: (number)): (undefined | number | string)
+[info]   reduce<T163 extends number>(color: (T163), total: (number)): T163
+[info]   convert<T173 extends I569<T174>, T174, T181 extends ((number | string) & number), T186 extends ((number | string) & number), T191 extends ((number | string) & number), T192, T193 extends I570<T194>, T194, T197 extends (number | string), T206 extends ((number | string) & number), T211 extends ((number | string) & number), T216 extends ((number | string) & number), T217, T218 extends I571<T219>, T219, T222 extends (number | string), T231 extends ((I572<T181, T186, T191, T192, T193, T194, T197> | number) & (I573<T206, T211, T216, T217, T218, T219, T222> | number) & I574<T173, T174>)>(color: (T231)): (number | T231)
+[info]   blend: I575
+[info] }
+[info] interface I580<T257> {
+[info]   (_?: {}, _?: ""): T257
+[info] }
+[info] interface I579<T257> {
+[info]   replace: I580<T257>
+[info] }
+[info] interface I578<T257> {
+[info]   (_?: {}, _?: ""): I579<T257>
+[info] }
+[info] interface I577<T257> {
+[info]   replace: I578<T257>
+[info] }
+[info] interface I581 {
+[info]   open: ""
+[info]   close: ""
+[info] }
+[info] interface I587<T268> {
+[info]   (): T268
+[info] }
+[info] interface I586<T268> {
+[info]   trim: I587<T268>
+[info] }
+[info] interface I585<T268> {
+[info]   (_?: {}, _?: ""): I586<T268>
+[info] }
+[info] interface I584<T268> {
+[info]   replace: I585<T268>
+[info] }
+[info] interface I583<T268> {
+[info]   (_?: {}, _?: ""): I584<T268>
+[info] }
+[info] interface I582<T268> {
+[info]   replace: I583<T268>
+[info] }
+[info] interface I590 {
+[info]   (ch: any): ("{close}" | "{open}")
+[info] }
+[info] interface I589<T277> {
+[info]   (_?: {}, _?: I590): T277
+[info] }
+[info] interface I588<T277> {
+[info]   replace: I589<T277>
+[info] }
+[info] interface I596 {
+[info]   (): any
+[info] }
+[info] interface I595 {
+[info]   toLowerCase: I596
+[info] }
+[info] interface I594 {
+[info]   [0]: (any)
+[info]   [1]: any
+[info]   name: I595
+[info] }
+[info] interface I599 {
+[info]   (): any
+[info] }
+[info] interface I598 {
+[info]   toLowerCase: I599
+[info] }
+[info] interface I597 {
+[info]   name: I598
+[info]   [0]: (any)
+[info]   [1]: any
+[info] }
+[info] interface I593 {
+[info]   (a: ((number & I594)), b: ((number & I597))): number
+[info] }
+[info] interface I592<T281> {
+[info]   (_?: I593): T281
+[info] }
+[info] interface I591<T281> {
+[info]   sort: I592<T281>
+[info] }
+[info] interface I602 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I605 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I607<T318> {
+[info]   (_?: {}, _?: "?"): T318
+[info] }
+[info] interface I606<T318> {
+[info]   replace: I607<T318>
+[info] }
+[info] interface I604<T318> {
+[info]   (_?: ({} | I605), _?: ""): I606<T318>
+[info] }
+[info] interface I603<T318> {
+[info]   replace: I604<T318>
+[info] }
+[info] interface I601<T318> {
+[info]   (_?: ({} | I602), _?: "??"): I603<T318>
+[info] }
+[info] interface I600<T318> {
+[info]   replace: I601<T318>
+[info] }
+[info] interface I611 {
+[info]   index: number
+[info] }
+[info] interface I612 {
+[info]   index: number
+[info] }
+[info] interface I610 {
+[info]   (a: I611, b: I612): number
+[info] }
+[info] interface I609<T327> {
+[info]   (_?: I610): T327
+[info] }
+[info] interface I608<T327> {
+[info]   sort: I609<T327>
+[info] }
+[info] interface I576 {
+[info]   findFile(start: (number | string), target: any): {}
+[info]   stripTags<T257>(text: ((boolean & I577<T257>))): ("" | T257)
+[info]   attrToBinary(): never
+[info]   generateTags(style: any, text: ((number | string))): (number | string | I581)
+[info]   parseTags(): never
+[info]   cleanTags<T268>(text: (I582<T268> | boolean)): T268
+[info]   merge<T275>(a: T275, b: any): T275
+[info]   escape<T277>(text: I588<T277>): T277
+[info]   asort<T281>(obj: I591<T281>): T281
+[info]   dropUnicode<T318>(text: ((boolean & I600<T318>))): ("" | T318)
+[info]   hsort<T327>(obj: I608<T327>): T327
+[info] }
+[info] interface I334 {
+[info]   (): {}
+[info]   unicode: I335
+[info]   widget: I487
+[info]   colors: I490
+[info]   helpers: I576
+[info] }
+[info] => I334
+[success] Total time: 8 s, completed Jul 29, 2018 10:22:29 PM

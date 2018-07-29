@@ -1,0 +1,114 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install public-ip into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/public-ip
+Look into <inf>/dns-socket
+Look into <inf>/dns-packet
+Look into <inf>/ip
+Look into <inf>/safe-buffer
+Look into <inf>/got
+Look into /
+=> Couldn't find @sindresorhus/is! Skip!
+Look into <inf>/cacheable-request
+Look into <inf>/clone-response
+Look into <inf>/mimic-response
+Look into <inf>/get-stream
+Look into <inf>/http-cache-semantics
+Look into <inf>/keyv
+Look into <inf>/json-buffer
+Look into <inf>/cacheable-request/node_modules/lowercase-keys
+Look into <inf>/normalize-url
+Look into <inf>/prepend-http
+Look into <inf>/query-string
+Look into <inf>/decode-uri-component
+Look into <inf>/object-assign
+Look into <inf>/strict-uri-encode
+Look into <inf>/sort-keys
+Look into <inf>/is-plain-obj
+Look into <inf>/responselike
+Look into <inf>/lowercase-keys
+Look into <inf>/decompress-response
+Look into <inf>/mimic-response
+Look into <inf>/duplexer3
+Look into <inf>/get-stream
+Look into <inf>/into-stream
+Look into <inf>/from2
+Look into <inf>/inherits
+Look into <inf>/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/isarray
+Look into <inf>/process-nextick-args
+Look into <inf>/safe-buffer
+Look into <inf>/util-deprecate
+Look into <inf>/p-is-promise
+Look into <inf>/is-retry-allowed
+Look into <inf>/isurl
+Look into <inf>/has-to-string-tag-x
+Look into <inf>/has-symbol-support-x
+Look into <inf>/is-object
+Look into <inf>/lowercase-keys
+Look into <inf>/mimic-response
+Look into <inf>/p-cancelable
+Look into <inf>/p-timeout
+Look into <inf>/p-finally
+Look into <inf>/pify
+Look into <inf>/safe-buffer
+Look into <inf>/timed-out
+Look into <inf>/url-parse-lax
+Look into <inf>/prepend-http
+Look into <inf>/url-to-options
+Look into <inf>/is-ip
+Look into <inf>/ip-regex
+Look into <inf>/pify
+Install types for dns-socket
+=> not found
+Install types for dns-packet
+=> not found
+Install types for ip
+Install types for safe-buffer
+=> not found
+Install types for got
+Install types for 
+=> not found
+Install types for cacheable-request
+=> not found
+Install types for clone-response
+=> not found
+Install types for mimic-response
+=> not found
+Install types for get-stream
+Install types for http-cache-semantics
+=> not found
+Install types for keyv
+Install types for json-buffer
+=> not found
+Install types for lowercase-keys
+=> not found
+Install types for normalize-url
+Install types for prepend-http
+=> not found
+Install types for query-string
+Install types for decode-uri-component
+=> not found
+Install types for object-assign
+Install types for strict-uri-encode
+Install types for sort-keys
+=> not found
+Install types for is-plain-obj
+=> not found
+Install types for responselike
+=> not found
+Install types for lowercase-keys
+=> not found
+Install types for decompress-response
+Install types for duplexer3
+Install types for into-stream
+Install types for from2
+Install types for inherits
+Install types for readable-stream

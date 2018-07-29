@@ -1,0 +1,188 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install base64-js into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/base64-js
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/base64-js/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/base64-js/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/base64-js /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/base64-js
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/base64-js/./index.js'
+[info] Done Parsing module.
+[info] Found Some(byteLength)
+[info] Found Some(toByteArray)
+[info] Found Some(fromByteArray)
+[info] Round 0
+[info] Analyse Some(fromByteArray)
+[info] Analyse Some(toByteArray)
+[info] Analyse Some(byteLength)
+[info] Round 1
+[info] Analyse Some(fromByteArray)
+[info] Analyse Some(toByteArray)
+[info] Analyse Some(byteLength)
+[info] Round 2
+[info] Analyse Some(fromByteArray)
+[info] Analyse Some(toByteArray)
+[info] Analyse Some(byteLength)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I60 {
+[info]   (_?: "="): (number & (number | string))
+[info] }
+[info] interface I59 {
+[info]   indexOf: I60
+[info]   length: (number & (number | string))
+[info] }
+[info] interface I62 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I63 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I64 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I65 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I66 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I67 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I68 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I69 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I70 {
+[info]   (_?: (number | string)): any
+[info] }
+[info] interface I71 {
+[info]   (_?: "="): (number & (number | string))
+[info] }
+[info] interface I61 {
+[info]   charCodeAt: (I68 | I70 | I63 | I67 | I64 | I66 | I65 | I69 | I62)
+[info]   indexOf: I71
+[info]   length: (number & (number | string))
+[info] }
+[info] interface I73 {
+[info]   byteLength: number
+[info] }
+[info] interface I72 {
+[info]   find: (number | {})
+[info]   subarray: (number | {})
+[info]   join: (number | {})
+[info]   map: (number | {})
+[info]   lastIndexOf: (number | {})
+[info]   every: (number | {})
+[info]   set: (number | {})
+[info]   toLocaleString: (number | {})
+[info]   forEach: (number | {})
+[info]   buffer: (number | I73)
+[info]   findIndex: (number | {})
+[info]   reverse: (number | {})
+[info]   filter: (number | {})
+[info]   reduceRight: (number | {})
+[info]   fill: (number | {})
+[info]   slice: (number | {})
+[info]   byteLength: number
+[info]   reduce: (number | {})
+[info]   toString: (number | {})
+[info]   length: number
+[info]   sort: (number | {})
+[info]   some: (number | {})
+[info]   indexOf: (number | {})
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info]   copyWithin: (number | {})
+[info] }
+[info] interface I75 {
+[info]   byteLength: number
+[info] }
+[info] interface I74 {
+[info]   find: (number | {})
+[info]   subarray: (number | {})
+[info]   join: (number | {})
+[info]   map: (number | {})
+[info]   lastIndexOf: (number | {})
+[info]   every: (number | {})
+[info]   set: (number | {})
+[info]   toLocaleString: (number | {})
+[info]   forEach: (number | {})
+[info]   buffer: (number | I75)
+[info]   findIndex: (number | {})
+[info]   reverse: (number | {})
+[info]   filter: (number | {})
+[info]   reduceRight: (number | {})
+[info]   fill: (number | {})
+[info]   slice: (number | {})
+[info]   byteLength: number
+[info]   reduce: (number | {})
+[info]   toString: (number | {})
+[info]   length: number
+[info]   sort: (number | {})
+[info]   some: (number | {})
+[info]   indexOf: (number | {})
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info]   copyWithin: (number | {})
+[info] }
+[info] interface I76 {
+[info]   [0]: number
+[info]   length: number
+[info] }
+[info] interface I58 {
+[info]   byteLength(b64: I59): number
+[info]   toByteArray(b64: (I61)): ({} | I74 | I72)
+[info]   fromByteArray(uint8: (I76)): string
+[info] }
+[info] => I58
+[success] Total time: 5 s, completed Jul 29, 2018 9:03:21 PM

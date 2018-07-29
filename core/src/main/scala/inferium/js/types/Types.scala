@@ -57,6 +57,7 @@ object js {
         def matches(arg: Entity): Boolean
         def instantiate(heap: Heap.Mutator, instantiator: Instantiator, substitutions: Map[GenericType, Entity]): Entity
 
+        def origin: Set[Entity] = Set.empty
     }
 
     object Type {
@@ -115,13 +116,11 @@ object js {
         def intersection(types: Traversable[Type])(rec: Map[CompoundType, Instantiate]): js.Type = {
             var obj: Option[CompoundType] = None
             var selfInst = new Instantiate()
-            var hasAny = false
 
             def flat(tys: Traversable[Type]): Seq[Type] = tys.toSeq flatMap {
                 case NeverType => Seq.empty
                 case AnyType =>
-                    hasAny = true
-                    Seq(AnyType)
+                    Seq()
                 case inst: Instantiate =>
                     assert(!inst.typeArguments.exists(_.isInstanceOf[GenericType]))
                     if (inst.typeArguments.nonEmpty || inst.target == null)
@@ -156,10 +155,6 @@ object js {
 
             val atoms = flat(types)
             obj foreach { selfInst.target = _ }
-
-            if (hasAny) {
-                return AnyType
-            }
 
             IntersectionType(atoms ++ obj.toSeq )
         }
@@ -266,6 +261,7 @@ object js {
     }
 
     final class ProbeType(val probe: ProbeEntity) extends Type {
+        override def origin: Set[Entity] = Set(probe)
         override def hashCode(): Int = probe.hashCode()
 
         override def equals(o: scala.Any): Boolean = o match {
@@ -302,7 +298,7 @@ object js {
             val obj = if (readProps.isEmpty && writeProps.isEmpty && properties.isEmpty && signature.isEmpty && constructor.isEmpty) {
                 NeverType
             } else {
-                val obj = new CompoundType(None, false)
+                val obj = new CompoundType(None, false, Set(probe))
 
                 obj._resolve(Seq.empty, Seq.empty, signature, constructor, properties.values.toSeq)
                 obj
@@ -464,7 +460,7 @@ object js {
         }
     }
 
-    final class CompoundType(val name: Option[String], var isClass: Boolean = false) extends Type with ClassLike {
+    final class CompoundType(val name: Option[String], var isClass: Boolean = false, override val origin: Set[Entity] = Set.empty) extends Type with ClassLike {
         lazy val defaultConstructor = {
             assert(isClass)
             val o = new Overload(Seq.empty, Seq.empty)
@@ -607,7 +603,7 @@ object js {
             if (other == this) {
                 this
             } else {
-                val result = new CompoundType(None, false)
+                val result = new CompoundType(None, false, origin | other.origin)
 
                 val newSignature = this.signature ++ other.signature
                 val newConstructor = this.constructor ++ other.constructor
@@ -627,7 +623,7 @@ object js {
             if (other == this) {
                 this
             } else {
-                val result = new CompoundType(None, false)
+                val result = new CompoundType(None, false, origin | other.origin)
 
                 val newSignature = this.signature ++ other.signature
                 val newConstructor = this.constructor ++ other.constructor
@@ -722,7 +718,7 @@ object js {
                     return cty
             }
 
-            val cty = new CompoundType(None)
+            val cty = new CompoundType(None, origin = Set(obj))
             objs += (key -> cty)
 
             var props = Map.empty[String, (Boolean, IniEntity)]
@@ -751,8 +747,8 @@ object js {
             }.toSeq
 
             val (signature, constructor) = obj match {
-                case f: FunctionEntity =>
-                    val info = f.callableInfo
+                case f: FunctionEntity if f.callableInfo.analysisInfo.isDefined=>
+                    val info = f.callableInfo.analysisInfo.get
 
                     val ths = info.thisProbe
                     val thisHasWrites = ths._writes.nonEmpty
@@ -764,7 +760,7 @@ object js {
                             Seq(name.toInt -> prop)
                         case _ =>
                             Seq.empty
-                    }.toSeq.sortBy(_._1).map { case (i, ty) => Param(info.argumentNames(i), ty, optional = false) }
+                    }.toSeq.sortBy(_._1).map { case (i, ty) => Param(f.callableInfo.argumentNames(i), ty, optional = false) }
 
                     val returnType = from(info.returnValue, heap)
 

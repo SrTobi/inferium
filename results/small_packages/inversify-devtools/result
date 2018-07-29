@@ -1,0 +1,773 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install inversify-devtools into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/inversify-devtools
+Look into <inf>/bootstrap
+=> Couldn't find font-awesome! Skip!
+Look into <inf>/inversify-logger-middleware
+Look into <inf>/chalk
+Look into <inf>/ansi-styles
+Look into <inf>/escape-string-regexp
+Look into <inf>/has-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/strip-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/supports-color
+Look into <inf>/react
+Look into <inf>/create-react-class
+Look into <inf>/fbjs
+Look into <inf>/core-js
+Look into <inf>/isomorphic-fetch
+Look into <inf>/node-fetch
+Look into <inf>/encoding
+Look into <inf>/iconv-lite
+Look into <inf>/safer-buffer
+Look into <inf>/is-stream
+Look into <inf>/whatwg-fetch
+Look into <inf>/loose-envify
+Look into <inf>/js-tokens
+Look into <inf>/object-assign
+Look into <inf>/promise
+Look into <inf>/asap
+Look into <inf>/setimmediate
+Look into <inf>/ua-parser-js
+Look into <inf>/loose-envify
+Look into <inf>/object-assign
+Look into <inf>/fbjs
+Look into <inf>/loose-envify
+Look into <inf>/object-assign
+Look into <inf>/prop-types
+Look into <inf>/loose-envify
+Look into <inf>/object-assign
+Look into <inf>/react-dom
+Look into <inf>/fbjs
+Look into <inf>/loose-envify
+Look into <inf>/object-assign
+Look into <inf>/prop-types
+Look into <inf>/react-json-tree
+Look into <inf>/babel-plugin-transform-runtime
+=> Couldn't find babel-runtime! Skip!
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/react-base16-styling
+Look into <inf>/base16
+Look into <inf>/lodash.curry
+Look into <inf>/react-pure-render
+Look into <inf>/react-redux
+Look into <inf>/create-react-class
+Look into <inf>/hoist-non-react-statics
+Look into <inf>/invariant
+Look into <inf>/loose-envify
+Look into <inf>/lodash
+Look into <inf>/loose-envify
+Look into <inf>/prop-types
+Look into <inf>/react-router
+Look into <inf>/history
+Look into <inf>/deep-equal
+Look into <inf>/invariant
+Look into <inf>/query-string
+Look into <inf>/strict-uri-encode
+Look into <inf>/history/node_modules/warning
+Look into <inf>/loose-envify
+Look into <inf>/react-router/node_modules/hoist-non-react-statics
+Look into <inf>/invariant
+Look into <inf>/loose-envify
+Look into <inf>/warning
+Look into <inf>/loose-envify
+Look into <inf>/react-router-redux
+Look into <inf>/redux
+Look into <inf>/lodash
+Look into <inf>/lodash-es
+Look into <inf>/loose-envify
+Look into <inf>/symbol-observable
+Look into <inf>/redux-bootstrap
+Look into <inf>/redux-bootstrap/node_modules/history
+Look into <inf>/invariant
+Look into <inf>/loose-envify
+Look into <inf>/redux-bootstrap/node_modules/query-string
+Look into <inf>/object-assign
+Look into <inf>/strict-uri-encode
+Look into <inf>/warning
+Look into <inf>/immutable
+Look into <inf>/react
+Look into <inf>/react-dom
+Look into <inf>/redux-bootstrap/node_modules/react-redux
+Look into <inf>/hoist-non-react-statics
+Look into <inf>/invariant
+Look into <inf>/lodash
+Look into <inf>/lodash-es
+Look into <inf>/loose-envify
+Look into <inf>/prop-types
+Look into <inf>/redux-bootstrap/node_modules/react-router
+Look into <inf>/create-react-class
+Look into <inf>/redux-bootstrap/node_modules/history
+Look into <inf>/hoist-non-react-statics
+Look into <inf>/invariant
+Look into <inf>/loose-envify
+Look into <inf>/prop-types
+Look into <inf>/warning
+Look into <inf>/react-router-redux
+Look into <inf>/redux
+Look into <inf>/redux-immutable
+Look into <inf>/immutable
+Look into <inf>/reselect
+Look into <inf>/redux-devtools
+Look into <inf>/lodash
+Look into <inf>/prop-types
+Look into <inf>/redux-devtools-instrument
+Look into <inf>/lodash
+Look into <inf>/symbol-observable
+Look into <inf>/redux-devtools-dock-monitor
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/parse-key
+Look into <inf>/prop-types
+Look into <inf>/react-dock
+Look into <inf>/lodash.debounce
+Look into <inf>/lodash._getnative
+Look into <inf>/prop-types
+Look into <inf>/react-pure-render
+Look into <inf>/redux-devtools-log-monitor
+Look into <inf>/redux-devtools-log-monitor/node_modules/lodash.debounce
+Look into <inf>/prop-types
+Look into <inf>/redux-devtools-log-monitor/node_modules/react-json-tree
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/prop-types
+Look into <inf>/redux-devtools-log-monitor/node_modules/react-base16-styling
+Look into <inf>/base16
+Look into <inf>/lodash.curry
+Look into <inf>/lodash.flow
+Look into <inf>/pure-color
+Look into <inf>/react-pure-render
+Look into <inf>/redux-devtools-themes
+Look into <inf>/base16
+Look into <inf>/redux-immutable
+Look into <inf>/redux-logger
+Look into <inf>/deep-diff
+Look into <inf>/redux-thunk
+Install types for bootstrap
+Install types for inversify-logger-middleware
+Install types for chalk
+Install types for ansi-styles
+Install types for escape-string-regexp
+Install types for has-ansi
+Install types for ansi-regex
+Install types for strip-ansi
+Install types for supports-color
+Install types for react
+Install types for create-react-class
+Install types for fbjs
+=> not found
+Install types for core-js
+Install types for isomorphic-fetch
+Install types for node-fetch
+Install types for encoding
+=> not found
+Install types for iconv-lite
+Install types for safer-buffer
+=> not found
+Install types for is-stream
+Install types for whatwg-fetch
+Install types for loose-envify
+=> not found
+Install types for js-tokens
+=> not found
+Install types for object-assign
+Install types for promise
+Install types for asap
+Install types for setimmediate
+=> not found
+Install types for ua-parser-js
+Install types for prop-types
+Install types for react-dom
+Install types for react-json-tree
+Install types for babel-plugin-transform-runtime
+=> not found
+Install types for react-base16-styling
+=> not found
+Install types for base16
+Install types for lodash.curry
+Install types for react-pure-render
+=> not found
+Install types for react-redux
+Install types for hoist-non-react-statics
+=> not found
+Install types for invariant
+Install types for lodash
+Install types for react-router
+Install types for history
+Install types for deep-equal
+Install types for query-string
+Install types for strict-uri-encode
+Install types for warning
+Install types for hoist-non-react-statics
+=> not found
+Install types for warning
+Install types for react-router-redux
+Install types for redux
+Install types for lodash-es
+Install types for symbol-observable
+=> not found
+Install types for redux-bootstrap
+Install types for history
+Install types for query-string
+Install types for immutable
+Install types for react-redux
+Install types for react-router
+Install types for redux-immutable
+Install types for reselect
+Install types for redux-devtools
+Install types for redux-devtools-instrument
+=> not found
+Install types for redux-devtools-dock-monitor
+Install types for parse-key
+=> not found
+Install types for react-dock
+=> not found
+Install types for lodash.debounce
+Install types for lodash._getnative
+=> not found
+Install types for redux-devtools-log-monitor
+Install types for lodash.debounce
+Install types for react-json-tree
+Install types for react-base16-styling
+=> not found
+Install types for lodash.flow
+Install types for pure-color
+=> not found
+Install types for redux-devtools-themes
+=> not found
+Install types for redux-logger
+Install types for deep-diff
+Install types for redux-thunk
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/inversify-devtools/_inferium_gather.ts
+Gather types for 76 packages:
+=> bootstrap, inversify-logger-middleware, chalk, ansi-styles, escape-string-regexp, has-ansi, ansi-regex, strip-ansi, supports-color, react, create-react-class, fbjs, core-js, isomorphic-fetch, node-fetch, encoding, iconv-lite, safer-buffer, is-stream, whatwg-fetch, loose-envify, js-tokens, object-assign, promise, asap, setimmediate, ua-parser-js, prop-types, react-dom, react-json-tree, babel-plugin-transform-runtime, react-base16-styling, base16, lodash.curry, react-pure-render, react-redux, hoist-non-react-statics, invariant, lodash, react-router, history, deep-equal, query-string, strict-uri-encode, warning, hoist-non-react-statics, warning, react-router-redux, redux, lodash-es, symbol-observable, redux-bootstrap, history, query-string, immutable, react-redux, react-router, redux-immutable, reselect, redux-devtools, redux-devtools-instrument, redux-devtools-dock-monitor, parse-key, react-dock, lodash.debounce, lodash._getnative, redux-devtools-log-monitor, lodash.debounce, react-json-tree, react-base16-styling, lodash.flow, pure-color, redux-devtools-themes, redux-logger, deep-diff, redux-thunk 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34, _inferium_import_35, _inferium_import_36, _inferium_import_37, _inferium_import_38, _inferium_import_39, _inferium_import_40, _inferium_import_41, _inferium_import_42, _inferium_import_43, _inferium_import_44, _inferium_import_45, _inferium_import_46, _inferium_import_47, _inferium_import_48, _inferium_import_49, _inferium_import_50, _inferium_import_51, _inferium_import_52, _inferium_import_53, _inferium_import_54, _inferium_import_55, _inferium_import_56, _inferium_import_57, _inferium_import_58, _inferium_import_59, _inferium_import_60, _inferium_import_61, _inferium_import_62, _inferium_import_63, _inferium_import_64, _inferium_import_65, _inferium_import_66, _inferium_import_67, _inferium_import_68, _inferium_import_69, _inferium_import_70, _inferium_import_71, _inferium_import_72, _inferium_import_73, _inferium_import_74, _inferium_import_75
+ambient modules: "jquery", "jquery/dist/jquery.slim", "core-js", "core-js/shim", "core-js/core", "core-js/core/$for", "core-js/core/_", "core-js/core/array", "core-js/core/date", "core-js/core/delay", "core-js/core/dict", "core-js/core/function", "core-js/core/global", "core-js/core/log", "core-js/core/number", "core-js/core/object", "core-js/core/string", "core-js/fn/$for", "core-js/fn/_", "core-js/fn/clear-immediate", "core-js/fn/delay", "core-js/fn/dict", "core-js/fn/get-iterator", "core-js/fn/global", "core-js/fn/is-iterable", "core-js/fn/log", "core-js/fn/map", "core-js/fn/promise", "core-js/fn/set", "core-js/fn/set-immediate", "core-js/fn/set-interval", "core-js/fn/set-timeout", "core-js/fn/weak-map", "core-js/fn/weak-set", "core-js/fn/array", "core-js/fn/array/concat", "core-js/fn/array/copy-within", "core-js/fn/array/entries", "core-js/fn/array/every", "core-js/fn/array/fill", "core-js/fn/array/filter", "core-js/fn/array/find", "core-js/fn/array/find-index", "core-js/fn/array/for-each", "core-js/fn/array/from", "core-js/fn/array/includes", "core-js/fn/array/index-of", "core-js/fn/array/is-array", "core-js/fn/array/join", "core-js/fn/array/keys", "core-js/fn/array/last-index-of", "core-js/fn/array/map", "core-js/fn/array/of", "core-js/fn/array/pop", "core-js/fn/array/push", "core-js/fn/array/reduce", "core-js/fn/array/reduce-right", "core-js/fn/array/reverse", "core-js/fn/array/shift", "core-js/fn/array/slice", "core-js/fn/array/some", "core-js/fn/array/sort", "core-js/fn/array/splice", "core-js/fn/array/turn", "core-js/fn/array/unshift", "core-js/fn/array/values", "core-js/fn/date", "core-js/fn/date/add-locale", "core-js/fn/date/format", "core-js/fn/date/formatUTC", "core-js/fn/function", "core-js/fn/function/has-instance", "core-js/fn/function/name", "core-js/fn/function/part", "core-js/fn/math", "core-js/fn/math/acosh", "core-js/fn/math/asinh", "core-js/fn/math/atanh", "core-js/fn/math/cbrt", "core-js/fn/math/clz32", "core-js/fn/math/cosh", "core-js/fn/math/expm1", "core-js/fn/math/fround", "core-js/fn/math/hypot", "core-js/fn/math/imul", "core-js/fn/math/log10", "core-js/fn/math/log1p", "core-js/fn/math/log2", "core-js/fn/math/sign", "core-js/fn/math/sinh", "core-js/fn/math/tanh", "core-js/fn/math/trunc", "core-js/fn/number", "core-js/fn/number/epsilon", "core-js/fn/number/is-finite", "core-js/fn/number/is-integer", "core-js/fn/number/is-nan", "core-js/fn/number/is-safe-integer", "core-js/fn/number/max-safe-integer", "core-js/fn/number/min-safe-integer", "core-js/fn/number/parse-float", "core-js/fn/number/parse-int", "core-js/fn/number/random", "core-js/fn/object", "core-js/fn/object/assign", "core-js/fn/object/classof", "core-js/fn/object/create", "core-js/fn/object/define", "core-js/fn/object/define-properties", "core-js/fn/object/define-property", "core-js/fn/object/entries", "core-js/fn/object/freeze", "core-js/fn/object/get-own-property-descriptor", "core-js/fn/object/get-own-property-descriptors", "core-js/fn/object/get-own-property-names", "core-js/fn/object/get-own-property-symbols", "core-js/fn/object/get-prototype-of", "core-js/fn/object/is", "core-js/fn/object/is-extensible", "core-js/fn/object/is-frozen", "core-js/fn/object/is-object", "core-js/fn/object/is-sealed", "core-js/fn/object/keys", "core-js/fn/object/make", "core-js/fn/object/prevent-extensions", "core-js/fn/object/seal", "core-js/fn/object/set-prototype-of", "core-js/fn/object/values", "core-js/fn/reflect", "core-js/fn/reflect/apply", "core-js/fn/reflect/construct", "core-js/fn/reflect/define-property", "core-js/fn/reflect/delete-property", "core-js/fn/reflect/enumerate", "core-js/fn/reflect/get", "core-js/fn/reflect/get-own-property-descriptor", "core-js/fn/reflect/get-prototype-of", "core-js/fn/reflect/has", "core-js/fn/reflect/is-extensible", "core-js/fn/reflect/own-keys", "core-js/fn/reflect/prevent-extensions", "core-js/fn/reflect/set", "core-js/fn/reflect/set-prototype-of", "core-js/fn/regexp", "core-js/fn/regexp/escape", "core-js/fn/string", "core-js/fn/string/at", "core-js/fn/string/code-point-at", "core-js/fn/string/ends-with", "core-js/fn/string/escape-html", "core-js/fn/string/from-code-point", "core-js/fn/string/includes", "core-js/fn/string/pad-end", "core-js/fn/string/pad-start", "core-js/fn/string/raw", "core-js/fn/string/repeat", "core-js/fn/string/starts-with", "core-js/fn/string/unescape-html", "core-js/fn/symbol", "core-js/fn/symbol/for", "core-js/fn/symbol/has-instance", "core-js/fn/symbol/is-concat-spreadable", "core-js/fn/symbol/iterator", "core-js/fn/symbol/key-for", "core-js/fn/symbol/match", "core-js/fn/symbol/replace", "core-js/fn/symbol/search", "core-js/fn/symbol/species", "core-js/fn/symbol/split", "core-js/fn/symbol/to-primitive", "core-js/fn/symbol/to-string-tag", "core-js/fn/symbol/unscopables", "core-js/es5", "core-js/es6", "core-js/es6/array", "core-js/es6/function", "core-js/es6/map", "core-js/es6/math", "core-js/es6/number", "core-js/es6/object", "core-js/es6/promise", "core-js/es6/reflect", "core-js/es6/regexp", "core-js/es6/set", "core-js/es6/string", "core-js/es6/symbol", "core-js/es6/weak-map", "core-js/es6/weak-set", "core-js/es7", "core-js/es7/array", "core-js/es7/map", "core-js/es7/object", "core-js/es7/regexp", "core-js/es7/set", "core-js/es7/string", "core-js/js", "core-js/js/array", "core-js/web", "core-js/web/dom", "core-js/web/immediate", "core-js/web/timers", "core-js/library", "core-js/library/shim", "core-js/library/core", "core-js/library/core/$for", "core-js/library/core/_", "core-js/library/core/array", "core-js/library/core/date", "core-js/library/core/delay", "core-js/library/core/dict", "core-js/library/core/function", "core-js/library/core/global", "core-js/library/core/log", "core-js/library/core/number", "core-js/library/core/object", "core-js/library/core/string", "core-js/library/fn/$for", "core-js/library/fn/_", "core-js/library/fn/clear-immediate", "core-js/library/fn/delay", "core-js/library/fn/dict", "core-js/library/fn/get-iterator", "core-js/library/fn/global", "core-js/library/fn/is-iterable", "core-js/library/fn/log", "core-js/library/fn/map", "core-js/library/fn/promise", "core-js/library/fn/set", "core-js/library/fn/set-immediate", "core-js/library/fn/set-interval", "core-js/library/fn/set-timeout", "core-js/library/fn/weak-map", "core-js/library/fn/weak-set", "core-js/library/fn/array", "core-js/library/fn/array/concat", "core-js/library/fn/array/copy-within", "core-js/library/fn/array/entries", "core-js/library/fn/array/every", "core-js/library/fn/array/fill", "core-js/library/fn/array/filter", "core-js/library/fn/array/find", "core-js/library/fn/array/find-index", "core-js/library/fn/array/for-each", "core-js/library/fn/array/from", "core-js/library/fn/array/includes", "core-js/library/fn/array/index-of", "core-js/library/fn/array/is-array", "core-js/library/fn/array/join", "core-js/library/fn/array/keys", "core-js/library/fn/array/last-index-of", "core-js/library/fn/array/map", "core-js/library/fn/array/of", "core-js/library/fn/array/pop", "core-js/library/fn/array/push", "core-js/library/fn/array/reduce", "core-js/library/fn/array/reduce-right", "core-js/library/fn/array/reverse", "core-js/library/fn/array/shift", "core-js/library/fn/array/slice", "core-js/library/fn/array/some", "core-js/library/fn/array/sort", "core-js/library/fn/array/splice", "core-js/library/fn/array/turn", "core-js/library/fn/array/unshift", "core-js/library/fn/array/values", "core-js/library/fn/date", "core-js/library/fn/date/add-locale", "core-js/library/fn/date/format", "core-js/library/fn/date/formatUTC", "core-js/library/fn/function", "core-js/library/fn/function/has-instance", "core-js/library/fn/function/name", "core-js/library/fn/function/part", "core-js/library/fn/math", "core-js/library/fn/math/acosh", "core-js/library/fn/math/asinh", "core-js/library/fn/math/atanh", "core-js/library/fn/math/cbrt", "core-js/library/fn/math/clz32", "core-js/library/fn/math/cosh", "core-js/library/fn/math/expm1", "core-js/library/fn/math/fround", "core-js/library/fn/math/hypot", "core-js/library/fn/math/imul", "core-js/library/fn/math/log10", "core-js/library/fn/math/log1p", "core-js/library/fn/math/log2", "core-js/library/fn/math/sign", "core-js/library/fn/math/sinh", "core-js/library/fn/math/tanh", "core-js/library/fn/math/trunc", "core-js/library/fn/number", "core-js/library/fn/number/epsilon", "core-js/library/fn/number/is-finite", "core-js/library/fn/number/is-integer", "core-js/library/fn/number/is-nan", "core-js/library/fn/number/is-safe-integer", "core-js/library/fn/number/max-safe-integer", "core-js/library/fn/number/min-safe-integer", "core-js/library/fn/number/parse-float", "core-js/library/fn/number/parse-int", "core-js/library/fn/number/random", "core-js/library/fn/object", "core-js/library/fn/object/assign", "core-js/library/fn/object/classof", "core-js/library/fn/object/create", "core-js/library/fn/object/define", "core-js/library/fn/object/define-properties", "core-js/library/fn/object/define-property", "core-js/library/fn/object/entries", "core-js/library/fn/object/freeze", "core-js/library/fn/object/get-own-property-descriptor", "core-js/library/fn/object/get-own-property-descriptors", "core-js/library/fn/object/get-own-property-names", "core-js/library/fn/object/get-own-property-symbols", "core-js/library/fn/object/get-prototype-of", "core-js/library/fn/object/is", "core-js/library/fn/object/is-extensible", "core-js/library/fn/object/is-frozen", "core-js/library/fn/object/is-object", "core-js/library/fn/object/is-sealed", "core-js/library/fn/object/keys", "core-js/library/fn/object/make", "core-js/library/fn/object/prevent-extensions", "core-js/library/fn/object/seal", "core-js/library/fn/object/set-prototype-of", "core-js/library/fn/object/values", "core-js/library/fn/reflect", "core-js/library/fn/reflect/apply", "core-js/library/fn/reflect/construct", "core-js/library/fn/reflect/define-property", "core-js/library/fn/reflect/delete-property", "core-js/library/fn/reflect/enumerate", "core-js/library/fn/reflect/get", "core-js/library/fn/reflect/get-own-property-descriptor", "core-js/library/fn/reflect/get-prototype-of", "core-js/library/fn/reflect/has", "core-js/library/fn/reflect/is-extensible", "core-js/library/fn/reflect/own-keys", "core-js/library/fn/reflect/prevent-extensions", "core-js/library/fn/reflect/set", "core-js/library/fn/reflect/set-prototype-of", "core-js/library/fn/reflect/es7/define-metadata", "core-js/library/fn/reflect/es7/delete-metadata", "core-js/library/fn/reflect/es7/get-metadata", "core-js/library/fn/reflect/es7/get-metadata-keys", "core-js/library/fn/reflect/es7/get-own-metadata", "core-js/library/fn/reflect/es7/get-own-metadata-keys'", "core-js/library/fn/reflect/es7/has-metadata'", "core-js/library/fn/reflect/es7/has-own-metadata'", "core-js/library/fn/reflect/es7/metadata'", "core-js/library/fn/regexp", "core-js/library/fn/regexp/escape", "core-js/library/fn/string", "core-js/library/fn/string/at", "core-js/library/fn/string/code-point-at", "core-js/library/fn/string/ends-with", "core-js/library/fn/string/escape-html", "core-js/library/fn/string/from-code-point", "core-js/library/fn/string/includes", "core-js/library/fn/string/pad-end", "core-js/library/fn/string/pad-start", "core-js/library/fn/string/raw", "core-js/library/fn/string/repeat", "core-js/library/fn/string/starts-with", "core-js/library/fn/string/unescape-html", "core-js/library/fn/symbol", "core-js/library/fn/symbol/for", "core-js/library/fn/symbol/has-instance", "core-js/library/fn/symbol/is-concat-spreadable", "core-js/library/fn/symbol/iterator", "core-js/library/fn/symbol/key-for", "core-js/library/fn/symbol/match", "core-js/library/fn/symbol/replace", "core-js/library/fn/symbol/search", "core-js/library/fn/symbol/species", "core-js/library/fn/symbol/split", "core-js/library/fn/symbol/to-primitive", "core-js/library/fn/symbol/to-string-tag", "core-js/library/fn/symbol/unscopables", "core-js/library/es5", "core-js/library/es6", "core-js/library/es6/array", "core-js/library/es6/function", "core-js/library/es6/map", "core-js/library/es6/math", "core-js/library/es6/number", "core-js/library/es6/object", "core-js/library/es6/promise", "core-js/library/es6/reflect", "core-js/library/es6/regexp", "core-js/library/es6/set", "core-js/library/es6/string", "core-js/library/es6/symbol", "core-js/library/es6/weak-map", "core-js/library/es6/weak-set", "core-js/library/es7", "core-js/library/es7/array", "core-js/library/es7/map", "core-js/library/es7/object", "core-js/library/es7/regexp", "core-js/library/es7/set", "core-js/library/es7/string", "core-js/library/js", "core-js/library/js/array", "core-js/library/web", "core-js/library/web/dom", "core-js/library/web/immediate", "core-js/library/web/timers", "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "ua-parser-js", "deep-diff"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/jquery/index.d.ts
+=> <inf>/popper.js/index.d.ts
+=> <inf>/@types/bootstrap/index.d.ts
+=> <inf>/@types/color-name/index.d.ts
+=> <inf>/@types/ansi-styles/escape-code.d.ts
+=> <inf>/@types/ansi-styles/index.d.ts
+=> <inf>/@types/escape-string-regexp/index.d.ts
+=> <inf>/@types/has-ansi/index.d.ts
+=> <inf>/@types/ansi-regex/index.d.ts
+=> <inf>/@types/strip-ansi/index.d.ts
+=> <inf>/@types/supports-color/index.d.ts
+=> <inf>/@types/react/global.d.ts
+=> <inf>/csstype/index.d.ts
+=> <inf>/@types/react/index.d.ts
+=> <inf>/@types/create-react-class/index.d.ts
+=> <inf>/@types/core-js/index.d.ts
+=> <inf>/@types/isomorphic-fetch/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/node-fetch/index.d.ts
+=> <inf>/iconv-lite/lib/index.d.ts
+=> <inf>/@types/is-stream/index.d.ts
+=> <inf>/@types/whatwg-streams/index.d.ts
+=> <inf>/@types/whatwg-fetch/index.d.ts
+=> <inf>/@types/object-assign/index.d.ts
+=> <inf>/promise/index.d.ts
+=> <inf>/@types/asap/index.d.ts
+=> <inf>/@types/ua-parser-js/index.d.ts
+=> <inf>/@types/prop-types/index.d.ts
+=> <inf>/@types/react-dom/index.d.ts
+=> <inf>/@types/react-json-tree/index.d.ts
+=> <inf>/@types/base16/index.d.ts
+=> <inf>/@types/lodash/common/common.d.ts
+=> <inf>/@types/lodash/common/array.d.ts
+=> <inf>/@types/lodash/common/collection.d.ts
+=> <inf>/@types/lodash/common/date.d.ts
+=> <inf>/@types/lodash/common/function.d.ts
+=> <inf>/@types/lodash/common/lang.d.ts
+=> <inf>/@types/lodash/common/math.d.ts
+=> <inf>/@types/lodash/common/number.d.ts
+=> <inf>/@types/lodash/common/object.d.ts
+=> <inf>/@types/lodash/common/seq.d.ts
+=> <inf>/@types/lodash/common/string.d.ts
+=> <inf>/@types/lodash/common/util.d.ts
+=> <inf>/@types/lodash/index.d.ts
+=> <inf>/@types/lodash.curry/index.d.ts
+=> <inf>/@types/react-redux/node_modules/redux/index.d.ts
+=> <inf>/@types/react-redux/index.d.ts
+=> <inf>/hoist-non-react-statics/index.d.ts
+=> <inf>/@types/invariant/index.d.ts
+=> <inf>/@types/history/DOMUtils.d.ts
+=> <inf>/@types/history/createBrowserHistory.d.ts
+=> <inf>/@types/history/createHashHistory.d.ts
+=> <inf>/@types/history/createMemoryHistory.d.ts
+=> <inf>/@types/history/LocationUtils.d.ts
+=> <inf>/@types/history/PathUtils.d.ts
+=> <inf>/@types/history/index.d.ts
+=> <inf>/@types/react-router/index.d.ts
+=> <inf>/@types/deep-equal/index.d.ts
+=> <inf>/@types/query-string/index.d.ts
+=> <inf>/@types/strict-uri-encode/index.d.ts
+=> <inf>/@types/warning/index.d.ts
+=> <inf>/@types/react-router-redux/index.d.ts
+=> <inf>/redux/index.d.ts
+=> <inf>/@types/lodash-es/add.d.ts
+=> <inf>/@types/lodash-es/after.d.ts
+=> <inf>/@types/lodash-es/ary.d.ts
+=> <inf>/@types/lodash-es/assign.d.ts
+=> <inf>/@types/lodash-es/assignIn.d.ts
+=> <inf>/@types/lodash-es/assignInWith.d.ts
+=> <inf>/@types/lodash-es/assignWith.d.ts
+=> <inf>/@types/lodash-es/at.d.ts
+=> <inf>/@types/lodash-es/attempt.d.ts
+=> <inf>/@types/lodash-es/before.d.ts
+=> <inf>/@types/lodash-es/bind.d.ts
+=> <inf>/@types/lodash-es/bindAll.d.ts
+=> <inf>/@types/lodash-es/bindKey.d.ts
+=> <inf>/@types/lodash-es/camelCase.d.ts
+=> <inf>/@types/lodash-es/capitalize.d.ts
+=> <inf>/@types/lodash-es/castArray.d.ts
+=> <inf>/@types/lodash-es/ceil.d.ts
+=> <inf>/@types/lodash-es/chunk.d.ts
+=> <inf>/@types/lodash-es/clamp.d.ts
+=> <inf>/@types/lodash-es/clone.d.ts
+=> <inf>/@types/lodash-es/cloneDeep.d.ts
+=> <inf>/@types/lodash-es/cloneDeepWith.d.ts
+=> <inf>/@types/lodash-es/cloneWith.d.ts
+=> <inf>/@types/lodash-es/compact.d.ts
+=> <inf>/@types/lodash-es/concat.d.ts
+=> <inf>/@types/lodash-es/cond.d.ts
+=> <inf>/@types/lodash-es/conforms.d.ts
+=> <inf>/@types/lodash-es/conformsTo.d.ts
+=> <inf>/@types/lodash-es/constant.d.ts
+=> <inf>/@types/lodash-es/countBy.d.ts
+=> <inf>/@types/lodash-es/create.d.ts
+=> <inf>/@types/lodash-es/curry.d.ts
+=> <inf>/@types/lodash-es/curryRight.d.ts
+=> <inf>/@types/lodash-es/debounce.d.ts
+=> <inf>/@types/lodash-es/deburr.d.ts
+=> <inf>/@types/lodash-es/defaultTo.d.ts
+=> <inf>/@types/lodash-es/defaults.d.ts
+=> <inf>/@types/lodash-es/defaultsDeep.d.ts
+=> <inf>/@types/lodash-es/defer.d.ts
+=> <inf>/@types/lodash-es/delay.d.ts
+=> <inf>/@types/lodash-es/difference.d.ts
+=> <inf>/@types/lodash-es/differenceBy.d.ts
+=> <inf>/@types/lodash-es/differenceWith.d.ts
+=> <inf>/@types/lodash-es/divide.d.ts
+=> <inf>/@types/lodash-es/drop.d.ts
+=> <inf>/@types/lodash-es/dropRight.d.ts
+=> <inf>/@types/lodash-es/dropRightWhile.d.ts
+=> <inf>/@types/lodash-es/dropWhile.d.ts
+=> <inf>/@types/lodash-es/each.d.ts
+=> <inf>/@types/lodash-es/eachRight.d.ts
+=> <inf>/@types/lodash-es/endsWith.d.ts
+=> <inf>/@types/lodash-es/entries.d.ts
+=> <inf>/@types/lodash-es/entriesIn.d.ts
+=> <inf>/@types/lodash-es/eq.d.ts
+=> <inf>/@types/lodash-es/escape.d.ts
+=> <inf>/@types/lodash-es/escapeRegExp.d.ts
+=> <inf>/@types/lodash-es/every.d.ts
+=> <inf>/@types/lodash-es/extend.d.ts
+=> <inf>/@types/lodash-es/extendWith.d.ts
+=> <inf>/@types/lodash-es/fill.d.ts
+=> <inf>/@types/lodash-es/filter.d.ts
+=> <inf>/@types/lodash-es/find.d.ts
+=> <inf>/@types/lodash-es/findIndex.d.ts
+=> <inf>/@types/lodash-es/findKey.d.ts
+=> <inf>/@types/lodash-es/findLast.d.ts
+=> <inf>/@types/lodash-es/findLastIndex.d.ts
+=> <inf>/@types/lodash-es/findLastKey.d.ts
+=> <inf>/@types/lodash-es/first.d.ts
+=> <inf>/@types/lodash-es/flatMap.d.ts
+=> <inf>/@types/lodash-es/flatMapDeep.d.ts
+=> <inf>/@types/lodash-es/flatMapDepth.d.ts
+=> <inf>/@types/lodash-es/flatten.d.ts
+=> <inf>/@types/lodash-es/flattenDeep.d.ts
+=> <inf>/@types/lodash-es/flattenDepth.d.ts
+=> <inf>/@types/lodash-es/flip.d.ts
+=> <inf>/@types/lodash-es/floor.d.ts
+=> <inf>/@types/lodash-es/flow.d.ts
+=> <inf>/@types/lodash-es/flowRight.d.ts
+=> <inf>/@types/lodash-es/forEach.d.ts
+=> <inf>/@types/lodash-es/forEachRight.d.ts
+=> <inf>/@types/lodash-es/forIn.d.ts
+=> <inf>/@types/lodash-es/forInRight.d.ts
+=> <inf>/@types/lodash-es/forOwn.d.ts
+=> <inf>/@types/lodash-es/forOwnRight.d.ts
+=> <inf>/@types/lodash-es/fromPairs.d.ts
+=> <inf>/@types/lodash-es/functions.d.ts
+=> <inf>/@types/lodash-es/functionsIn.d.ts
+=> <inf>/@types/lodash-es/get.d.ts
+=> <inf>/@types/lodash-es/groupBy.d.ts
+=> <inf>/@types/lodash-es/gt.d.ts
+=> <inf>/@types/lodash-es/gte.d.ts
+=> <inf>/@types/lodash-es/has.d.ts
+=> <inf>/@types/lodash-es/hasIn.d.ts
+=> <inf>/@types/lodash-es/head.d.ts
+=> <inf>/@types/lodash-es/identity.d.ts
+=> <inf>/@types/lodash-es/inRange.d.ts
+=> <inf>/@types/lodash-es/includes.d.ts
+=> <inf>/@types/lodash-es/indexOf.d.ts
+=> <inf>/@types/lodash-es/initial.d.ts
+=> <inf>/@types/lodash-es/intersection.d.ts
+=> <inf>/@types/lodash-es/intersectionBy.d.ts
+=> <inf>/@types/lodash-es/intersectionWith.d.ts
+=> <inf>/@types/lodash-es/invert.d.ts
+=> <inf>/@types/lodash-es/invertBy.d.ts
+=> <inf>/@types/lodash-es/invoke.d.ts
+=> <inf>/@types/lodash-es/invokeMap.d.ts
+=> <inf>/@types/lodash-es/isArguments.d.ts
+=> <inf>/@types/lodash-es/isArray.d.ts
+=> <inf>/@types/lodash-es/isArrayBuffer.d.ts
+=> <inf>/@types/lodash-es/isArrayLike.d.ts
+=> <inf>/@types/lodash-es/isArrayLikeObject.d.ts
+=> <inf>/@types/lodash-es/isBoolean.d.ts
+=> <inf>/@types/lodash-es/isBuffer.d.ts
+=> <inf>/@types/lodash-es/isDate.d.ts
+=> <inf>/@types/lodash-es/isElement.d.ts
+=> <inf>/@types/lodash-es/isEmpty.d.ts
+=> <inf>/@types/lodash-es/isEqual.d.ts
+=> <inf>/@types/lodash-es/isEqualWith.d.ts
+=> <inf>/@types/lodash-es/isError.d.ts
+=> <inf>/@types/lodash-es/isFinite.d.ts
+=> <inf>/@types/lodash-es/isFunction.d.ts
+=> <inf>/@types/lodash-es/isInteger.d.ts
+=> <inf>/@types/lodash-es/isLength.d.ts
+=> <inf>/@types/lodash-es/isMap.d.ts
+=> <inf>/@types/lodash-es/isMatch.d.ts
+=> <inf>/@types/lodash-es/isMatchWith.d.ts
+=> <inf>/@types/lodash-es/isNaN.d.ts
+=> <inf>/@types/lodash-es/isNative.d.ts
+=> <inf>/@types/lodash-es/isNil.d.ts
+=> <inf>/@types/lodash-es/isNull.d.ts
+=> <inf>/@types/lodash-es/isNumber.d.ts
+=> <inf>/@types/lodash-es/isObject.d.ts
+=> <inf>/@types/lodash-es/isObjectLike.d.ts
+=> <inf>/@types/lodash-es/isPlainObject.d.ts
+=> <inf>/@types/lodash-es/isRegExp.d.ts
+=> <inf>/@types/lodash-es/isSafeInteger.d.ts
+=> <inf>/@types/lodash-es/isSet.d.ts
+=> <inf>/@types/lodash-es/isString.d.ts
+=> <inf>/@types/lodash-es/isSymbol.d.ts
+=> <inf>/@types/lodash-es/isTypedArray.d.ts
+=> <inf>/@types/lodash-es/isUndefined.d.ts
+=> <inf>/@types/lodash-es/isWeakMap.d.ts
+=> <inf>/@types/lodash-es/isWeakSet.d.ts
+=> <inf>/@types/lodash-es/iteratee.d.ts
+=> <inf>/@types/lodash-es/join.d.ts
+=> <inf>/@types/lodash-es/kebabCase.d.ts
+=> <inf>/@types/lodash-es/keyBy.d.ts
+=> <inf>/@types/lodash-es/keys.d.ts
+=> <inf>/@types/lodash-es/keysIn.d.ts
+=> <inf>/@types/lodash-es/last.d.ts
+=> <inf>/@types/lodash-es/lastIndexOf.d.ts
+=> <inf>/@types/lodash-es/lowerCase.d.ts
+=> <inf>/@types/lodash-es/lowerFirst.d.ts
+=> <inf>/@types/lodash-es/lt.d.ts
+=> <inf>/@types/lodash-es/lte.d.ts
+=> <inf>/@types/lodash-es/map.d.ts
+=> <inf>/@types/lodash-es/mapKeys.d.ts
+=> <inf>/@types/lodash-es/mapValues.d.ts
+=> <inf>/@types/lodash-es/matches.d.ts
+=> <inf>/@types/lodash-es/matchesProperty.d.ts
+=> <inf>/@types/lodash-es/max.d.ts
+=> <inf>/@types/lodash-es/maxBy.d.ts
+=> <inf>/@types/lodash-es/mean.d.ts
+=> <inf>/@types/lodash-es/meanBy.d.ts
+=> <inf>/@types/lodash-es/memoize.d.ts
+=> <inf>/@types/lodash-es/merge.d.ts
+=> <inf>/@types/lodash-es/mergeWith.d.ts
+=> <inf>/@types/lodash-es/method.d.ts
+=> <inf>/@types/lodash-es/methodOf.d.ts
+=> <inf>/@types/lodash-es/min.d.ts
+=> <inf>/@types/lodash-es/minBy.d.ts
+=> <inf>/@types/lodash-es/mixin.d.ts
+=> <inf>/@types/lodash-es/multiply.d.ts
+=> <inf>/@types/lodash-es/negate.d.ts
+=> <inf>/@types/lodash-es/noop.d.ts
+=> <inf>/@types/lodash-es/now.d.ts
+=> <inf>/@types/lodash-es/nth.d.ts
+=> <inf>/@types/lodash-es/nthArg.d.ts
+=> <inf>/@types/lodash-es/omit.d.ts
+=> <inf>/@types/lodash-es/omitBy.d.ts
+=> <inf>/@types/lodash-es/once.d.ts
+=> <inf>/@types/lodash-es/orderBy.d.ts
+=> <inf>/@types/lodash-es/over.d.ts
+=> <inf>/@types/lodash-es/overArgs.d.ts
+=> <inf>/@types/lodash-es/overEvery.d.ts
+=> <inf>/@types/lodash-es/overSome.d.ts
+=> <inf>/@types/lodash-es/pad.d.ts
+=> <inf>/@types/lodash-es/padEnd.d.ts
+=> <inf>/@types/lodash-es/padStart.d.ts
+=> <inf>/@types/lodash-es/parseInt.d.ts
+=> <inf>/@types/lodash-es/partial.d.ts
+=> <inf>/@types/lodash-es/partialRight.d.ts
+=> <inf>/@types/lodash-es/partition.d.ts
+=> <inf>/@types/lodash-es/pick.d.ts
+=> <inf>/@types/lodash-es/pickBy.d.ts
+=> <inf>/@types/lodash-es/property.d.ts
+=> <inf>/@types/lodash-es/propertyOf.d.ts
+=> <inf>/@types/lodash-es/pull.d.ts
+=> <inf>/@types/lodash-es/pullAll.d.ts
+=> <inf>/@types/lodash-es/pullAllBy.d.ts
+=> <inf>/@types/lodash-es/pullAllWith.d.ts
+=> <inf>/@types/lodash-es/pullAt.d.ts
+=> <inf>/@types/lodash-es/random.d.ts
+=> <inf>/@types/lodash-es/range.d.ts
+=> <inf>/@types/lodash-es/rangeRight.d.ts
+=> <inf>/@types/lodash-es/rearg.d.ts
+=> <inf>/@types/lodash-es/reduce.d.ts
+=> <inf>/@types/lodash-es/reduceRight.d.ts
+=> <inf>/@types/lodash-es/reject.d.ts
+=> <inf>/@types/lodash-es/remove.d.ts
+=> <inf>/@types/lodash-es/repeat.d.ts
+=> <inf>/@types/lodash-es/replace.d.ts
+=> <inf>/@types/lodash-es/rest.d.ts
+=> <inf>/@types/lodash-es/result.d.ts
+=> <inf>/@types/lodash-es/reverse.d.ts
+=> <inf>/@types/lodash-es/round.d.ts
+=> <inf>/@types/lodash-es/sample.d.ts
+=> <inf>/@types/lodash-es/sampleSize.d.ts
+=> <inf>/@types/lodash-es/set.d.ts
+=> <inf>/@types/lodash-es/setWith.d.ts
+=> <inf>/@types/lodash-es/shuffle.d.ts
+=> <inf>/@types/lodash-es/size.d.ts
+=> <inf>/@types/lodash-es/slice.d.ts
+=> <inf>/@types/lodash-es/snakeCase.d.ts
+=> <inf>/@types/lodash-es/some.d.ts
+=> <inf>/@types/lodash-es/sortBy.d.ts
+=> <inf>/@types/lodash-es/sortedIndex.d.ts
+=> <inf>/@types/lodash-es/sortedIndexBy.d.ts
+=> <inf>/@types/lodash-es/sortedIndexOf.d.ts
+=> <inf>/@types/lodash-es/sortedLastIndex.d.ts
+=> <inf>/@types/lodash-es/sortedLastIndexBy.d.ts
+=> <inf>/@types/lodash-es/sortedLastIndexOf.d.ts
+=> <inf>/@types/lodash-es/sortedUniq.d.ts
+=> <inf>/@types/lodash-es/sortedUniqBy.d.ts
+=> <inf>/@types/lodash-es/split.d.ts
+=> <inf>/@types/lodash-es/spread.d.ts
+=> <inf>/@types/lodash-es/startCase.d.ts
+=> <inf>/@types/lodash-es/startsWith.d.ts
+=> <inf>/@types/lodash-es/stubArray.d.ts
+=> <inf>/@types/lodash-es/stubFalse.d.ts
+=> <inf>/@types/lodash-es/stubObject.d.ts
+=> <inf>/@types/lodash-es/stubString.d.ts
+=> <inf>/@types/lodash-es/stubTrue.d.ts
+=> <inf>/@types/lodash-es/subtract.d.ts
+=> <inf>/@types/lodash-es/sum.d.ts
+=> <inf>/@types/lodash-es/sumBy.d.ts
+=> <inf>/@types/lodash-es/tail.d.ts
+=> <inf>/@types/lodash-es/take.d.ts
+=> <inf>/@types/lodash-es/takeRight.d.ts
+=> <inf>/@types/lodash-es/takeRightWhile.d.ts
+=> <inf>/@types/lodash-es/takeWhile.d.ts
+=> <inf>/@types/lodash-es/template.d.ts
+=> <inf>/@types/lodash-es/templateSettings.d.ts
+=> <inf>/@types/lodash-es/throttle.d.ts
+=> <inf>/@types/lodash-es/times.d.ts
+=> <inf>/@types/lodash-es/toArray.d.ts
+=> <inf>/@types/lodash-es/toFinite.d.ts
+=> <inf>/@types/lodash-es/toInteger.d.ts
+=> <inf>/@types/lodash-es/toLength.d.ts
+=> <inf>/@types/lodash-es/toLower.d.ts
+=> <inf>/@types/lodash-es/toNumber.d.ts
+=> <inf>/@types/lodash-es/toPairs.d.ts
+=> <inf>/@types/lodash-es/toPairsIn.d.ts
+=> <inf>/@types/lodash-es/toPath.d.ts
+=> <inf>/@types/lodash-es/toPlainObject.d.ts
+=> <inf>/@types/lodash-es/toSafeInteger.d.ts
+=> <inf>/@types/lodash-es/toString.d.ts
+=> <inf>/@types/lodash-es/toUpper.d.ts
+=> <inf>/@types/lodash-es/transform.d.ts
+=> <inf>/@types/lodash-es/trim.d.ts
+=> <inf>/@types/lodash-es/trimEnd.d.ts
+=> <inf>/@types/lodash-es/trimStart.d.ts
+=> <inf>/@types/lodash-es/truncate.d.ts
+=> <inf>/@types/lodash-es/unary.d.ts
+=> <inf>/@types/lodash-es/unescape.d.ts
+=> <inf>/@types/lodash-es/union.d.ts
+=> <inf>/@types/lodash-es/unionBy.d.ts
+=> <inf>/@types/lodash-es/unionWith.d.ts
+=> <inf>/@types/lodash-es/uniq.d.ts
+=> <inf>/@types/lodash-es/uniqBy.d.ts
+=> <inf>/@types/lodash-es/uniqWith.d.ts
+=> <inf>/@types/lodash-es/uniqueId.d.ts
+=> <inf>/@types/lodash-es/unset.d.ts
+=> <inf>/@types/lodash-es/unzip.d.ts
+=> <inf>/@types/lodash-es/unzipWith.d.ts
+=> <inf>/@types/lodash-es/update.d.ts
+=> <inf>/@types/lodash-es/updateWith.d.ts
+=> <inf>/@types/lodash-es/upperCase.d.ts
+=> <inf>/@types/lodash-es/upperFirst.d.ts
+=> <inf>/@types/lodash-es/values.d.ts
+=> <inf>/@types/lodash-es/valuesIn.d.ts
+=> <inf>/@types/lodash-es/without.d.ts
+=> <inf>/@types/lodash-es/words.d.ts
+=> <inf>/@types/lodash-es/wrap.d.ts
+=> <inf>/@types/lodash-es/xor.d.ts
+=> <inf>/@types/lodash-es/xorBy.d.ts
+=> <inf>/@types/lodash-es/xorWith.d.ts
+=> <inf>/@types/lodash-es/zip.d.ts
+=> <inf>/@types/lodash-es/zipObject.d.ts
+=> <inf>/@types/lodash-es/zipObjectDeep.d.ts
+=> <inf>/@types/lodash-es/zipWith.d.ts
+=> <inf>/@types/lodash-es/index.d.ts
+=> <inf>/symbol-observable/index.d.ts
+=> <inf>/redux-bootstrap/dts/interfaces/interfaces.d.ts
+=> <inf>/redux-bootstrap/dts/index.d.ts
+=> <inf>/immutable/dist/immutable-nonambient.d.ts
+=> <inf>/@types/redux-immutable/index.d.ts
+=> <inf>/reselect/src/reselect.d.ts
+=> <inf>/@types/redux-devtools/index.d.ts
+=> <inf>/@types/redux-devtools-dock-monitor/index.d.ts
+=> <inf>/@types/lodash.debounce/index.d.ts
+=> <inf>/@types/redux-devtools-log-monitor/index.d.ts
+=> <inf>/@types/lodash.flow/index.d.ts
+=> <inf>/@types/redux-logger/index.d.ts
+=> <inf>/@types/deep-diff/index.d.ts
+=> <inf>/redux-thunk/index.d.ts
+=> <inf>/inversify-devtools/_inferium_gather.ts
+=> <inf>/@types/iconv-lite/index.d.ts
+=> <inf>/@types/promise/index.d.ts
+
+Resolve bootstrap
+Resolve inversify-logger-middleware
+Resolve chalk
+Resolve ansi-styles
+Resolve escape-string-regexp
+Resolve has-ansi
+Resolve ansi-regex
+Resolve strip-ansi
+Resolve supports-color
+Resolve react
+Resolve create-react-class
+Resolve fbjs
+Resolve core-js
+Resolve isomorphic-fetch
+Resolve node-fetch
+Resolve encoding
+Resolve iconv-lite
+Resolve safer-buffer
+Resolve is-stream
+Resolve whatwg-fetch
+Resolve loose-envify
+Resolve js-tokens
+Resolve object-assign
+Resolve promise
+Resolve asap
+Resolve setimmediate
+Resolve ua-parser-js
+Resolve prop-types
+Resolve react-dom
+Resolve react-json-tree
+Resolve babel-plugin-transform-runtime
+Resolve react-base16-styling
+Resolve base16
+Resolve lodash.curry
+Resolve react-pure-render
+Resolve react-redux
+Resolve hoist-non-react-statics
+Resolve invariant
+Resolve lodash
+Resolve react-router
+Resolve history
+Resolve deep-equal
+Resolve query-string
+Resolve strict-uri-encode
+Resolve warning
+Resolve hoist-non-react-statics
+Resolve warning
+Resolve react-router-redux
+Resolve redux
+Resolve lodash-es
+Resolve symbol-observable
+Resolve redux-bootstrap
+Resolve history
+Resolve query-string
+Resolve immutable
+Resolve react-redux
+Resolve react-router
+Resolve redux-immutable
+Resolve reselect
+Resolve redux-devtools
+Resolve redux-devtools-instrument
+Resolve redux-devtools-dock-monitor
+Resolve parse-key
+Resolve react-dock
+Resolve lodash.debounce
+Resolve lodash._getnative
+Resolve redux-devtools-log-monitor
+Resolve lodash.debounce
+Resolve react-json-tree
+Resolve react-base16-styling
+Resolve lodash.flow
+Resolve pure-color
+Resolve redux-devtools-themes
+Resolve redux-logger
+Resolve deep-diff
+Resolve redux-thunk
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/inversify-devtools /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/inversify-devtools
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[error] Exception in thread "main" java.lang.ClassCastException: inferium.js.types.js$AnyType$ cannot be cast to inferium.js.types.js$ClassLike
+[error] 	at inferium.js.types.js$Prelude$.$anonfun$load$17(Types.scala:903)
+[error] 	at scala.collection.TraversableLike.$anonfun$map$1(TraversableLike.scala:234)
+[error] 	at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:59)
+[error] 	at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:52)
+[error] 	at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)
+[error] 	at scala.collection.TraversableLike.map(TraversableLike.scala:234)
+[error] 	at scala.collection.TraversableLike.map$(TraversableLike.scala:227)
+[error] 	at scala.collection.AbstractTraversable.map(Traversable.scala:104)
+[error] 	at inferium.js.types.js$Prelude$.$anonfun$load$15(Types.scala:903)
+[error] 	at inferium.js.types.js$Prelude$.$anonfun$load$25(Types.scala:951)
+[error] 	at inferium.js.types.js$Prelude$.$anonfun$load$25$adapted(Types.scala:951)
+[error] 	at scala.collection.mutable.ResizableArray.foreach(ResizableArray.scala:59)
+[error] 	at scala.collection.mutable.ResizableArray.foreach$(ResizableArray.scala:52)
+[error] 	at scala.collection.mutable.ArrayBuffer.foreach(ArrayBuffer.scala:48)
+[error] 	at inferium.js.types.js$Prelude$.load(Types.scala:951)
+[error] 	at inferium.CliMain$.main(CliMain.scala:107)
+[error] 	at inferium.CliMain.main(CliMain.scala)
+[error] java.lang.RuntimeException: Nonzero exit code returned from runner: 1
+[error] 	at sbt.ForkRun.processExitCode$1(Run.scala:33)
+[error] 	at sbt.ForkRun.run(Run.scala:42)
+[error] 	at sbt.Defaults$.$anonfun$bgRunTask$5(Defaults.scala:1172)
+[error] 	at sbt.Defaults$.$anonfun$bgRunTask$5$adapted(Defaults.scala:1167)
+[error] 	at sbt.internal.BackgroundThreadPool.$anonfun$run$1(DefaultBackgroundJobService.scala:366)
+[error] 	at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:12)
+[error] 	at scala.util.Try$.apply(Try.scala:209)
+[error] 	at sbt.internal.BackgroundThreadPool$BackgroundRunnable.run(DefaultBackgroundJobService.scala:289)
+[error] 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+[error] 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+[error] 	at java.lang.Thread.run(Thread.java:748)
+[error] (cli / Compile / run) Nonzero exit code returned from runner: 1
+[error] Total time: 2 s, completed Jul 29, 2018 7:43:23 PM

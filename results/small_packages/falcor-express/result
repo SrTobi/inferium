@@ -1,0 +1,433 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install falcor-express into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/falcor-express
+Look into <inf>/body-parser
+Look into <inf>/bytes
+Look into <inf>/content-type
+Look into <inf>/debug
+Look into <inf>/ms
+Look into <inf>/depd
+Look into <inf>/http-errors
+Look into <inf>/depd
+Look into <inf>/inherits
+Look into <inf>/setprototypeof
+Look into <inf>/statuses
+Look into <inf>/iconv-lite
+Look into <inf>/safer-buffer
+Look into <inf>/on-finished
+Look into <inf>/ee-first
+Look into <inf>/qs
+Look into <inf>/raw-body
+Look into <inf>/bytes
+Look into <inf>/http-errors
+Look into <inf>/iconv-lite
+Look into <inf>/unpipe
+Look into <inf>/type-is
+Look into <inf>/media-typer
+Look into <inf>/mime-types
+Look into <inf>/mime-db
+Look into <inf>/express
+Look into <inf>/accepts
+Look into <inf>/mime-types
+Look into <inf>/negotiator
+Look into <inf>/array-flatten
+Look into <inf>/express/node_modules/body-parser
+Look into <inf>/bytes
+Look into <inf>/content-type
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/http-errors
+Look into <inf>/express/node_modules/iconv-lite
+Look into <inf>/on-finished
+Look into <inf>/express/node_modules/qs
+Look into <inf>/express/node_modules/raw-body
+Look into <inf>/bytes
+Look into <inf>/express/node_modules/raw-body/node_modules/http-errors
+Look into <inf>/express/node_modules/raw-body/node_modules/depd
+Look into <inf>/inherits
+Look into <inf>/express/node_modules/raw-body/node_modules/setprototypeof
+Look into <inf>/express/node_modules/statuses
+Look into <inf>/express/node_modules/iconv-lite
+Look into <inf>/unpipe
+Look into <inf>/type-is
+Look into <inf>/content-disposition
+Look into <inf>/content-type
+Look into <inf>/cookie
+Look into <inf>/cookie-signature
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/etag
+Look into <inf>/finalhandler
+Look into <inf>/debug
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/on-finished
+Look into <inf>/parseurl
+Look into <inf>/finalhandler/node_modules/statuses
+Look into <inf>/unpipe
+Look into <inf>/fresh
+Look into <inf>/merge-descriptors
+Look into <inf>/methods
+Look into <inf>/on-finished
+Look into <inf>/parseurl
+Look into <inf>/path-to-regexp
+Look into <inf>/proxy-addr
+Look into <inf>/forwarded
+Look into <inf>/ipaddr.js
+Look into <inf>/express/node_modules/qs
+Look into <inf>/range-parser
+Look into <inf>/safe-buffer
+Look into <inf>/send
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/destroy
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/etag
+Look into <inf>/fresh
+Look into <inf>/http-errors
+Look into <inf>/mime
+Look into <inf>/ms
+Look into <inf>/on-finished
+Look into <inf>/range-parser
+Look into <inf>/send/node_modules/statuses
+Look into <inf>/serve-static
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/parseurl
+Look into <inf>/send
+Look into <inf>/setprototypeof
+Look into <inf>/express/node_modules/statuses
+Look into <inf>/type-is
+Look into <inf>/utils-merge
+Look into <inf>/vary
+Look into <inf>/rx
+Install types for body-parser
+Install types for bytes
+Install types for content-type
+Install types for debug
+Install types for ms
+Install types for depd
+Install types for http-errors
+Install types for inherits
+Install types for setprototypeof
+=> not found
+Install types for statuses
+Install types for iconv-lite
+Install types for safer-buffer
+=> not found
+Install types for on-finished
+Install types for ee-first
+=> not found
+Install types for qs
+Install types for raw-body
+Install types for unpipe
+=> not found
+Install types for type-is
+Install types for media-typer
+Install types for mime-types
+Install types for mime-db
+Install types for express
+Install types for accepts
+Install types for negotiator
+Install types for array-flatten
+=> not found
+Install types for body-parser
+Install types for iconv-lite
+Install types for qs
+Install types for raw-body
+Install types for http-errors
+Install types for depd
+Install types for setprototypeof
+=> not found
+Install types for statuses
+Install types for content-disposition
+Install types for cookie
+Install types for cookie-signature
+Install types for encodeurl
+=> not found
+Install types for escape-html
+Install types for etag
+Install types for finalhandler
+Install types for parseurl
+Install types for statuses
+Install types for fresh
+Install types for merge-descriptors
+Install types for methods
+Install types for path-to-regexp
+Install types for proxy-addr
+Install types for forwarded
+Install types for ipaddr.js
+=> not found
+Install types for range-parser
+Install types for safe-buffer
+=> not found
+Install types for send
+Install types for destroy
+Install types for mime
+Install types for statuses
+Install types for serve-static
+Install types for utils-merge
+Install types for vary
+Install types for rx
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/falcor-express/_inferium_gather.ts
+Gather types for 59 packages:
+=> body-parser, bytes, content-type, debug, ms, depd, http-errors, inherits, setprototypeof, statuses, iconv-lite, safer-buffer, on-finished, ee-first, qs, raw-body, unpipe, type-is, media-typer, mime-types, mime-db, express, accepts, negotiator, array-flatten, body-parser, iconv-lite, qs, raw-body, http-errors, depd, setprototypeof, statuses, content-disposition, cookie, cookie-signature, encodeurl, escape-html, etag, finalhandler, parseurl, statuses, fresh, merge-descriptors, methods, path-to-regexp, proxy-addr, forwarded, ipaddr.js, range-parser, safe-buffer, send, destroy, mime, statuses, serve-static, utils-merge, vary, rx 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34, _inferium_import_35, _inferium_import_36, _inferium_import_37, _inferium_import_38, _inferium_import_39, _inferium_import_40, _inferium_import_41, _inferium_import_42, _inferium_import_43, _inferium_import_44, _inferium_import_45, _inferium_import_46, _inferium_import_47, _inferium_import_48, _inferium_import_49, _inferium_import_50, _inferium_import_51, _inferium_import_52, _inferium_import_53, _inferium_import_54, _inferium_import_55, _inferium_import_56, _inferium_import_57, _inferium_import_58
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "ipaddr.js", "rx-core", "rx-core-binding", "rx-lite", "rx-lite-aggregates", "rx-lite-async", "rx-lite-backpressure", "rx-lite-coincidence", "rx-lite-experimental", "rx-lite-joinpatterns", "rx-lite-virtualtime", "rx-lite-testing", "rx-lite-time", "rx"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/events/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/connect/index.d.ts
+=> <inf>/@types/body-parser/index.d.ts
+=> <inf>/@types/bytes/index.d.ts
+=> <inf>/@types/content-type/index.d.ts
+=> <inf>/@types/debug/index.d.ts
+=> <inf>/@types/ms/index.d.ts
+=> <inf>/@types/depd/index.d.ts
+=> <inf>/@types/http-errors/index.d.ts
+=> <inf>/@types/inherits/index.d.ts
+=> <inf>/setprototypeof/index.d.ts
+=> <inf>/@types/statuses/index.d.ts
+=> <inf>/iconv-lite/lib/index.d.ts
+=> <inf>/@types/on-finished/index.d.ts
+=> <inf>/@types/qs/index.d.ts
+=> <inf>/raw-body/index.d.ts
+=> <inf>/@types/type-is/index.d.ts
+=> <inf>/@types/media-typer/index.d.ts
+=> <inf>/@types/mime-types/index.d.ts
+=> <inf>/@types/mime-db/index.d.ts
+=> <inf>/@types/range-parser/index.d.ts
+=> <inf>/@types/express-serve-static-core/index.d.ts
+=> <inf>/@types/mime/index.d.ts
+=> <inf>/@types/serve-static/index.d.ts
+=> <inf>/@types/express/index.d.ts
+=> <inf>/@types/accepts/index.d.ts
+=> <inf>/@types/negotiator/index.d.ts
+=> <inf>/@types/content-disposition/index.d.ts
+=> <inf>/@types/cookie/index.d.ts
+=> <inf>/@types/cookie-signature/index.d.ts
+=> <inf>/@types/escape-html/index.d.ts
+=> <inf>/@types/etag/index.d.ts
+=> <inf>/@types/finalhandler/index.d.ts
+=> <inf>/@types/parseurl/index.d.ts
+=> <inf>/@types/fresh/index.d.ts
+=> <inf>/@types/merge-descriptors/index.d.ts
+=> <inf>/@types/methods/index.d.ts
+=> <inf>/@types/proxy-addr/index.d.ts
+=> <inf>/@types/forwarded/index.d.ts
+=> <inf>/ipaddr.js/lib/ipaddr.js.d.ts
+=> <inf>/@types/send/index.d.ts
+=> <inf>/@types/destroy/index.d.ts
+=> <inf>/@types/utils-merge/index.d.ts
+=> <inf>/@types/vary/index.d.ts
+=> <inf>/@types/rx-core/index.d.ts
+=> <inf>/@types/rx-core-binding/index.d.ts
+=> <inf>/@types/rx-lite/index.d.ts
+=> <inf>/@types/rx-lite-aggregates/index.d.ts
+=> <inf>/@types/rx-lite-async/index.d.ts
+=> <inf>/@types/rx-lite-backpressure/index.d.ts
+=> <inf>/@types/rx-lite-coincidence/index.d.ts
+=> <inf>/@types/rx-lite-experimental/index.d.ts
+=> <inf>/@types/rx-lite-joinpatterns/index.d.ts
+=> <inf>/@types/rx-lite-virtualtime/index.d.ts
+=> <inf>/@types/rx-lite-testing/index.d.ts
+=> <inf>/@types/rx-lite-time/index.d.ts
+=> <inf>/@types/rx/index.d.ts
+=> <inf>/falcor-express/_inferium_gather.ts
+=> <inf>/@types/iconv-lite/index.d.ts
+
+Resolve body-parser
+Resolve bytes
+Resolve content-type
+Resolve debug
+Resolve ms
+Resolve depd
+Resolve http-errors
+Resolve inherits
+Resolve setprototypeof
+Resolve statuses
+Resolve iconv-lite
+Resolve safer-buffer
+Resolve on-finished
+Resolve ee-first
+Resolve qs
+Resolve raw-body
+Resolve unpipe
+Resolve type-is
+Resolve media-typer
+Resolve mime-types
+Resolve mime-db
+Resolve express
+Resolve accepts
+Resolve negotiator
+Resolve array-flatten
+Resolve body-parser
+Resolve iconv-lite
+Resolve qs
+Resolve raw-body
+Resolve http-errors
+Resolve depd
+Resolve setprototypeof
+Resolve statuses
+Resolve content-disposition
+Resolve cookie
+Resolve cookie-signature
+Resolve encodeurl
+Resolve escape-html
+Resolve etag
+Resolve finalhandler
+Resolve parseurl
+Resolve statuses
+Resolve fresh
+Resolve merge-descriptors
+Resolve methods
+Resolve path-to-regexp
+Resolve proxy-addr
+Resolve forwarded
+Resolve ipaddr.js
+Resolve range-parser
+Resolve safe-buffer
+Resolve send
+Resolve destroy
+Resolve mime
+Resolve statuses
+Resolve serve-static
+Resolve utils-merge
+Resolve vary
+Resolve rx
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/falcor-express /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/falcor-express
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", body-parser, etag, range-parser, "https", "rx-core", media-typer, "zlib", "fs", "assert", "rx-lite-joinpatterns", "dgram", "ipaddr.js", forwarded, fresh, depd, "async_hooks", "url", raw-body, mime-types, "dns", "http", "string_decoder", "querystring", on-finished, cookie-signature, "events", merge-descriptors, "rx", "rx-lite", qs, "os", "rx-lite-virtualtime", "util", mime, "rx-lite-testing", "constants", "punycode", rx, content-disposition, "readline", "perf_hooks", mime-db, utils-merge, debug, setprototypeof, proxy-addr, parseurl, "buffer", bytes, "domain", "rx-core-binding", destroy, "tty", escape-html, "child_process", "crypto", "rx-lite-experimental", content-type, cookie, "rx-lite-coincidence", "rx-lite-time", "inspector", "stream", express, accepts, "process", iconv-lite, inherits, "rx-lite-aggregates", "path", "rx-lite-backpressure", "v8", "rx-lite-async", "http2", "cluster", finalhandler, "tls", vary, "net", type-is, ipaddr.js, ms, "repl", "console", "vm", serve-static, negotiator, send
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/falcor-express/./src/index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/falcor-express/./src/./requestToContext.js'
+[info] Done Parsing module.
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Found None
+[info] Analyse None
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Round 2
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Round 3
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I42<T7, T8, T9> {
+[info]   url: T7
+[info]   method: T8
+[info]   body: T9
+[info] }
+[info] interface I45<T2> {
+[info]   (_?: "Request not supported"): T2
+[info] }
+[info] interface I44<T15 extends I45<T2>, T2> {
+[info]   send: T15
+[info] }
+[info] interface I43<T14 extends I44<T15, T2>, T15 extends I45<T2>, T2> {
+[info]   (_?: number): T14
+[info] }
+[info] interface I48<T3> {
+[info]   (_?: "No query method provided"): T3
+[info] }
+[info] interface I47<T19 extends I48<T3>, T3> {
+[info]   send: T19
+[info] }
+[info] interface I46<T18 extends I47<T19, T3>, T19 extends I48<T3>, T3> {
+[info]   (_?: number): T18
+[info] }
+[info] interface I51<T4> {
+[info]   (_?: "Data source does not implement the requested method"): T4
+[info] }
+[info] interface I50<T23 extends I51<T4>, T4> {
+[info]   send: T23
+[info] }
+[info] interface I49<T22 extends I50<T23, T4>, T23 extends I51<T4>, T4> {
+[info]   (_?: number): T22
+[info] }
+[info] interface I52<T13 extends I43<T14, T15, T2>, T14 extends I44<T15, T2>, T15 extends I45<T2>, T17 extends I46<T18, T19, T3>, T18 extends I47<T19, T3>, T19 extends I48<T3>, T2, T21 extends I49<T22, T23, T4>, T22 extends I50<T23, T4>, T23 extends I51<T4>, T3, T4> {
+[info]   status: (T21 | T17 | T13)
+[info] }
+[info] interface I56<T33> {
+[info]   (_?: {}, _?: {}): T33
+[info] }
+[info] interface I57<T32 extends I56<T33>, T33> {
+[info]   subscribe: T32
+[info] }
+[info] interface I58<T32 extends I56<T33>, T33> {
+[info]   subscribe: T32
+[info] }
+[info] interface I59<T32 extends I56<T33>, T33> {
+[info]   subscribe: T32
+[info] }
+[info] interface I55<T32 extends I56<T33>, T33> {
+[info]   (_?: ({})): I57<T32, T33>
+[info]   (_?: undefined, _?: undefined, _?: undefined, _?: undefined): I58<T32, T33>
+[info]   (_?: undefined): I59<T32, T33>
+[info] }
+[info] interface I54 {
+[info]   undefined: (I55<I56<T33>, any>)
+[info] }
+[info] interface I53<T10 extends I42<T7, T8, T9>, T13 extends I43<T14, T15, T2>, T14 extends I44<T15, T2>, T15 extends I45<T2>, T17 extends I46<T18, T19, T3>, T18 extends I47<T19, T3>, T19 extends I48<T3>, T2, T21 extends I49<T22, T23, T4>, T22 extends I50<T23, T4>, T23 extends I51<T4>, T26 extends I52<T13, T14, T15, T17, T18, T19, T2, T21, T22, T23, T3, T4>, T3, T4, T7, T8, T9> {
+[info]   (_?: T10, _?: T26): I54
+[info] }
+[info] interface I60<T10 extends I42<T7, T8, T9>, T13 extends I43<T14, T15, T2>, T14 extends I44<T15, T2>, T15 extends I45<T2>, T17 extends I46<T18, T19, T3>, T18 extends I47<T19, T3>, T19 extends I48<T3>, T2, T21 extends I49<T22, T23, T4>, T22 extends I50<T23, T4>, T23 extends I51<T4>, T26 extends I52<T13, T14, T15, T17, T18, T19, T2, T21, T22, T23, T3, T4>, T3, T4, T7, T8, T9> {
+[info]   (req: (T10), res: (T26)): (undefined | T2 | T3 | T4)
+[info] }
+[info] interface I41 {
+[info]   expressMiddleware(getDataSource: any): undefined
+[info]   dataSourceRoute<T10 extends I42<T7, T8, T9>, T13 extends I43<T14, T15, T2>, T14 extends I44<T15, T2>, T15 extends I45<T2>, T17 extends I46<T18, T19, T3>, T18 extends I47<T19, T3>, T19 extends I48<T3>, T2, T21 extends I49<T22, T23, T4>, T22 extends I50<T23, T4>, T23 extends I51<T4>, T26 extends I52<T13, T14, T15, T17, T18, T19, T2, T21, T22, T23, T3, T4>, T3, T4, T7, T8, T9>(getDataSource: I53<T10, T13, T14, T15, T17, T18, T19, T2, T21, T22, T23, T26, T3, T4, T7, T8, T9>): I60<T10, T13, T14, T15, T17, T18, T19, T2, T21, T22, T23, T26, T3, T4, T7, T8, T9>
+[info] }
+[info] => I41
+[success] Total time: 3 s, completed Jul 29, 2018 9:08:35 PM

@@ -2,6 +2,7 @@ package inferium.js.types
 
 import inferium.js.types.js._
 import inferium.lattice.ProbeEntity
+import inferium.utils.IdentityKey
 
 import scala.collection.mutable
 import scala.util.Try
@@ -41,7 +42,7 @@ object TypeScriptPrinter {
         private val printedInterfaces = mutable.Set.empty[CompoundType]
 
         class Generic(val bound: Type, var isRead: Boolean, var isWrite: Boolean) {
-            lazy val name: String = "T" + nextId()
+            val name: String = "T" + nextId()
             private var _next: Option[Generic] = None
             def get(): Generic = _next map { n => _next = Some(n.get()); _next.get } getOrElse this
 
@@ -173,11 +174,11 @@ object TypeScriptPrinter {
             }
         }
 
-        def markGenerics(ty: Type, read: Boolean, write: Boolean, visited: Set[Type]): Unit = {
-            if (visited.contains(ty) && !ty.isInstanceOf[ProbeType]) {
+        def markGenerics(ty: Type, read: Boolean, write: Boolean, visited: Set[IdentityKey[Type]]): Unit = {
+            if (visited.contains(new IdentityKey[Type](ty)) && !ty.isInstanceOf[ProbeType]) {
                 return
             }
-            def innerVisited = visited + ty
+            def innerVisited = visited + new IdentityKey[Type](ty)
 
             ty match {
                 case obj: CompoundType =>

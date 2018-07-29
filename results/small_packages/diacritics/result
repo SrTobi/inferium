@@ -1,0 +1,580 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install diacritics into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/diacritics
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/diacritics/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/diacritics/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/diacritics /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/diacritics
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/diacritics/./index.js'
+[info] Done Parsing module.
+[info] Found Some(removeDiacritics)
+[info] Round 0
+[info] Analyse Some(removeDiacritics)
+[info] Found None
+[info] Round 1
+[info] Analyse None
+[info] Analyse Some(removeDiacritics)
+[info] Round 2
+[info] Analyse None
+[info] Analyse Some(removeDiacritics)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I10 {
+[info]   <T6 extends never>(c: (T6)): ("z" | "W" | "J" | "NJ" | "c" | "t" | "m" | "DZ" | "dz" | "0" | "y" | "Lj" | "f" | "ay" | "V" | "p" | " " | "AO" | "AY" | "th" | "oe" | "hv" | "r" | "OE" | "VY" | "au" | "OO" | "fi" | "AU" | "vy" | "tz" | "e" | "B" | "l" | "U" | "S" | "X" | "q" | "N" | "w" | "h" | "O" | "A" | "oo" | "j" | "ffi" | "AA" | "s" | "F" | "Q" | "Z" | "Dz" | "d" | "TZ" | "T" | "Nj" | "K" | "P" | "dh" | "v" | "AE" | "o" | "ffl" | "M" | "Th" | "ao" | "lj" | "G" | "aa" | "LJ" | "ou" | "Y" | "i" | "OU" | "k" | "fl" | "Dh" | "OI" | "I" | T6 | "oi" | "ss" | "R" | "L" | "ae" | "C" | "b" | "u" | "nj" | "E" | "ff" | "n" | "a" | "g" | "AV" | "D" | "x" | "av" | "H" | undefined)
+[info] }
+[info] interface I9<T1> {
+[info]   (_?: {}, _?: I10): T1
+[info] }
+[info] interface I8<T1> {
+[info]   replace: I9<T1>
+[info] }
+[info] interface I12 {
+[info]   base: "X"
+[info]   chars: "ⓍＸẊẌ"
+[info] }
+[info] interface I13 {
+[info]   base: "P"
+[info]   chars: "ⓅＰṔṖƤⱣꝐꝒꝔ"
+[info] }
+[info] interface I14 {
+[info]   base: "g"
+[info]   chars: "ⓖｇǵĝḡğġǧģǥɠꞡꝿᵹ"
+[info] }
+[info] interface I15 {
+[info]   base: "vy"
+[info]   chars: "ꝡ"
+[info] }
+[info] interface I16 {
+[info]   base: "Dh"
+[info]   chars: "Ð"
+[info] }
+[info] interface I17 {
+[info]   base: "ffl"
+[info]   chars: "ﬄ"
+[info] }
+[info] interface I18 {
+[info]   base: "th"
+[info]   chars: "þ"
+[info] }
+[info] interface I19 {
+[info]   base: "ao"
+[info]   chars: "ꜵ"
+[info] }
+[info] interface I20 {
+[info]   base: "q"
+[info]   chars: "ⓠｑɋꝗꝙ"
+[info] }
+[info] interface I21 {
+[info]   base: "AY"
+[info]   chars: "Ꜽ"
+[info] }
+[info] interface I22 {
+[info]   base: "l"
+[info]   chars: "ⓛｌŀĺľḷḹļḽḻſłƚɫⱡꝉꞁꝇɭ"
+[info] }
+[info] interface I23 {
+[info]   base: "o"
+[info]   chars: "ⓞｏòóôồốỗổõṍȭṏōṑṓŏȯȱöȫỏőǒȍȏơờớỡởợọộǫǭøǿꝋꝍɵɔᴑ"
+[info] }
+[info] interface I24 {
+[info]   base: "I"
+[info]   chars: "ⒾＩÌÍÎĨĪĬİÏḮỈǏȈȊỊĮḬƗ"
+[info] }
+[info] interface I25 {
+[info]   base: "LJ"
+[info]   chars: "Ǉ"
+[info] }
+[info] interface I26 {
+[info]   base: "ff"
+[info]   chars: "ﬀ"
+[info] }
+[info] interface I27 {
+[info]   base: "AE"
+[info]   chars: "ÆǼǢ"
+[info] }
+[info] interface I28 {
+[info]   base: "t"
+[info]   chars: "ⓣｔṫẗťṭțţṱṯŧƭʈⱦꞇ"
+[info] }
+[info] interface I29 {
+[info]   base: "nj"
+[info]   chars: "ǌ"
+[info] }
+[info] interface I30 {
+[info]   base: "TZ"
+[info]   chars: "Ꜩ"
+[info] }
+[info] interface I31 {
+[info]   base: "E"
+[info]   chars: "ɛⒺＥÈÉÊỀẾỄỂẼĒḔḖĔĖËẺĚȄȆẸỆȨḜĘḘḚƐƎᴇ"
+[info] }
+[info] interface I32 {
+[info]   base: "D"
+[info]   chars: "ⒹＤḊĎḌḐḒḎĐƊƉᴅꝹ"
+[info] }
+[info] interface I33 {
+[info]   base: "tz"
+[info]   chars: "ꜩ"
+[info] }
+[info] interface I34 {
+[info]   base: "B"
+[info]   chars: "ⒷＢḂḄḆɃƁ"
+[info] }
+[info] interface I35 {
+[info]   base: "W"
+[info]   chars: "ⓌＷẀẂŴẆẄẈⱲ"
+[info] }
+[info] interface I36 {
+[info]   base: "OU"
+[info]   chars: "Ȣ"
+[info] }
+[info] interface I37 {
+[info]   base: "L"
+[info]   chars: "ⓁＬĿĹĽḶḸĻḼḺŁȽⱢⱠꝈꝆꞀ"
+[info] }
+[info] interface I38 {
+[info]   base: "c"
+[info]   chars: "ｃⓒćĉċčçḉƈȼꜿↄ"
+[info] }
+[info] interface I39 {
+[info]   base: "b"
+[info]   chars: "ⓑｂḃḅḇƀƃɓƂ"
+[info] }
+[info] interface I40 {
+[info]   base: "N"
+[info]   chars: "ꞤȠⓃＮǸŃÑṄŇṆŅṊṈƝꞐᴎ"
+[info] }
+[info] interface I41 {
+[info]   base: "ae"
+[info]   chars: "æǽǣ"
+[info] }
+[info] interface I42 {
+[info]   base: "S"
+[info]   chars: "ⓈＳẞŚṤŜṠŠṦṢṨȘŞⱾꞨꞄ"
+[info] }
+[info] interface I43 {
+[info]   base: "h"
+[info]   chars: "ⓗｈĥḣḧȟḥḩḫẖħⱨⱶɥ"
+[info] }
+[info] interface I44 {
+[info]   base: "f"
+[info]   chars: "ⓕｆḟƒ"
+[info] }
+[info] interface I45 {
+[info]   base: "DZ"
+[info]   chars: "ǱǄ"
+[info] }
+[info] interface I46 {
+[info]   base: "Y"
+[info]   chars: "ⓎＹỲÝŶỸȲẎŸỶỴƳɎỾ"
+[info] }
+[info] interface I47 {
+[info]   base: "Lj"
+[info]   chars: "ǈ"
+[info] }
+[info] interface I48 {
+[info]   base: "w"
+[info]   chars: "ⓦｗẁẃŵẇẅẘẉⱳ"
+[info] }
+[info] interface I49 {
+[info]   base: "p"
+[info]   chars: "ⓟｐṕṗƥᵽꝑꝓꝕρ"
+[info] }
+[info] interface I50 {
+[info]   base: "Q"
+[info]   chars: "ⓆＱꝖꝘɊ"
+[info] }
+[info] interface I51 {
+[info]   base: "F"
+[info]   chars: "ꝼⒻＦḞƑꝻ"
+[info] }
+[info] interface I52 {
+[info]   base: "oe"
+[info]   chars: "œ"
+[info] }
+[info] interface I53 {
+[info]   base: "AO"
+[info]   chars: "Ꜵ"
+[info] }
+[info] interface I54 {
+[info]   base: "k"
+[info]   chars: "ⓚｋḱǩḳķḵƙⱪꝁꝃꝅꞣ"
+[info] }
+[info] interface I55 {
+[info]   base: "C"
+[info]   chars: "ⒸＣꜾḈĆCĈĊČÇƇȻ"
+[info] }
+[info] interface I56 {
+[info]   base: "dz"
+[info]   chars: "ǳǆ"
+[info] }
+[info] interface I57 {
+[info]   base: "ss"
+[info]   chars: "ß"
+[info] }
+[info] interface I58 {
+[info]   base: "a"
+[info]   chars: "ⓐａẚàáâầấẫẩãāăằắẵẳȧǡäǟảåǻǎȁȃạậặḁąⱥɐɑ"
+[info] }
+[info] interface I59 {
+[info]   base: "K"
+[info]   chars: "ⓀＫḰǨḲĶḴƘⱩꝀꝂꝄꞢ"
+[info] }
+[info] interface I60 {
+[info]   base: "n"
+[info]   chars: "ⓝｎǹńñṅňṇņṋṉƞɲŉꞑꞥлԉ"
+[info] }
+[info] interface I61 {
+[info]   base: "ay"
+[info]   chars: "ꜽ"
+[info] }
+[info] interface I62 {
+[info]   base: "VY"
+[info]   chars: "Ꝡ"
+[info] }
+[info] interface I63 {
+[info]   base: "ffi"
+[info]   chars: "ﬃ"
+[info] }
+[info] interface I64 {
+[info]   base: "j"
+[info]   chars: "ⓙｊĵǰɉ"
+[info] }
+[info] interface I65 {
+[info]   base: "d"
+[info]   chars: "ⓓｄḋďḍḑḓḏđƌɖɗƋᏧԁꞪ"
+[info] }
+[info] interface I66 {
+[info]   base: "OO"
+[info]   chars: "Ꝏ"
+[info] }
+[info] interface I67 {
+[info]   base: "oi"
+[info]   chars: "ƣ"
+[info] }
+[info] interface I68 {
+[info]   base: "ou"
+[info]   chars: "ȣ"
+[info] }
+[info] interface I69 {
+[info]   base: "aa"
+[info]   chars: "ꜳ"
+[info] }
+[info] interface I70 {
+[info]   base: "AU"
+[info]   chars: "Ꜷ"
+[info] }
+[info] interface I71 {
+[info]   base: "R"
+[info]   chars: "ⓇＲŔṘŘȐȒṚṜŖṞɌⱤꝚꞦꞂ"
+[info] }
+[info] interface I72 {
+[info]   base: "0"
+[info]   chars: "߀"
+[info] }
+[info] interface I73 {
+[info]   base: "Th"
+[info]   chars: "Þ"
+[info] }
+[info] interface I74 {
+[info]   base: "G"
+[info]   chars: "ⒼＧǴĜḠĞĠǦĢǤƓꞠꝽꝾɢ"
+[info] }
+[info] interface I75 {
+[info]   base: "M"
+[info]   chars: "ⓂＭḾṀṂⱮƜϻ"
+[info] }
+[info] interface I76 {
+[info]   base: "e"
+[info]   chars: "ⓔｅèéêềếễểẽēḕḗĕėëẻěȅȇẹệȩḝęḙḛɇǝ"
+[info] }
+[info] interface I77 {
+[info]   base: "Dz"
+[info]   chars: "ǲǅ"
+[info] }
+[info] interface I78 {
+[info]   base: "Z"
+[info]   chars: "ⓏＺŹẐŻŽẒẔƵȤⱿⱫꝢ"
+[info] }
+[info] interface I79 {
+[info]   base: "OI"
+[info]   chars: "Ƣ"
+[info] }
+[info] interface I80 {
+[info]   base: "y"
+[info]   chars: "ⓨｙỳýŷỹȳẏÿỷẙỵƴɏỿ"
+[info] }
+[info] interface I81 {
+[info]   base: "hv"
+[info]   chars: "ƕ"
+[info] }
+[info] interface I82 {
+[info]   base: "x"
+[info]   chars: "ⓧｘẋẍ"
+[info] }
+[info] interface I83 {
+[info]   base: "dh"
+[info]   chars: "ð"
+[info] }
+[info] interface I84 {
+[info]   base: "fl"
+[info]   chars: "ﬂ"
+[info] }
+[info] interface I85 {
+[info]   base: "av"
+[info]   chars: "ꜹꜻ"
+[info] }
+[info] interface I86 {
+[info]   base: "V"
+[info]   chars: "ⓋＶṼṾƲꝞɅ"
+[info] }
+[info] interface I87 {
+[info]   base: "m"
+[info]   chars: "ⓜｍḿṁṃɱɯ"
+[info] }
+[info] interface I88 {
+[info]   base: " "
+[info]   chars: " "
+[info] }
+[info] interface I89 {
+[info]   base: "J"
+[info]   chars: "ⒿＪĴɈȷ"
+[info] }
+[info] interface I90 {
+[info]   base: "NJ"
+[info]   chars: "Ǌ"
+[info] }
+[info] interface I91 {
+[info]   base: "i"
+[info]   chars: "ⓘｉìíîĩīĭïḯỉǐȉȋịįḭɨı"
+[info] }
+[info] interface I92 {
+[info]   base: "A"
+[info]   chars: "ⒶＡÀÁÂẦẤẪẨÃĀĂẰẮẴẲȦǠÄǞẢÅǺǍȀȂẠẬẶḀĄȺⱯ"
+[info] }
+[info] interface I93 {
+[info]   base: "s"
+[info]   chars: "ⓢｓśṥŝṡšṧṣṩșşȿꞩꞅẛʂ"
+[info] }
+[info] interface I94 {
+[info]   base: "T"
+[info]   chars: "ⓉＴṪŤṬȚŢṰṮŦƬƮȾꞆ"
+[info] }
+[info] interface I95 {
+[info]   base: "oo"
+[info]   chars: "ꝏ"
+[info] }
+[info] interface I96 {
+[info]   base: "v"
+[info]   chars: "ⓥｖṽṿʋꝟʌ"
+[info] }
+[info] interface I97 {
+[info]   base: "H"
+[info]   chars: "ⒽＨĤḢḦȞḤḨḪĦⱧⱵꞍ"
+[info] }
+[info] interface I98 {
+[info]   base: "OE"
+[info]   chars: "Œ"
+[info] }
+[info] interface I99 {
+[info]   base: "AV"
+[info]   chars: "ꜸꜺ"
+[info] }
+[info] interface I100 {
+[info]   base: "z"
+[info]   chars: "ⓩｚźẑżžẓẕƶȥɀⱬꝣ"
+[info] }
+[info] interface I101 {
+[info]   base: "O"
+[info]   chars: "ⓄＯÒÓÔỒỐỖỔÕṌȬṎŌṐṒŎȮȰÖȪỎŐǑȌȎƠỜỚỠỞỢỌỘǪǬØǾƆƟꝊꝌ"
+[info] }
+[info] interface I102 {
+[info]   base: "U"
+[info]   chars: "ⓊＵÙÚÛŨṸŪṺŬÜǛǗǕǙỦŮŰǓȔȖƯỪỨỮỬỰỤṲŲṶṴɄ"
+[info] }
+[info] interface I103 {
+[info]   base: "fi"
+[info]   chars: "ﬁ"
+[info] }
+[info] interface I104 {
+[info]   base: "AA"
+[info]   chars: "Ꜳ"
+[info] }
+[info] interface I105 {
+[info]   base: "lj"
+[info]   chars: "ǉ"
+[info] }
+[info] interface I106 {
+[info]   base: "u"
+[info]   chars: "ⓤｕùúûũṹūṻŭüǜǘǖǚủůűǔȕȗưừứữửựụṳųṷṵʉ"
+[info] }
+[info] interface I107 {
+[info]   base: "au"
+[info]   chars: "ꜷ"
+[info] }
+[info] interface I108 {
+[info]   base: "r"
+[info]   chars: "ⓡｒŕṙřȑȓṛṝŗṟɍɽꝛꞧꞃ"
+[info] }
+[info] interface I109 {
+[info]   base: "Nj"
+[info]   chars: "ǋ"
+[info] }
+[info] interface I11 {
+[info]   [45]: I12
+[info]   [34]: I13
+[info]   [67]: I14
+[info]   [93]: I15
+[info]   [12]: I16
+[info]   [66]: I17
+[info]   [89]: I18
+[info]   [51]: I19
+[info]   [84]: I20
+[info]   [8]: I21
+[info]   [73]: I22
+[info]   [78]: I23
+[info]   [19]: I24
+[info]   [23]: I25
+[info]   [62]: I26
+[info]   [4]: I27
+[info]   [88]: I28
+[info]   [77]: I29
+[info]   [40]: I30
+[info]   [15]: I31
+[info]   [11]: I32
+[info]   [90]: I33
+[info]   [9]: I34
+[info]   [44]: I35
+[info]   [33]: I36
+[info]   [22]: I37
+[info]   [56]: I38
+[info]   [55]: I39
+[info]   [26]: I40
+[info]   [50]: I41
+[info]   [37]: I42
+[info]   [68]: I43
+[info]   [61]: I44
+[info]   [13]: I45
+[info]   [46]: I46
+[info]   [24]: I47
+[info]   [94]: I48
+[info]   [83]: I49
+[info]   [35]: I50
+[info]   [16]: I51
+[info]   [79]: I52
+[info]   [5]: I53
+[info]   [72]: I54
+[info]   [10]: I55
+[info]   [59]: I56
+[info]   [87]: I57
+[info]   [48]: I58
+[info]   [21]: I59
+[info]   [76]: I60
+[info]   [54]: I61
+[info]   [43]: I62
+[info]   [65]: I63
+[info]   [71]: I64
+[info]   [57]: I65
+[info]   [32]: I66
+[info]   [80]: I67
+[info]   [82]: I68
+[info]   [49]: I69
+[info]   [6]: I70
+[info]   [36]: I71
+[info]   [1]: I72
+[info]   [39]: I73
+[info]   [17]: I74
+[info]   [25]: I75
+[info]   [60]: I76
+[info]   [14]: I77
+[info]   [47]: I78
+[info]   [31]: I79
+[info]   [96]: I80
+[info]   [69]: I81
+[info]   [95]: I82
+[info]   [58]: I83
+[info]   [64]: I84
+[info]   [53]: I85
+[info]   [42]: I86
+[info]   [75]: I87
+[info]   [0]: I88
+[info]   [20]: I89
+[info]   [27]: I90
+[info]   [70]: I91
+[info]   [2]: I92
+[info]   [86]: I93
+[info]   [38]: I94
+[info]   [81]: I95
+[info]   length: number
+[info]   [92]: I96
+[info]   [18]: I97
+[info]   [30]: I98
+[info]   [7]: I99
+[info]   [97]: I100
+[info]   [29]: I101
+[info]   [41]: I102
+[info]   [63]: I103
+[info]   [3]: I104
+[info]   [74]: I105
+[info]   [91]: I106
+[info]   [52]: I107
+[info]   [85]: I108
+[info]   [28]: I109
+[info] }
+[info] interface I110 {
+[info]   undefined?: ("z" | "W" | "J" | "NJ" | "c" | "t" | "m" | "DZ" | "dz" | "0" | "y" | "Lj" | "f" | "ay" | "V" | "p" | " " | "AO" | "AY" | "th" | "oe" | "hv" | "r" | "OE" | "VY" | "au" | "OO" | "fi" | "AU" | "vy" | "tz" | "e" | "B" | "l" | "U" | "S" | "X" | "q" | "N" | "w" | "h" | "O" | "A" | "oo" | "j" | "ffi" | "AA" | "s" | "F" | "Q" | "Z" | "Dz" | "d" | "TZ" | "T" | "Nj" | "K" | "P" | "dh" | "v" | "AE" | "o" | "ffl" | "M" | "Th" | "ao" | "lj" | "G" | "aa" | "LJ" | "ou" | "Y" | "i" | "OU" | "k" | "fl" | "Dh" | "OI" | "I" | "oi" | "ss" | "R" | "L" | "ae" | "C" | "b" | "u" | "nj" | "E" | "ff" | "n" | "a" | "g" | "AV" | "D" | "x" | "av" | "H" | undefined)
+[info] }
+[info] interface I7 {
+[info]   remove<T1>(str: I8<T1>): T1
+[info]   replacementList: I11
+[info]   diacriticsMap: I110
+[info] }
+[info] => I7
+[success] Total time: 10 s, completed Jul 29, 2018 7:50:03 PM

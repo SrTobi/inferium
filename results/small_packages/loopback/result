@@ -1,0 +1,408 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install loopback into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/loopback
+Look into <inf>/async
+Look into <inf>/lodash
+Look into <inf>/bcryptjs
+Look into <inf>/bluebird
+Look into <inf>/body-parser
+Look into <inf>/bytes
+Look into <inf>/content-type
+Look into <inf>/debug
+Look into <inf>/ms
+Look into <inf>/depd
+Look into <inf>/http-errors
+Look into <inf>/depd
+Look into <inf>/inherits
+Look into <inf>/setprototypeof
+Look into <inf>/statuses
+Look into <inf>/iconv-lite
+Look into <inf>/safer-buffer
+Look into <inf>/on-finished
+Look into <inf>/ee-first
+Look into <inf>/qs
+Look into <inf>/raw-body
+Look into <inf>/bytes
+Look into <inf>/http-errors
+Look into <inf>/iconv-lite
+Look into <inf>/unpipe
+Look into <inf>/type-is
+Look into <inf>/media-typer
+Look into <inf>/mime-types
+Look into <inf>/mime-db
+Look into <inf>/canonical-json
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/ejs
+Look into <inf>/express
+Look into <inf>/accepts
+Look into <inf>/mime-types
+Look into <inf>/negotiator
+Look into <inf>/array-flatten
+Look into <inf>/express/node_modules/body-parser
+Look into <inf>/bytes
+Look into <inf>/content-type
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/http-errors
+Look into <inf>/express/node_modules/iconv-lite
+Look into <inf>/on-finished
+Look into <inf>/express/node_modules/qs
+Look into <inf>/express/node_modules/raw-body
+Look into <inf>/bytes
+Look into <inf>/express/node_modules/raw-body/node_modules/http-errors
+Look into <inf>/express/node_modules/raw-body/node_modules/depd
+Look into <inf>/inherits
+Look into <inf>/express/node_modules/raw-body/node_modules/setprototypeof
+Look into <inf>/express/node_modules/statuses
+Look into <inf>/express/node_modules/iconv-lite
+Look into <inf>/unpipe
+Look into <inf>/type-is
+Look into <inf>/content-disposition
+Look into <inf>/content-type
+Look into <inf>/cookie
+Look into <inf>/cookie-signature
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/etag
+Look into <inf>/finalhandler
+Look into <inf>/debug
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/on-finished
+Look into <inf>/parseurl
+Look into <inf>/finalhandler/node_modules/statuses
+Look into <inf>/unpipe
+Look into <inf>/fresh
+Look into <inf>/merge-descriptors
+Look into <inf>/methods
+Look into <inf>/on-finished
+Look into <inf>/parseurl
+Look into <inf>/path-to-regexp
+Look into <inf>/proxy-addr
+Look into <inf>/forwarded
+Look into <inf>/ipaddr.js
+Look into <inf>/express/node_modules/qs
+Look into <inf>/range-parser
+Look into <inf>/safe-buffer
+Look into <inf>/send
+Look into <inf>/debug
+Look into <inf>/depd
+Look into <inf>/destroy
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/etag
+Look into <inf>/fresh
+Look into <inf>/http-errors
+Look into <inf>/mime
+Look into <inf>/ms
+Look into <inf>/on-finished
+Look into <inf>/range-parser
+Look into <inf>/send/node_modules/statuses
+Look into <inf>/serve-static
+Look into <inf>/encodeurl
+Look into <inf>/escape-html
+Look into <inf>/parseurl
+Look into <inf>/send
+Look into <inf>/setprototypeof
+Look into <inf>/express/node_modules/statuses
+Look into <inf>/type-is
+Look into <inf>/utils-merge
+Look into <inf>/vary
+Look into <inf>/inflection
+Look into <inf>/isemail
+Look into <inf>/loopback-connector-remote
+Look into <inf>/loopback-datasource-juggler
+Look into <inf>/async
+Look into <inf>/bluebird
+Look into <inf>/loopback-datasource-juggler/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/depd
+Look into <inf>/inflection
+Look into <inf>/lodash
+Look into <inf>/loopback-connector
+Look into <inf>/async
+Look into <inf>/bluebird
+Look into <inf>/loopback-connector/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/msgpack5
+Look into <inf>/bl
+Look into <inf>/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/isarray
+Look into <inf>/process-nextick-args
+Look into <inf>/safe-buffer
+Look into <inf>/util-deprecate
+Look into <inf>/safe-buffer
+Look into <inf>/inherits
+Look into <inf>/readable-stream
+Look into <inf>/msgpack5/node_modules/safe-buffer
+Look into <inf>/strong-globalize
+Look into <inf>/accept-language
+Look into <inf>/bcp47
+Look into <inf>/stable
+Look into <inf>/strong-globalize/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/globalize
+Look into <inf>/cldrjs
+Look into <inf>/lodash
+Look into <inf>/md5
+Look into <inf>/charenc
+Look into <inf>/crypt
+Look into <inf>/is-buffer
+Look into <inf>/mkdirp
+Look into <inf>/minimist
+Look into <inf>/os-locale
+Look into <inf>/execa
+Look into <inf>/cross-spawn
+Look into <inf>/lru-cache
+Look into <inf>/pseudomap
+Look into <inf>/yallist
+Look into <inf>/shebang-command
+Look into <inf>/shebang-regex
+Look into <inf>/which
+Look into <inf>/isexe
+Look into <inf>/get-stream
+Look into <inf>/is-stream
+Look into <inf>/npm-run-path
+Look into <inf>/path-key
+Look into <inf>/p-finally
+Look into <inf>/signal-exit
+Look into <inf>/strip-eof
+Look into <inf>/lcid
+Look into <inf>/invert-kv
+Look into <inf>/mem
+Look into <inf>/mimic-fn
+Look into <inf>/yamljs
+Look into <inf>/argparse
+Look into <inf>/sprintf-js
+Look into <inf>/glob
+Look into <inf>/fs.realpath
+Look into <inf>/inflight
+Look into <inf>/once
+Look into <inf>/wrappy
+Look into <inf>/wrappy
+Look into <inf>/inherits
+Look into <inf>/minimatch
+Look into <inf>/brace-expansion
+Look into <inf>/balanced-match
+Look into <inf>/concat-map
+Look into <inf>/once
+Look into <inf>/path-is-absolute
+Look into <inf>/uuid
+Look into <inf>/minimatch
+Look into <inf>/qs
+Look into <inf>/shortid
+Look into <inf>/nanoid
+Look into <inf>/strong-globalize
+Look into <inf>/traverse
+Look into <inf>/uuid
+Look into <inf>/strong-remoting
+Look into <inf>/async
+Look into <inf>/body-parser
+Look into <inf>/strong-remoting/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/depd
+Look into <inf>/escape-string-regexp
+Look into <inf>/eventemitter2
+Look into <inf>/express
+Look into <inf>/inflection
+Look into <inf>/jayson
+Look into <inf>/JSONStream
+Look into <inf>/jsonparse
+Look into <inf>/through
+Look into <inf>/commander
+Look into <inf>/es6-promisify
+Look into <inf>/es6-promise
+Look into <inf>/eyes
+Look into <inf>/json-stringify-safe
+Look into <inf>/lodash
+Look into <inf>/uuid
+Look into <inf>/js2xmlparser
+Look into <inf>/xmlcreate
+Look into <inf>/loopback-datatype-geopoint
+Look into <inf>/loopback-phase
+Look into <inf>/async
+Look into <inf>/loopback-phase/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/strong-globalize
+Look into <inf>/mux-demux
+Look into <inf>/duplex
+Look into <inf>/json-buffer
+Look into <inf>/msgpack-stream
+Look into <inf>/bops
+Look into <inf>/base64-js
+Look into <inf>/to-utf8
+Look into <inf>/msgpack-js
+Look into <inf>/msgpack-js/node_modules/bops
+Look into <inf>/msgpack-js/node_modules/base64-js
+Look into <inf>/to-utf8
+Look into <inf>/msgpack-stream/node_modules/through
+Look into <inf>/stream-combiner
+Look into <inf>/duplexer
+Look into <inf>/stream-serializer
+Look into <inf>/through
+Look into <inf>/xtend
+Look into <inf>/qs
+Look into <inf>/request
+Look into <inf>/aws-sign2
+Look into <inf>/aws4
+Look into <inf>/caseless
+Look into <inf>/combined-stream
+Look into <inf>/delayed-stream
+Look into <inf>/extend
+Look into <inf>/forever-agent
+Look into <inf>/form-data
+Look into <inf>/asynckit
+Look into <inf>/combined-stream
+Look into <inf>/mime-types
+Look into <inf>/har-validator
+Look into <inf>/ajv
+Look into <inf>/co
+Look into <inf>/fast-deep-equal
+Look into <inf>/fast-json-stable-stringify
+Look into <inf>/json-schema-traverse
+Look into <inf>/har-schema
+Look into <inf>/http-signature
+Look into <inf>/assert-plus
+Look into <inf>/jsprim
+Look into <inf>/assert-plus
+Look into <inf>/extsprintf
+Look into <inf>/json-schema
+Look into <inf>/verror
+Look into <inf>/assert-plus
+Look into <inf>/core-util-is
+Look into <inf>/extsprintf
+Look into <inf>/sshpk
+Look into <inf>/asn1
+Look into <inf>/assert-plus
+Look into <inf>/bcrypt-pbkdf
+Look into <inf>/tweetnacl
+Look into <inf>/dashdash
+Look into <inf>/assert-plus
+Look into <inf>/ecc-jsbn
+Look into <inf>/jsbn
+Look into <inf>/safer-buffer
+Look into <inf>/getpass
+Look into <inf>/assert-plus
+Look into <inf>/jsbn
+Look into <inf>/safer-buffer
+Look into <inf>/tweetnacl
+Look into <inf>/is-typedarray
+Look into <inf>/isstream
+Look into <inf>/json-stringify-safe
+Look into <inf>/mime-types
+Look into <inf>/oauth-sign
+Look into <inf>/performance-now
+Look into <inf>/qs
+Look into <inf>/safe-buffer
+Look into <inf>/tough-cookie
+Look into <inf>/tunnel-agent
+Look into <inf>/safe-buffer
+Look into <inf>/uuid
+Look into <inf>/sse
+Look into <inf>/options
+Look into <inf>/strong-error-handler
+Look into <inf>/accepts
+Look into <inf>/strong-error-handler/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/ejs
+Look into <inf>/http-status
+Look into <inf>/js2xmlparser
+Look into <inf>/strong-globalize
+Look into <inf>/strong-globalize
+Look into <inf>/traverse
+Look into <inf>/xml2js
+Look into <inf>/sax
+Look into <inf>/xmlbuilder
+Look into <inf>/loopback-datasource-juggler
+Look into <inf>/loopback-filters
+Look into <inf>/loopback-filters/node_modules/debug
+Look into <inf>/ms
+Look into <inf>/loopback-phase
+Look into <inf>/nodemailer
+Look into <inf>/nodemailer-direct-transport
+Look into <inf>/nodemailer-shared
+Look into <inf>/nodemailer-fetch
+Look into <inf>/smtp-connection
+Look into <inf>/httpntlm
+Look into <inf>/httpreq
+Look into <inf>/underscore
+Look into <inf>/nodemailer-shared
+Look into <inf>/nodemailer-stub-transport
+Look into <inf>/serve-favicon
+Look into <inf>/etag
+Look into <inf>/fresh
+Look into <inf>/serve-favicon/node_modules/ms
+Look into <inf>/parseurl
+Look into <inf>/safe-buffer
+Look into <inf>/stable
+Look into <inf>/strong-globalize
+Look into <inf>/strong-remoting
+Look into <inf>/uid2
+Look into <inf>/underscore.string
+Look into <inf>/sprintf-js
+Look into <inf>/util-deprecate
+Install types for async
+Install types for lodash
+Install types for bcryptjs
+Install types for bluebird
+Install types for body-parser
+Install types for bytes
+Install types for content-type
+Install types for debug
+Install types for ms
+Install types for depd
+Install types for http-errors
+Install types for inherits
+Install types for setprototypeof
+=> not found
+Install types for statuses
+Install types for iconv-lite
+Install types for safer-buffer
+=> not found
+Install types for on-finished
+Install types for ee-first
+=> not found
+Install types for qs
+Install types for raw-body
+Install types for unpipe
+=> not found
+Install types for type-is
+Install types for media-typer
+Install types for mime-types
+Install types for mime-db
+Install types for canonical-json
+=> not found
+Install types for ejs
+Install types for express
+Install types for accepts
+Install types for negotiator
+Install types for array-flatten
+=> not found
+Install types for body-parser
+Install types for iconv-lite
+Install types for qs
+Install types for raw-body
+Install types for http-errors
+Install types for depd
+Install types for setprototypeof
+=> not found
+Install types for statuses
+Install types for content-disposition
+Install types for cookie
+Install types for cookie-signature
+Install types for encodeurl
+=> not found
+Install types for escape-html
+Install types for etag
+Install types for finalhandler

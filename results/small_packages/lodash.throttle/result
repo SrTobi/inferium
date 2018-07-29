@@ -1,0 +1,139 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.throttle into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.throttle
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.throttle/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.throttle/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.throttle /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.throttle
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.throttle/./index.js'
+[info] Done Parsing module.
+[info] Found Some(throttle)
+[info] Round 0
+[info] Analyse Some(throttle)
+[info] Found Some(debounced)
+[info] Found Some(cancel)
+[info] Found Some(flush)
+[info] Round 1
+[info] Analyse Some(flush)
+[info] Analyse Some(cancel)
+[info] Analyse Some(debounced)
+[info] Analyse Some(throttle)
+[info] Round 2
+[info] Analyse Some(flush)
+[info] Analyse Some(cancel)
+[info] Analyse Some(debounced)
+[info] Analyse Some(throttle)
+[info] Round 3
+[info] Analyse Some(flush)
+[info] skipped
+[info] Analyse Some(debounced)
+[info] Analyse Some(throttle)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I46<T1, T2, T3, T8, T9> {
+[info]   (_?: (undefined | T8), _?: (undefined | T9)): T1
+[info]   (_?: (undefined | T8), _?: (undefined | T9)): T2
+[info]   (_?: undefined, _?: undefined): T3
+[info] }
+[info] interface I45<T1, T2, T3> {
+[info]   apply: (I46<T1, T2, T3, any, any>)
+[info] }
+[info] interface I50<T18> {
+[info]   (_?: number): T18
+[info] }
+[info] interface I49<T17 extends I50<T18>, T18> {
+[info]   slice: T17
+[info] }
+[info] interface I48<T16 extends (I49<T17, T18> | number), T17 extends I50<T18>, T18> {
+[info]   (_?: {}, _?: ""): T16
+[info] }
+[info] interface I52<T15 extends I48<T16, T17, T18>, T16 extends (I49<T17, T18> | number), T17 extends I50<T18>, T18> {
+[info]   replace: T15
+[info] }
+[info] interface I51<T15 extends I48<T16, T17, T18>, T16 extends (I49<T17, T18> | number), T17 extends I50<T18>, T18> {
+[info]   (): (I52<T15, T16, T17, T18> | (boolean & (number | string) & number))
+[info] }
+[info] interface I47<T15 extends I48<T16, T17, T18>, T16 extends (I49<T17, T18> | number), T17 extends I50<T18>, T18> {
+[info]   replace: T15
+[info]   valueOf: (I51<T15, T16, T17, T18>)
+[info] }
+[info] interface I56<T27> {
+[info]   (_?: number): T27
+[info] }
+[info] interface I55<T26 extends I56<T27>, T27> {
+[info]   slice: T26
+[info] }
+[info] interface I54<T25 extends (I55<T26, T27> | number), T26 extends I56<T27>, T27> {
+[info]   (_?: {}, _?: ""): T25
+[info] }
+[info] interface I58<T24 extends I54<T25, T26, T27>, T25 extends (I55<T26, T27> | number), T26 extends I56<T27>, T27> {
+[info]   replace: T24
+[info] }
+[info] interface I57<T24 extends I54<T25, T26, T27>, T25 extends (I55<T26, T27> | number), T26 extends I56<T27>, T27> {
+[info]   (): (I58<T24, T25, T26, T27> | (boolean & (number | string) & number))
+[info] }
+[info] interface I53<T24 extends I54<T25, T26, T27>, T25 extends (I55<T26, T27> | number), T26 extends I56<T27>, T27> {
+[info]   replace: T24
+[info]   valueOf: (I57<T24, T25, T26, T27>)
+[info] }
+[info] interface I59 {
+[info]   trailing: boolean
+[info]   leading: boolean
+[info] }
+[info] interface I60<T1, T2, T3> {
+[info]   (): (undefined | T1 | T2 | T3)
+[info]   cancel(): undefined
+[info]   flush(): (undefined | T1 | T2 | T3)
+[info] }
+[info] interface I44 {
+[info]   <T1, T2, T3>(func: (I45<T1, T2, T3>), wait: (((I47<I48<T16, T17, T18>, (I49<T17, T18> | number), I50<T18>, any> | (boolean & (number | string) & number)) & (I53<I54<T25, T26, T27>, (I55<T26, T27> | number), I56<T27>, any> | (boolean & (number | string) & number)))), options: ((boolean & I59))): I60<T1, T2, T3>
+[info] }
+[info] => I44
+[success] Total time: 4 s, completed Jul 29, 2018 9:10:42 PM

@@ -1,0 +1,768 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install ember-feature-flags into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/ember-feature-flags
+Look into <inf>/ember-cli-babel
+Look into <inf>/amd-name-resolver
+Look into <inf>/ensure-posix-path
+Look into <inf>/babel-plugin-debug-macros
+Look into <inf>/semver
+Look into <inf>/babel-plugin-ember-modules-api-polyfill
+Look into <inf>/ember-rfc176-data
+Look into <inf>/babel-plugin-transform-es2015-modules-amd
+Look into <inf>/babel-plugin-transform-es2015-modules-commonjs
+Look into <inf>/babel-plugin-transform-strict-mode
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/esutils
+Look into <inf>/lodash
+Look into <inf>/to-fast-properties
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-traverse
+Look into <inf>/babel-code-frame
+Look into <inf>/chalk
+Look into <inf>/ansi-styles
+Look into <inf>/escape-string-regexp
+Look into <inf>/has-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/strip-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/supports-color
+Look into <inf>/esutils
+Look into <inf>/js-tokens
+Look into <inf>/babel-messages
+=> Couldn't find babel-runtime! Skip!
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babylon
+Look into <inf>/debug
+Look into <inf>/ms
+Look into <inf>/globals
+Look into <inf>/invariant
+Look into <inf>/loose-envify
+Look into <inf>/js-tokens
+Look into <inf>/lodash
+Look into <inf>/babel-types
+Look into <inf>/babylon
+Look into <inf>/lodash
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-polyfill
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/core-js
+Look into <inf>/babel-polyfill/node_modules/regenerator-runtime
+Look into <inf>/babel-preset-env
+Look into <inf>/babel-plugin-check-es2015-constants
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-syntax-trailing-function-commas
+Look into <inf>/babel-plugin-transform-async-to-generator
+Look into <inf>/babel-helper-remap-async-to-generator
+Look into <inf>/babel-helper-function-name
+Look into <inf>/babel-helper-get-function-arity
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-syntax-async-functions
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-arrow-functions
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-block-scoped-functions
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-block-scoping
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/lodash
+Look into <inf>/babel-plugin-transform-es2015-classes
+Look into <inf>/babel-helper-define-map
+Look into <inf>/babel-helper-function-name
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/lodash
+Look into <inf>/babel-helper-function-name
+Look into <inf>/babel-helper-optimise-call-expression
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-helper-replace-supers
+Look into <inf>/babel-helper-optimise-call-expression
+Look into <inf>/babel-messages
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babel-messages
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-computed-properties
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-plugin-transform-es2015-destructuring
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-duplicate-keys
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-for-of
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-function-name
+Look into <inf>/babel-helper-function-name
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-literals
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-modules-amd
+Look into <inf>/babel-plugin-transform-es2015-modules-commonjs
+Look into <inf>/babel-plugin-transform-es2015-modules-systemjs
+Look into <inf>/babel-helper-hoist-variables
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-plugin-transform-es2015-modules-umd
+Look into <inf>/babel-plugin-transform-es2015-modules-amd
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-plugin-transform-es2015-object-super
+Look into <inf>/babel-helper-replace-supers
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-parameters
+Look into <inf>/babel-helper-call-delegate
+Look into <inf>/babel-helper-hoist-variables
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babel-helper-get-function-arity
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-shorthand-properties
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-spread
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-sticky-regex
+Look into <inf>/babel-helper-regex
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/lodash
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-transform-es2015-template-literals
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-typeof-symbol
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-es2015-unicode-regex
+Look into <inf>/babel-helper-regex
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/regexpu-core
+Look into <inf>/regenerate
+Look into <inf>/regjsgen
+Look into <inf>/regjsparser
+Look into <inf>/jsesc
+Look into <inf>/babel-plugin-transform-exponentiation-operator
+Look into <inf>/babel-helper-builder-binary-assignment-operator-visitor
+Look into <inf>/babel-helper-explode-assignable-expression
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/babel-plugin-syntax-exponentiation-operator
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-plugin-transform-regenerator
+Look into <inf>/regenerator-transform
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/private
+Look into <inf>/browserslist
+Look into <inf>/caniuse-lite
+Look into <inf>/electron-to-chromium
+Look into <inf>/invariant
+Look into <inf>/semver
+Look into <inf>/broccoli-babel-transpiler
+Look into <inf>/babel-core
+Look into <inf>/babel-code-frame
+Look into <inf>/babel-generator
+Look into <inf>/babel-messages
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-types
+Look into <inf>/detect-indent
+Look into <inf>/repeating
+Look into <inf>/is-finite
+Look into <inf>/number-is-nan
+Look into <inf>/babel-generator/node_modules/jsesc
+Look into <inf>/lodash
+Look into <inf>/source-map
+Look into <inf>/trim-right
+Look into <inf>/babel-helpers
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-messages
+Look into <inf>/babel-register
+Look into <inf>/babel-core
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/core-js
+Look into <inf>/home-or-tmp
+Look into <inf>/os-homedir
+Look into <inf>/os-tmpdir
+Look into <inf>/lodash
+Look into <inf>/mkdirp
+Look into <inf>/minimist
+Look into <inf>/source-map-support
+Look into <inf>/source-map
+=> Couldn't find babel-runtime! Skip!
+Look into <inf>/babel-template
+Look into <inf>/babel-traverse
+Look into <inf>/babel-types
+Look into <inf>/babylon
+Look into <inf>/convert-source-map
+Look into <inf>/debug
+Look into <inf>/json5
+Look into <inf>/lodash
+Look into <inf>/minimatch
+Look into <inf>/brace-expansion
+Look into <inf>/balanced-match
+Look into <inf>/concat-map
+Look into <inf>/path-is-absolute
+Look into <inf>/private
+Look into <inf>/slash
+Look into <inf>/source-map
+Look into <inf>/broccoli-funnel
+Look into <inf>/array-equal
+Look into <inf>/blank-object
+Look into <inf>/broccoli-plugin
+Look into <inf>/promise-map-series
+Look into <inf>/promise-map-series/node_modules/rsvp
+Look into <inf>/quick-temp
+Look into <inf>/mktemp
+Look into <inf>/rimraf
+Look into <inf>/glob
+Look into <inf>/fs.realpath
+Look into <inf>/inflight
+Look into <inf>/once
+Look into <inf>/wrappy
+Look into <inf>/wrappy
+Look into <inf>/inherits
+Look into <inf>/minimatch
+Look into <inf>/once
+Look into <inf>/path-is-absolute
+Look into <inf>/underscore.string
+Look into <inf>/sprintf-js
+Look into <inf>/util-deprecate
+Look into <inf>/rimraf
+Look into <inf>/symlink-or-copy
+Look into <inf>/debug
+Look into <inf>/fast-ordered-set
+Look into <inf>/blank-object
+Look into <inf>/fs-tree-diff
+Look into <inf>/heimdalljs-logger
+Look into <inf>/debug
+Look into <inf>/heimdalljs
+Look into <inf>/heimdalljs/node_modules/rsvp
+Look into <inf>/object-assign
+Look into <inf>/path-posix
+Look into <inf>/symlink-or-copy
+Look into <inf>/heimdalljs
+Look into <inf>/minimatch
+Look into <inf>/mkdirp
+Look into <inf>/path-posix
+Look into <inf>/rimraf
+Look into <inf>/symlink-or-copy
+Look into <inf>/walk-sync
+Look into <inf>/ensure-posix-path
+Look into <inf>/matcher-collection
+Look into <inf>/minimatch
+Look into <inf>/broccoli-merge-trees
+Look into <inf>/broccoli-plugin
+Look into <inf>/merge-trees
+Look into <inf>/can-symlink
+Look into <inf>/tmp
+Look into <inf>/os-tmpdir
+Look into <inf>/fs-tree-diff
+Look into <inf>/heimdalljs
+Look into <inf>/heimdalljs-logger
+Look into <inf>/rimraf
+Look into <inf>/symlink-or-copy
+Look into <inf>/broccoli-persistent-filter
+Look into <inf>/async-disk-cache
+Look into <inf>/debug
+Look into <inf>/heimdalljs
+Look into <inf>/istextorbinary
+Look into <inf>/binaryextensions
+Look into <inf>/editions
+Look into <inf>/textextensions
+Look into <inf>/mkdirp
+Look into <inf>/rimraf
+Look into <inf>/async-disk-cache/node_modules/rsvp
+Look into <inf>/username-sync
+Look into <inf>/async-promise-queue
+Look into <inf>/async
+Look into <inf>/lodash
+Look into <inf>/debug
+Look into <inf>/broccoli-plugin
+Look into <inf>/fs-tree-diff
+Look into <inf>/hash-for-dep
+Look into <inf>/broccoli-kitchen-sink-helpers
+Look into <inf>/broccoli-kitchen-sink-helpers/node_modules/glob
+Look into <inf>/inflight
+Look into <inf>/inherits
+Look into <inf>/minimatch
+Look into <inf>/once
+Look into <inf>/path-is-absolute
+Look into <inf>/mkdirp
+Look into <inf>/heimdalljs
+Look into <inf>/heimdalljs-logger
+Look into <inf>/resolve
+Look into <inf>/path-parse
+Look into <inf>/heimdalljs
+Look into <inf>/heimdalljs-logger
+Look into <inf>/mkdirp
+Look into <inf>/promise-map-series
+Look into <inf>/rimraf
+Look into <inf>/broccoli-persistent-filter/node_modules/rsvp
+Look into <inf>/symlink-or-copy
+Look into <inf>/walk-sync
+Look into <inf>/clone
+Look into <inf>/hash-for-dep
+Look into <inf>/heimdalljs-logger
+Look into <inf>/json-stable-stringify
+Look into <inf>/jsonify
+Look into <inf>/rsvp
+Look into <inf>/workerpool
+Look into <inf>/object-assign
+Look into <inf>/broccoli-debug
+Look into <inf>/broccoli-plugin
+Look into <inf>/fs-tree-diff
+Look into <inf>/heimdalljs
+Look into <inf>/heimdalljs-logger
+Look into <inf>/symlink-or-copy
+Look into <inf>/tree-sync
+Look into <inf>/debug
+Look into <inf>/fs-tree-diff
+Look into <inf>/mkdirp
+Look into <inf>/quick-temp
+Look into <inf>/tree-sync/node_modules/walk-sync
+Look into <inf>/ensure-posix-path
+Look into <inf>/matcher-collection
+Look into <inf>/broccoli-funnel
+Look into <inf>/broccoli-source
+Look into <inf>/clone
+Look into <inf>/ember-cli-version-checker
+Look into <inf>/resolve
+Look into <inf>/semver
+Look into <inf>/semver
+Install types for ember-cli-babel
+=> not found
+Install types for amd-name-resolver
+=> not found
+Install types for ensure-posix-path
+=> not found
+Install types for babel-plugin-debug-macros
+=> not found
+Install types for semver
+Install types for babel-plugin-ember-modules-api-polyfill
+=> not found
+Install types for ember-rfc176-data
+=> not found
+Install types for babel-plugin-transform-es2015-modules-amd
+=> not found
+Install types for babel-plugin-transform-es2015-modules-commonjs
+=> not found
+Install types for babel-plugin-transform-strict-mode
+=> not found
+Install types for babel-types
+Install types for esutils
+=> not found
+Install types for lodash
+Install types for to-fast-properties
+=> not found
+Install types for babel-template
+Install types for babel-traverse
+Install types for babel-code-frame
+Install types for chalk
+Install types for ansi-styles
+Install types for escape-string-regexp
+Install types for has-ansi
+Install types for ansi-regex
+Install types for strip-ansi
+Install types for supports-color
+Install types for js-tokens
+=> not found
+Install types for babel-messages
+=> not found
+Install types for babylon
+Install types for debug
+Install types for ms
+Install types for globals
+=> not found
+Install types for invariant
+Install types for loose-envify
+=> not found
+Install types for babel-polyfill
+=> not found
+Install types for core-js
+Install types for regenerator-runtime
+=> not found
+Install types for babel-preset-env
+=> not found
+Install types for babel-plugin-check-es2015-constants
+=> not found
+Install types for babel-plugin-syntax-trailing-function-commas
+=> not found
+Install types for babel-plugin-transform-async-to-generator
+=> not found
+Install types for babel-helper-remap-async-to-generator
+=> not found
+Install types for babel-helper-function-name
+=> not found
+Install types for babel-helper-get-function-arity
+=> not found
+Install types for babel-plugin-syntax-async-functions
+=> not found
+Install types for babel-plugin-transform-es2015-arrow-functions
+=> not found
+Install types for babel-plugin-transform-es2015-block-scoped-functions
+=> not found
+Install types for babel-plugin-transform-es2015-block-scoping
+=> not found
+Install types for babel-plugin-transform-es2015-classes
+=> not found
+Install types for babel-helper-define-map
+=> not found
+Install types for babel-helper-optimise-call-expression
+=> not found
+Install types for babel-helper-replace-supers
+=> not found
+Install types for babel-plugin-transform-es2015-computed-properties
+=> not found
+Install types for babel-plugin-transform-es2015-destructuring
+=> not found
+Install types for babel-plugin-transform-es2015-duplicate-keys
+=> not found
+Install types for babel-plugin-transform-es2015-for-of
+=> not found
+Install types for babel-plugin-transform-es2015-function-name
+=> not found
+Install types for babel-plugin-transform-es2015-literals
+=> not found
+Install types for babel-plugin-transform-es2015-modules-systemjs
+=> not found
+Install types for babel-helper-hoist-variables
+=> not found
+Install types for babel-plugin-transform-es2015-modules-umd
+=> not found
+Install types for babel-plugin-transform-es2015-object-super
+=> not found
+Install types for babel-plugin-transform-es2015-parameters
+=> not found
+Install types for babel-helper-call-delegate
+=> not found
+Install types for babel-plugin-transform-es2015-shorthand-properties
+=> not found
+Install types for babel-plugin-transform-es2015-spread
+=> not found
+Install types for babel-plugin-transform-es2015-sticky-regex
+=> not found
+Install types for babel-helper-regex
+=> not found
+Install types for babel-plugin-transform-es2015-template-literals
+=> not found
+Install types for babel-plugin-transform-es2015-typeof-symbol
+=> not found
+Install types for babel-plugin-transform-es2015-unicode-regex
+=> not found
+Install types for regexpu-core
+=> not found
+Install types for regenerate
+=> not found
+Install types for regjsgen
+=> not found
+Install types for regjsparser
+=> not found
+Install types for jsesc
+Install types for babel-plugin-transform-exponentiation-operator
+=> not found
+Install types for babel-helper-builder-binary-assignment-operator-visitor
+=> not found
+Install types for babel-helper-explode-assignable-expression
+=> not found
+Install types for babel-plugin-syntax-exponentiation-operator
+=> not found
+Install types for babel-plugin-transform-regenerator
+=> not found
+Install types for regenerator-transform
+=> not found
+Install types for private
+=> not found
+Install types for browserslist
+=> not found
+Install types for caniuse-lite
+=> not found
+Install types for electron-to-chromium
+=> not found
+Install types for broccoli-babel-transpiler
+=> not found
+Install types for babel-core
+Install types for babel-generator
+Install types for detect-indent
+Install types for repeating
+=> not found
+Install types for is-finite
+Install types for number-is-nan
+Install types for jsesc
+Install types for source-map
+Install types for trim-right
+=> not found
+Install types for babel-helpers
+=> not found
+Install types for babel-register
+=> not found
+Install types for home-or-tmp
+=> not found
+Install types for os-homedir
+Install types for os-tmpdir
+Install types for mkdirp
+Install types for minimist
+Install types for source-map-support
+Install types for convert-source-map
+Install types for json5
+Install types for minimatch
+Install types for brace-expansion
+Install types for balanced-match
+=> not found
+Install types for concat-map
+=> not found
+Install types for path-is-absolute
+Install types for slash
+=> not found
+Install types for broccoli-funnel
+=> not found
+Install types for array-equal
+=> not found
+Install types for blank-object
+=> not found
+Install types for broccoli-plugin
+=> not found
+Install types for promise-map-series
+=> not found
+Install types for rsvp
+Install types for quick-temp
+=> not found
+Install types for mktemp
+=> not found
+Install types for rimraf
+Install types for glob
+Install types for fs.realpath
+=> not found
+Install types for inflight
+=> not found
+Install types for once
+Install types for wrappy
+=> not found
+Install types for inherits
+Install types for underscore.string
+Install types for sprintf-js
+Install types for util-deprecate
+Install types for symlink-or-copy
+=> not found
+Install types for fast-ordered-set
+=> not found
+Install types for fs-tree-diff
+=> not found
+Install types for heimdalljs-logger
+=> not found
+Install types for heimdalljs
+=> not found
+Install types for rsvp
+Install types for object-assign
+Install types for path-posix
+=> not found
+Install types for walk-sync
+=> not found
+Install types for matcher-collection
+=> not found
+Install types for broccoli-merge-trees
+=> not found
+Install types for merge-trees
+=> not found
+Install types for can-symlink
+=> not found
+Install types for tmp
+Install types for broccoli-persistent-filter
+=> not found
+Install types for async-disk-cache
+=> not found
+Install types for istextorbinary
+=> not found
+Install types for binaryextensions
+=> not found
+Install types for editions
+=> not found
+Install types for textextensions
+=> not found
+Install types for rsvp
+Install types for username-sync
+=> not found
+Install types for async-promise-queue
+=> not found
+Install types for async
+Install types for hash-for-dep
+=> not found
+Install types for broccoli-kitchen-sink-helpers
+=> not found
+Install types for glob
+Install types for resolve
+Install types for path-parse
+Install types for rsvp
+Install types for clone
+Install types for json-stable-stringify
+Install types for jsonify
+=> not found
+Install types for rsvp
+Install types for workerpool
+Install types for broccoli-debug
+=> not found
+Install types for tree-sync
+=> not found
+Install types for walk-sync
+=> not found
+Install types for broccoli-source
+=> not found
+Install types for ember-cli-version-checker
+=> not found
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/ember-feature-flags/_inferium_gather.ts
+Gather types for 168 packages:
+=> ember-cli-babel, amd-name-resolver, ensure-posix-path, babel-plugin-debug-macros, semver, babel-plugin-ember-modules-api-polyfill, ember-rfc176-data, babel-plugin-transform-es2015-modules-amd, babel-plugin-transform-es2015-modules-commonjs, babel-plugin-transform-strict-mode, babel-types, esutils, lodash, to-fast-properties, babel-template, babel-traverse, babel-code-frame, chalk, ansi-styles, escape-string-regexp, has-ansi, ansi-regex, strip-ansi, supports-color, js-tokens, babel-messages, babylon, debug, ms, globals, invariant, loose-envify, babel-polyfill, core-js, regenerator-runtime, babel-preset-env, babel-plugin-check-es2015-constants, babel-plugin-syntax-trailing-function-commas, babel-plugin-transform-async-to-generator, babel-helper-remap-async-to-generator, babel-helper-function-name, babel-helper-get-function-arity, babel-plugin-syntax-async-functions, babel-plugin-transform-es2015-arrow-functions, babel-plugin-transform-es2015-block-scoped-functions, babel-plugin-transform-es2015-block-scoping, babel-plugin-transform-es2015-classes, babel-helper-define-map, babel-helper-optimise-call-expression, babel-helper-replace-supers, babel-plugin-transform-es2015-computed-properties, babel-plugin-transform-es2015-destructuring, babel-plugin-transform-es2015-duplicate-keys, babel-plugin-transform-es2015-for-of, babel-plugin-transform-es2015-function-name, babel-plugin-transform-es2015-literals, babel-plugin-transform-es2015-modules-systemjs, babel-helper-hoist-variables, babel-plugin-transform-es2015-modules-umd, babel-plugin-transform-es2015-object-super, babel-plugin-transform-es2015-parameters, babel-helper-call-delegate, babel-plugin-transform-es2015-shorthand-properties, babel-plugin-transform-es2015-spread, babel-plugin-transform-es2015-sticky-regex, babel-helper-regex, babel-plugin-transform-es2015-template-literals, babel-plugin-transform-es2015-typeof-symbol, babel-plugin-transform-es2015-unicode-regex, regexpu-core, regenerate, regjsgen, regjsparser, jsesc, babel-plugin-transform-exponentiation-operator, babel-helper-builder-binary-assignment-operator-visitor, babel-helper-explode-assignable-expression, babel-plugin-syntax-exponentiation-operator, babel-plugin-transform-regenerator, regenerator-transform, private, browserslist, caniuse-lite, electron-to-chromium, broccoli-babel-transpiler, babel-core, babel-generator, detect-indent, repeating, is-finite, number-is-nan, jsesc, source-map, trim-right, babel-helpers, babel-register, home-or-tmp, os-homedir, os-tmpdir, mkdirp, minimist, source-map-support, convert-source-map, json5, minimatch, brace-expansion, balanced-match, concat-map, path-is-absolute, slash, broccoli-funnel, array-equal, blank-object, broccoli-plugin, promise-map-series, rsvp, quick-temp, mktemp, rimraf, glob, fs.realpath, inflight, once, wrappy, inherits, underscore.string, sprintf-js, util-deprecate, symlink-or-copy, fast-ordered-set, fs-tree-diff, heimdalljs-logger, heimdalljs, rsvp, object-assign, path-posix, walk-sync, matcher-collection, broccoli-merge-trees, merge-trees, can-symlink, tmp, broccoli-persistent-filter, async-disk-cache, istextorbinary, binaryextensions, editions, textextensions, rsvp, username-sync, async-promise-queue, async, hash-for-dep, broccoli-kitchen-sink-helpers, glob, resolve, path-parse, rsvp, clone, json-stable-stringify, jsonify, rsvp, workerpool, broccoli-debug, tree-sync, walk-sync, broccoli-source, ember-cli-version-checker 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34, _inferium_import_35, _inferium_import_36, _inferium_import_37, _inferium_import_38, _inferium_import_39, _inferium_import_40, _inferium_import_41, _inferium_import_42, _inferium_import_43, _inferium_import_44, _inferium_import_45, _inferium_import_46, _inferium_import_47, _inferium_import_48, _inferium_import_49, _inferium_import_50, _inferium_import_51, _inferium_import_52, _inferium_import_53, _inferium_import_54, _inferium_import_55, _inferium_import_56, _inferium_import_57, _inferium_import_58, _inferium_import_59, _inferium_import_60, _inferium_import_61, _inferium_import_62, _inferium_import_63, _inferium_import_64, _inferium_import_65, _inferium_import_66, _inferium_import_67, _inferium_import_68, _inferium_import_69, _inferium_import_70, _inferium_import_71, _inferium_import_72, _inferium_import_73, _inferium_import_74, _inferium_import_75, _inferium_import_76, _inferium_import_77, _inferium_import_78, _inferium_import_79, _inferium_import_80, _inferium_import_81, _inferium_import_82, _inferium_import_83, _inferium_import_84, _inferium_import_85, _inferium_import_86, _inferium_import_87, _inferium_import_88, _inferium_import_89, _inferium_import_90, _inferium_import_91, _inferium_import_92, _inferium_import_93, _inferium_import_94, _inferium_import_95, _inferium_import_96, _inferium_import_97, _inferium_import_98, _inferium_import_99, _inferium_import_100, _inferium_import_101, _inferium_import_102, _inferium_import_103, _inferium_import_104, _inferium_import_105, _inferium_import_106, _inferium_import_107, _inferium_import_108, _inferium_import_109, _inferium_import_110, _inferium_import_111, _inferium_import_112, _inferium_import_113, _inferium_import_114, _inferium_import_115, _inferium_import_116, _inferium_import_117, _inferium_import_118, _inferium_import_119, _inferium_import_120, _inferium_import_121, _inferium_import_122, _inferium_import_123, _inferium_import_124, _inferium_import_125, _inferium_import_126, _inferium_import_127, _inferium_import_128, _inferium_import_129, _inferium_import_130, _inferium_import_131, _inferium_import_132, _inferium_import_133, _inferium_import_134, _inferium_import_135, _inferium_import_136, _inferium_import_137, _inferium_import_138, _inferium_import_139, _inferium_import_140, _inferium_import_141, _inferium_import_142, _inferium_import_143, _inferium_import_144, _inferium_import_145, _inferium_import_146, _inferium_import_147, _inferium_import_148, _inferium_import_149, _inferium_import_150, _inferium_import_151, _inferium_import_152, _inferium_import_153, _inferium_import_154, _inferium_import_155, _inferium_import_156, _inferium_import_157, _inferium_import_158, _inferium_import_159, _inferium_import_160, _inferium_import_161, _inferium_import_162, _inferium_import_163, _inferium_import_164, _inferium_import_165, _inferium_import_166, _inferium_import_167
+ambient modules: "core-js", "core-js/shim", "core-js/core", "core-js/core/$for", "core-js/core/_", "core-js/core/array", "core-js/core/date", "core-js/core/delay", "core-js/core/dict", "core-js/core/function", "core-js/core/global", "core-js/core/log", "core-js/core/number", "core-js/core/object", "core-js/core/string", "core-js/fn/$for", "core-js/fn/_", "core-js/fn/clear-immediate", "core-js/fn/delay", "core-js/fn/dict", "core-js/fn/get-iterator", "core-js/fn/global", "core-js/fn/is-iterable", "core-js/fn/log", "core-js/fn/map", "core-js/fn/promise", "core-js/fn/set", "core-js/fn/set-immediate", "core-js/fn/set-interval", "core-js/fn/set-timeout", "core-js/fn/weak-map", "core-js/fn/weak-set", "core-js/fn/array", "core-js/fn/array/concat", "core-js/fn/array/copy-within", "core-js/fn/array/entries", "core-js/fn/array/every", "core-js/fn/array/fill", "core-js/fn/array/filter", "core-js/fn/array/find", "core-js/fn/array/find-index", "core-js/fn/array/for-each", "core-js/fn/array/from", "core-js/fn/array/includes", "core-js/fn/array/index-of", "core-js/fn/array/is-array", "core-js/fn/array/join", "core-js/fn/array/keys", "core-js/fn/array/last-index-of", "core-js/fn/array/map", "core-js/fn/array/of", "core-js/fn/array/pop", "core-js/fn/array/push", "core-js/fn/array/reduce", "core-js/fn/array/reduce-right", "core-js/fn/array/reverse", "core-js/fn/array/shift", "core-js/fn/array/slice", "core-js/fn/array/some", "core-js/fn/array/sort", "core-js/fn/array/splice", "core-js/fn/array/turn", "core-js/fn/array/unshift", "core-js/fn/array/values", "core-js/fn/date", "core-js/fn/date/add-locale", "core-js/fn/date/format", "core-js/fn/date/formatUTC", "core-js/fn/function", "core-js/fn/function/has-instance", "core-js/fn/function/name", "core-js/fn/function/part", "core-js/fn/math", "core-js/fn/math/acosh", "core-js/fn/math/asinh", "core-js/fn/math/atanh", "core-js/fn/math/cbrt", "core-js/fn/math/clz32", "core-js/fn/math/cosh", "core-js/fn/math/expm1", "core-js/fn/math/fround", "core-js/fn/math/hypot", "core-js/fn/math/imul", "core-js/fn/math/log10", "core-js/fn/math/log1p", "core-js/fn/math/log2", "core-js/fn/math/sign", "core-js/fn/math/sinh", "core-js/fn/math/tanh", "core-js/fn/math/trunc", "core-js/fn/number", "core-js/fn/number/epsilon", "core-js/fn/number/is-finite", "core-js/fn/number/is-integer", "core-js/fn/number/is-nan", "core-js/fn/number/is-safe-integer", "core-js/fn/number/max-safe-integer", "core-js/fn/number/min-safe-integer", "core-js/fn/number/parse-float", "core-js/fn/number/parse-int", "core-js/fn/number/random", "core-js/fn/object", "core-js/fn/object/assign", "core-js/fn/object/classof", "core-js/fn/object/create", "core-js/fn/object/define", "core-js/fn/object/define-properties", "core-js/fn/object/define-property", "core-js/fn/object/entries", "core-js/fn/object/freeze", "core-js/fn/object/get-own-property-descriptor", "core-js/fn/object/get-own-property-descriptors", "core-js/fn/object/get-own-property-names", "core-js/fn/object/get-own-property-symbols", "core-js/fn/object/get-prototype-of", "core-js/fn/object/is", "core-js/fn/object/is-extensible", "core-js/fn/object/is-frozen", "core-js/fn/object/is-object", "core-js/fn/object/is-sealed", "core-js/fn/object/keys", "core-js/fn/object/make", "core-js/fn/object/prevent-extensions", "core-js/fn/object/seal", "core-js/fn/object/set-prototype-of", "core-js/fn/object/values", "core-js/fn/reflect", "core-js/fn/reflect/apply", "core-js/fn/reflect/construct", "core-js/fn/reflect/define-property", "core-js/fn/reflect/delete-property", "core-js/fn/reflect/enumerate", "core-js/fn/reflect/get", "core-js/fn/reflect/get-own-property-descriptor", "core-js/fn/reflect/get-prototype-of", "core-js/fn/reflect/has", "core-js/fn/reflect/is-extensible", "core-js/fn/reflect/own-keys", "core-js/fn/reflect/prevent-extensions", "core-js/fn/reflect/set", "core-js/fn/reflect/set-prototype-of", "core-js/fn/regexp", "core-js/fn/regexp/escape", "core-js/fn/string", "core-js/fn/string/at", "core-js/fn/string/code-point-at", "core-js/fn/string/ends-with", "core-js/fn/string/escape-html", "core-js/fn/string/from-code-point", "core-js/fn/string/includes", "core-js/fn/string/pad-end", "core-js/fn/string/pad-start", "core-js/fn/string/raw", "core-js/fn/string/repeat", "core-js/fn/string/starts-with", "core-js/fn/string/unescape-html", "core-js/fn/symbol", "core-js/fn/symbol/for", "core-js/fn/symbol/has-instance", "core-js/fn/symbol/is-concat-spreadable", "core-js/fn/symbol/iterator", "core-js/fn/symbol/key-for", "core-js/fn/symbol/match", "core-js/fn/symbol/replace", "core-js/fn/symbol/search", "core-js/fn/symbol/species", "core-js/fn/symbol/split", "core-js/fn/symbol/to-primitive", "core-js/fn/symbol/to-string-tag", "core-js/fn/symbol/unscopables", "core-js/es5", "core-js/es6", "core-js/es6/array", "core-js/es6/function", "core-js/es6/map", "core-js/es6/math", "core-js/es6/number", "core-js/es6/object", "core-js/es6/promise", "core-js/es6/reflect", "core-js/es6/regexp", "core-js/es6/set", "core-js/es6/string", "core-js/es6/symbol", "core-js/es6/weak-map", "core-js/es6/weak-set", "core-js/es7", "core-js/es7/array", "core-js/es7/map", "core-js/es7/object", "core-js/es7/regexp", "core-js/es7/set", "core-js/es7/string", "core-js/js", "core-js/js/array", "core-js/web", "core-js/web/dom", "core-js/web/immediate", "core-js/web/timers", "core-js/library", "core-js/library/shim", "core-js/library/core", "core-js/library/core/$for", "core-js/library/core/_", "core-js/library/core/array", "core-js/library/core/date", "core-js/library/core/delay", "core-js/library/core/dict", "core-js/library/core/function", "core-js/library/core/global", "core-js/library/core/log", "core-js/library/core/number", "core-js/library/core/object", "core-js/library/core/string", "core-js/library/fn/$for", "core-js/library/fn/_", "core-js/library/fn/clear-immediate", "core-js/library/fn/delay", "core-js/library/fn/dict", "core-js/library/fn/get-iterator", "core-js/library/fn/global", "core-js/library/fn/is-iterable", "core-js/library/fn/log", "core-js/library/fn/map", "core-js/library/fn/promise", "core-js/library/fn/set", "core-js/library/fn/set-immediate", "core-js/library/fn/set-interval", "core-js/library/fn/set-timeout", "core-js/library/fn/weak-map", "core-js/library/fn/weak-set", "core-js/library/fn/array", "core-js/library/fn/array/concat", "core-js/library/fn/array/copy-within", "core-js/library/fn/array/entries", "core-js/library/fn/array/every", "core-js/library/fn/array/fill", "core-js/library/fn/array/filter", "core-js/library/fn/array/find", "core-js/library/fn/array/find-index", "core-js/library/fn/array/for-each", "core-js/library/fn/array/from", "core-js/library/fn/array/includes", "core-js/library/fn/array/index-of", "core-js/library/fn/array/is-array", "core-js/library/fn/array/join", "core-js/library/fn/array/keys", "core-js/library/fn/array/last-index-of", "core-js/library/fn/array/map", "core-js/library/fn/array/of", "core-js/library/fn/array/pop", "core-js/library/fn/array/push", "core-js/library/fn/array/reduce", "core-js/library/fn/array/reduce-right", "core-js/library/fn/array/reverse", "core-js/library/fn/array/shift", "core-js/library/fn/array/slice", "core-js/library/fn/array/some", "core-js/library/fn/array/sort", "core-js/library/fn/array/splice", "core-js/library/fn/array/turn", "core-js/library/fn/array/unshift", "core-js/library/fn/array/values", "core-js/library/fn/date", "core-js/library/fn/date/add-locale", "core-js/library/fn/date/format", "core-js/library/fn/date/formatUTC", "core-js/library/fn/function", "core-js/library/fn/function/has-instance", "core-js/library/fn/function/name", "core-js/library/fn/function/part", "core-js/library/fn/math", "core-js/library/fn/math/acosh", "core-js/library/fn/math/asinh", "core-js/library/fn/math/atanh", "core-js/library/fn/math/cbrt", "core-js/library/fn/math/clz32", "core-js/library/fn/math/cosh", "core-js/library/fn/math/expm1", "core-js/library/fn/math/fround", "core-js/library/fn/math/hypot", "core-js/library/fn/math/imul", "core-js/library/fn/math/log10", "core-js/library/fn/math/log1p", "core-js/library/fn/math/log2", "core-js/library/fn/math/sign", "core-js/library/fn/math/sinh", "core-js/library/fn/math/tanh", "core-js/library/fn/math/trunc", "core-js/library/fn/number", "core-js/library/fn/number/epsilon", "core-js/library/fn/number/is-finite", "core-js/library/fn/number/is-integer", "core-js/library/fn/number/is-nan", "core-js/library/fn/number/is-safe-integer", "core-js/library/fn/number/max-safe-integer", "core-js/library/fn/number/min-safe-integer", "core-js/library/fn/number/parse-float", "core-js/library/fn/number/parse-int", "core-js/library/fn/number/random", "core-js/library/fn/object", "core-js/library/fn/object/assign", "core-js/library/fn/object/classof", "core-js/library/fn/object/create", "core-js/library/fn/object/define", "core-js/library/fn/object/define-properties", "core-js/library/fn/object/define-property", "core-js/library/fn/object/entries", "core-js/library/fn/object/freeze", "core-js/library/fn/object/get-own-property-descriptor", "core-js/library/fn/object/get-own-property-descriptors", "core-js/library/fn/object/get-own-property-names", "core-js/library/fn/object/get-own-property-symbols", "core-js/library/fn/object/get-prototype-of", "core-js/library/fn/object/is", "core-js/library/fn/object/is-extensible", "core-js/library/fn/object/is-frozen", "core-js/library/fn/object/is-object", "core-js/library/fn/object/is-sealed", "core-js/library/fn/object/keys", "core-js/library/fn/object/make", "core-js/library/fn/object/prevent-extensions", "core-js/library/fn/object/seal", "core-js/library/fn/object/set-prototype-of", "core-js/library/fn/object/values", "core-js/library/fn/reflect", "core-js/library/fn/reflect/apply", "core-js/library/fn/reflect/construct", "core-js/library/fn/reflect/define-property", "core-js/library/fn/reflect/delete-property", "core-js/library/fn/reflect/enumerate", "core-js/library/fn/reflect/get", "core-js/library/fn/reflect/get-own-property-descriptor", "core-js/library/fn/reflect/get-prototype-of", "core-js/library/fn/reflect/has", "core-js/library/fn/reflect/is-extensible", "core-js/library/fn/reflect/own-keys", "core-js/library/fn/reflect/prevent-extensions", "core-js/library/fn/reflect/set", "core-js/library/fn/reflect/set-prototype-of", "core-js/library/fn/reflect/es7/define-metadata", "core-js/library/fn/reflect/es7/delete-metadata", "core-js/library/fn/reflect/es7/get-metadata", "core-js/library/fn/reflect/es7/get-metadata-keys", "core-js/library/fn/reflect/es7/get-own-metadata", "core-js/library/fn/reflect/es7/get-own-metadata-keys'", "core-js/library/fn/reflect/es7/has-metadata'", "core-js/library/fn/reflect/es7/has-own-metadata'", "core-js/library/fn/reflect/es7/metadata'", "core-js/library/fn/regexp", "core-js/library/fn/regexp/escape", "core-js/library/fn/string", "core-js/library/fn/string/at", "core-js/library/fn/string/code-point-at", "core-js/library/fn/string/ends-with", "core-js/library/fn/string/escape-html", "core-js/library/fn/string/from-code-point", "core-js/library/fn/string/includes", "core-js/library/fn/string/pad-end", "core-js/library/fn/string/pad-start", "core-js/library/fn/string/raw", "core-js/library/fn/string/repeat", "core-js/library/fn/string/starts-with", "core-js/library/fn/string/unescape-html", "core-js/library/fn/symbol", "core-js/library/fn/symbol/for", "core-js/library/fn/symbol/has-instance", "core-js/library/fn/symbol/is-concat-spreadable", "core-js/library/fn/symbol/iterator", "core-js/library/fn/symbol/key-for", "core-js/library/fn/symbol/match", "core-js/library/fn/symbol/replace", "core-js/library/fn/symbol/search", "core-js/library/fn/symbol/species", "core-js/library/fn/symbol/split", "core-js/library/fn/symbol/to-primitive", "core-js/library/fn/symbol/to-string-tag", "core-js/library/fn/symbol/unscopables", "core-js/library/es5", "core-js/library/es6", "core-js/library/es6/array", "core-js/library/es6/function", "core-js/library/es6/map", "core-js/library/es6/math", "core-js/library/es6/number", "core-js/library/es6/object", "core-js/library/es6/promise", "core-js/library/es6/reflect", "core-js/library/es6/regexp", "core-js/library/es6/set", "core-js/library/es6/string", "core-js/library/es6/symbol", "core-js/library/es6/weak-map", "core-js/library/es6/weak-set", "core-js/library/es7", "core-js/library/es7/array", "core-js/library/es7/map", "core-js/library/es7/object", "core-js/library/es7/regexp", "core-js/library/es7/set", "core-js/library/es7/string", "core-js/library/js", "core-js/library/js/array", "core-js/library/web", "core-js/library/web/dom", "core-js/library/web/immediate", "core-js/library/web/timers", "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "rsvp"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/semver/index.d.ts
+=> <inf>/@types/babel-types/index.d.ts
+=> <inf>/@types/lodash/common/common.d.ts
+=> <inf>/@types/lodash/common/array.d.ts
+=> <inf>/@types/lodash/common/collection.d.ts
+=> <inf>/@types/lodash/common/date.d.ts
+=> <inf>/@types/lodash/common/function.d.ts
+=> <inf>/@types/lodash/common/lang.d.ts
+=> <inf>/@types/lodash/common/math.d.ts
+=> <inf>/@types/lodash/common/number.d.ts
+=> <inf>/@types/lodash/common/object.d.ts
+=> <inf>/@types/lodash/common/seq.d.ts
+=> <inf>/@types/lodash/common/string.d.ts
+=> <inf>/@types/lodash/common/util.d.ts
+=> <inf>/@types/lodash/index.d.ts
+=> <inf>/@types/babylon/index.d.ts
+=> <inf>/@types/babel-template/index.d.ts
+=> <inf>/@types/babel-traverse/index.d.ts
+=> <inf>/@types/babel-code-frame/index.d.ts
+=> <inf>/@types/color-name/index.d.ts
+=> <inf>/@types/ansi-styles/escape-code.d.ts
+=> <inf>/@types/ansi-styles/index.d.ts
+=> <inf>/@types/escape-string-regexp/index.d.ts
+=> <inf>/@types/has-ansi/index.d.ts
+=> <inf>/@types/ansi-regex/index.d.ts
+=> <inf>/@types/strip-ansi/index.d.ts
+=> <inf>/@types/supports-color/index.d.ts
+=> <inf>/@types/debug/index.d.ts
+=> <inf>/@types/ms/index.d.ts
+=> <inf>/@types/invariant/index.d.ts
+=> <inf>/@types/core-js/index.d.ts
+=> <inf>/@types/jsesc/index.d.ts
+=> <inf>/@types/babel-generator/index.d.ts
+=> <inf>/@types/babel-core/index.d.ts
+=> <inf>/@types/detect-indent/index.d.ts
+=> <inf>/@types/is-finite/index.d.ts
+=> <inf>/@types/number-is-nan/index.d.ts
+=> <inf>/@types/os-homedir/index.d.ts
+=> <inf>/@types/os-tmpdir/index.d.ts
+=> <inf>/@types/events/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/mkdirp/index.d.ts
+=> <inf>/@types/minimist/index.d.ts
+=> <inf>/@types/source-map-support/index.d.ts
+=> <inf>/@types/convert-source-map/index.d.ts
+=> <inf>/@types/json5/index.d.ts
+=> <inf>/@types/minimatch/index.d.ts
+=> <inf>/@types/brace-expansion/index.d.ts
+=> <inf>/@types/path-is-absolute/index.d.ts
+=> <inf>/@types/rsvp/index.d.ts
+=> <inf>/@types/glob/index.d.ts
+=> <inf>/@types/rimraf/index.d.ts
+=> <inf>/@types/once/index.d.ts
+=> <inf>/@types/inherits/index.d.ts
+=> <inf>/@types/underscore/index.d.ts
+=> <inf>/@types/underscore.string/index.d.ts
+=> <inf>/@types/sprintf-js/index.d.ts
+=> <inf>/@types/util-deprecate/index.d.ts
+=> <inf>/@types/object-assign/index.d.ts
+=> <inf>/@types/tmp/index.d.ts
+=> <inf>/@types/async/index.d.ts
+=> <inf>/@types/resolve/index.d.ts
+=> <inf>/@types/path-parse/index.d.ts
+=> <inf>/@types/clone/index.d.ts
+=> <inf>/@types/json-stable-stringify/index.d.ts
+=> <inf>/@types/workerpool/index.d.ts
+=> <inf>/ember-feature-flags/_inferium_gather.ts
+
+Resolve ember-cli-babel
+Resolve amd-name-resolver
+Resolve ensure-posix-path
+Resolve babel-plugin-debug-macros
+Resolve semver
+Resolve babel-plugin-ember-modules-api-polyfill
+Resolve ember-rfc176-data
+Resolve babel-plugin-transform-es2015-modules-amd
+Resolve babel-plugin-transform-es2015-modules-commonjs
+Resolve babel-plugin-transform-strict-mode
+Resolve babel-types
+Resolve esutils
+Resolve lodash
+Resolve to-fast-properties
+Resolve babel-template
+Resolve babel-traverse
+Error: Error: Conditionals are not supported
+    at makeBigTypes (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:503:27)
+    at resolve (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:466:27)
+    at resolveType (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:375:16)
+    at resolveSymbol (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:335:16)
+    at /home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:551:23
+    at Array.forEach (<anonymous>)
+    at makeObject (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:547:20)
+    at ensureObject (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:530:23)
+    at resolve (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:443:21)
+    at resolveType (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:375:16)

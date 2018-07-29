@@ -1,0 +1,162 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install bech32 into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/bech32
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/bech32/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/bech32/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/bech32 /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/bech32
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/bech32/./index.js'
+[info] Done Parsing module.
+[info] Found Some(decode)
+[info] Found Some(encode)
+[info] Found Some(toWords)
+[info] Found Some(fromWords)
+[info] Round 0
+[info] Analyse Some(fromWords)
+[info] Analyse Some(toWords)
+[info] Analyse Some(encode)
+[info] Analyse Some(decode)
+[info] Round 1
+[info] Analyse Some(fromWords)
+[info] Analyse Some(toWords)
+[info] Analyse Some(encode)
+[info] Analyse Some(decode)
+[info] Round 2
+[info] Analyse Some(fromWords)
+[info] Analyse Some(toWords)
+[info] Analyse Some(encode)
+[info] Analyse Some(decode)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I95<T3 extends number, T5 extends number> {
+[info]   (_?: (number | string)): T5
+[info]   (_?: (number | string)): T3
+[info] }
+[info] interface I94<T3 extends number, T5 extends number, T6 extends I95<T3, T5>, T9 extends number> {
+[info]   charCodeAt: (T6)
+[info]   length: (T9)
+[info] }
+[info] interface I97<T16 extends (number | string)> {
+[info]   (_?: "1"): T16
+[info] }
+[info] interface I98 {
+[info]   (): any
+[info] }
+[info] interface I101 {
+[info]   (_?: (undefined | number | string)): (number | string)
+[info] }
+[info] interface I100 {
+[info]   charAt: I101
+[info]   length: (number)
+[info] }
+[info] interface I99 {
+[info]   (_?: (number | string)): I100
+[info] }
+[info] interface I102<T1 extends (I94<T3, T5, T6, T9> | number | string), T16 extends (number | string), T3 extends number, T5 extends number, T6 extends I95<T3, T5>, T9 extends number> {
+[info]   (_?: number, _?: T16): T1
+[info] }
+[info] interface I103 {
+[info]   (): any
+[info] }
+[info] interface I96<T1 extends (I94<T3, T5, T6, T9> | number | string), T16 extends (number | string), T3 extends number, T5 extends number, T6 extends I95<T3, T5>, T9 extends number> {
+[info]   lastIndexOf: I97<T16>
+[info]   toLowerCase: I98
+[info]   slice: (I99 | I102<T1, T16, T3, T5, T6, T9>)
+[info]   length: (number)
+[info]   toUpperCase: I103
+[info] }
+[info] interface I105 {
+[info]   length: number
+[info] }
+[info] interface I104<T1 extends (I94<T3, T5, T6, T9> | number | string), T3 extends number, T5 extends number, T6 extends I95<T3, T5>, T9 extends number> {
+[info]   prefix: (undefined | T1)
+[info]   words: (undefined | I105)
+[info] }
+[info] interface I107 {
+[info]   (_?: (number | string)): number
+[info]   (_?: (number | string)): number
+[info] }
+[info] interface I106 {
+[info]   charCodeAt: (I107)
+[info]   length: (number)
+[info] }
+[info] interface I109 {
+[info]   (): any
+[info] }
+[info] interface I108 {
+[info]   toLowerCase: I109
+[info]   length: (number | string)
+[info] }
+[info] interface I110 {
+[info]   [0]: number
+[info]   length: (number | (number | string))
+[info] }
+[info] interface I111 {
+[info]   length: number
+[info]   [0]: number
+[info] }
+[info] interface I112 {
+[info]   length: number
+[info] }
+[info] interface I113 {
+[info]   length: number
+[info]   [0]: number
+[info] }
+[info] interface I114 {
+[info]   length: number
+[info] }
+[info] interface I93 {
+[info]   decode<T1 extends (I94<T3, T5, T6, T9> | number | string), T3 extends number, T5 extends number, T6 extends I95<T3, T5>, T9 extends number>(str: (((number | string) & I96<T1, (number | string), T3, T5, T6, T9>)), LIMIT: (number)): I104<T1, T3, T5, T6, T9>
+[info]   encode(prefix: (((I106 | number | string) & (number | string) & I108)), words: (I110), LIMIT: (number)): (undefined | number | string)
+[info]   toWords(bytes: I111): I112
+[info]   fromWords(words: I113): I114
+[info] }
+[info] => I93
+[success] Total time: 4 s, completed Jul 29, 2018 9:02:02 PM

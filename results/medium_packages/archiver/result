@@ -1,0 +1,448 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install archiver into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/archiver
+Look into <inf>/archiver-utils
+Look into <inf>/glob
+Look into <inf>/fs.realpath
+Look into <inf>/inflight
+Look into <inf>/once
+Look into <inf>/wrappy
+Look into <inf>/wrappy
+Look into <inf>/inherits
+Look into <inf>/minimatch
+Look into <inf>/brace-expansion
+Look into <inf>/balanced-match
+Look into <inf>/concat-map
+Look into <inf>/once
+Look into <inf>/path-is-absolute
+Look into <inf>/graceful-fs
+Look into <inf>/lazystream
+Look into <inf>/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/isarray
+Look into <inf>/process-nextick-args
+Look into <inf>/safe-buffer
+Look into <inf>/util-deprecate
+Look into <inf>/lodash
+Look into <inf>/normalize-path
+Look into <inf>/remove-trailing-separator
+Look into <inf>/readable-stream
+Look into <inf>/async
+Look into <inf>/lodash
+Look into <inf>/buffer-crc32
+Look into <inf>/glob
+Look into <inf>/lodash
+Look into <inf>/readable-stream
+Look into <inf>/tar-stream
+Look into <inf>/bl
+Look into <inf>/readable-stream
+Look into <inf>/safe-buffer
+Look into <inf>/buffer-alloc
+Look into <inf>/buffer-alloc-unsafe
+Look into <inf>/buffer-fill
+Look into <inf>/end-of-stream
+Look into <inf>/once
+Look into <inf>/fs-constants
+Look into <inf>/readable-stream
+Look into <inf>/to-buffer
+Look into <inf>/xtend
+Look into <inf>/zip-stream
+Look into <inf>/archiver-utils
+Look into <inf>/compress-commons
+Look into <inf>/buffer-crc32
+Look into <inf>/crc32-stream
+Look into <inf>/crc
+Look into <inf>/readable-stream
+Look into <inf>/normalize-path
+Look into <inf>/readable-stream
+Look into <inf>/lodash
+Look into <inf>/readable-stream
+Install types for archiver-utils
+=> not found
+Install types for glob
+Install types for fs.realpath
+=> not found
+Install types for inflight
+=> not found
+Install types for once
+Install types for wrappy
+=> not found
+Install types for inherits
+Install types for minimatch
+Install types for brace-expansion
+Install types for balanced-match
+=> not found
+Install types for concat-map
+=> not found
+Install types for path-is-absolute
+Install types for graceful-fs
+Install types for lazystream
+=> not found
+Install types for readable-stream
+=> not found
+Install types for core-util-is
+=> not found
+Install types for isarray
+=> not found
+Install types for process-nextick-args
+=> not found
+Install types for safe-buffer
+=> not found
+Install types for util-deprecate
+Install types for lodash
+Install types for normalize-path
+=> not found
+Install types for remove-trailing-separator
+=> not found
+Install types for async
+Install types for buffer-crc32
+=> not found
+Install types for tar-stream
+Install types for bl
+Install types for buffer-alloc
+=> not found
+Install types for buffer-alloc-unsafe
+=> not found
+Install types for buffer-fill
+=> not found
+Install types for end-of-stream
+Install types for fs-constants
+=> not found
+Install types for to-buffer
+=> not found
+Install types for xtend
+Install types for zip-stream
+=> not found
+Install types for compress-commons
+=> not found
+Install types for crc32-stream
+=> not found
+Install types for crc
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/archiver/_inferium_gather.ts
+Gather types for 38 packages:
+=> archiver-utils, glob, fs.realpath, inflight, once, wrappy, inherits, minimatch, brace-expansion, balanced-match, concat-map, path-is-absolute, graceful-fs, lazystream, readable-stream, core-util-is, isarray, process-nextick-args, safe-buffer, util-deprecate, lodash, normalize-path, remove-trailing-separator, async, buffer-crc32, tar-stream, bl, buffer-alloc, buffer-alloc-unsafe, buffer-fill, end-of-stream, fs-constants, to-buffer, xtend, zip-stream, compress-commons, crc32-stream, crc 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34, _inferium_import_35, _inferium_import_36, _inferium_import_37
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "safe-buffer"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/events/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/minimatch/index.d.ts
+=> <inf>/@types/glob/index.d.ts
+=> <inf>/@types/once/index.d.ts
+=> <inf>/@types/inherits/index.d.ts
+=> <inf>/@types/brace-expansion/index.d.ts
+=> <inf>/@types/path-is-absolute/index.d.ts
+=> <inf>/@types/graceful-fs/index.d.ts
+=> <inf>/safe-buffer/index.d.ts
+=> <inf>/@types/util-deprecate/index.d.ts
+=> <inf>/@types/lodash/common/common.d.ts
+=> <inf>/@types/lodash/common/array.d.ts
+=> <inf>/@types/lodash/common/collection.d.ts
+=> <inf>/@types/lodash/common/date.d.ts
+=> <inf>/@types/lodash/common/function.d.ts
+=> <inf>/@types/lodash/common/lang.d.ts
+=> <inf>/@types/lodash/common/math.d.ts
+=> <inf>/@types/lodash/common/number.d.ts
+=> <inf>/@types/lodash/common/object.d.ts
+=> <inf>/@types/lodash/common/seq.d.ts
+=> <inf>/@types/lodash/common/string.d.ts
+=> <inf>/@types/lodash/common/util.d.ts
+=> <inf>/@types/lodash/index.d.ts
+=> <inf>/@types/async/index.d.ts
+=> <inf>/@types/tar-stream/index.d.ts
+=> <inf>/@types/bl/index.d.ts
+=> <inf>/@types/end-of-stream/index.d.ts
+=> <inf>/@types/xtend/index.d.ts
+=> <inf>/@types/crc/index.d.ts
+=> <inf>/archiver/_inferium_gather.ts
+
+Resolve archiver-utils
+Resolve glob
+Resolve fs.realpath
+Resolve inflight
+Resolve once
+Resolve wrappy
+Resolve inherits
+Resolve minimatch
+Resolve brace-expansion
+Resolve balanced-match
+Resolve concat-map
+Resolve path-is-absolute
+Resolve graceful-fs
+Resolve lazystream
+Resolve readable-stream
+Resolve core-util-is
+Resolve isarray
+Resolve process-nextick-args
+Resolve safe-buffer
+Resolve util-deprecate
+Resolve lodash
+Resolve normalize-path
+Resolve remove-trailing-separator
+Resolve async
+Resolve buffer-crc32
+Resolve tar-stream
+Resolve bl
+Resolve buffer-alloc
+Resolve buffer-alloc-unsafe
+Resolve buffer-fill
+Resolve end-of-stream
+Resolve fs-constants
+Resolve to-buffer
+Resolve xtend
+Resolve zip-stream
+Resolve compress-commons
+Resolve crc32-stream
+Resolve crc
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/archiver /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/archiver
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", once, "fs", "assert", "dgram", "async_hooks", tar-stream, "url", "dns", "http", "string_decoder", "querystring", "events", xtend, "os", "util", "constants", "punycode", "readline", "perf_hooks", glob, "buffer", "domain", async, "tty", "child_process", "crypto", bl, graceful-fs, "inspector", "stream", crc, util-deprecate, end-of-stream, brace-expansion, safe-buffer, "process", inherits, "path", "v8", "http2", "cluster", minimatch, "tls", "net", "safe-buffer", "repl", "console", "vm", lodash, path-is-absolute
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/archiver/./index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/archiver/././lib/core.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/archiver/././lib/./error.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/archiver/././lib/plugins/zip.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/archiver/././lib/plugins/tar.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/archiver/././lib/plugins/json.js'
+[info] Done Parsing module.
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Round 2
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I43 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I44 {
+[info]   length: number
+[info] }
+[info] interface I42 {
+[info]   options?: {}
+[info]   supports?: I43
+[info]   files?: I44
+[info] }
+[info] interface I46 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I47 {
+[info]   bytesRead: number
+[info] }
+[info] interface I45 {
+[info]   options?: {}
+[info]   supports?: I46
+[info]   engine?: {}
+[info]   compressor?: (boolean | I47)
+[info] }
+[info] interface I49 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I48 {
+[info]   compressor?: (undefined | boolean | I47)
+[info]   files?: (undefined | I44)
+[info]   options?: {}
+[info]   supports?: (undefined | I43 | I46 | I49)
+[info]   engine?: {}
+[info] }
+[info] interface I50 {
+[info]   options?: {}
+[info]   supports?: I49
+[info]   engine?: {}
+[info] }
+[info] interface I51 {
+[info]   length: number
+[info] }
+[info] interface I52 {
+[info]   finalized: boolean
+[info]   finalizing: boolean
+[info]   aborted: boolean
+[info]   modulePiped: boolean
+[info]   finalize: boolean
+[info] }
+[info] interface I41<T39 extends (number | string)> {
+[info]   _module?: (I48 | I42 | boolean | I50 | I45)
+[info]   _format?: (boolean | T39)
+[info]   _pending?: number
+[info]   _entriesProcessedCount?: number
+[info]   _statQueue?: {}
+[info]   _streams?: I51
+[info]   _state?: I52
+[info]   options?: {}
+[info]   _entriesCount?: number
+[info]   _fsEntriesTotalBytes?: number
+[info]   _pointer?: number
+[info]   _queue?: {}
+[info]   _fsEntriesProcessedBytes?: number
+[info] }
+[info] interface I53<T39 extends (number | string)> {
+[info]   _module?: (I48 | I42 | boolean | I50 | I45)
+[info]   _format?: (boolean | T39)
+[info]   _pending?: number
+[info]   _entriesProcessedCount?: number
+[info]   _statQueue?: {}
+[info]   _streams?: I51
+[info]   _state?: I52
+[info]   options?: {}
+[info]   _entriesCount?: number
+[info]   _fsEntriesTotalBytes?: number
+[info]   _pointer?: number
+[info]   _queue?: {}
+[info]   _fsEntriesProcessedBytes?: number
+[info] }
+[info] interface I56 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I57 {
+[info]   bytesRead: number
+[info] }
+[info] interface I55 {
+[info]   options?: {}
+[info]   supports?: I56
+[info]   engine?: {}
+[info]   compressor?: (boolean | I57)
+[info] }
+[info] interface I59 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I60 {
+[info]   length: number
+[info] }
+[info] interface I58 {
+[info]   options?: {}
+[info]   supports?: I59
+[info]   files?: I60
+[info] }
+[info] interface I62 {
+[info]   directory: boolean
+[info]   symlink: boolean
+[info] }
+[info] interface I61 {
+[info]   compressor?: (undefined | boolean | I57)
+[info]   files?: (undefined | I60)
+[info]   options?: {}
+[info]   supports?: (undefined | I62 | I59 | I56)
+[info]   engine?: {}
+[info] }
+[info] interface I63 {
+[info]   options?: {}
+[info]   supports?: I62
+[info]   engine?: {}
+[info] }
+[info] interface I64 {
+[info]   length: number
+[info] }
+[info] interface I65 {
+[info]   finalized: boolean
+[info]   finalizing: boolean
+[info]   aborted: boolean
+[info]   modulePiped: boolean
+[info]   finalize: boolean
+[info] }
+[info] interface I54<T9 extends (number | string)> {
+[info]   _module?: (I63 | boolean | I61 | I55 | I58)
+[info]   _format?: (boolean | T9)
+[info]   _pending?: number
+[info]   _entriesProcessedCount?: number
+[info]   _statQueue?: {}
+[info]   _streams?: I64
+[info]   _state?: I65
+[info]   options?: {}
+[info]   _entriesCount?: number
+[info]   _fsEntriesTotalBytes?: number
+[info]   _pointer?: number
+[info]   _queue?: {}
+[info]   _fsEntriesProcessedBytes?: number
+[info] }
+[info] interface I66<T9 extends (number | string)> {
+[info]   _module?: (I63 | boolean | I61 | I55 | I58)
+[info]   _format?: (boolean | T9)
+[info]   _pending?: number
+[info]   _entriesProcessedCount?: number
+[info]   _statQueue?: {}
+[info]   _streams?: I64
+[info]   _state?: I65
+[info]   options?: {}
+[info]   _entriesCount?: number
+[info]   _fsEntriesTotalBytes?: number
+[info]   _pointer?: number
+[info]   _queue?: {}
+[info]   _fsEntriesProcessedBytes?: number
+[info] }
+[info] interface I68 {
+[info]   finalize: any
+[info] }
+[info] interface I69 {
+[info]   append: any
+[info] }
+[info] interface I67<T12 extends never, T34> {
+[info]   new (_?: T34): any
+[info]   new (_?: T12): any
+[info]   prototype: ((never) | I68 | I69)
+[info] }
+[info] interface I40<T12 extends never, T34> {
+[info]   <T39 extends (number | string)>(format: T39, options: T34): (I41<T39> | I53<T39>)
+[info]   create<T9 extends (number | string)>(format: (T9), options: (T12)): (I54<T9> | I66<T9>)
+[info]   registerFormat(format: ((number | string)), module: (I67<T12, T34>)): undefined
+[info] }
+[info] => I40<never, any>
+[success] Total time: 5 s, completed Jul 29, 2018 11:45:14 PM

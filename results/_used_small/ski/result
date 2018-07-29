@@ -1,0 +1,101 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install ski into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/ski
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/ski/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/ski/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/ski /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/ski
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/ski/./index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/ski/././s.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/ski/././k.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/ski/././i.js'
+[info] Done Parsing module.
+[info] Found Some(S)
+[info] Found Some(K)
+[info] Found Some(I)
+[info] Round 0
+[info] Analyse Some(I)
+[info] Analyse Some(K)
+[info] Found None
+[info] Analyse Some(S)
+[info] Round 1
+[info] Analyse None
+[info] Analyse Some(I)
+[info] Analyse Some(K)
+[info] Analyse Some(S)
+[info] Round 2
+[info] Analyse None
+[info] skipped
+[info] Analyse Some(K)
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I13<T1, T4> {
+[info]   (_?: T4): T1
+[info] }
+[info] interface I12<T1, T4, T8 extends never> {
+[info]   (_?: T8): I13<T1, T4>
+[info] }
+[info] interface I14<T4, T8 extends never> {
+[info]   (_?: T8): T4
+[info] }
+[info] interface I15<T9> {
+[info]   (): T9
+[info] }
+[info] interface I11 {
+[info]   S<T1, T4, T8 extends never>(x: I12<T1, T4, T8>, y: I14<T4, T8>, z: (T8)): T1
+[info]   K<T9>(x: T9): I15<T9>
+[info]   I<T10>(x: T10): T10
+[info] }
+[info] => I11
+[success] Total time: 3 s, completed Jul 29, 2018 9:23:06 PM

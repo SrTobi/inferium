@@ -1,0 +1,563 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install multiparty into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/multiparty
+Look into <inf>/fd-slicer
+Look into <inf>/pend
+Look into <inf>/safe-buffer
+Install types for fd-slicer
+=> not found
+Install types for pend
+=> not found
+Install types for safe-buffer
+=> not found
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/multiparty/_inferium_gather.ts
+Gather types for 3 packages:
+=> fd-slicer, pend, safe-buffer 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2
+ambient modules: "safe-buffer", "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/safe-buffer/index.d.ts
+=> <inf>/multiparty/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Resolve fd-slicer
+Resolve pend
+Resolve safe-buffer
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/multiparty /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/multiparty
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", safe-buffer, "process", "path", "v8", "http2", "cluster", "tls", "net", "safe-buffer", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/multiparty/./index.js'
+[info] Done Parsing module.
+[info] Found Some(Form)
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Found None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Found Some(handleError)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(Form)
+[info] Found None
+[info] Round 1
+[info] Analyse None
+[info] Analyse Some(handleError)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(Form)
+[info] Round 2
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(handleError)
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Round 3
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I284<T11, T2, T3, T4, T5> {
+[info]   autoFiles: boolean
+[info]   maxFieldsSize: T2
+[info]   maxFields: T3
+[info]   encoding: T4
+[info]   autoFields: boolean
+[info]   uploadDir: T5
+[info]   maxFilesSize: T11
+[info] }
+[info] interface I286 {
+[info]   length: number
+[info] }
+[info] interface I288 {
+[info]   (eventName: (never)): undefined
+[info] }
+[info] interface I287 {
+[info]   (_?: "newListener", _?: I288): any
+[info] }
+[info] interface I289 {
+[info]   length: number
+[info] }
+[info] interface I290 {
+[info]   length: number
+[info] }
+[info] interface I285<T11, T2, T3, T4, T5> {
+[info]   writeCbs?: I286
+[info]   flushing?: number
+[info]   autoFiles?: boolean
+[info]   maxFieldsSize?: (number | T2)
+[info]   bytesExpected?: null
+[info]   totalFileSize?: number
+[info]   maxFields?: (number | T3)
+[info]   encoding?: ("utf8" | T4)
+[info]   autoFields?: boolean
+[info]   totalFieldCount?: number
+[info]   uploadDir?: (string | T5)
+[info]   on: I287
+[info]   error?: null
+[info]   maxFilesSize?: (number | T11)
+[info]   totalFieldSize?: number
+[info]   bytesReceived?: number
+[info]   emitQueue?: I289
+[info]   backpressure?: boolean
+[info]   openedFiles?: I290
+[info] }
+[info] interface I295<T17> {
+[info]   (_?: T17): (number | string)
+[info] }
+[info] interface I294<T17> {
+[info]   write: I295<T17>
+[info] }
+[info] interface I293<T17> {
+[info]   headerValue: ((number | string) | number | string)
+[info]   headerValueDecoder: I294<T17>
+[info] }
+[info] interface I292 {
+[info]   new <T17>(b: T17): (I293<T17> & {})
+[info] }
+[info] interface I298 {
+[info] }
+[info] interface I299 {
+[info] }
+[info] interface I301<T19> {
+[info]   (): T19
+[info] }
+[info] interface I307<T37 extends (number | string)> {
+[info]   (_?: "\"): T37
+[info] }
+[info] interface I308<T39> {
+[info]   (_?: (number | string)): T39
+[info] }
+[info] interface I306<T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39> {
+[info]   lastIndexOf: T36
+[info]   substr: T38
+[info] }
+[info] interface I305<T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39> {
+[info]   (_?: {}, _?: {}): T35
+[info] }
+[info] interface I304<T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39> {
+[info]   replace: T34
+[info] }
+[info] interface I303<T33 extends I304<T34, T35, T36, T37, T38, T39>, T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39> {
+[info]   (_?: {}, _?: """): T33
+[info] }
+[info] interface I309<T32 extends I303<T33, T34, T35, T36, T37, T38, T39>, T33 extends I304<T34, T35, T36, T37, T38, T39>, T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39> {
+[info]   replace: T32
+[info] }
+[info] interface I310<T32 extends I303<T33, T34, T35, T36, T37, T38, T39>, T33 extends I304<T34, T35, T36, T37, T38, T39>, T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39, T43 extends I309<T32, T33, T34, T35, T36, T37, T38, T39>> {
+[info]   [1]: ((T43) | {})
+[info] }
+[info] interface I311<T32 extends I303<T33, T34, T35, T36, T37, T38, T39>, T33 extends I304<T34, T35, T36, T37, T38, T39>, T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39, T43 extends I309<T32, T33, T34, T35, T36, T37, T38, T39>> {
+[info]   [1]: T43
+[info] }
+[info] interface I302<T32 extends I303<T33, T34, T35, T36, T37, T38, T39>, T33 extends I304<T34, T35, T36, T37, T38, T39>, T34 extends I305<T35, T36, T37, T38, T39>, T35 extends I306<T36, T37, T38, T39>, T36 extends I307<T37>, T37 extends (number | string), T38 extends I308<T39>, T39, T43 extends I309<T32, T33, T34, T35, T36, T37, T38, T39>> {
+[info]   (_?: {}): I310<T32, T33, T34, T35, T36, T37, T38, T39, T43>
+[info]   (_?: {}): (I311<T32, T33, T34, T35, T36, T37, T38, T39, T43> | boolean)
+[info] }
+[info] interface I313<T27> {
+[info]   [1]: T27
+[info] }
+[info] interface I312<T27> {
+[info]   (_?: {}): I313<T27>
+[info] }
+[info] interface I300<T19, T27, T39> {
+[info]   toLowerCase: I301<T19>
+[info]   match: ((I302<I303<T33, T34, T35, T36, T37, T38, T39>, I304<T34, T35, T36, T37, T38, T39>, I305<T35, T36, T37, T38, T39>, I306<T36, T37, T38, T39>, I307<T37>, (number | string), I308<T39>, T39, I309<T32, T33, T34, T35, T36, T37, T38, T39>>) | I312<T27>)
+[info] }
+[info] interface I315 {
+[info]   (): any
+[info] }
+[info] interface I314 {
+[info]   toLowerCase: I315
+[info] }
+[info] interface I297<T19, T27, T39> {
+[info]   headerValueDecoder?: I298
+[info]   headerFieldDecoder?: I299
+[info]   partTransferEncoding?: T19
+[info]   encoding: (never)
+[info]   headerValue: ((I300<T19, T27, T39>) | "")
+[info]   partName?: T27
+[info]   headerField: ((I314) | any | "")
+[info]   partFilename?: (undefined | T39)
+[info]   partHeaders: any
+[info] }
+[info] interface I296 {
+[info]   new (): (I297<any, any, any> & {})
+[info] }
+[info] interface I317<T65> {
+[info]   (_?: "ascii"): T65
+[info] }
+[info] interface I318<T65, T72 extends I317<T65>> {
+[info]   toString: T72
+[info] }
+[info] interface I321<T65, T72 extends I317<T65>, T73 extends I318<T65, T72>> {
+[info]   (_?: T73): boolean
+[info] }
+[info] interface I322<T65> {
+[info]   (_?: T65, _?: "base64"): boolean
+[info] }
+[info] interface I320<T65, T72 extends I317<T65>, T73 extends I318<T65, T72>> {
+[info]   write: (I321<T65, T72, T73> | I322<T65>)
+[info] }
+[info] interface I319<T65, T72 extends I317<T65>, T73 extends I318<T65, T72>> {
+[info]   partTransferEncoding: any
+[info]   destStream: (I320<T65, T72, T73>)
+[info]   backpressure?: boolean
+[info] }
+[info] interface I316 {
+[info]   new <T65, T72 extends I317<T65>, T73 extends I318<T65, T72>>(b: (T73)): (I319<T65, T72, T73> & {})
+[info] }
+[info] interface I326<T78> {
+[info]   (_?: T78): (number | string)
+[info] }
+[info] interface I325<T78> {
+[info]   write: I326<T78>
+[info] }
+[info] interface I324<T78> {
+[info]   headerFieldDecoder: I325<T78>
+[info]   headerField: ((number | string) | number | string)
+[info] }
+[info] interface I323 {
+[info]   new <T78>(b: T78): (I324<T78> & {})
+[info] }
+[info] interface I328 {
+[info]   (_?: any): any
+[info] }
+[info] interface I329 {
+[info]   (_?: any, _?: (undefined | number | string)): any
+[info] }
+[info] interface I330 {
+[info]   (_?: any, _?: (undefined | number | string)): any
+[info] }
+[info] interface I331 {
+[info]   (_?: any): any
+[info] }
+[info] interface I332 {
+[info]   (_?: any, _?: (undefined | number | string)): any
+[info] }
+[info] interface I333 {
+[info]   (_?: any): any
+[info] }
+[info] interface I327 {
+[info]   length: ((number | string) | number)
+[info]   slice: (I330 | I333 | I329 | I331 | I332 | I328)
+[info]   [0]: ((number | string) & number)
+[info] }
+[info] interface I334 {
+[info]   (): any
+[info] }
+[info] interface I337<T144> {
+[info]   (_?: "
+[info] --", _?: number, _?: (number | string), _?: "ascii"): T144
+[info] }
+[info] interface I338<T147> {
+[info]   (_?: {}, _?: number, _?: {}, _?: "ascii"): T147
+[info] }
+[info] interface I339<T139 extends (number | string), T141, T143 extends I337<T144>, T144, T146 extends I338<T147>, T147, T149 extends number> {
+[info]   length: (T149 | T139)
+[info]   write: (T146 | T143)
+[info]   [0]: T141
+[info] }
+[info] interface I340<T156, T167 extends never> {
+[info]   (_?: "error", _?: T167): T156
+[info] }
+[info] interface I341<T169, T171, T173, T175, T177> {
+[info]   (_?: "error", _?: {}): T177
+[info]   (_?: "file", _?: {}): T175
+[info]   (_?: "close", _?: {}): T173
+[info]   (_?: "field", _?: {}): T171
+[info]   (_?: "finish", _?: {}): T169
+[info] }
+[info] interface I346<T167 extends never> {
+[info]   err?: T167
+[info] }
+[info] interface I347<T167 extends never, T188 extends I346<T167>> {
+[info]   (item: T188): undefined
+[info] }
+[info] interface I345<T167 extends never, T187, T188 extends I346<T167>> {
+[info]   (_?: I347<T167, T188>): T187
+[info] }
+[info] interface I344<T167 extends never, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189> {
+[info]   forEach: T186
+[info]   length: T189
+[info] }
+[info] interface I348<T191> {
+[info]   ee: T191
+[info] }
+[info] interface I349<T190 extends I348<T191>, T191> {
+[info]   (item: T190): boolean
+[info] }
+[info] interface I343<T167 extends never, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191> {
+[info]   (_?: I349<T190, T191>): T185
+[info] }
+[info] interface I342<T167 extends never, T184 extends I343<T167, T185, T186, T187, T188, T189, T190, T191>, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191> {
+[info]   filter: T184
+[info] }
+[info] interface I350<T167 extends never, T195> {
+[info]   (_?: "error", _?: T167): T195
+[info] }
+[info] interface I351<T167 extends never, T194 extends I350<T167, T195>, T195> {
+[info]   emit: T194
+[info] }
+[info] interface I355<T203> {
+[info]   (): T203
+[info] }
+[info] interface I354<T202 extends I355<T203>, T203> {
+[info]   destroy: T202
+[info] }
+[info] interface I356<T206> {
+[info]   path: T206
+[info] }
+[info] interface I357<T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206> {
+[info]   publicFile: T205
+[info]   ws: T201
+[info] }
+[info] interface I358<T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   (internalFile: (T207)): undefined
+[info] }
+[info] interface I353<T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   (_?: I358<T201, T202, T203, T205, T206, T207>): T199
+[info] }
+[info] interface I352<T198 extends I353<T199, T201, T202, T203, T205, T206, T207>, T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   forEach: T198
+[info] }
+[info] interface I359<T167 extends never> {
+[info]   (err: (T167)): undefined
+[info]   (err: (T167)): undefined
+[info]   (err: (T167)): undefined
+[info]   (err: (T167)): undefined
+[info] }
+[info] interface I360 {
+[info]   length: number
+[info] }
+[info] interface I336<T137 extends (number | string), T139 extends (number | string), T141, T143 extends I337<T144>, T144, T146 extends I338<T147>, T147, T149 extends number, T153 extends I339<T139, T141, T143, T144, T146, T147, T149>, T154, T155 extends I340<T156, T167>, T156, T167 extends never, T169, T171, T173, T175, T177, T181 extends I341<T169, T171, T173, T175, T177>, T182 extends boolean, T183 extends I342<T167, T184, T185, T186, T187, T188, T189, T190, T191>, T184 extends I343<T167, T185, T186, T187, T188, T189, T190, T191>, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191, T194 extends I350<T167, T195>, T195, T196 extends I351<T167, T194, T195>, T197 extends I352<T198, T199, T201, T202, T203, T205, T206, T207>, T198 extends I353<T199, T201, T202, T203, T205, T206, T207>, T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   partBoundaryFlag?: boolean
+[info]   flushing: (T137 | number | string)
+[info]   autoFiles?: boolean
+[info]   state?: number
+[info]   bytesExpected?: {}
+[info]   boundary: ((T153) | {})
+[info]   lookbehind?: {}
+[info]   boundaryChars: (T154 | {})
+[info]   autoFields?: boolean
+[info]   emit: T155
+[info]   handleError?: I359<T167>
+[info]   on: (T181)
+[info]   error: (T182 | T167)
+[info]   emitQueue: T183
+[info]   destStream: (T196)
+[info]   index?: null
+[info]   openedFiles: (T197 | I360)
+[info] }
+[info] interface I362 {
+[info]   encoding: any
+[info]   decoder: any
+[info] }
+[info] interface I363 {
+[info]   (_?: "end", _?: {}): any
+[info] }
+[info] interface I364 {
+[info]   (_?: "aborted", _?: {}): any
+[info] }
+[info] interface I365 {
+[info]   (_?: "error", _?: {}): any
+[info] }
+[info] interface I366 {
+[info]   (_?: "aborted", _?: ({})): any
+[info] }
+[info] interface I367 {
+[info]   (_?: "end", _?: ({})): any
+[info] }
+[info] interface I368<T136 extends I336<T137, T139, T141, T143, T144, T146, T147, T149, T153, T154, T155, T156, T167, T169, T171, T173, T175, T177, T181, T182, T183, T184, T185, T186, T187, T188, T189, T190, T191, T194, T195, T196, T197, T198, T199, T201, T202, T203, T205, T206, T207>, T137 extends (number | string), T139 extends (number | string), T141, T143 extends I337<T144>, T144, T146 extends I338<T147>, T147, T149 extends number, T153 extends I339<T139, T141, T143, T144, T146, T147, T149>, T154, T155 extends I340<T156, T167>, T156, T167 extends never, T169, T171, T173, T175, T177, T181 extends I341<T169, T171, T173, T175, T177>, T182 extends boolean, T183 extends I342<T167, T184, T185, T186, T187, T188, T189, T190, T191>, T184 extends I343<T167, T185, T186, T187, T188, T189, T190, T191>, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191, T194 extends I350<T167, T195>, T195, T196 extends I351<T167, T194, T195>, T197 extends I352<T198, T199, T201, T202, T203, T205, T206, T207>, T198 extends I353<T199, T201, T202, T203, T205, T206, T207>, T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   (_?: T136): any
+[info] }
+[info] interface I369 {
+[info]   transfer-encoding: any
+[info]   content-length: any
+[info] }
+[info] interface I370 {
+[info]   content-type: boolean
+[info] }
+[info] interface I361<T136 extends I336<T137, T139, T141, T143, T144, T146, T147, T149, T153, T154, T155, T156, T167, T169, T171, T173, T175, T177, T181, T182, T183, T184, T185, T186, T187, T188, T189, T190, T191, T194, T195, T196, T197, T198, T199, T201, T202, T203, T205, T206, T207>, T137 extends (number | string), T139 extends (number | string), T141, T143 extends I337<T144>, T144, T146 extends I338<T147>, T147, T149 extends number, T153 extends I339<T139, T141, T143, T144, T146, T147, T149>, T154, T155 extends I340<T156, T167>, T156, T167 extends never, T169, T171, T173, T175, T177, T181 extends I341<T169, T171, T173, T175, T177>, T182 extends boolean, T183 extends I342<T167, T184, T185, T186, T187, T188, T189, T190, T191>, T184 extends I343<T167, T185, T186, T187, T188, T189, T190, T191>, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191, T194 extends I350<T167, T195>, T195, T196 extends I351<T167, T194, T195>, T197 extends I352<T198, T199, T201, T202, T203, T205, T206, T207>, T198 extends I353<T199, T201, T202, T203, T205, T206, T207>, T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>> {
+[info]   _decoder: any
+[info]   _readableState: I362
+[info]   removeListener: (I363 | I364)
+[info]   on: (I365 | I366 | I367)
+[info]   pipe: I368<T136, T137, T139, T141, T143, T144, T146, T147, T149, T153, T154, T155, T156, T167, T169, T171, T173, T175, T177, T181, T182, T183, T184, T185, T186, T187, T188, T189, T190, T191, T194, T195, T196, T197, T198, T199, T201, T202, T203, T205, T206, T207>
+[info]   headers: (I369 | I370)
+[info] }
+[info] interface I335 {
+[info]   new <T136 extends I336<T137, T139, T141, T143, T144, T146, T147, T149, T153, T154, T155, T156, T167, T169, T171, T173, T175, T177, T181, T182, T183, T184, T185, T186, T187, T188, T189, T190, T191, T194, T195, T196, T197, T198, T199, T201, T202, T203, T205, T206, T207>, T137 extends (number | string), T139 extends (number | string), T141, T143 extends I337<T144>, T144, T146 extends I338<T147>, T147, T149 extends number, T153 extends I339<T139, T141, T143, T144, T146, T147, T149>, T154, T155 extends I340<T156, T167>, T156, T167 extends never, T169, T171, T173, T175, T177, T181 extends I341<T169, T171, T173, T175, T177>, T182 extends boolean, T183 extends I342<T167, T184, T185, T186, T187, T188, T189, T190, T191>, T184 extends I343<T167, T185, T186, T187, T188, T189, T190, T191>, T185 extends I344<T167, T186, T187, T188, T189>, T186 extends I345<T167, T187, T188>, T187, T188 extends I346<T167>, T189, T190 extends I348<T191>, T191, T194 extends I350<T167, T195>, T195, T196 extends I351<T167, T194, T195>, T197 extends I352<T198, T199, T201, T202, T203, T205, T206, T207>, T198 extends I353<T199, T201, T202, T203, T205, T206, T207>, T199, T201 extends I354<T202, T203>, T202 extends I355<T203>, T203, T205 extends I356<T206>, T206, T207 extends I357<T201, T202, T203, T205, T206>>(req: (I361<T136, T137, T139, T141, T143, T144, T146, T147, T149, T153, T154, T155, T156, T167, T169, T171, T173, T175, T177, T181, T182, T183, T184, T185, T186, T187, T188, T189, T190, T191, T194, T195, T196, T197, T198, T199, T201, T202, T203, T205, T206, T207>), cb: any): (T136 & {})
+[info] }
+[info] interface I371 {
+[info]   statusCode?: number
+[info]   name: string
+[info]   status?: number
+[info]   stack?: (undefined | string)
+[info]   message: string
+[info] }
+[info] interface I372 {
+[info]   statusCode?: number
+[info]   name: string
+[info]   status?: number
+[info]   stack?: (undefined | string)
+[info]   message: string
+[info] }
+[info] interface I375 {
+[info] }
+[info] interface I376 {
+[info] }
+[info] interface I374 {
+[info]   headerValueDecoder?: I375
+[info]   headerFieldDecoder?: I376
+[info]   partTransferEncoding?: "binary"
+[info]   encoding: (never)
+[info]   headerValue?: ""
+[info]   partName?: null
+[info]   headerField?: ""
+[info]   partFilename?: null
+[info]   partHeaders?: {}
+[info]   destStream?: null
+[info] }
+[info] interface I373 {
+[info]   new (): (I374 & {})
+[info] }
+[info] interface I379 {
+[info] }
+[info] interface I380 {
+[info] }
+[info] interface I383 {
+[info]   (cb: any): undefined
+[info] }
+[info] interface I382 {
+[info]   (_?: I383): any
+[info] }
+[info] interface I381 {
+[info]   forEach: I382
+[info] }
+[info] interface I384 {
+[info]   length: number
+[info] }
+[info] interface I378 {
+[info]   headerValueDecoder?: I379
+[info]   headerFieldDecoder?: I380
+[info]   writeCbs: (I381 | I384)
+[info]   partTransferEncoding?: "binary"
+[info]   encoding: (never)
+[info]   headerValue?: ""
+[info]   partName?: null
+[info]   headerField?: ""
+[info]   partFilename?: null
+[info]   partHeaders?: {}
+[info]   destStream: ((never) | null)
+[info]   backpressure?: boolean
+[info] }
+[info] interface I377 {
+[info]   new (): (I378 & {})
+[info] }
+[info] interface I291 {
+[info]   onParseHeaderValue: I292
+[info]   onParseHeaderEnd: I296
+[info]   onParsePartData: I316
+[info]   onParseHeaderField: I323
+[info]   _write(buffer: (I327), cb: (I334)): (any | undefined)
+[info]   parse: I335
+[info]   onParseHeadersEnd(offset: (number | string)): (undefined | I371 | I372)
+[info]   onParsePartBegin: I373
+[info]   onParsePartEnd: I377
+[info] }
+[info] interface I283 {
+[info]   new <T11, T2, T3, T4, T5>(options: (I284<T11, T2, T3, T4, T5>)): (I285<T11, T2, T3, T4, T5> & I291)
+[info] }
+[info] interface I282 {
+[info]   Form: I283
+[info] }
+[info] => I282
+[success] Total time: 5 s, completed Jul 29, 2018 11:48:17 PM

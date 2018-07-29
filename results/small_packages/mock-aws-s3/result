@@ -1,0 +1,70 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install mock-aws-s3 into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/mock-aws-s3
+Look into <inf>/bluebird
+Look into <inf>/fs-extra
+Look into <inf>/jsonfile
+Look into <inf>/mkdirp
+Look into <inf>/ncp
+Look into <inf>/rimraf
+Look into <inf>/underscore
+Install types for bluebird
+Install types for fs-extra
+Install types for jsonfile
+Install types for mkdirp
+Install types for ncp
+Install types for rimraf
+Install types for underscore
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/mock-aws-s3/_inferium_gather.ts
+Gather types for 7 packages:
+=> bluebird, fs-extra, jsonfile, mkdirp, ncp, rimraf, underscore 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/bluebird/index.d.ts
+=> <inf>/@types/events/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/fs-extra/index.d.ts
+=> <inf>/@types/jsonfile/index.d.ts
+=> <inf>/@types/mkdirp/index.d.ts
+=> <inf>/@types/ncp/index.d.ts
+=> <inf>/@types/minimatch/index.d.ts
+=> <inf>/@types/glob/index.d.ts
+=> <inf>/@types/rimraf/index.d.ts
+=> <inf>/@types/underscore/index.d.ts
+=> <inf>/mock-aws-s3/_inferium_gather.ts
+
+Resolve bluebird
+Error: Error: Conditionals are not supported
+    at makeBigTypes (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:503:27)
+    at resolve (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:466:27)
+    at resolveType (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:375:16)
+    at /home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:433:91
+    at Array.map (<anonymous>)
+    at resolve (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:433:64)
+    at resolveType (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:375:16)
+    at resolveCallSignature (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:572:30)
+    at Array.map (<anonymous>)
+    at makeObject (/home/tobi/workspace/inferium/extras/ts-reader/dist/main.js:581:39)

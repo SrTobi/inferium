@@ -1,0 +1,113 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install net-keepalive into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/net-keepalive
+Look into <inf>/net-keepalive/node_modules/ffi-napi
+Look into <inf>/net-keepalive/node_modules/ffi-napi/node_modules/bindings
+Look into <inf>/net-keepalive/node_modules/ffi-napi/node_modules/debug
+Look into <inf>/net-keepalive/node_modules/ms
+Look into <inf>/net-keepalive/node_modules/get-uv-event-loop-napi-h
+Look into <inf>/net-keepalive/node_modules/get-symbol-from-current-process-h
+Look into <inf>/net-keepalive/node_modules/node-addon-api
+Look into <inf>/net-keepalive/node_modules/ref-napi
+Look into <inf>/net-keepalive/node_modules/ref-napi/node_modules/bindings
+Look into <inf>/net-keepalive/node_modules/ref-napi/node_modules/debug
+Look into <inf>/net-keepalive/node_modules/ms
+Look into <inf>/net-keepalive/node_modules/ref-napi/node_modules/node-addon-api
+Look into <inf>/net-keepalive/node_modules/ref-struct-di
+Look into <inf>/net-keepalive/node_modules/ref-struct-di/node_modules/debug
+Look into <inf>/net-keepalive/node_modules/ms
+Look into <inf>/net-keepalive/node_modules/ref-napi
+Install types for ffi-napi
+=> not found
+Install types for bindings
+Install types for debug
+Install types for ms
+Install types for get-uv-event-loop-napi-h
+=> not found
+Install types for get-symbol-from-current-process-h
+=> not found
+Install types for node-addon-api
+=> not found
+Install types for ref-napi
+=> not found
+Install types for bindings
+Install types for debug
+Install types for node-addon-api
+=> not found
+Install types for ref-struct-di
+=> not found
+Install types for debug
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/net-keepalive/_inferium_gather.ts
+Gather types for 13 packages:
+=> ffi-napi, bindings, debug, ms, get-uv-event-loop-napi-h, get-symbol-from-current-process-h, node-addon-api, ref-napi, bindings, debug, node-addon-api, ref-struct-di, debug 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/bindings/index.d.ts
+=> <inf>/@types/debug/index.d.ts
+=> <inf>/@types/ms/index.d.ts
+=> <inf>/net-keepalive/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Resolve ffi-napi
+Resolve bindings
+Resolve debug
+Resolve ms
+Resolve get-uv-event-loop-napi-h
+Resolve get-symbol-from-current-process-h
+Resolve node-addon-api
+Resolve ref-napi
+Resolve bindings
+Resolve debug
+Resolve node-addon-api
+Resolve ref-struct-di
+Resolve debug
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/net-keepalive /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/net-keepalive
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", bindings, "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", debug, "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", ms, "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/net-keepalive/./index.js'
+[info] Done Parsing module.
+[info] Round 0
+[info] Done
+[info] ======= Print Type Definition ======
+[info] => {}
+[success] Total time: 3 s, completed Jul 29, 2018 8:08:23 PM

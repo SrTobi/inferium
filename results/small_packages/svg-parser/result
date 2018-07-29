@@ -1,0 +1,460 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install svg-parser into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/svg-parser
+Look into <inf>/locate-character
+Install types for locate-character
+=> not found
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/svg-parser/_inferium_gather.ts
+Gather types for 1 packages:
+=> locate-character 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/svg-parser/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Resolve locate-character
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/svg-parser /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/svg-parser
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/svg-parser/./dist/svg-parser.umd.js'
+[info] Done Parsing module.
+[info] Found Some(parse)
+[info] Round 0
+[info] Analyse Some(parse)
+[info] Round 1
+[info] Analyse Some(parse)
+[info] Round 2
+[info] Analyse Some(parse)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I422 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I421 {
+[info]   [0]: I422
+[info] }
+[info] interface I420 {
+[info]   (_?: {}): I421
+[info] }
+[info] interface I419 {
+[info]   map: I420
+[info] }
+[info] interface I426 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I425 {
+[info]   [0]: I426
+[info] }
+[info] interface I424 {
+[info]   (_?: {}): I425
+[info] }
+[info] interface I423 {
+[info]   map: I424
+[info] }
+[info] interface I418 {
+[info]   (_?: "
+[info] "): I419
+[info]   (_?: "
+[info] "): I423
+[info] }
+[info] interface I431 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I430 {
+[info]   [0]: I431
+[info] }
+[info] interface I429 {
+[info]   (_?: {}): I430
+[info] }
+[info] interface I428 {
+[info]   map: I429
+[info] }
+[info] interface I435 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I434 {
+[info]   [0]: I435
+[info] }
+[info] interface I433 {
+[info]   (_?: {}): I434
+[info] }
+[info] interface I432 {
+[info]   map: I433
+[info] }
+[info] interface I427 {
+[info]   (_?: "
+[info] "): I428
+[info]   (_?: "
+[info] "): I432
+[info] }
+[info] interface I440 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I439 {
+[info]   [0]: I440
+[info] }
+[info] interface I438 {
+[info]   (_?: {}): I439
+[info] }
+[info] interface I437 {
+[info]   map: I438
+[info] }
+[info] interface I444 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I443 {
+[info]   [0]: I444
+[info] }
+[info] interface I442 {
+[info]   (_?: {}): I443
+[info] }
+[info] interface I441 {
+[info]   map: I442
+[info] }
+[info] interface I436 {
+[info]   (_?: "
+[info] "): I437
+[info]   (_?: "
+[info] "): I441
+[info] }
+[info] interface I449 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I448 {
+[info]   [0]: I449
+[info] }
+[info] interface I447 {
+[info]   (_?: {}): I448
+[info] }
+[info] interface I446 {
+[info]   map: I447
+[info] }
+[info] interface I453 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I452 {
+[info]   [0]: I453
+[info] }
+[info] interface I451 {
+[info]   (_?: {}): I452
+[info] }
+[info] interface I450 {
+[info]   map: I451
+[info] }
+[info] interface I445 {
+[info]   (_?: "
+[info] "): I446
+[info]   (_?: "
+[info] "): I450
+[info] }
+[info] interface I458 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I457 {
+[info]   [0]: I458
+[info] }
+[info] interface I456 {
+[info]   (_?: {}): I457
+[info] }
+[info] interface I455 {
+[info]   map: I456
+[info] }
+[info] interface I462 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I461 {
+[info]   [0]: I462
+[info] }
+[info] interface I460 {
+[info]   (_?: {}): I461
+[info] }
+[info] interface I459 {
+[info]   map: I460
+[info] }
+[info] interface I454 {
+[info]   (_?: "
+[info] "): I455
+[info]   (_?: "
+[info] "): I459
+[info] }
+[info] interface I467 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I466 {
+[info]   [0]: I467
+[info] }
+[info] interface I465 {
+[info]   (_?: {}): I466
+[info] }
+[info] interface I464 {
+[info]   map: I465
+[info] }
+[info] interface I471 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I470 {
+[info]   [0]: I471
+[info] }
+[info] interface I469 {
+[info]   (_?: {}): I470
+[info] }
+[info] interface I468 {
+[info]   map: I469
+[info] }
+[info] interface I463 {
+[info]   (_?: "
+[info] "): I464
+[info]   (_?: "
+[info] "): I468
+[info] }
+[info] interface I476 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I475 {
+[info]   [0]: I476
+[info] }
+[info] interface I474 {
+[info]   (_?: {}): I475
+[info] }
+[info] interface I473 {
+[info]   map: I474
+[info] }
+[info] interface I480 {
+[info]   line: (number | string)
+[info]   end: (number)
+[info]   start: (number)
+[info] }
+[info] interface I479 {
+[info]   [0]: I480
+[info] }
+[info] interface I478 {
+[info]   (_?: {}): I479
+[info] }
+[info] interface I477 {
+[info]   map: I478
+[info] }
+[info] interface I472 {
+[info]   (_?: "
+[info] "): I473
+[info]   (_?: "
+[info] "): I477
+[info] }
+[info] interface I481 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I482 {
+[info]   (_?: (number | string), _?: (number | string)): any
+[info] }
+[info] interface I483 {
+[info]   (_?: (number | string), _?: (number | string)): any
+[info] }
+[info] interface I486 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I485 {
+[info]   replace: I486
+[info] }
+[info] interface I484 {
+[info]   (_?: number, _?: (undefined | number | string)): I485
+[info] }
+[info] interface I487 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I490 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I489 {
+[info]   replace: I490
+[info] }
+[info] interface I488 {
+[info]   (_?: number, _?: (undefined | number | string)): I489
+[info] }
+[info] interface I491<T12 extends (number & (number | string))> {
+[info]   (_?: (number | string), _?: T12): any
+[info] }
+[info] interface I492 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I495 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I494 {
+[info]   replace: I495
+[info] }
+[info] interface I493 {
+[info]   (_?: number, _?: (undefined | number | string)): I494
+[info] }
+[info] interface I496 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I499 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I498 {
+[info]   replace: I499
+[info] }
+[info] interface I497 {
+[info]   (_?: number, _?: (undefined | number | string)): I498
+[info] }
+[info] interface I502 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I501 {
+[info]   replace: I502
+[info] }
+[info] interface I500 {
+[info]   (_?: number, _?: (undefined | number | string)): I501
+[info] }
+[info] interface I503 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I506 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I505 {
+[info]   replace: I506
+[info] }
+[info] interface I504 {
+[info]   (_?: number, _?: (undefined | number | string)): I505
+[info] }
+[info] interface I507 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I510 {
+[info]   (_?: {}, _?: {}): any
+[info] }
+[info] interface I509 {
+[info]   replace: I510
+[info] }
+[info] interface I508 {
+[info]   (_?: number, _?: (undefined | number | string)): I509
+[info] }
+[info] interface I511 {
+[info]   (_?: (undefined | number | string)): any
+[info] }
+[info] interface I512 {
+[info]   (_?: (number | string), _?: (number | string)): any
+[info] }
+[info] interface I513 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I514 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I515 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I516 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I517 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I518 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I519 {
+[info]   (_?: (undefined | number | string), _?: number): number
+[info]   (_?: (undefined | number | string), _?: number): number
+[info] }
+[info] interface I520<T12 extends (number & (number | string))> {
+[info]   (_?: "]]>", _?: (undefined | number | string)): T12
+[info] }
+[info] interface I521 {
+[info]   (_?: "-->", _?: (undefined | number | string)): (number & (number | string))
+[info] }
+[info] interface I417<T12 extends (number & (number | string))> {
+[info]   split: ((I454) | (I463) | (I472) | (I427) | (I436) | (I418) | (I445))
+[info]   slice: (I507 | I497 | I483 | I487 | I482 | I508 | I493 | I488 | I491<T12> | I512 | I504 | I481 | I496 | I492 | I511 | I500 | I484 | I503)
+[info]   length: (number)
+[info]   indexOf: ((I516) | (I519) | (I513) | (I514) | (I515) | (I518) | I520<T12> | (I517) | I521)
+[info]   undefined: (any)
+[info] }
+[info] interface I523 {
+[info]   length: number
+[info] }
+[info] interface I522 {
+[info]   name: (number | string)
+[info]   children: I523
+[info]   metadata?: (undefined | number | string)
+[info] }
+[info] interface I416 {
+[info]   (source: (I417<(number & (number | string))>)): (null | I522)
+[info] }
+[info] interface I415 {
+[info]   parse?: (undefined | I416)
+[info] }
+[info] => I415
+[success] Total time: 14 s, completed Jul 29, 2018 9:02:30 PM

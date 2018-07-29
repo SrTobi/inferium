@@ -1,0 +1,1606 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install mozjpeg into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/mozjpeg
+Look into <inf>/bin-build
+Look into <inf>/decompress
+Look into <inf>/decompress-tar
+Look into <inf>/file-type
+Look into <inf>/is-stream
+Look into <inf>/tar-stream
+Look into <inf>/bl
+Look into <inf>/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/isarray
+Look into <inf>/process-nextick-args
+Look into <inf>/safe-buffer
+Look into <inf>/util-deprecate
+Look into <inf>/safe-buffer
+Look into <inf>/buffer-alloc
+Look into <inf>/buffer-alloc-unsafe
+Look into <inf>/buffer-fill
+Look into <inf>/end-of-stream
+Look into <inf>/once
+Look into <inf>/wrappy
+Look into <inf>/fs-constants
+Look into <inf>/readable-stream
+Look into <inf>/to-buffer
+Look into <inf>/xtend
+Look into <inf>/decompress-tarbz2
+Look into <inf>/decompress-tar
+Look into <inf>/decompress-tarbz2/node_modules/file-type
+Look into <inf>/is-stream
+Look into <inf>/seek-bzip
+Look into <inf>/commander
+Look into <inf>/graceful-readlink
+Look into <inf>/unbzip2-stream
+Look into <inf>/through
+Look into <inf>/decompress-targz
+Look into <inf>/decompress-tar
+Look into <inf>/file-type
+Look into <inf>/is-stream
+Look into <inf>/decompress-unzip
+Look into <inf>/decompress-unzip/node_modules/file-type
+Look into <inf>/get-stream
+Look into <inf>/object-assign
+Look into <inf>/pinkie-promise
+Look into <inf>/pinkie
+Look into <inf>/pify
+Look into <inf>/yauzl
+Look into <inf>/buffer-crc32
+Look into <inf>/fd-slicer
+Look into <inf>/pend
+Look into <inf>/graceful-fs
+Look into <inf>/make-dir
+Look into <inf>/make-dir/node_modules/pify
+Look into <inf>/pify
+Look into <inf>/strip-dirs
+Look into <inf>/is-natural-number
+Look into <inf>/download
+Look into <inf>/caw
+Look into <inf>/get-proxy
+Look into <inf>/npm-conf
+Look into <inf>/config-chain
+Look into <inf>/ini
+Look into <inf>/proto-list
+Look into <inf>/npm-conf/node_modules/pify
+Look into <inf>/isurl
+Look into <inf>/has-to-string-tag-x
+Look into <inf>/has-symbol-support-x
+Look into <inf>/is-object
+Look into <inf>/tunnel-agent
+Look into <inf>/safe-buffer
+Look into <inf>/url-to-options
+Look into <inf>/content-disposition
+Look into <inf>/decompress
+Look into <inf>/ext-name
+Look into <inf>/ext-list
+Look into <inf>/mime-db
+Look into <inf>/sort-keys-length
+Look into <inf>/sort-keys
+Look into <inf>/is-plain-obj
+Look into <inf>/file-type
+Look into <inf>/filenamify
+Look into <inf>/filename-reserved-regex
+Look into <inf>/strip-outer
+Look into <inf>/escape-string-regexp
+Look into <inf>/trim-repeated
+Look into <inf>/escape-string-regexp
+Look into <inf>/download/node_modules/get-stream
+Look into <inf>/got
+Look into <inf>/decompress-response
+Look into <inf>/mimic-response
+Look into <inf>/duplexer3
+Look into <inf>/got/node_modules/get-stream
+Look into <inf>/is-plain-obj
+Look into <inf>/is-retry-allowed
+Look into <inf>/is-stream
+Look into <inf>/isurl
+Look into <inf>/lowercase-keys
+Look into <inf>/p-cancelable
+Look into <inf>/p-timeout
+Look into <inf>/p-finally
+Look into <inf>/safe-buffer
+Look into <inf>/timed-out
+Look into <inf>/url-parse-lax
+Look into <inf>/prepend-http
+Look into <inf>/url-to-options
+Look into <inf>/make-dir
+Look into <inf>/p-event
+Look into <inf>/p-timeout
+Look into <inf>/download/node_modules/pify
+Look into <inf>/execa
+Look into <inf>/cross-spawn
+Look into <inf>/lru-cache
+Look into <inf>/pseudomap
+Look into <inf>/yallist
+Look into <inf>/shebang-command
+Look into <inf>/shebang-regex
+Look into <inf>/which
+Look into <inf>/isexe
+Look into <inf>/execa/node_modules/get-stream
+Look into <inf>/is-stream
+Look into <inf>/npm-run-path
+Look into <inf>/path-key
+Look into <inf>/p-finally
+Look into <inf>/signal-exit
+Look into <inf>/strip-eof
+Look into <inf>/p-map-series
+Look into <inf>/p-reduce
+Look into <inf>/tempfile
+Look into <inf>/temp-dir
+Look into <inf>/uuid
+Look into <inf>/bin-wrapper
+Look into <inf>/bin-check
+Look into <inf>/executable
+Look into <inf>/meow
+Look into <inf>/camelcase-keys
+Look into <inf>/camelcase
+Look into <inf>/map-obj
+Look into <inf>/decamelize
+Look into <inf>/loud-rejection
+Look into <inf>/currently-unhandled
+Look into <inf>/array-find-index
+Look into <inf>/signal-exit
+Look into <inf>/map-obj
+Look into <inf>/minimist
+Look into <inf>/normalize-package-data
+Look into <inf>/hosted-git-info
+Look into <inf>/is-builtin-module
+Look into <inf>/builtin-modules
+Look into <inf>/semver
+Look into <inf>/validate-npm-package-license
+Look into <inf>/spdx-correct
+Look into <inf>/spdx-expression-parse
+Look into <inf>/spdx-exceptions
+Look into <inf>/spdx-license-ids
+Look into <inf>/spdx-license-ids
+Look into <inf>/spdx-expression-parse
+Look into <inf>/object-assign
+Look into <inf>/read-pkg-up
+Look into <inf>/find-up
+Look into <inf>/path-exists
+Look into <inf>/pinkie-promise
+Look into <inf>/pinkie-promise
+Look into <inf>/read-pkg
+Look into <inf>/load-json-file
+Look into <inf>/graceful-fs
+Look into <inf>/parse-json
+Look into <inf>/error-ex
+Look into <inf>/is-arrayish
+Look into <inf>/pify
+Look into <inf>/pinkie-promise
+Look into <inf>/strip-bom
+Look into <inf>/is-utf8
+Look into <inf>/normalize-package-data
+Look into <inf>/path-type
+Look into <inf>/graceful-fs
+Look into <inf>/pify
+Look into <inf>/pinkie-promise
+Look into <inf>/redent
+Look into <inf>/indent-string
+Look into <inf>/repeating
+Look into <inf>/is-finite
+Look into <inf>/number-is-nan
+Look into <inf>/strip-indent
+Look into <inf>/get-stdin
+Look into <inf>/trim-newlines
+Look into <inf>/bin-version-check
+Look into <inf>/bin-version
+Look into <inf>/find-versions
+Look into <inf>/array-uniq
+Look into <inf>/get-stdin
+Look into <inf>/meow
+Look into <inf>/semver-regex
+Look into <inf>/minimist
+Look into <inf>/bin-version-check/node_modules/semver
+Look into <inf>/semver-truncate
+Look into <inf>/semver
+Look into <inf>/bin-wrapper/node_modules/download
+Look into <inf>/bin-wrapper/node_modules/caw
+Look into <inf>/bin-wrapper/node_modules/get-proxy
+Look into <inf>/rc
+Look into <inf>/deep-extend
+Look into <inf>/ini
+Look into <inf>/minimist
+Look into <inf>/strip-json-comments
+Look into <inf>/is-obj
+Look into <inf>/bin-wrapper/node_modules/caw/node_modules/object-assign
+Look into <inf>/bin-wrapper/node_modules/tunnel-agent
+Look into <inf>/concat-stream
+Look into <inf>/buffer-from
+Look into <inf>/inherits
+Look into <inf>/readable-stream
+Look into <inf>/typedarray
+Look into <inf>/each-async
+Look into <inf>/onetime
+Look into <inf>/set-immediate-shim
+Look into <inf>/bin-wrapper/node_modules/filenamify
+Look into <inf>/bin-wrapper/node_modules/filename-reserved-regex
+Look into <inf>/strip-outer
+Look into <inf>/trim-repeated
+Look into <inf>/bin-wrapper/node_modules/got
+Look into <inf>/create-error-class
+Look into <inf>/capture-stack-trace
+Look into <inf>/duplexer2
+Look into <inf>/readable-stream
+Look into <inf>/is-redirect
+Look into <inf>/is-retry-allowed
+Look into <inf>/is-stream
+Look into <inf>/lowercase-keys
+Look into <inf>/node-status-codes
+Look into <inf>/object-assign
+Look into <inf>/parse-json
+Look into <inf>/pinkie-promise
+Look into <inf>/read-all-stream
+Look into <inf>/pinkie-promise
+Look into <inf>/readable-stream
+Look into <inf>/readable-stream
+Look into <inf>/bin-wrapper/node_modules/timed-out
+Look into <inf>/unzip-response
+Look into <inf>/url-parse-lax
+Look into <inf>/gulp-decompress
+Look into <inf>/archive-type
+Look into <inf>/archive-type/node_modules/file-type
+Look into <inf>/gulp-decompress/node_modules/decompress
+Look into <inf>/buffer-to-vinyl
+Look into <inf>/buffer-to-vinyl/node_modules/file-type
+Look into <inf>/readable-stream
+Look into <inf>/buffer-to-vinyl/node_modules/uuid
+Look into <inf>/vinyl
+Look into <inf>/clone
+Look into <inf>/clone-stats
+Look into <inf>/replace-ext
+Look into <inf>/concat-stream
+Look into <inf>/gulp-decompress/node_modules/decompress-tar
+Look into <inf>/is-tar
+Look into <inf>/gulp-decompress/node_modules/object-assign
+Look into <inf>/gulp-decompress/node_modules/strip-dirs
+Look into <inf>/chalk
+Look into <inf>/ansi-styles
+Look into <inf>/escape-string-regexp
+Look into <inf>/has-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/strip-ansi
+Look into <inf>/ansi-regex
+Look into <inf>/supports-color
+Look into <inf>/get-stdin
+Look into <inf>/is-absolute
+Look into <inf>/is-relative
+Look into <inf>/gulp-decompress/node_modules/is-natural-number
+Look into <inf>/minimist
+Look into <inf>/sum-up
+Look into <inf>/chalk
+Look into <inf>/tar-stream
+Look into <inf>/through2
+Look into <inf>/through2/node_modules/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/through2/node_modules/isarray
+Look into <inf>/xtend
+Look into <inf>/gulp-decompress/node_modules/vinyl
+Look into <inf>/gulp-decompress/node_modules/clone
+Look into <inf>/clone-stats
+Look into <inf>/gulp-decompress/node_modules/decompress-tarbz2
+Look into <inf>/is-bzip2
+Look into <inf>/gulp-decompress/node_modules/object-assign
+Look into <inf>/seek-bzip
+Look into <inf>/gulp-decompress/node_modules/strip-dirs
+Look into <inf>/tar-stream
+Look into <inf>/through2
+Look into <inf>/gulp-decompress/node_modules/vinyl
+Look into <inf>/gulp-decompress/node_modules/decompress-targz
+Look into <inf>/is-gzip
+Look into <inf>/gulp-decompress/node_modules/object-assign
+Look into <inf>/gulp-decompress/node_modules/strip-dirs
+Look into <inf>/tar-stream
+Look into <inf>/through2
+Look into <inf>/gulp-decompress/node_modules/vinyl
+Look into <inf>/gulp-decompress/node_modules/decompress-unzip
+Look into <inf>/is-zip
+Look into <inf>/read-all-stream
+Look into <inf>/stat-mode
+Look into <inf>/gulp-decompress/node_modules/strip-dirs
+Look into <inf>/gulp-decompress/node_modules/decompress-unzip/node_modules/through2
+Look into <inf>/readable-stream
+Look into <inf>/xtend
+Look into <inf>/gulp-decompress/node_modules/decompress-unzip/node_modules/vinyl
+Look into <inf>/gulp-decompress/node_modules/decompress-unzip/node_modules/clone
+Look into <inf>/clone-stats
+Look into <inf>/replace-ext
+Look into <inf>/yauzl
+Look into <inf>/stream-combiner2
+Look into <inf>/duplexer2
+Look into <inf>/readable-stream
+Look into <inf>/vinyl-assign
+Look into <inf>/object-assign
+Look into <inf>/readable-stream
+Look into <inf>/vinyl-fs
+Look into <inf>/duplexify
+Look into <inf>/end-of-stream
+Look into <inf>/inherits
+Look into <inf>/readable-stream
+Look into <inf>/stream-shift
+Look into <inf>/glob-stream
+Look into <inf>/extend
+Look into <inf>/glob
+Look into <inf>/inflight
+Look into <inf>/once
+Look into <inf>/wrappy
+Look into <inf>/inherits
+Look into <inf>/minimatch
+Look into <inf>/brace-expansion
+Look into <inf>/balanced-match
+Look into <inf>/concat-map
+Look into <inf>/once
+Look into <inf>/path-is-absolute
+Look into <inf>/glob-parent
+Look into <inf>/is-glob
+Look into <inf>/is-extglob
+Look into <inf>/path-dirname
+Look into <inf>/micromatch
+Look into <inf>/arr-diff
+Look into <inf>/arr-flatten
+Look into <inf>/array-unique
+Look into <inf>/braces
+Look into <inf>/expand-range
+Look into <inf>/fill-range
+Look into <inf>/is-number
+Look into <inf>/kind-of
+Look into <inf>/is-buffer
+Look into <inf>/isobject
+Look into <inf>/isarray
+Look into <inf>/randomatic
+Look into <inf>/randomatic/node_modules/is-number
+Look into <inf>/randomatic/node_modules/kind-of
+Look into <inf>/math-random
+Look into <inf>/repeat-element
+Look into <inf>/repeat-string
+Look into <inf>/preserve
+Look into <inf>/repeat-element
+Look into <inf>/expand-brackets
+Look into <inf>/is-posix-bracket
+Look into <inf>/extglob
+Look into <inf>/extglob/node_modules/is-extglob
+Look into <inf>/filename-regex
+Look into <inf>/micromatch/node_modules/is-extglob
+Look into <inf>/micromatch/node_modules/is-glob
+Look into <inf>/micromatch/node_modules/is-extglob
+Look into <inf>/kind-of
+Look into <inf>/normalize-path
+Look into <inf>/remove-trailing-separator
+Look into <inf>/object.omit
+Look into <inf>/for-own
+Look into <inf>/for-in
+Look into <inf>/is-extendable
+Look into <inf>/parse-glob
+Look into <inf>/glob-base
+Look into <inf>/glob-base/node_modules/glob-parent
+Look into <inf>/glob-base/node_modules/is-glob
+Look into <inf>/glob-base/node_modules/is-extglob
+Look into <inf>/glob-base/node_modules/is-glob
+Look into <inf>/is-dotfile
+Look into <inf>/parse-glob/node_modules/is-extglob
+Look into <inf>/parse-glob/node_modules/is-glob
+Look into <inf>/parse-glob/node_modules/is-extglob
+Look into <inf>/regex-cache
+Look into <inf>/is-equal-shallow
+Look into <inf>/is-primitive
+Look into <inf>/ordered-read-streams
+Look into <inf>/is-stream
+Look into <inf>/readable-stream
+Look into <inf>/through2
+Look into <inf>/to-absolute-glob
+Look into <inf>/extend-shallow
+Look into <inf>/is-extendable
+Look into <inf>/unique-stream
+Look into <inf>/json-stable-stringify
+Look into <inf>/jsonify
+Look into <inf>/through2-filter
+Look into <inf>/through2-filter/node_modules/through2
+Look into <inf>/readable-stream
+Look into <inf>/xtend
+Look into <inf>/xtend
+Look into <inf>/graceful-fs
+Look into <inf>/gulp-sourcemaps
+Look into <inf>/convert-source-map
+Look into <inf>/graceful-fs
+Look into <inf>/strip-bom
+Look into <inf>/gulp-sourcemaps/node_modules/through2
+Look into <inf>/readable-stream
+Look into <inf>/xtend
+Look into <inf>/vinyl
+Look into <inf>/is-valid-glob
+Look into <inf>/lazystream
+Look into <inf>/readable-stream
+Look into <inf>/lodash.isequal
+Look into <inf>/merge-stream
+Look into <inf>/readable-stream
+Look into <inf>/mkdirp
+Look into <inf>/mkdirp/node_modules/minimist
+Look into <inf>/object-assign
+Look into <inf>/readable-stream
+Look into <inf>/strip-bom
+Look into <inf>/strip-bom-stream
+Look into <inf>/first-chunk-stream
+Look into <inf>/strip-bom
+Look into <inf>/vinyl-fs/node_modules/through2
+Look into <inf>/readable-stream
+Look into <inf>/xtend
+Look into <inf>/through2-filter
+Look into <inf>/vali-date
+Look into <inf>/vinyl
+Look into <inf>/gulp-util
+Look into <inf>/array-differ
+Look into <inf>/array-uniq
+Look into <inf>/beeper
+Look into <inf>/chalk
+Look into <inf>/dateformat
+Look into <inf>/fancy-log
+Look into <inf>/ansi-gray
+Look into <inf>/ansi-wrap
+Look into <inf>/color-support
+Look into <inf>/time-stamp
+Look into <inf>/gulplog
+Look into <inf>/glogg
+Look into <inf>/sparkles
+Look into <inf>/has-gulplog
+Look into <inf>/sparkles
+Look into <inf>/lodash._reescape
+Look into <inf>/lodash._reevaluate
+Look into <inf>/lodash._reinterpolate
+Look into <inf>/lodash.template
+Look into <inf>/lodash._basecopy
+Look into <inf>/lodash._basetostring
+Look into <inf>/lodash._basevalues
+Look into <inf>/lodash._isiterateecall
+Look into <inf>/lodash._reinterpolate
+Look into <inf>/lodash.escape
+Look into <inf>/lodash._root
+Look into <inf>/lodash.keys
+Look into <inf>/lodash._getnative
+Look into <inf>/lodash.isarguments
+Look into <inf>/lodash.isarray
+Look into <inf>/lodash.restparam
+Look into <inf>/lodash.templatesettings
+Look into <inf>/lodash._reinterpolate
+Look into <inf>/lodash.escape
+Look into <inf>/minimist
+Look into <inf>/multipipe
+Look into <inf>/multipipe/node_modules/duplexer2
+Look into <inf>/multipipe/node_modules/readable-stream
+Look into <inf>/core-util-is
+Look into <inf>/inherits
+Look into <inf>/multipipe/node_modules/isarray
+Look into <inf>/gulp-util/node_modules/object-assign
+Look into <inf>/replace-ext
+Look into <inf>/gulp-util/node_modules/through2
+Look into <inf>/readable-stream
+Look into <inf>/xtend
+Look into <inf>/gulp-util/node_modules/vinyl
+Look into <inf>/clone
+Look into <inf>/clone-stats
+Look into <inf>/replace-ext
+Look into <inf>/readable-stream
+Look into <inf>/gulp-rename
+Look into <inf>/is-url
+Look into <inf>/object-assign
+Look into <inf>/read-all-stream
+Look into <inf>/readable-stream
+Look into <inf>/stream-combiner2
+Look into <inf>/vinyl
+Look into <inf>/vinyl-fs
+Look into <inf>/ware
+Look into <inf>/wrap-fn
+Look into <inf>/co
+Look into <inf>/each-async
+Look into <inf>/lazy-req
+Look into <inf>/os-filter-obj
+Look into <inf>/logalot
+Look into <inf>/figures
+Look into <inf>/escape-string-regexp
+Look into <inf>/object-assign
+Look into <inf>/squeak
+Look into <inf>/chalk
+Look into <inf>/console-stream
+Look into <inf>/lpad-align
+Look into <inf>/get-stdin
+Look into <inf>/indent-string
+Look into <inf>/longest
+Look into <inf>/meow
+Install types for bin-build
+=> not found
+Install types for decompress
+Install types for decompress-tar
+=> not found
+Install types for file-type
+Install types for is-stream
+Install types for tar-stream
+Install types for bl
+Install types for readable-stream
+=> not found
+Install types for core-util-is
+=> not found
+Install types for inherits
+Install types for isarray
+=> not found
+Install types for process-nextick-args
+=> not found
+Install types for safe-buffer
+=> not found
+Install types for util-deprecate
+Install types for buffer-alloc
+=> not found
+Install types for buffer-alloc-unsafe
+=> not found
+Install types for buffer-fill
+=> not found
+Install types for end-of-stream
+Install types for once
+Install types for wrappy
+=> not found
+Install types for fs-constants
+=> not found
+Install types for to-buffer
+=> not found
+Install types for xtend
+Install types for decompress-tarbz2
+=> not found
+Install types for file-type
+Install types for seek-bzip
+=> not found
+Install types for commander
+Install types for graceful-readlink
+=> not found
+Install types for unbzip2-stream
+=> not found
+Install types for through
+Install types for decompress-targz
+=> not found
+Install types for decompress-unzip
+=> not found
+Install types for file-type
+Install types for get-stream
+Install types for object-assign
+Install types for pinkie-promise
+=> not found
+Install types for pinkie
+=> not found
+Install types for pify
+Install types for yauzl
+Install types for buffer-crc32
+=> not found
+Install types for fd-slicer
+=> not found
+Install types for pend
+=> not found
+Install types for graceful-fs
+Install types for make-dir
+Install types for pify
+Install types for strip-dirs
+=> not found
+Install types for is-natural-number
+=> not found
+Install types for download
+Install types for caw
+=> not found
+Install types for get-proxy
+=> not found
+Install types for npm-conf
+=> not found
+Install types for config-chain
+=> not found
+Install types for ini
+Install types for proto-list
+=> not found
+Install types for pify
+Install types for isurl
+=> not found
+Install types for has-to-string-tag-x
+=> not found
+Install types for has-symbol-support-x
+=> not found
+Install types for is-object
+Install types for tunnel-agent
+=> not found
+Install types for url-to-options
+=> not found
+Install types for content-disposition
+Install types for ext-name
+=> not found
+Install types for ext-list
+=> not found
+Install types for mime-db
+Install types for sort-keys-length
+=> not found
+Install types for sort-keys
+=> not found
+Install types for is-plain-obj
+=> not found
+Install types for filenamify
+Install types for filename-reserved-regex
+=> not found
+Install types for strip-outer
+=> not found
+Install types for escape-string-regexp
+Install types for trim-repeated
+=> not found
+Install types for get-stream
+Install types for got
+Install types for decompress-response
+Install types for mimic-response
+=> not found
+Install types for duplexer3
+Install types for get-stream
+Install types for is-retry-allowed
+=> not found
+Install types for lowercase-keys
+=> not found
+Install types for p-cancelable
+Install types for p-timeout
+Install types for p-finally
+=> not found
+Install types for timed-out
+=> not found
+Install types for url-parse-lax
+=> not found
+Install types for prepend-http
+=> not found
+Install types for p-event
+Install types for pify
+Install types for execa
+Install types for cross-spawn
+Install types for lru-cache
+Install types for pseudomap
+=> not found
+Install types for yallist
+Install types for shebang-command
+=> not found
+Install types for shebang-regex
+=> not found
+Install types for which
+Install types for isexe
+=> not found
+Install types for get-stream
+Install types for npm-run-path
+=> not found
+Install types for path-key
+=> not found
+Install types for signal-exit
+=> not found
+Install types for strip-eof
+=> not found
+Install types for p-map-series
+Install types for p-reduce
+Install types for tempfile
+Install types for temp-dir
+=> not found
+Install types for uuid
+Install types for bin-wrapper
+=> not found
+Install types for bin-check
+=> not found
+Install types for executable
+=> not found
+Install types for meow
+Install types for camelcase-keys
+Install types for camelcase
+Install types for map-obj
+Install types for decamelize
+Install types for loud-rejection
+Install types for currently-unhandled
+=> not found
+Install types for array-find-index
+Install types for minimist
+Install types for normalize-package-data
+Install types for hosted-git-info
+=> not found
+Install types for is-builtin-module
+=> not found
+Install types for builtin-modules
+Install types for semver
+Install types for validate-npm-package-license
+=> not found
+Install types for spdx-correct
+Install types for spdx-expression-parse
+=> not found
+Install types for spdx-exceptions
+=> not found
+Install types for spdx-license-ids
+=> not found
+Install types for read-pkg-up
+Install types for find-up
+Install types for path-exists
+Install types for read-pkg
+Install types for load-json-file
+Install types for parse-json
+Install types for error-ex
+=> not found
+Install types for is-arrayish
+=> not found
+Install types for strip-bom
+Install types for is-utf8
+=> not found
+Install types for path-type
+=> not found
+Install types for redent
+=> not found
+Install types for indent-string
+Install types for repeating
+=> not found
+Install types for is-finite
+Install types for number-is-nan
+Install types for strip-indent
+=> not found
+Install types for get-stdin
+Install types for trim-newlines
+=> not found
+Install types for bin-version-check
+=> not found
+Install types for bin-version
+=> not found
+Install types for find-versions
+Install types for array-uniq
+Install types for semver-regex
+=> not found
+Install types for semver
+Install types for semver-truncate
+=> not found
+Install types for download
+Install types for caw
+=> not found
+Install types for get-proxy
+=> not found
+Install types for rc
+Install types for deep-extend
+Install types for strip-json-comments
+Install types for is-obj
+=> not found
+Install types for object-assign
+Install types for tunnel-agent
+=> not found
+Install types for concat-stream
+Install types for buffer-from
+Install types for typedarray
+=> not found
+Install types for each-async
+=> not found
+Install types for onetime
+Install types for set-immediate-shim
+=> not found
+Install types for filenamify
+Install types for filename-reserved-regex
+=> not found
+Install types for got
+Install types for create-error-class
+=> not found
+Install types for capture-stack-trace
+=> not found
+Install types for duplexer2
+Install types for is-redirect
+=> not found
+Install types for node-status-codes
+=> not found
+Install types for read-all-stream
+=> not found
+Install types for timed-out
+=> not found
+Install types for unzip-response
+=> not found
+Install types for gulp-decompress
+=> not found
+Install types for archive-type
+=> not found
+Install types for file-type
+Install types for decompress
+Install types for buffer-to-vinyl
+=> not found
+Install types for file-type
+Install types for uuid
+Install types for vinyl
+Install types for clone
+Install types for clone-stats
+=> not found
+Install types for replace-ext
+Install types for decompress-tar
+=> not found
+Install types for is-tar
+=> not found
+Install types for object-assign
+Install types for strip-dirs
+=> not found
+Install types for chalk
+Install types for ansi-styles
+Install types for has-ansi
+Install types for ansi-regex
+Install types for strip-ansi
+Install types for supports-color
+Install types for is-absolute
+=> not found
+Install types for is-relative
+=> not found
+Install types for is-natural-number
+=> not found
+Install types for sum-up
+=> not found
+Install types for through2
+Install types for readable-stream
+=> not found
+Install types for isarray
+=> not found
+Install types for vinyl
+Install types for clone
+Install types for decompress-tarbz2
+=> not found
+Install types for is-bzip2
+=> not found
+Install types for decompress-targz
+=> not found
+Install types for is-gzip
+=> not found
+Install types for decompress-unzip
+=> not found
+Install types for is-zip
+=> not found
+Install types for stat-mode
+Install types for through2
+Install types for vinyl
+Install types for clone
+Install types for stream-combiner2
+=> not found
+Install types for vinyl-assign
+=> not found
+Install types for vinyl-fs
+Install types for duplexify
+Install types for stream-shift
+Install types for glob-stream
+Install types for extend
+Install types for glob
+Install types for inflight
+=> not found
+Install types for minimatch
+Install types for brace-expansion
+Install types for balanced-match
+=> not found
+Install types for concat-map
+=> not found
+Install types for path-is-absolute
+Install types for glob-parent
+Install types for is-glob
+Install types for is-extglob
+=> not found
+Install types for path-dirname
+=> not found
+Install types for micromatch
+Install types for arr-diff
+=> not found
+Install types for arr-flatten
+=> not found
+Install types for array-unique
+Install types for braces
+Install types for expand-range
+=> not found
+Install types for fill-range
+=> not found
+Install types for is-number
+Install types for kind-of
+=> not found
+Install types for is-buffer
+=> not found
+Install types for isobject
+=> not found
+Install types for randomatic
+=> not found
+Install types for is-number
+Install types for kind-of
+=> not found
+Install types for math-random
+=> not found
+Install types for repeat-element
+=> not found
+Install types for repeat-string
+=> not found
+Install types for preserve
+=> not found
+Install types for expand-brackets
+=> not found
+Install types for is-posix-bracket
+=> not found
+Install types for extglob
+=> not found
+Install types for is-extglob
+=> not found
+Install types for filename-regex
+=> not found
+Install types for is-extglob
+=> not found
+Install types for is-glob
+Install types for normalize-path
+=> not found
+Install types for remove-trailing-separator
+=> not found
+Install types for object.omit
+=> not found
+Install types for for-own
+=> not found
+Install types for for-in
+=> not found
+Install types for is-extendable
+=> not found
+Install types for parse-glob
+Install types for glob-base
+Install types for glob-parent
+Install types for is-glob
+Install types for is-extglob
+=> not found
+Install types for is-dotfile
+=> not found
+Install types for is-extglob
+=> not found
+Install types for is-glob
+Install types for regex-cache
+=> not found
+Install types for is-equal-shallow
+=> not found
+Install types for is-primitive
+=> not found
+Install types for ordered-read-streams
+=> not found
+Install types for to-absolute-glob
+Install types for extend-shallow
+=> not found
+Install types for unique-stream
+=> not found
+Install types for json-stable-stringify
+Install types for jsonify
+=> not found
+Install types for through2-filter
+=> not found
+Install types for through2
+Install types for gulp-sourcemaps
+Install types for convert-source-map
+Install types for through2
+Install types for is-valid-glob
+=> not found
+Install types for lazystream
+=> not found
+Install types for lodash.isequal
+Install types for merge-stream
+Install types for mkdirp
+Install types for minimist
+Install types for strip-bom-stream
+=> not found
+Install types for first-chunk-stream
+=> not found
+Install types for through2
+Install types for vali-date
+Install types for gulp-util
+Install types for array-differ
+=> not found
+Install types for beeper
+=> not found
+Install types for dateformat
+Install types for fancy-log
+Install types for ansi-gray
+=> not found
+Install types for ansi-wrap
+=> not found
+Install types for color-support
+=> not found
+Install types for time-stamp
+=> not found
+Install types for gulplog
+=> not found
+Install types for glogg
+=> not found
+Install types for sparkles
+=> not found
+Install types for has-gulplog
+=> not found
+Install types for lodash._reescape
+=> not found
+Install types for lodash._reevaluate
+=> not found
+Install types for lodash._reinterpolate
+=> not found
+Install types for lodash.template
+Install types for lodash._basecopy
+=> not found
+Install types for lodash._basetostring
+=> not found
+Install types for lodash._basevalues
+=> not found
+Install types for lodash._isiterateecall
+=> not found
+Install types for lodash.escape
+Install types for lodash._root
+=> not found
+Install types for lodash.keys
+Install types for lodash._getnative
+=> not found
+Install types for lodash.isarguments
+Install types for lodash.isarray
+Install types for lodash.restparam
+=> not found
+Install types for lodash.templatesettings
+=> not found
+Install types for multipipe
+=> not found
+Install types for duplexer2
+Install types for readable-stream
+=> not found
+Install types for isarray
+=> not found
+Install types for object-assign
+Install types for through2
+Install types for vinyl
+Install types for gulp-rename
+Install types for is-url
+Install types for ware
+=> not found
+Install types for wrap-fn
+=> not found
+Install types for co
+=> not found
+Install types for lazy-req
+=> not found
+Install types for os-filter-obj
+=> not found
+Install types for logalot
+=> not found
+Install types for figures
+Install types for squeak
+=> not found
+Install types for console-stream
+=> not found
+Install types for lpad-align
+=> not found
+Install types for longest
+=> not found
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/mozjpeg/_inferium_gather.ts
+Gather types for 352 packages:
+=> bin-build, decompress, decompress-tar, file-type, is-stream, tar-stream, bl, readable-stream, core-util-is, inherits, isarray, process-nextick-args, safe-buffer, util-deprecate, buffer-alloc, buffer-alloc-unsafe, buffer-fill, end-of-stream, once, wrappy, fs-constants, to-buffer, xtend, decompress-tarbz2, file-type, seek-bzip, commander, graceful-readlink, unbzip2-stream, through, decompress-targz, decompress-unzip, file-type, get-stream, object-assign, pinkie-promise, pinkie, pify, yauzl, buffer-crc32, fd-slicer, pend, graceful-fs, make-dir, pify, strip-dirs, is-natural-number, download, caw, get-proxy, npm-conf, config-chain, ini, proto-list, pify, isurl, has-to-string-tag-x, has-symbol-support-x, is-object, tunnel-agent, url-to-options, content-disposition, ext-name, ext-list, mime-db, sort-keys-length, sort-keys, is-plain-obj, filenamify, filename-reserved-regex, strip-outer, escape-string-regexp, trim-repeated, get-stream, got, decompress-response, mimic-response, duplexer3, get-stream, is-retry-allowed, lowercase-keys, p-cancelable, p-timeout, p-finally, timed-out, url-parse-lax, prepend-http, p-event, pify, execa, cross-spawn, lru-cache, pseudomap, yallist, shebang-command, shebang-regex, which, isexe, get-stream, npm-run-path, path-key, signal-exit, strip-eof, p-map-series, p-reduce, tempfile, temp-dir, uuid, bin-wrapper, bin-check, executable, meow, camelcase-keys, camelcase, map-obj, decamelize, loud-rejection, currently-unhandled, array-find-index, minimist, normalize-package-data, hosted-git-info, is-builtin-module, builtin-modules, semver, validate-npm-package-license, spdx-correct, spdx-expression-parse, spdx-exceptions, spdx-license-ids, read-pkg-up, find-up, path-exists, read-pkg, load-json-file, parse-json, error-ex, is-arrayish, strip-bom, is-utf8, path-type, redent, indent-string, repeating, is-finite, number-is-nan, strip-indent, get-stdin, trim-newlines, bin-version-check, bin-version, find-versions, array-uniq, semver-regex, semver, semver-truncate, download, caw, get-proxy, rc, deep-extend, strip-json-comments, is-obj, object-assign, tunnel-agent, concat-stream, buffer-from, typedarray, each-async, onetime, set-immediate-shim, filenamify, filename-reserved-regex, got, create-error-class, capture-stack-trace, duplexer2, is-redirect, node-status-codes, read-all-stream, timed-out, unzip-response, gulp-decompress, archive-type, file-type, decompress, buffer-to-vinyl, file-type, uuid, vinyl, clone, clone-stats, replace-ext, decompress-tar, is-tar, object-assign, strip-dirs, chalk, ansi-styles, has-ansi, ansi-regex, strip-ansi, supports-color, is-absolute, is-relative, is-natural-number, sum-up, through2, readable-stream, isarray, vinyl, clone, decompress-tarbz2, is-bzip2, decompress-targz, is-gzip, decompress-unzip, is-zip, stat-mode, through2, vinyl, clone, stream-combiner2, vinyl-assign, vinyl-fs, duplexify, stream-shift, glob-stream, extend, glob, inflight, minimatch, brace-expansion, balanced-match, concat-map, path-is-absolute, glob-parent, is-glob, is-extglob, path-dirname, micromatch, arr-diff, arr-flatten, array-unique, braces, expand-range, fill-range, is-number, kind-of, is-buffer, isobject, randomatic, is-number, kind-of, math-random, repeat-element, repeat-string, preserve, expand-brackets, is-posix-bracket, extglob, is-extglob, filename-regex, is-extglob, is-glob, normalize-path, remove-trailing-separator, object.omit, for-own, for-in, is-extendable, parse-glob, glob-base, glob-parent, is-glob, is-extglob, is-dotfile, is-extglob, is-glob, regex-cache, is-equal-shallow, is-primitive, ordered-read-streams, to-absolute-glob, extend-shallow, unique-stream, json-stable-stringify, jsonify, through2-filter, through2, gulp-sourcemaps, convert-source-map, through2, is-valid-glob, lazystream, lodash.isequal, merge-stream, mkdirp, minimist, strip-bom-stream, first-chunk-stream, through2, vali-date, gulp-util, array-differ, beeper, dateformat, fancy-log, ansi-gray, ansi-wrap, color-support, time-stamp, gulplog, glogg, sparkles, has-gulplog, lodash._reescape, lodash._reevaluate, lodash._reinterpolate, lodash.template, lodash._basecopy, lodash._basetostring, lodash._basevalues, lodash._isiterateecall, lodash.escape, lodash._root, lodash.keys, lodash._getnative, lodash.isarguments, lodash.isarray, lodash.restparam, lodash.templatesettings, multipipe, duplexer2, readable-stream, isarray, object-assign, through2, vinyl, gulp-rename, is-url, ware, wrap-fn, co, lazy-req, os-filter-obj, logalot, figures, squeak, console-stream, lpad-align, longest 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34, _inferium_import_35, _inferium_import_36, _inferium_import_37, _inferium_import_38, _inferium_import_39, _inferium_import_40, _inferium_import_41, _inferium_import_42, _inferium_import_43, _inferium_import_44, _inferium_import_45, _inferium_import_46, _inferium_import_47, _inferium_import_48, _inferium_import_49, _inferium_import_50, _inferium_import_51, _inferium_import_52, _inferium_import_53, _inferium_import_54, _inferium_import_55, _inferium_import_56, _inferium_import_57, _inferium_import_58, _inferium_import_59, _inferium_import_60, _inferium_import_61, _inferium_import_62, _inferium_import_63, _inferium_import_64, _inferium_import_65, _inferium_import_66, _inferium_import_67, _inferium_import_68, _inferium_import_69, _inferium_import_70, _inferium_import_71, _inferium_import_72, _inferium_import_73, _inferium_import_74, _inferium_import_75, _inferium_import_76, _inferium_import_77, _inferium_import_78, _inferium_import_79, _inferium_import_80, _inferium_import_81, _inferium_import_82, _inferium_import_83, _inferium_import_84, _inferium_import_85, _inferium_import_86, _inferium_import_87, _inferium_import_88, _inferium_import_89, _inferium_import_90, _inferium_import_91, _inferium_import_92, _inferium_import_93, _inferium_import_94, _inferium_import_95, _inferium_import_96, _inferium_import_97, _inferium_import_98, _inferium_import_99, _inferium_import_100, _inferium_import_101, _inferium_import_102, _inferium_import_103, _inferium_import_104, _inferium_import_105, _inferium_import_106, _inferium_import_107, _inferium_import_108, _inferium_import_109, _inferium_import_110, _inferium_import_111, _inferium_import_112, _inferium_import_113, _inferium_import_114, _inferium_import_115, _inferium_import_116, _inferium_import_117, _inferium_import_118, _inferium_import_119, _inferium_import_120, _inferium_import_121, _inferium_import_122, _inferium_import_123, _inferium_import_124, _inferium_import_125, _inferium_import_126, _inferium_import_127, _inferium_import_128, _inferium_import_129, _inferium_import_130, _inferium_import_131, _inferium_import_132, _inferium_import_133, _inferium_import_134, _inferium_import_135, _inferium_import_136, _inferium_import_137, _inferium_import_138, _inferium_import_139, _inferium_import_140, _inferium_import_141, _inferium_import_142, _inferium_import_143, _inferium_import_144, _inferium_import_145, _inferium_import_146, _inferium_import_147, _inferium_import_148, _inferium_import_149, _inferium_import_150, _inferium_import_151, _inferium_import_152, _inferium_import_153, _inferium_import_154, _inferium_import_155, _inferium_import_156, _inferium_import_157, _inferium_import_158, _inferium_import_159, _inferium_import_160, _inferium_import_161, _inferium_import_162, _inferium_import_163, _inferium_import_164, _inferium_import_165, _inferium_import_166, _inferium_import_167, _inferium_import_168, _inferium_import_169, _inferium_import_170, _inferium_import_171, _inferium_import_172, _inferium_import_173, _inferium_import_174, _inferium_import_175, _inferium_import_176, _inferium_import_177, _inferium_import_178, _inferium_import_179, _inferium_import_180, _inferium_import_181, _inferium_import_182, _inferium_import_183, _inferium_import_184, _inferium_import_185, _inferium_import_186, _inferium_import_187, _inferium_import_188, _inferium_import_189, _inferium_import_190, _inferium_import_191, _inferium_import_192, _inferium_import_193, _inferium_import_194, _inferium_import_195, _inferium_import_196, _inferium_import_197, _inferium_import_198, _inferium_import_199, _inferium_import_200, _inferium_import_201, _inferium_import_202, _inferium_import_203, _inferium_import_204, _inferium_import_205, _inferium_import_206, _inferium_import_207, _inferium_import_208, _inferium_import_209, _inferium_import_210, _inferium_import_211, _inferium_import_212, _inferium_import_213, _inferium_import_214, _inferium_import_215, _inferium_import_216, _inferium_import_217, _inferium_import_218, _inferium_import_219, _inferium_import_220, _inferium_import_221, _inferium_import_222, _inferium_import_223, _inferium_import_224, _inferium_import_225, _inferium_import_226, _inferium_import_227, _inferium_import_228, _inferium_import_229, _inferium_import_230, _inferium_import_231, _inferium_import_232, _inferium_import_233, _inferium_import_234, _inferium_import_235, _inferium_import_236, _inferium_import_237, _inferium_import_238, _inferium_import_239, _inferium_import_240, _inferium_import_241, _inferium_import_242, _inferium_import_243, _inferium_import_244, _inferium_import_245, _inferium_import_246, _inferium_import_247, _inferium_import_248, _inferium_import_249, _inferium_import_250, _inferium_import_251, _inferium_import_252, _inferium_import_253, _inferium_import_254, _inferium_import_255, _inferium_import_256, _inferium_import_257, _inferium_import_258, _inferium_import_259, _inferium_import_260, _inferium_import_261, _inferium_import_262, _inferium_import_263, _inferium_import_264, _inferium_import_265, _inferium_import_266, _inferium_import_267, _inferium_import_268, _inferium_import_269, _inferium_import_270, _inferium_import_271, _inferium_import_272, _inferium_import_273, _inferium_import_274, _inferium_import_275, _inferium_import_276, _inferium_import_277, _inferium_import_278, _inferium_import_279, _inferium_import_280, _inferium_import_281, _inferium_import_282, _inferium_import_283, _inferium_import_284, _inferium_import_285, _inferium_import_286, _inferium_import_287, _inferium_import_288, _inferium_import_289, _inferium_import_290, _inferium_import_291, _inferium_import_292, _inferium_import_293, _inferium_import_294, _inferium_import_295, _inferium_import_296, _inferium_import_297, _inferium_import_298, _inferium_import_299, _inferium_import_300, _inferium_import_301, _inferium_import_302, _inferium_import_303, _inferium_import_304, _inferium_import_305, _inferium_import_306, _inferium_import_307, _inferium_import_308, _inferium_import_309, _inferium_import_310, _inferium_import_311, _inferium_import_312, _inferium_import_313, _inferium_import_314, _inferium_import_315, _inferium_import_316, _inferium_import_317, _inferium_import_318, _inferium_import_319, _inferium_import_320, _inferium_import_321, _inferium_import_322, _inferium_import_323, _inferium_import_324, _inferium_import_325, _inferium_import_326, _inferium_import_327, _inferium_import_328, _inferium_import_329, _inferium_import_330, _inferium_import_331, _inferium_import_332, _inferium_import_333, _inferium_import_334, _inferium_import_335, _inferium_import_336, _inferium_import_337, _inferium_import_338, _inferium_import_339, _inferium_import_340, _inferium_import_341, _inferium_import_342, _inferium_import_343, _inferium_import_344, _inferium_import_345, _inferium_import_346, _inferium_import_347, _inferium_import_348, _inferium_import_349, _inferium_import_350, _inferium_import_351
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "safe-buffer", "dateformat"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/events/index.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/decompress/index.d.ts
+=> <inf>/@types/file-type/index.d.ts
+=> <inf>/@types/is-stream/index.d.ts
+=> <inf>/@types/tar-stream/index.d.ts
+=> <inf>/@types/bl/index.d.ts
+=> <inf>/@types/inherits/index.d.ts
+=> <inf>/safe-buffer/index.d.ts
+=> <inf>/@types/util-deprecate/index.d.ts
+=> <inf>/@types/end-of-stream/index.d.ts
+=> <inf>/@types/once/index.d.ts
+=> <inf>/@types/xtend/index.d.ts
+=> <inf>/@types/through/index.d.ts
+=> <inf>/@types/get-stream/index.d.ts
+=> <inf>/@types/object-assign/index.d.ts
+=> <inf>/@types/pify/index.d.ts
+=> <inf>/@types/yauzl/index.d.ts
+=> <inf>/@types/graceful-fs/index.d.ts
+=> <inf>/@types/make-dir/index.d.ts
+=> <inf>/@types/got/index.d.ts
+=> <inf>/@types/download/index.d.ts
+=> <inf>/@types/ini/index.d.ts
+=> <inf>/@types/is-object/index.d.ts
+=> <inf>/@types/content-disposition/index.d.ts
+=> <inf>/@types/mime-db/index.d.ts
+=> <inf>/@types/filenamify/index.d.ts
+=> <inf>/@types/escape-string-regexp/index.d.ts
+=> <inf>/@types/decompress-response/index.d.ts
+=> <inf>/@types/duplexer3/index.d.ts
+=> <inf>/@types/p-cancelable/index.d.ts
+=> <inf>/@types/p-timeout/index.d.ts
+=> <inf>/@types/p-event/index.d.ts
+=> <inf>/@types/execa/index.d.ts
+=> <inf>/@types/cross-spawn/index.d.ts
+=> <inf>/@types/lru-cache/index.d.ts
+=> <inf>/@types/yallist/index.d.ts
+=> <inf>/@types/which/index.d.ts
+=> <inf>/@types/p-map-series/index.d.ts
+=> <inf>/@types/p-reduce/index.d.ts
+=> <inf>/@types/tempfile/index.d.ts
+=> <inf>/@types/uuid/interfaces.d.ts
+=> <inf>/@types/uuid/index.d.ts
+=> <inf>/@types/minimist/index.d.ts
+=> <inf>/@types/minimist-options/index.d.ts
+=> <inf>/@types/meow/index.d.ts
+=> <inf>/@types/camelcase-keys/index.d.ts
+=> <inf>/@types/camelcase/index.d.ts
+=> <inf>/@types/map-obj/index.d.ts
+=> <inf>/@types/decamelize/index.d.ts
+=> <inf>/@types/loud-rejection/index.d.ts
+=> <inf>/@types/array-find-index/index.d.ts
+=> <inf>/@types/normalize-package-data/index.d.ts
+=> <inf>/@types/builtin-modules/index.d.ts
+=> <inf>/@types/semver/index.d.ts
+=> <inf>/@types/spdx-correct/index.d.ts
+=> <inf>/@types/read-pkg-up/index.d.ts
+=> <inf>/@types/find-up/index.d.ts
+=> <inf>/@types/path-exists/index.d.ts
+=> <inf>/@types/read-pkg/index.d.ts
+=> <inf>/@types/load-json-file/index.d.ts
+=> <inf>/@types/parse-json/index.d.ts
+=> <inf>/@types/strip-bom/index.d.ts
+=> <inf>/@types/indent-string/index.d.ts
+=> <inf>/@types/is-finite/index.d.ts
+=> <inf>/@types/number-is-nan/index.d.ts
+=> <inf>/@types/get-stdin/index.d.ts
+=> <inf>/@types/find-versions/index.d.ts
+=> <inf>/@types/array-uniq/index.d.ts
+=> <inf>/@types/rc/index.d.ts
+=> <inf>/@types/deep-extend/index.d.ts
+=> <inf>/@types/strip-json-comments/index.d.ts
+=> <inf>/@types/concat-stream/index.d.ts
+=> <inf>/@types/buffer-from/index.d.ts
+=> <inf>/@types/onetime/index.d.ts
+=> <inf>/@types/duplexer2/index.d.ts
+=> <inf>/@types/vinyl/index.d.ts
+=> <inf>/@types/clone/index.d.ts
+=> <inf>/@types/replace-ext/index.d.ts
+=> <inf>/@types/color-name/index.d.ts
+=> <inf>/@types/ansi-styles/escape-code.d.ts
+=> <inf>/@types/ansi-styles/index.d.ts
+=> <inf>/@types/has-ansi/index.d.ts
+=> <inf>/@types/ansi-regex/index.d.ts
+=> <inf>/@types/strip-ansi/index.d.ts
+=> <inf>/@types/supports-color/index.d.ts
+=> <inf>/@types/through2/index.d.ts
+=> <inf>/@types/stat-mode/index.d.ts
+=> <inf>/@types/minimatch/index.d.ts
+=> <inf>/@types/glob/index.d.ts
+=> <inf>/@types/glob-stream/index.d.ts
+=> <inf>/@types/vinyl-fs/index.d.ts
+=> <inf>/@types/duplexify/index.d.ts
+=> <inf>/@types/stream-shift/index.d.ts
+=> <inf>/@types/extend/index.d.ts
+=> <inf>/@types/brace-expansion/index.d.ts
+=> <inf>/@types/path-is-absolute/index.d.ts
+=> <inf>/@types/glob-parent/index.d.ts
+=> <inf>/@types/is-glob/index.d.ts
+=> <inf>/@types/braces/index.d.ts
+=> <inf>/@types/micromatch/index.d.ts
+=> <inf>/@types/array-unique/index.d.ts
+=> <inf>/@types/is-number/index.d.ts
+=> <inf>/@types/parse-glob/index.d.ts
+=> <inf>/@types/glob-base/index.d.ts
+=> <inf>/@types/to-absolute-glob/index.d.ts
+=> <inf>/@types/json-stable-stringify/index.d.ts
+=> <inf>/@types/gulp-sourcemaps/index.d.ts
+=> <inf>/@types/convert-source-map/index.d.ts
+=> <inf>/@types/lodash/common/common.d.ts
+=> <inf>/@types/lodash/common/array.d.ts
+=> <inf>/@types/lodash/common/collection.d.ts
+=> <inf>/@types/lodash/common/date.d.ts
+=> <inf>/@types/lodash/common/function.d.ts
+=> <inf>/@types/lodash/common/lang.d.ts
+=> <inf>/@types/lodash/common/math.d.ts
+=> <inf>/@types/lodash/common/number.d.ts
+=> <inf>/@types/lodash/common/object.d.ts
+=> <inf>/@types/lodash/common/seq.d.ts
+=> <inf>/@types/lodash/common/string.d.ts
+=> <inf>/@types/lodash/common/util.d.ts
+=> <inf>/@types/lodash/index.d.ts
+=> <inf>/@types/lodash.isequal/index.d.ts
+=> <inf>/@types/merge-stream/index.d.ts
+=> <inf>/@types/mkdirp/index.d.ts
+=> <inf>/@types/vali-date/index.d.ts
+=> <inf>/@types/gulp-util/node_modules/chalk/types/index.d.ts
+=> <inf>/@types/gulp-util/index.d.ts
+=> <inf>/@types/dateformat/index.d.ts
+=> <inf>/@types/fancy-log/index.d.ts
+=> <inf>/@types/lodash.template/index.d.ts
+=> <inf>/@types/lodash.escape/index.d.ts
+=> <inf>/@types/lodash.keys/index.d.ts
+=> <inf>/@types/lodash.isarguments/index.d.ts
+=> <inf>/@types/lodash.isarray/index.d.ts
+=> <inf>/@types/gulp-rename/index.d.ts
+=> <inf>/@types/is-url/index.d.ts
+=> <inf>/@types/figures/index.d.ts
+=> <inf>/mozjpeg/_inferium_gather.ts
+
+Resolve bin-build
+Resolve decompress
+Resolve decompress-tar
+Resolve file-type
+Resolve is-stream
+Resolve tar-stream
+Resolve bl
+Resolve readable-stream
+Resolve core-util-is
+Resolve inherits
+Resolve isarray
+Resolve process-nextick-args
+Resolve safe-buffer
+Resolve util-deprecate
+Resolve buffer-alloc
+Resolve buffer-alloc-unsafe
+Resolve buffer-fill
+Resolve end-of-stream
+Resolve once
+Resolve wrappy
+Resolve fs-constants
+Resolve to-buffer
+Resolve xtend
+Resolve decompress-tarbz2
+Resolve file-type
+Resolve seek-bzip
+Resolve commander
+Resolve graceful-readlink
+Resolve unbzip2-stream
+Resolve through
+Resolve decompress-targz
+Resolve decompress-unzip
+Resolve file-type
+Resolve get-stream
+Resolve object-assign
+Resolve pinkie-promise
+Resolve pinkie
+Resolve pify
+Resolve yauzl
+Resolve buffer-crc32
+Resolve fd-slicer
+Resolve pend
+Resolve graceful-fs
+Resolve make-dir
+Resolve pify
+Resolve strip-dirs
+Resolve is-natural-number
+Resolve download
+Resolve caw
+Resolve get-proxy
+Resolve npm-conf
+Resolve config-chain
+Resolve ini
+Resolve proto-list
+Resolve pify
+Resolve isurl
+Resolve has-to-string-tag-x
+Resolve has-symbol-support-x
+Resolve is-object
+Resolve tunnel-agent
+Resolve url-to-options
+Resolve content-disposition
+Resolve ext-name
+Resolve ext-list
+Resolve mime-db
+Resolve sort-keys-length
+Resolve sort-keys
+Resolve is-plain-obj
+Resolve filenamify
+Resolve filename-reserved-regex
+Resolve strip-outer
+Resolve escape-string-regexp
+Resolve trim-repeated
+Resolve get-stream
+Resolve got
+Resolve decompress-response
+Resolve mimic-response
+Resolve duplexer3
+Resolve get-stream
+Resolve is-retry-allowed
+Resolve lowercase-keys
+Resolve p-cancelable
+Resolve p-timeout
+Resolve p-finally
+Resolve timed-out
+Resolve url-parse-lax
+Resolve prepend-http
+Resolve p-event
+Resolve pify
+Resolve execa
+Resolve cross-spawn
+Resolve lru-cache
+Resolve pseudomap
+Resolve yallist
+Resolve shebang-command
+Resolve shebang-regex
+Resolve which
+Resolve isexe
+Resolve get-stream
+Resolve npm-run-path
+Resolve path-key
+Resolve signal-exit
+Resolve strip-eof
+Resolve p-map-series
+Resolve p-reduce
+Resolve tempfile
+Resolve temp-dir
+Resolve uuid
+Resolve bin-wrapper
+Resolve bin-check
+Resolve executable
+Resolve meow
+Resolve camelcase-keys
+Resolve camelcase
+Resolve map-obj
+Resolve decamelize
+Resolve loud-rejection
+Resolve currently-unhandled
+Resolve array-find-index
+Resolve minimist
+Resolve normalize-package-data
+Resolve hosted-git-info
+Resolve is-builtin-module
+Resolve builtin-modules
+Resolve semver
+Resolve validate-npm-package-license
+Resolve spdx-correct
+Resolve spdx-expression-parse
+Resolve spdx-exceptions
+Resolve spdx-license-ids
+Resolve read-pkg-up
+Resolve find-up
+Resolve path-exists
+Resolve read-pkg
+Resolve load-json-file
+Resolve parse-json
+Resolve error-ex
+Resolve is-arrayish
+Resolve strip-bom
+Resolve is-utf8
+Resolve path-type
+Resolve redent
+Resolve indent-string
+Resolve repeating
+Resolve is-finite
+Resolve number-is-nan
+Resolve strip-indent
+Resolve get-stdin
+Resolve trim-newlines
+Resolve bin-version-check
+Resolve bin-version
+Resolve find-versions
+Resolve array-uniq
+Resolve semver-regex
+Resolve semver
+Resolve semver-truncate
+Resolve download
+Resolve caw
+Resolve get-proxy
+Resolve rc
+Resolve deep-extend
+Resolve strip-json-comments
+Resolve is-obj
+Resolve object-assign
+Resolve tunnel-agent
+Resolve concat-stream
+Resolve buffer-from
+Resolve typedarray
+Resolve each-async
+Resolve onetime
+Resolve set-immediate-shim
+Resolve filenamify
+Resolve filename-reserved-regex
+Resolve got
+Resolve create-error-class
+Resolve capture-stack-trace
+Resolve duplexer2
+Resolve is-redirect
+Resolve node-status-codes
+Resolve read-all-stream
+Resolve timed-out
+Resolve unzip-response
+Resolve gulp-decompress
+Resolve archive-type
+Resolve file-type
+Resolve decompress
+Resolve buffer-to-vinyl
+Resolve file-type
+Resolve uuid
+Resolve vinyl
+Resolve clone
+Resolve clone-stats
+Resolve replace-ext
+Resolve decompress-tar
+Resolve is-tar
+Resolve object-assign
+Resolve strip-dirs
+Resolve chalk
+Resolve ansi-styles
+Resolve has-ansi
+Resolve ansi-regex
+Resolve strip-ansi
+Resolve supports-color
+Resolve is-absolute
+Resolve is-relative
+Resolve is-natural-number
+Resolve sum-up
+Resolve through2
+Resolve readable-stream
+Resolve isarray
+Resolve vinyl
+Resolve clone
+Resolve decompress-tarbz2
+Resolve is-bzip2
+Resolve decompress-targz
+Resolve is-gzip
+Resolve decompress-unzip
+Resolve is-zip
+Resolve stat-mode
+Resolve through2
+Resolve vinyl
+Resolve clone
+Resolve stream-combiner2
+Resolve vinyl-assign
+Resolve vinyl-fs
+Resolve duplexify
+Resolve stream-shift
+Resolve glob-stream
+Resolve extend
+Resolve glob
+Resolve inflight
+Resolve minimatch
+Resolve brace-expansion
+Resolve balanced-match
+Resolve concat-map
+Resolve path-is-absolute
+Resolve glob-parent
+Resolve is-glob
+Resolve is-extglob
+Resolve path-dirname
+Resolve micromatch
+Resolve arr-diff
+Resolve arr-flatten
+Resolve array-unique
+Resolve braces
+Resolve expand-range
+Resolve fill-range
+Resolve is-number
+Resolve kind-of
+Resolve is-buffer
+Resolve isobject
+Resolve randomatic
+Resolve is-number
+Resolve kind-of
+Resolve math-random
+Resolve repeat-element
+Resolve repeat-string
+Resolve preserve
+Resolve expand-brackets
+Resolve is-posix-bracket
+Resolve extglob
+Resolve is-extglob
+Resolve filename-regex
+Resolve is-extglob
+Resolve is-glob
+Resolve normalize-path
+Resolve remove-trailing-separator
+Resolve object.omit
+Resolve for-own
+Resolve for-in
+Resolve is-extendable
+Resolve parse-glob
+Resolve glob-base
+Resolve glob-parent
+Resolve is-glob
+Resolve is-extglob
+Resolve is-dotfile
+Resolve is-extglob
+Resolve is-glob
+Resolve regex-cache
+Resolve is-equal-shallow
+Resolve is-primitive
+Resolve ordered-read-streams
+Resolve to-absolute-glob
+Resolve extend-shallow
+Resolve unique-stream
+Resolve json-stable-stringify
+Resolve jsonify
+Resolve through2-filter
+Resolve through2
+Resolve gulp-sourcemaps
+Resolve convert-source-map
+Resolve through2
+Resolve is-valid-glob
+Resolve lazystream
+Resolve lodash.isequal
+Resolve merge-stream
+Resolve mkdirp
+Resolve minimist
+Resolve strip-bom-stream
+Resolve first-chunk-stream
+Resolve through2
+Resolve vali-date
+Resolve gulp-util
+Resolve array-differ
+Resolve beeper
+Resolve dateformat
+Resolve fancy-log
+Resolve ansi-gray
+Resolve ansi-wrap
+Resolve color-support
+Resolve time-stamp
+Resolve gulplog
+Resolve glogg
+Resolve sparkles
+Resolve has-gulplog
+Resolve lodash._reescape
+Resolve lodash._reevaluate
+Resolve lodash._reinterpolate
+Resolve lodash.template
+Resolve lodash._basecopy
+Resolve lodash._basetostring
+Resolve lodash._basevalues
+Resolve lodash._isiterateecall
+Resolve lodash.escape
+Resolve lodash._root
+Resolve lodash.keys
+Resolve lodash._getnative
+Resolve lodash.isarguments
+Resolve lodash.isarray
+Resolve lodash.restparam
+Resolve lodash.templatesettings
+Resolve multipipe
+Resolve duplexer2
+Resolve readable-stream
+Resolve isarray
+Resolve object-assign
+Resolve through2
+Resolve vinyl
+Resolve gulp-rename
+Resolve is-url
+Resolve ware
+Resolve wrap-fn
+Resolve co
+Resolve lazy-req
+Resolve os-filter-obj
+Resolve logalot
+Resolve figures
+Resolve squeak
+Resolve console-stream
+Resolve lpad-align
+Resolve longest
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/mozjpeg /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/mozjpeg
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", lodash.escape, "https", yauzl, parse-glob, normalize-package-data, "zlib", once, ansi-regex, "fs", "assert", json-stable-stringify, is-object, "dgram", is-url, find-up, camelcase, file-type, spdx-correct, "async_hooks", find-versions, tar-stream, ini, concat-stream, yallist, "url", stat-mode, "dns", glob-parent, "http", "string_decoder", p-map-series, vinyl-fs, "querystring", "events", camelcase-keys, xtend, load-json-file, figures, number-is-nan, escape-string-regexp, gulp-util, strip-ansi, "os", tempfile, stream-shift, strip-json-comments, make-dir, micromatch, p-reduce, "util", cross-spawn, minimist, "constants", "punycode", strip-bom, content-disposition, gulp-rename, extend, read-pkg, "readline", "perf_hooks", lodash.isequal, deep-extend, mime-db, to-absolute-glob, glob, loud-rejection, p-timeout, "dateformat", dateformat, vali-date, braces, vinyl, semver, indent-string, "buffer", glob-stream, is-number, through, "domain", onetime, read-pkg-up, "tty", lru-cache, filenamify, parse-json, "child_process", supports-color, p-cancelable, replace-ext, "crypto", buffer-from, fancy-log, clone, duplexer3, map-obj, gulp-sourcemaps, bl, graceful-fs, is-glob, "inspector", is-finite, array-uniq, lodash.keys, "stream", object-assign, lodash.template, through2, convert-source-map, pify, which, has-ansi, get-stream, util-deprecate, end-of-stream, brace-expansion, safe-buffer, array-find-index, "process", ansi-styles, inherits, decompress-response, "path", "v8", lodash.isarray, "http2", "cluster", duplexify, decompress, array-unique, meow, path-exists, minimatch, get-stdin, "tls", execa, download, "net", rc, "safe-buffer", duplexer2, lodash.isarguments, is-stream, "repl", decamelize, mkdirp, "console", glob-base, "vm", p-event, path-is-absolute, merge-stream
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/mozjpeg/./index.js'
+[info] Done Parsing module.
+[info] Round 0
+[info] Done
+[info] ======= Print Type Definition ======
+[info] => {}
+[success] Total time: 3 s, completed Jul 29, 2018 9:45:21 PM

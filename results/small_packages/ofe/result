@@ -1,0 +1,92 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install ofe into /tmp/inferium
+Error: { Error: Command failed: /bin/sh -c npm install "ofe" --prefix "/tmp/inferium"
+In file included from ../ofe.cc:1:
+../../nan/nan.h: In function ‘void Nan::AsyncQueueWorker(Nan::AsyncWorker*)’:
+../../nan/nan.h:2167:62: warning: cast between incompatible function types from ‘void (*)(uv_work_t*)’ {aka ‘void (*)(uv_work_s*)’} to ‘uv_after_work_cb’ {aka ‘void (*)(uv_work_s*, int)’} [-Wcast-function-type]
+     , reinterpret_cast<uv_after_work_cb>(AsyncExecuteComplete)
+                                                              ^
+../ofe.cc: In function ‘Nan::NAN_METHOD_RETURN_TYPE Method(Nan::NAN_METHOD_ARGS_TYPE)’:
+../ofe.cc:70:7: error: ‘SetFatalErrorHandler’ is not a member of ‘v8::V8’
+   V8::SetFatalErrorHandler(OnFatalError);
+       ^~~~~~~~~~~~~~~~~~~~
+../ofe.cc: In function ‘void Init(v8::Handle<v8::Object>)’:
+../ofe.cc:75:7: error: ‘SetFatalErrorHandler’ is not a member of ‘v8::V8’
+   V8::SetFatalErrorHandler(OnFatalError);
+       ^~~~~~~~~~~~~~~~~~~~
+In file included from ../../nan/nan.h:51,
+                 from ../ofe.cc:1:
+../ofe.cc: At global scope:
+/home/tobi/.node-gyp/10.7.0/include/node/node.h:537:43: warning: cast between incompatible function types from ‘void (*)(v8::Handle<v8::Object>)’ {aka ‘void (*)(v8::Local<v8::Object>)’} to ‘node::addon_register_func’ {aka ‘void (*)(v8::Local<v8::Object>, v8::Local<v8::Value>, void*)’} [-Wcast-function-type]
+       (node::addon_register_func) (regfunc),                          \
+                                           ^
+/home/tobi/.node-gyp/10.7.0/include/node/node.h:571:3: note: in expansion of macro ‘NODE_MODULE_X’
+   NODE_MODULE_X(modname, regfunc, NULL, 0)  // NOLINT (readability/null_usage)
+   ^~~~~~~~~~~~~
+../ofe.cc:80:1: note: in expansion of macro ‘NODE_MODULE’
+ NODE_MODULE(ofe, Init)
+ ^~~~~~~~~~~
+In file included from /home/tobi/.node-gyp/10.7.0/include/node/node.h:63,
+                 from ../../nan/nan.h:51,
+                 from ../ofe.cc:1:
+/home/tobi/.node-gyp/10.7.0/include/node/v8.h: In instantiation of ‘void v8::PersistentBase<T>::SetWeak(P*, typename v8::WeakCallbackInfo<P>::Callback, v8::WeakCallbackType) [with P = node::ObjectWrap; T = v8::Object; typename v8::WeakCallbackInfo<P>::Callback = void (*)(const v8::WeakCallbackInfo<node::ObjectWrap>&)]’:
+/home/tobi/.node-gyp/10.7.0/include/node/node_object_wrap.h:85:78:   required from here
+/home/tobi/.node-gyp/10.7.0/include/node/v8.h:9402:16: warning: cast between incompatible function types from ‘v8::WeakCallbackInfo<node::ObjectWrap>::Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<node::ObjectWrap>&)’} to ‘Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<void>&)’} [-Wcast-function-type]
+                reinterpret_cast<Callback>(callback), type);
+                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/tobi/.node-gyp/10.7.0/include/node/v8.h: In instantiation of ‘void v8::PersistentBase<T>::SetWeak(P*, typename v8::WeakCallbackInfo<P>::Callback, v8::WeakCallbackType) [with P = Nan::ObjectWrap; T = v8::Object; typename v8::WeakCallbackInfo<P>::Callback = void (*)(const v8::WeakCallbackInfo<Nan::ObjectWrap>&)]’:
+../../nan/nan_object_wrap.h:66:61:   required from here
+/home/tobi/.node-gyp/10.7.0/include/node/v8.h:9402:16: warning: cast between incompatible function types from ‘v8::WeakCallbackInfo<Nan::ObjectWrap>::Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<Nan::ObjectWrap>&)’} to ‘Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<void>&)’} [-Wcast-function-type]
+make: *** [ofe.target.mk:101: Release/obj.target/ofe/ofe.o] Error 1
+gyp ERR! build error 
+gyp ERR! stack Error: `make` failed with exit code: 2
+gyp ERR! stack     at ChildProcess.onExit (/usr/lib/node_modules/npm/node_modules/node-gyp/lib/build.js:262:23)
+gyp ERR! stack     at ChildProcess.emit (events.js:182:13)
+gyp ERR! stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:237:12)
+gyp ERR! System Linux 4.17.9-1-ARCH
+gyp ERR! command "/usr/bin/node" "/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js" "rebuild"
+gyp ERR! cwd /tmp/inferium/node_modules/ofe
+gyp ERR! node -v v10.7.0
+gyp ERR! node-gyp -v v3.7.0
+gyp ERR! not ok 
+npm WARN enoent ENOENT: no such file or directory, open '/tmp/inferium/package.json'
+npm WARN inferium No description
+npm WARN inferium No repository field.
+npm WARN inferium No README data
+npm WARN inferium No license field.
+
+npm ERR! code ELIFECYCLE
+npm ERR! errno 1
+npm ERR! ofe@0.5.1 install: `node-gyp rebuild`
+npm ERR! Exit status 1
+npm ERR! 
+npm ERR! Failed at the ofe@0.5.1 install script.
+npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     /home/tobi/.npm/_logs/2018-07-29T17_51_51_949Z-debug.log
+
+
+> ofe@0.5.1 install /tmp/inferium/node_modules/ofe
+> node-gyp rebuild
+
+make: Entering directory '/tmp/inferium/node_modules/ofe/build'
+  CXX(target) Release/obj.target/ofe/ofe.o
+make: Leaving directory '/tmp/inferium/node_modules/ofe/build'
+
+    at makeError (/home/tobi/workspace/inferium/extras/ts-reader/node_modules/execa/index.js:172:9)
+    at Promise.all.then.arr (/home/tobi/workspace/inferium/extras/ts-reader/node_modules/execa/index.js:277:16)
+    at process._tickCallback (internal/process/next_tick.js:68:7)
+  code: 1,
+  stdout:
+   '\n> ofe@0.5.1 install /tmp/inferium/node_modules/ofe\n> node-gyp rebuild\n\nmake: Entering directory \'/tmp/inferium/node_modules/ofe/build\'\n  CXX(target) Release/obj.target/ofe/ofe.o\nmake: Leaving directory \'/tmp/inferium/node_modules/ofe/build\'\n',
+  stderr:
+   'In file included from ../ofe.cc:1:\n../../nan/nan.h: In function ‘void Nan::AsyncQueueWorker(Nan::AsyncWorker*)’:\n../../nan/nan.h:2167:62: warning: cast between incompatible function types from ‘void (*)(uv_work_t*)’ {aka ‘void (*)(uv_work_s*)’} to ‘uv_after_work_cb’ {aka ‘void (*)(uv_work_s*, int)’} [-Wcast-function-type]\n     , reinterpret_cast<uv_after_work_cb>(AsyncExecuteComplete)\n                                                              ^\n../ofe.cc: In function ‘Nan::NAN_METHOD_RETURN_TYPE Method(Nan::NAN_METHOD_ARGS_TYPE)’:\n../ofe.cc:70:7: error: ‘SetFatalErrorHandler’ is not a member of ‘v8::V8’\n   V8::SetFatalErrorHandler(OnFatalError);\n       ^~~~~~~~~~~~~~~~~~~~\n../ofe.cc: In function ‘void Init(v8::Handle<v8::Object>)’:\n../ofe.cc:75:7: error: ‘SetFatalErrorHandler’ is not a member of ‘v8::V8’\n   V8::SetFatalErrorHandler(OnFatalError);\n       ^~~~~~~~~~~~~~~~~~~~\nIn file included from ../../nan/nan.h:51,\n                 from ../ofe.cc:1:\n../ofe.cc: At global scope:\n/home/tobi/.node-gyp/10.7.0/include/node/node.h:537:43: warning: cast between incompatible function types from ‘void (*)(v8::Handle<v8::Object>)’ {aka ‘void (*)(v8::Local<v8::Object>)’} to ‘node::addon_register_func’ {aka ‘void (*)(v8::Local<v8::Object>, v8::Local<v8::Value>, void*)’} [-Wcast-function-type]\n       (node::addon_register_func) (regfunc),                          \\\n                                           ^\n/home/tobi/.node-gyp/10.7.0/include/node/node.h:571:3: note: in expansion of macro ‘NODE_MODULE_X’\n   NODE_MODULE_X(modname, regfunc, NULL, 0)  // NOLINT (readability/null_usage)\n   ^~~~~~~~~~~~~\n../ofe.cc:80:1: note: in expansion of macro ‘NODE_MODULE’\n NODE_MODULE(ofe, Init)\n ^~~~~~~~~~~\nIn file included from /home/tobi/.node-gyp/10.7.0/include/node/node.h:63,\n                 from ../../nan/nan.h:51,\n                 from ../ofe.cc:1:\n/home/tobi/.node-gyp/10.7.0/include/node/v8.h: In instantiation of ‘void v8::PersistentBase<T>::SetWeak(P*, typename v8::WeakCallbackInfo<P>::Callback, v8::WeakCallbackType) [with P = node::ObjectWrap; T = v8::Object; typename v8::WeakCallbackInfo<P>::Callback = void (*)(const v8::WeakCallbackInfo<node::ObjectWrap>&)]’:\n/home/tobi/.node-gyp/10.7.0/include/node/node_object_wrap.h:85:78:   required from here\n/home/tobi/.node-gyp/10.7.0/include/node/v8.h:9402:16: warning: cast between incompatible function types from ‘v8::WeakCallbackInfo<node::ObjectWrap>::Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<node::ObjectWrap>&)’} to ‘Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<void>&)’} [-Wcast-function-type]\n                reinterpret_cast<Callback>(callback), type);\n                ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n/home/tobi/.node-gyp/10.7.0/include/node/v8.h: In instantiation of ‘void v8::PersistentBase<T>::SetWeak(P*, typename v8::WeakCallbackInfo<P>::Callback, v8::WeakCallbackType) [with P = Nan::ObjectWrap; T = v8::Object; typename v8::WeakCallbackInfo<P>::Callback = void (*)(const v8::WeakCallbackInfo<Nan::ObjectWrap>&)]’:\n../../nan/nan_object_wrap.h:66:61:   required from here\n/home/tobi/.node-gyp/10.7.0/include/node/v8.h:9402:16: warning: cast between incompatible function types from ‘v8::WeakCallbackInfo<Nan::ObjectWrap>::Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<Nan::ObjectWrap>&)’} to ‘Callback’ {aka ‘void (*)(const v8::WeakCallbackInfo<void>&)’} [-Wcast-function-type]\nmake: *** [ofe.target.mk:101: Release/obj.target/ofe/ofe.o] Error 1\ngyp ERR! build error \ngyp ERR! stack Error: `make` failed with exit code: 2\ngyp ERR! stack     at ChildProcess.onExit (/usr/lib/node_modules/npm/node_modules/node-gyp/lib/build.js:262:23)\ngyp ERR! stack     at ChildProcess.emit (events.js:182:13)\ngyp ERR! stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:237:12)\ngyp ERR! System Linux 4.17.9-1-ARCH\ngyp ERR! command "/usr/bin/node" "/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js" "rebuild"\ngyp ERR! cwd /tmp/inferium/node_modules/ofe\ngyp ERR! node -v v10.7.0\ngyp ERR! node-gyp -v v3.7.0\ngyp ERR! not ok \nnpm WARN enoent ENOENT: no such file or directory, open \'/tmp/inferium/package.json\'\nnpm WARN inferium No description\nnpm WARN inferium No repository field.\nnpm WARN inferium No README data\nnpm WARN inferium No license field.\n\nnpm ERR! code ELIFECYCLE\nnpm ERR! errno 1\nnpm ERR! ofe@0.5.1 install: `node-gyp rebuild`\nnpm ERR! Exit status 1\nnpm ERR! \nnpm ERR! Failed at the ofe@0.5.1 install script.\nnpm ERR! This is probably not a problem with npm. There is likely additional logging output above.\n\nnpm ERR! A complete log of this run can be found in:\nnpm ERR!     /home/tobi/.npm/_logs/2018-07-29T17_51_51_949Z-debug.log\n',
+  failed: true,
+  signal: null,
+  cmd: '/bin/sh -c npm install "ofe" --prefix "/tmp/inferium"',
+  timedOut: false,
+  killed: false }

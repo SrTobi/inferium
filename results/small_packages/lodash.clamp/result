@@ -1,0 +1,127 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.clamp into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.clamp
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.clamp/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.clamp/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.clamp /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.clamp
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.clamp/./index.js'
+[info] Done Parsing module.
+[info] Found Some(clamp)
+[info] Round 0
+[info] Analyse Some(clamp)
+[info] Round 1
+[info] Analyse Some(clamp)
+[info] Round 2
+[info] Analyse Some(clamp)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I56<T7> {
+[info]   (_?: number): T7
+[info] }
+[info] interface I55<T6 extends I56<T7>, T7> {
+[info]   slice: T6
+[info] }
+[info] interface I54<T5 extends (I55<T6, T7> | number), T6 extends I56<T7>, T7> {
+[info]   (_?: {}, _?: ""): T5
+[info] }
+[info] interface I53<T4 extends I54<T5, T6, T7>, T5 extends (I55<T6, T7> | number), T6 extends I56<T7>, T7> {
+[info]   replace: T4
+[info] }
+[info] interface I57<T10 extends (I53<T4, T5, T6, T7> | (boolean & (number | string) & number)), T4 extends I54<T5, T6, T7>, T5 extends (I55<T6, T7> | number), T6 extends I56<T7>, T7> {
+[info]   (): T10
+[info] }
+[info] interface I60<T21> {
+[info]   (_?: number): T21
+[info] }
+[info] interface I59<T20 extends I60<T21>, T21> {
+[info]   slice: T20
+[info] }
+[info] interface I58<T19 extends (I59<T20, T21> | number), T20 extends I60<T21>, T21> {
+[info]   (_?: {}, _?: ""): T19
+[info] }
+[info] interface I61<T18 extends I58<T19, T20, T21>, T19 extends (I59<T20, T21> | number), T20 extends I60<T21>, T21> {
+[info]   replace: T18
+[info] }
+[info] interface I62<T18 extends I58<T19, T20, T21>, T19 extends (I59<T20, T21> | number), T20 extends I60<T21>, T21, T24 extends (I61<T18, T19, T20, T21> | (boolean & (number | string) & number))> {
+[info]   (): T24
+[info] }
+[info] interface I63<T10 extends (I53<T4, T5, T6, T7> | (boolean & (number | string) & number)), T11 extends I57<T10, T4, T5, T6, T7>, T4 extends I54<T5, T6, T7>, T5 extends (I55<T6, T7> | number), T6 extends I56<T7>, T7> {
+[info]   replace: T4
+[info]   valueOf: (T11)
+[info] }
+[info] interface I64<T18 extends I58<T19, T20, T21>, T19 extends (I59<T20, T21> | number), T20 extends I60<T21>, T21, T24 extends (I61<T18, T19, T20, T21> | (boolean & (number | string) & number)), T25 extends I62<T18, T19, T20, T21, T24>> {
+[info]   replace: T18
+[info]   valueOf: (T25)
+[info] }
+[info] interface I67<T38> {
+[info]   (_?: number): T38
+[info] }
+[info] interface I66<T37 extends I67<T38>, T38> {
+[info]   slice: T37
+[info] }
+[info] interface I65<T36 extends (I66<T37, T38> | number), T37 extends I67<T38>, T38> {
+[info]   (_?: {}, _?: ""): T36
+[info] }
+[info] interface I68<T35 extends I65<T36, T37, T38>, T36 extends (I66<T37, T38> | number), T37 extends I67<T38>, T38> {
+[info]   replace: T35
+[info] }
+[info] interface I69<T35 extends I65<T36, T37, T38>, T36 extends (I66<T37, T38> | number), T37 extends I67<T38>, T38, T41 extends (I68<T35, T36, T37, T38> | (boolean & (number | string) & number))> {
+[info]   (): T41
+[info] }
+[info] interface I70<T35 extends I65<T36, T37, T38>, T36 extends (I66<T37, T38> | number), T37 extends I67<T38>, T38, T41 extends (I68<T35, T36, T37, T38> | (boolean & (number | string) & number)), T42 extends I69<T35, T36, T37, T38, T41>> {
+[info]   replace: T35
+[info]   valueOf: (T42)
+[info] }
+[info] interface I52 {
+[info]   <T10 extends (I53<T4, T5, T6, T7> | (boolean & (number | string) & number)), T11 extends I57<T10, T4, T5, T6, T7>, T18 extends I58<T19, T20, T21>, T19 extends (I59<T20, T21> | number), T20 extends I60<T21>, T21, T24 extends (I61<T18, T19, T20, T21> | (boolean & (number | string) & number)), T25 extends I62<T18, T19, T20, T21, T24>, T3 extends (I63<T10, T11, T4, T5, T6, T7> | (boolean & (number | string) & number)), T31 extends (number & (I64<T18, T19, T20, T21, T24, T25> | (boolean & (number | string) & number))), T35 extends I65<T36, T37, T38>, T36 extends (I66<T37, T38> | number), T37 extends I67<T38>, T38, T4 extends I54<T5, T6, T7>, T41 extends (I68<T35, T36, T37, T38> | (boolean & (number | string) & number)), T42 extends I69<T35, T36, T37, T38, T41>, T5 extends (I55<T6, T7> | number), T51 extends (number & (I70<T35, T36, T37, T38, T41, T42> | (boolean & (number | string) & number))), T6 extends I56<T7>, T7>(number: T3, lower: (T31), upper: (T51)): ({} | T31 | T51 | T10 | T3)
+[info] }
+[info] => I52
+[success] Total time: 4 s, completed Jul 29, 2018 7:31:45 PM

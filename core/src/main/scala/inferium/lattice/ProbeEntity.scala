@@ -20,20 +20,21 @@ class ProbeEntity extends Entity with Callable {
     val _constructors = mutable.Map.empty[ProbeEntity, Seq[js.Type]]
     var _usedAs: js.Type = NeverType
 
-    /*def entities: Iterator[Entity] = {
-        _reads.values.iterator.flatMap(_.iterator) ++
-            _writes.values.iterator ++
-            _dynReads.iterator ++
-            _numberReads.iterator ++
-            Iterator(_dynWrites) ++
-            Iterator(_numberWrites) ++
+    def entities: Iterator[Entity] = {
+        _reads.values.iterator.flatMap(_.origin.iterator) ++
+            _writes.values.iterator.flatMap(_.origin.iterator) ++
+            _dynReads.origin.iterator ++
+            _numberReads.origin.iterator ++
+            _dynWrites.origin.iterator ++
+            _numberWrites.origin.iterator ++
             _calls.flatMap {
-                case (ret, (args, ths)) => Iterator(ret, ths) ++ args.iterator
+                case (ret, (args, ths)) => Iterator(ret) ++ ths.origin.iterator ++ args.flatMap(_.origin.iterator)
             } ++
             _constructors.flatMap {
-                case (ret, args) => Iterator(ret) ++ args.iterator
-            }
-    }*/
+                case (ret, args) => Iterator(ret) ++ args.iterator.flatMap(_.origin.iterator)
+            } ++
+            _usedAs.origin.iterator
+    }
 
     def usedAs(ty: js.Type): Unit = {
         _usedAs = _usedAs intersectWith ty

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+readarray -t arr < $1
+#rm -rf results
+mkdir results
+mkdir results/$1
+
+set -o pipefail
+
+for i in "${arr[@]}"
+do
+	if [ -d "results/$1/$i" ]; then
+		echo $i already analyzed!
+	else
+			mkdir "results/$1/$i"
+			cp "../DefinitelyTyped/types/$i/index.d.ts" "results/$1/$i"
+			echo "$i"
+			./run "$i" |& tee "results/$1/$i/result"
+			if [ $? -eq 0 ]; then
+				echo Success!
+			else
+				rm -r "results/$1/$i"
+				echo Failed!
+			fi
+	fi
+done

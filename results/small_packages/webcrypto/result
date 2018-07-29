@@ -1,0 +1,275 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install webcrypto into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/webcrypto
+Look into <inf>/crypto-browserify
+Look into <inf>/browserify-cipher
+Look into <inf>/browserify-aes
+Look into <inf>/buffer-xor
+Look into <inf>/cipher-base
+Look into <inf>/inherits
+Look into <inf>/safe-buffer
+Look into <inf>/create-hash
+Look into <inf>/cipher-base
+Look into <inf>/inherits
+Look into <inf>/md5.js
+Look into <inf>/hash-base
+Look into <inf>/inherits
+Look into <inf>/safe-buffer
+Look into <inf>/inherits
+Look into <inf>/ripemd160
+Look into <inf>/hash-base
+Look into <inf>/inherits
+Look into <inf>/sha.js
+Look into <inf>/inherits
+Look into <inf>/safe-buffer
+Look into <inf>/evp_bytestokey
+Look into <inf>/md5.js
+Look into <inf>/safe-buffer
+Look into <inf>/inherits
+Look into <inf>/safe-buffer
+Look into <inf>/browserify-des
+Look into <inf>/cipher-base
+Look into <inf>/des.js
+Look into <inf>/inherits
+Look into <inf>/minimalistic-assert
+Look into <inf>/inherits
+Look into <inf>/safe-buffer
+Look into <inf>/evp_bytestokey
+Look into <inf>/browserify-sign
+Look into <inf>/bn.js
+Look into <inf>/browserify-rsa
+Look into <inf>/bn.js
+Look into <inf>/randombytes
+Look into <inf>/safe-buffer
+Look into <inf>/create-hash
+Look into <inf>/create-hmac
+Look into <inf>/cipher-base
+Look into <inf>/create-hash
+Look into <inf>/inherits
+Look into <inf>/ripemd160
+Look into <inf>/safe-buffer
+Look into <inf>/sha.js
+Look into <inf>/elliptic
+Look into <inf>/bn.js
+Look into <inf>/brorand
+Look into <inf>/hash.js
+Look into <inf>/inherits
+Look into <inf>/minimalistic-assert
+Look into <inf>/hmac-drbg
+Look into <inf>/hash.js
+Look into <inf>/minimalistic-assert
+Look into <inf>/minimalistic-crypto-utils
+Look into <inf>/inherits
+Look into <inf>/minimalistic-assert
+Look into <inf>/minimalistic-crypto-utils
+Look into <inf>/inherits
+Look into <inf>/parse-asn1
+Look into <inf>/asn1.js
+Look into <inf>/bn.js
+Look into <inf>/inherits
+Look into <inf>/minimalistic-assert
+Look into <inf>/browserify-aes
+Look into <inf>/create-hash
+Look into <inf>/evp_bytestokey
+Look into <inf>/pbkdf2
+Look into <inf>/create-hash
+Look into <inf>/create-hmac
+Look into <inf>/ripemd160
+Look into <inf>/safe-buffer
+Look into <inf>/sha.js
+Look into <inf>/create-ecdh
+Look into <inf>/bn.js
+Look into <inf>/elliptic
+Look into <inf>/create-hash
+Look into <inf>/create-hmac
+Look into <inf>/diffie-hellman
+Look into <inf>/bn.js
+Look into <inf>/miller-rabin
+Look into <inf>/bn.js
+Look into <inf>/brorand
+Look into <inf>/randombytes
+Look into <inf>/inherits
+Look into <inf>/pbkdf2
+Look into <inf>/public-encrypt
+Look into <inf>/bn.js
+Look into <inf>/browserify-rsa
+Look into <inf>/create-hash
+Look into <inf>/parse-asn1
+Look into <inf>/randombytes
+Look into <inf>/randombytes
+Look into <inf>/randomfill
+Look into <inf>/randombytes
+Look into <inf>/safe-buffer
+Look into <inf>/detect-node
+Install types for crypto-browserify
+=> not found
+Install types for browserify-cipher
+=> not found
+Install types for browserify-aes
+=> not found
+Install types for buffer-xor
+=> not found
+Install types for cipher-base
+=> not found
+Install types for inherits
+Install types for safe-buffer
+=> not found
+Install types for create-hash
+=> not found
+Install types for md5.js
+=> not found
+Install types for hash-base
+=> not found
+Install types for ripemd160
+=> not found
+Install types for sha.js
+=> not found
+Install types for evp_bytestokey
+=> not found
+Install types for browserify-des
+=> not found
+Install types for des.js
+=> not found
+Install types for minimalistic-assert
+=> not found
+Install types for browserify-sign
+=> not found
+Install types for bn.js
+Install types for browserify-rsa
+=> not found
+Install types for randombytes
+=> not found
+Install types for create-hmac
+=> not found
+Install types for elliptic
+=> not found
+Install types for brorand
+Install types for hash.js
+=> not found
+Install types for hmac-drbg
+=> not found
+Install types for minimalistic-crypto-utils
+=> not found
+Install types for parse-asn1
+=> not found
+Install types for asn1.js
+=> not found
+Install types for pbkdf2
+=> not found
+Install types for create-ecdh
+=> not found
+Install types for diffie-hellman
+=> not found
+Install types for miller-rabin
+=> not found
+Install types for public-encrypt
+=> not found
+Install types for randomfill
+=> not found
+Install types for detect-node
+=> not found
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/webcrypto/_inferium_gather.ts
+Gather types for 35 packages:
+=> crypto-browserify, browserify-cipher, browserify-aes, buffer-xor, cipher-base, inherits, safe-buffer, create-hash, md5.js, hash-base, ripemd160, sha.js, evp_bytestokey, browserify-des, des.js, minimalistic-assert, browserify-sign, bn.js, browserify-rsa, randombytes, create-hmac, elliptic, brorand, hash.js, hmac-drbg, minimalistic-crypto-utils, parse-asn1, asn1.js, pbkdf2, create-ecdh, diffie-hellman, miller-rabin, public-encrypt, randomfill, detect-node 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19, _inferium_import_20, _inferium_import_21, _inferium_import_22, _inferium_import_23, _inferium_import_24, _inferium_import_25, _inferium_import_26, _inferium_import_27, _inferium_import_28, _inferium_import_29, _inferium_import_30, _inferium_import_31, _inferium_import_32, _inferium_import_33, _inferium_import_34
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks", "safe-buffer", "hash.js"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+=> <inf>/@types/inherits/index.d.ts
+=> <inf>/safe-buffer/index.d.ts
+=> <inf>/@types/bn.js/index.d.ts
+=> <inf>/@types/brorand/index.d.ts
+=> <inf>/hash.js/lib/hash.d.ts
+=> <inf>/webcrypto/_inferium_gather.ts
+
+Resolve crypto-browserify
+Resolve browserify-cipher
+Resolve browserify-aes
+Resolve buffer-xor
+Resolve cipher-base
+Resolve inherits
+Resolve safe-buffer
+Resolve create-hash
+Resolve md5.js
+Resolve hash-base
+Resolve ripemd160
+Resolve sha.js
+Resolve evp_bytestokey
+Resolve browserify-des
+Resolve des.js
+Resolve minimalistic-assert
+Resolve browserify-sign
+Resolve bn.js
+Resolve browserify-rsa
+Resolve randombytes
+Resolve create-hmac
+Resolve elliptic
+Resolve brorand
+Resolve hash.js
+Resolve hmac-drbg
+Resolve minimalistic-crypto-utils
+Resolve parse-asn1
+Resolve asn1.js
+Resolve pbkdf2
+Resolve create-ecdh
+Resolve diffie-hellman
+Resolve miller-rabin
+Resolve public-encrypt
+Resolve randomfill
+Resolve detect-node
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/webcrypto /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/webcrypto
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "hash.js", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", hash.js, "buffer", "domain", "tty", "child_process", "crypto", "inspector", brorand, bn.js, "stream", safe-buffer, "process", inherits, "path", "v8", "http2", "cluster", "tls", "net", "safe-buffer", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/webcrypto/./src/index.js'
+[info] Done Parsing module.
+[info] Round 0
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I2 {
+[info] }
+[info] interface I1 {
+[info]   fips: boolean
+[info]   ECDH: I2
+[info]   DEFAULT_ENCODING: string
+[info] }
+[info] => ({} | I1)
+[success] Total time: 3 s, completed Jul 29, 2018 8:18:19 PM

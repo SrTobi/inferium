@@ -1,0 +1,133 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.fill into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.fill
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.fill/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.fill/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.fill /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.fill
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.fill/./index.js'
+[info] Done Parsing module.
+[info] Found Some(fill)
+[info] Round 0
+[info] Analyse Some(fill)
+[info] Round 1
+[info] Analyse Some(fill)
+[info] Round 2
+[info] Analyse Some(fill)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I57<T6> {
+[info]   (_?: number): T6
+[info] }
+[info] interface I56<T5 extends I57<T6>, T6> {
+[info]   slice: T5
+[info] }
+[info] interface I59<T43> {
+[info]   (_?: number): T43
+[info] }
+[info] interface I58<T42 extends I59<T43>, T43> {
+[info]   slice: T42
+[info] }
+[info] interface I61<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T5 extends I57<T6>, T6> {
+[info]   (_?: {}, _?: ""): T4
+[info]   (_?: {}, _?: ""): T41
+[info] }
+[info] interface I63<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T6> {
+[info]   replace: T48
+[info] }
+[info] interface I62<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))> {
+[info]   (): T9
+[info]   (): T47
+[info] }
+[info] interface I60<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))> {
+[info]   replace: (T48)
+[info]   valueOf: (T52)
+[info] }
+[info] interface I55<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))> {
+[info]   replace: T48
+[info]   valueOf: (T52)
+[info] }
+[info] interface I54<T13 extends boolean, T2 extends (I55<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (number & (number | string) & boolean)), T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))> {
+[info]   length: (T2 | T13)
+[info] }
+[info] interface I64 {
+[info]   length: ((number & boolean))
+[info] }
+[info] interface I68<T31> {
+[info]   (_?: number): T31
+[info] }
+[info] interface I67<T30 extends I68<T31>, T31> {
+[info]   slice: T30
+[info] }
+[info] interface I66<T29 extends (I67<T30, T31> | number), T30 extends I68<T31>, T31> {
+[info]   (_?: {}, _?: ""): T29
+[info] }
+[info] interface I70<T28 extends I66<T29, T30, T31>, T29 extends (I67<T30, T31> | number), T30 extends I68<T31>, T31> {
+[info]   replace: T28
+[info] }
+[info] interface I69<T28 extends I66<T29, T30, T31>, T29 extends (I67<T30, T31> | number), T30 extends I68<T31>, T31> {
+[info]   (): (I70<T28, T29, T30, T31> | (boolean & (number | string) & number))
+[info] }
+[info] interface I65<T28 extends I66<T29, T30, T31>, T29 extends (I67<T30, T31> | number), T30 extends I68<T31>, T31> {
+[info]   replace: T28
+[info]   valueOf: (I69<T28, T29, T30, T31>)
+[info] }
+[info] interface I71<T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))> {
+[info]   replace: (T48)
+[info]   valueOf: (T52)
+[info] }
+[info] interface I72 {
+[info]   length: number
+[info] }
+[info] interface I53 {
+[info]   <T13 extends boolean, T17 extends I54<T13, T2, T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T2 extends (I55<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (number & (number | string) & boolean)), T4 extends (I56<T5, T6> | number), T41 extends (I58<T42, T43> | number), T42 extends I59<T43>, T43, T47 extends (I60<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (boolean & (number | string) & number)), T48 extends I61<T4, T41, T42, T43, T5, T6>, T5 extends I57<T6>, T52 extends I62<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9>, T6, T9 extends (I63<T4, T41, T42, T43, T48, T5, T6> | (boolean & (number | string) & number))>(array: (T17), value: (number), start: (((I64 | boolean) & (I65<I66<T29, T30, T31>, (I67<T30, T31> | number), I68<T31>, any> | (boolean & (number | string) & number)))), end: (I71<T4, T41, T42, T43, T47, T48, T5, T52, T6, T9> | (number & boolean & (number | string)))): (I72 | T17)
+[info] }
+[info] => I53
+[success] Total time: 4 s, completed Jul 29, 2018 8:57:57 PM

@@ -551,7 +551,7 @@ class GraphBuilder(config: GraphBuilder.Config) {
                         operandGraph ~> new graph.PopNode ~> new graph.LiteralNode(UndefinedValue)
 
                     case ast.UnaryExpression(ast.UnaryOperator.delete, _, operand) =>
-                        EmptyGraph
+                        buildExpression(operand)
 
                     case ast.UnaryExpression(unOp, _, operand) =>
                         import ast.{UnaryOperator => astOp}
@@ -1068,7 +1068,11 @@ class GraphBuilder(config: GraphBuilder.Config) {
 
                         // build expression
                         implicit val info: Node.Info = Node.Info(blockPriority, env, functionFrame, block.catchEntry, None)
-                        val stringExpr = new graph.PopNode ~> buildLiteral(StringValue(directive))
+                        val stringExpr = if (isTopLevel) {
+                            new graph.PopNode ~> buildLiteral(StringValue(directive))
+                        } else {
+                            buildLiteral(StringValue(directive)) ~> new graph.PopNode
+                        }
                         bodyGraph = bodyGraph ~> stringExpr
 
                     case stmt =>
@@ -1203,6 +1207,9 @@ class GraphBuilder(config: GraphBuilder.Config) {
     private case class FunctionTemplate(name: Option[String], params: Seq[ast.Pattern], body: ast.ArrowFunctionBody, lexicalEnv: LexicalEnv) extends CallableInfo {
         override def anchor: AnyRef = body
         override def yieldsGraph: Boolean = true
+
+        private val argNames: Seq[String] = params.map { case ast.Identifier(n) => Some(n); case _ => None }.takeWhile(_.isDefined).map(_.get)
+        override def argumentNames: Array[String] = (argNames ++ super.argumentNames.drop(argNames.size)).toArray
 
         override def asAnalysable: Analysable = {
             val functionBuilder = new FunctionBuilder(isTopLevel = false, Node.NoCallFrame, 0)

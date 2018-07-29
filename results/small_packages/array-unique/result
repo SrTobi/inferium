@@ -1,0 +1,92 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install array-unique into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/array-unique
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/array-unique/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/array-unique/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/array-unique /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/array-unique
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/array-unique/./index.js'
+[info] Done Parsing module.
+[info] Found Some(unique)
+[info] Found Some(uniqueImmutable)
+[info] Round 0
+[info] Analyse Some(uniqueImmutable)
+[info] Analyse Some(unique)
+[info] Round 1
+[info] Analyse Some(uniqueImmutable)
+[info] Analyse Some(unique)
+[info] Round 2
+[info] Analyse Some(uniqueImmutable)
+[info] Analyse Some(unique)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I26<T11> {
+[info]   (_?: number, _?: number): T11
+[info] }
+[info] interface I27<T10 extends I26<T11>, T11, T14 extends number, T18 extends number> {
+[info]   length: (T18 | T14)
+[info]   splice: T10
+[info] }
+[info] interface I28<T1> {
+[info]   [0]: T1
+[info]   length: number
+[info] }
+[info] interface I29<T1> {
+[info]   [0]?: T1
+[info] }
+[info] interface I30<T1> {
+[info]   [0]?: T1
+[info] }
+[info] interface I25 {
+[info]   <T10 extends I26<T11>, T11, T14 extends number, T18 extends number, T24 extends I27<T10, T11, T14, T18>>(arr: (T24)): T24
+[info]   immutable<T1>(arr: (I28<T1>)): ({} | I29<T1> | I30<T1>)
+[info] }
+[info] => I25
+[success] Total time: 3 s, completed Jul 29, 2018 8:55:24 PM

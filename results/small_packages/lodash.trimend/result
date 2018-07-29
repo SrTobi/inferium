@@ -1,0 +1,125 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install lodash.trimend into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/lodash.trimend
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/lodash.trimend/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/lodash.trimend/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/lodash.trimend /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/lodash.trimend
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/lodash.trimend/./index.js'
+[info] Done Parsing module.
+[info] Found Some(trimEnd)
+[info] Round 0
+[info] Analyse Some(trimEnd)
+[info] Round 1
+[info] Analyse Some(trimEnd)
+[info] Round 2
+[info] Analyse Some(trimEnd)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I44<T3> {
+[info]   (_?: ""): T3
+[info] }
+[info] interface I43<T12 extends I44<T3>, T21 extends (number & (number | string)), T3> {
+[info]   join: T12
+[info]   length: (T21)
+[info] }
+[info] interface I45 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I42<T11 extends I43<T12, T21, T3>, T12 extends I44<T3>, T21 extends (number & (number | string)), T3> {
+[info]   (_?: ({} | I45)): T11
+[info] }
+[info] interface I47<T12 extends I44<T3>, T21 extends (number & (number | string)), T3> {
+[info]   join: T12
+[info]   length: (T21)
+[info] }
+[info] interface I46<T12 extends I44<T3>, T19 extends I47<T12, T21, T3>, T21 extends (number & (number | string)), T3> {
+[info]   (_?: ""): T19
+[info] }
+[info] interface I49<T2> {
+[info]   (_?: {}, _?: ""): T2
+[info] }
+[info] interface I48<T10 extends I42<T11, T12, T21, T3>, T11 extends I43<T12, T21, T3>, T12 extends I44<T3>, T18 extends I46<T12, T19, T21, T3>, T19 extends I47<T12, T21, T3>, T2, T21 extends (number & (number | string)), T3, T7 extends I49<T2>> {
+[info]   match: T10
+[info]   split: T18
+[info]   replace: T7
+[info] }
+[info] interface I52 {
+[info]   multiline: boolean
+[info]   source: string
+[info]   global: boolean
+[info]   lastIndex: number
+[info]   ignoreCase: boolean
+[info] }
+[info] interface I53<T37 extends number> {
+[info]   length: (T37)
+[info] }
+[info] interface I51<T37 extends number> {
+[info]   (_?: ({} | I52)): I53<T37>
+[info] }
+[info] interface I55<T37 extends number> {
+[info]   length: (T37)
+[info] }
+[info] interface I54<T37 extends number> {
+[info]   (_?: ""): I55<T37>
+[info] }
+[info] interface I50<T37 extends number> {
+[info]   match: I51<T37>
+[info]   split: I54<T37>
+[info] }
+[info] interface I41 {
+[info]   <T10 extends I42<T11, T12, T21, T3>, T11 extends I43<T12, T21, T3>, T12 extends I44<T3>, T18 extends I46<T12, T19, T21, T3>, T19 extends I47<T12, T21, T3>, T2, T21 extends (number & (number | string)), T26 extends (boolean & (number | string) & number & I48<T10, T11, T12, T18, T19, T2, T21, T3, T7>), T3, T7 extends I49<T2>>(string: (T26), chars: ((boolean & (number | string) & number & I50<number>)), guard: any): (string | T26 | T2 | T3)
+[info] }
+[info] => I41
+[success] Total time: 5 s, completed Jul 29, 2018 9:09:49 PM

@@ -1,0 +1,284 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install buffer-reader into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/buffer-reader
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/buffer-reader/_inferium_gather.ts
+Gather types for 0 packages:
+=>  
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: 
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/buffer-reader/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/buffer-reader /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/buffer-reader
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", "domain", "tty", "child_process", "crypto", "inspector", "stream", "process", "path", "v8", "http2", "cluster", "tls", "net", "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/buffer-reader/./index.js'
+[info] Done Parsing module.
+[info] Found Some(BufferReader)
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Found None
+[info] Round 0
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(BufferReader)
+[info] Round 1
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse None
+[info] Analyse Some(BufferReader)
+[info] Round 2
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] skipped
+[info] Analyse None
+[info] skipped
+[info] Analyse None
+[info] Analyse None
+[info] skipped
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I56<T54 extends never> {
+[info]   offset?: number
+[info]   buf?: T54
+[info] }
+[info] interface I58<T3> {
+[info]   (): T3
+[info] }
+[info] interface I59<T3> {
+[info]   (): T3
+[info] }
+[info] interface I60<T3> {
+[info]   (): T3
+[info] }
+[info] interface I61<T3> {
+[info]   (): T3
+[info] }
+[info] interface I62<T3> {
+[info]   (): T3
+[info] }
+[info] interface I63<T3> {
+[info]   (): T3
+[info] }
+[info] interface I64<T3> {
+[info]   (): T3
+[info] }
+[info] interface I65<T3> {
+[info]   (): T3
+[info] }
+[info] interface I66<T3> {
+[info]   (): T3
+[info] }
+[info] interface I67<T3> {
+[info]   (): T3
+[info] }
+[info] interface I68<T3> {
+[info]   (): T3
+[info] }
+[info] interface I69<T3> {
+[info]   (): T3
+[info] }
+[info] interface I70<T3> {
+[info]   (): T3
+[info] }
+[info] interface I71<T3> {
+[info]   (): T3
+[info] }
+[info] interface I74 {
+[info]   byteLength: number
+[info] }
+[info] interface I73 {
+[info]   buffer: I74
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I76 {
+[info]   byteLength: number
+[info] }
+[info] interface I75 {
+[info]   buffer: I76
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I78 {
+[info]   byteLength: number
+[info] }
+[info] interface I77 {
+[info]   buffer: I78
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I80 {
+[info]   byteLength: number
+[info] }
+[info] interface I79 {
+[info]   buffer: I80
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I72 {
+[info]   (length: ((number & (number | string)))): (I79 | {} | I75 | I77 | I73)
+[info] }
+[info] interface I83 {
+[info]   length: number
+[info] }
+[info] interface I82 {
+[info]   offset: (((number | string)) | number | string)
+[info]   buf: I83
+[info] }
+[info] interface I81 {
+[info]   (diff: ((number | string))): I82
+[info] }
+[info] interface I86 {
+[info]   byteLength: number
+[info] }
+[info] interface I85 {
+[info]   buffer: I86
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I88 {
+[info]   byteLength: number
+[info] }
+[info] interface I87 {
+[info]   buffer: I88
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I90 {
+[info]   byteLength: number
+[info] }
+[info] interface I89 {
+[info]   buffer: I90
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I92 {
+[info]   byteLength: number
+[info] }
+[info] interface I91 {
+[info]   buffer: I92
+[info]   byteLength: number
+[info]   length: number
+[info]   byteOffset: number
+[info]   BYTES_PER_ELEMENT: number
+[info] }
+[info] interface I84 {
+[info]   (): (I89 | I91 | {} | I85 | I87)
+[info] }
+[info] interface I95 {
+[info]   length: number
+[info] }
+[info] interface I94<T33 extends number> {
+[info]   buf: I95
+[info]   offset?: T33
+[info] }
+[info] interface I93 {
+[info]   <T33 extends number>(pos: (T33)): I94<T33>
+[info] }
+[info] interface I96 {
+[info]   (length: ((number & (number | string))), encoding: any): any
+[info] }
+[info] interface I97 {
+[info]   (encoding: any): any
+[info] }
+[info] interface I98 {
+[info]   (): any
+[info] }
+[info] interface I100 {
+[info]   buf: (any | {})
+[info] }
+[info] interface I99 {
+[info]   (buffer: (never)): I100
+[info] }
+[info] interface I57<T3> {
+[info]   nextBuffer: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I72 | I65<T3> | I60<T3> | I69<T3>)
+[info]   move: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I81 | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info]   nextAll: (I64<T3> | I66<T3> | I84 | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info]   seek: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I93 | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info]   nextString: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I96 | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info]   nextStringZero: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I97 | I65<T3> | I60<T3> | I69<T3>)
+[info]   tell: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I98 | I60<T3> | I69<T3>)
+[info]   restAll: (I64<T3> | I66<T3> | I84 | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info]   append: (I64<T3> | I66<T3> | I58<T3> | I68<T3> | I71<T3> | I59<T3> | I70<T3> | I61<T3> | I99 | I62<T3> | I67<T3> | I63<T3> | I65<T3> | I60<T3> | I69<T3>)
+[info] }
+[info] interface I55 {
+[info]   new <T54 extends never>(buffer: (T54)): (I56<T54> & I57<any>)
+[info] }
+[info] => I55
+[success] Total time: 4 s, completed Jul 29, 2018 11:31:13 PM

@@ -1,0 +1,172 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install enzyme-adapter-react-15 into /tmp/inferium
+Done.
+
+Search types...
+Look into <inf>/enzyme-adapter-react-15
+Look into <inf>/enzyme-adapter-utils
+Look into <inf>/object.assign
+Look into <inf>/define-properties
+Look into <inf>/foreach
+Look into <inf>/object-keys
+Look into <inf>/function-bind
+Look into <inf>/has-symbols
+Look into <inf>/object-keys
+Look into <inf>/prop-types
+Look into <inf>/loose-envify
+Look into <inf>/js-tokens
+Look into <inf>/object-assign
+Look into <inf>/object.assign
+Look into <inf>/object.values
+Look into <inf>/define-properties
+Look into <inf>/es-abstract
+Look into <inf>/es-to-primitive
+Look into <inf>/is-callable
+Look into <inf>/is-date-object
+Look into <inf>/is-symbol
+Look into <inf>/function-bind
+Look into <inf>/has
+Look into <inf>/function-bind
+Look into <inf>/is-callable
+Look into <inf>/is-regex
+Look into <inf>/has
+Look into <inf>/function-bind
+Look into <inf>/has
+Look into <inf>/prop-types
+Look into <inf>/react-is
+Install types for enzyme-adapter-utils
+=> not found
+Install types for object.assign
+=> not found
+Install types for define-properties
+=> not found
+Install types for foreach
+=> not found
+Install types for object-keys
+Install types for function-bind
+=> not found
+Install types for has-symbols
+=> not found
+Install types for prop-types
+Install types for loose-envify
+=> not found
+Install types for js-tokens
+=> not found
+Install types for object-assign
+Install types for object.values
+=> not found
+Install types for es-abstract
+=> not found
+Install types for es-to-primitive
+=> not found
+Install types for is-callable
+=> not found
+Install types for is-date-object
+=> not found
+Install types for is-symbol
+=> not found
+Install types for has
+=> not found
+Install types for is-regex
+=> not found
+Install types for react-is
+Force installation of node types...
+Install types for node
+Done.
+
+Gather types...
+File: <inf>/enzyme-adapter-react-15/_inferium_gather.ts
+Gather types for 20 packages:
+=> enzyme-adapter-utils, object.assign, define-properties, foreach, object-keys, function-bind, has-symbols, prop-types, loose-envify, js-tokens, object-assign, object.values, es-abstract, es-to-primitive, is-callable, is-date-object, is-symbol, has, is-regex, react-is 
+
+Write gather file
+Done.
+
+Analyse program
+Done.
+
+global: global
+imported: _inferium_import_0, _inferium_import_1, _inferium_import_2, _inferium_import_3, _inferium_import_4, _inferium_import_5, _inferium_import_6, _inferium_import_7, _inferium_import_8, _inferium_import_9, _inferium_import_10, _inferium_import_11, _inferium_import_12, _inferium_import_13, _inferium_import_14, _inferium_import_15, _inferium_import_16, _inferium_import_17, _inferium_import_18, _inferium_import_19
+ambient modules: "inspector", "buffer", "querystring", "events", "http", "cluster", "zlib", "os", "https", "punycode", "repl", "readline", "vm", "child_process", "url", "dns", "net", "dgram", "fs", "path", "string_decoder", "tls", "crypto", "stream", "util", "assert", "tty", "domain", "constants", "module", "process", "v8", "timers", "console", "async_hooks", "http2", "perf_hooks"
+
+Incorporated files:
+=> <org>/extras/ts-reader/node_modules/typescript/lib/lib.d.ts
+=> <inf>/@types/object-keys/index.d.ts
+=> <inf>/@types/react/global.d.ts
+=> <inf>/csstype/index.d.ts
+=> <inf>/@types/react/index.d.ts
+=> <inf>/@types/prop-types/index.d.ts
+=> <inf>/@types/object-assign/index.d.ts
+=> <inf>/@types/react-is/index.d.ts
+=> <inf>/enzyme-adapter-react-15/_inferium_gather.ts
+=> <inf>/@types/node/inspector.d.ts
+=> <inf>/@types/node/index.d.ts
+
+Resolve enzyme-adapter-utils
+Resolve object.assign
+Resolve define-properties
+Resolve foreach
+Resolve object-keys
+Resolve function-bind
+Resolve has-symbols
+Resolve prop-types
+Resolve loose-envify
+Resolve js-tokens
+Resolve object-assign
+Resolve object.values
+Resolve es-abstract
+Resolve es-to-primitive
+Resolve is-callable
+Resolve is-date-object
+Resolve is-symbol
+Resolve has
+Resolve is-regex
+Resolve react-is
+Done.
+
+Write result to /tmp/inferium/result.json
+Done.
+[info] Loading settings from idea.sbt ...
+[info] Loading global plugins from /home/tobi/.sbt/1.0/plugins
+[info] Loading settings from plugins.sbt ...
+[info] Loading project definition from /home/tobi/workspace/inferium/project
+[info] Loading settings from build.sbt ...
+[info] Set current project to inferium (in build file:/home/tobi/workspace/inferium/)
+[info] Running (fork) inferium.CliMain /tmp/inferium/node_modules/enzyme-adapter-react-15 /tmp/inferium/result.json
+[info] ======= Inferium - Tobias Kahlert ======
+[info] MainScript: /tmp/inferium/node_modules/enzyme-adapter-react-15
+[info] TypesFile:  /tmp/inferium/result.json
+[info] ======= Get Prelude ======
+[info] Prelude contains following types:
+[info] "module", "timers", "https", "zlib", "fs", "assert", "dgram", "async_hooks", "url", "dns", "http", "string_decoder", "querystring", "events", "os", "util", "constants", "punycode", "readline", "perf_hooks", "buffer", prop-types, "domain", "tty", "child_process", "crypto", "inspector", "stream", object-assign, "process", "path", object-keys, "v8", "http2", "cluster", "tls", "net", react-is, "repl", "console", "vm"
+[info] ======= Initialize ======
+[info] Done.
+[info] ======= Analysing =======
+[info] Parse module '/tmp/inferium/node_modules/enzyme-adapter-react-15/./build/index.js'
+[info] Done Parsing module.
+[info] Parse module '/tmp/inferium/node_modules/enzyme-adapter-react-15/./build/./ReactFifteenAdapter.js'
+[info] Done Parsing module.
+[info] Found Some(ReactFifteenAdapter)
+[info] Round 0
+[info] Analyse Some(ReactFifteenAdapter)
+[info] Round 1
+[info] Analyse Some(ReactFifteenAdapter)
+[info] Round 2
+[info] Analyse Some(ReactFifteenAdapter)
+[info] Done
+[info] ======= Print Type Definition ======
+[info] interface I8 {
+[info]   lifecycles: any
+[info] }
+[info] interface I7 {
+[info]   options: ((I8) | {})
+[info] }
+[info] interface I6 {
+[info]   (): ({} | (I7 | (object & boolean)))
+[info]   __proto__?: {}
+[info] }
+[info] => I6
+[success] Total time: 4 s, completed Jul 29, 2018 9:09:19 PM

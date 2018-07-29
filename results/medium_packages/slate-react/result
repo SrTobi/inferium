@@ -1,0 +1,5 @@
+
+> ts-reader@1.0.0 build /home/tobi/workspace/inferium/extras/ts-reader
+> tsc -p .
+
+Install slate-react into /tmp/inferium
