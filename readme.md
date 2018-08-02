@@ -10,6 +10,12 @@ The following software has to be present to build Inferium:
 - scala
 - nodejs + npm
 
+In the directory `extras/ts-reader/`, the following command has to be executed once to install Node.js dependencies.
+
+```
+npm install
+```
+
 The `run` script automatically uses `sbt` to build Inferium.
 
 
