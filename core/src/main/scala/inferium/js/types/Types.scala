@@ -285,13 +285,15 @@ object js {
                 case (rp, wp) => Property(rp.name, UnionType(rp.ty, wp.ty))
             }
 
+            var paramIt = ('a' to 'z').iterator.map(_.toString)
+
             val signature = probe._calls.map {
                 case (ret, (args, _)) =>
-                    Overload(Seq.empty, args map { Param("_", _, optional = true) }, new ProbeType(ret))
+                    Overload(Seq.empty, args map { Param(paramIt.next(), _, optional = true) }, new ProbeType(ret))
             }.toSeq
             val constructor = probe._constructors.map {
                 case (ret, args) =>
-                    Overload(Seq.empty, args map { Param("_", _, optional = true) }, new ProbeType(ret))
+                    Overload(Seq.empty, args map { Param(paramIt.next(), _, optional = true) }, new ProbeType(ret))
             }.toSeq
 
 

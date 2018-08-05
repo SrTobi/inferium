@@ -500,7 +500,7 @@ trait HeapImmutables {
             getBox(loc) match {
                 case Some(BoxedValue(abstractValue, concreteValue, abstractCount)) =>
                     if (abstractCount == valueLoc.abstractCount) {
-                        setBox(loc, BoxedValue(abstractValue, concreteValue, abstractCount))
+                        setBox(loc, BoxedValue(abstractValue, value, abstractCount))
                     }
                 case None =>
                     throw new AssertionError(s"$valueLoc can not be changed, because it does not exist")

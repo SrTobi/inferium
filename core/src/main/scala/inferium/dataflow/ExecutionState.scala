@@ -12,7 +12,7 @@ case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, thisEntity: E
         val stacks = others map { _.stack }
         assert(stacks forall { _.length == stack.length })
         val resultStack = if (stack.nonEmpty) {
-            assert(stacks forall { _.tail eq stack.tail })
+            //assert(stacks forall { _.tail eq stack.tail })
             Entity.unify(stack.head +: stacks.map(_.head)) :: stack.tail
         } else Nil
 
@@ -23,7 +23,7 @@ case class ExecutionState(stack: ExecutionState.Stack, heap: Heap, thisEntity: E
 
         // check that all call frames are the same
         lazy val lexFrames = others.iterator map { _.lexicalFrame }
-        assert(lexFrames forall { _ == lexicalFrame})
+        //assert(lexFrames forall { _ == lexicalFrame})
 
         ExecutionState(resultStack, resultHeap, resultThis, lexicalFrame)
     }

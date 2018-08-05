@@ -19,6 +19,11 @@ class MergeNode(val mergeType: MergeType = MergeType.Normal, val removable: Bool
     private val inStates = mutable.Map.empty[NodeId, ExecutionState]
     private var mergeState: ExecutionState = _
 
+    override def reset(): Unit = {
+        inStates.clear()
+        mergeState = null
+    }
+
     override def setNewInState(state: ExecutionState, origin: NodeId)(implicit analysis: DataFlowAnalysis): Unit = {
         assert(origin != this.id)
 

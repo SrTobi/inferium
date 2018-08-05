@@ -24,6 +24,8 @@ abstract class Node(implicit val info: Node.Info) {
 
     var exprStackInfo: ExprStackInfo = _
 
+    def reset(): Unit = ()
+
     final def ~>(node: Node): Graph = {
         this.addSuccessor(node)
         node.addPredecessor(this)

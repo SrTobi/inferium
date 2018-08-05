@@ -29,7 +29,7 @@ lazy val checkFixtures = taskKey[Unit]("Check if the test fixtures run when exec
 
 //--------------------- root ---------------------//
 lazy val root = project.in(file("."))
-    .aggregate(cli, /*web,*/ coreJVM, /*coreJS,*/ testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM)
+    .aggregate(cli, /*web,*/ coreJVM, coreJS, testToolsJVM, testToolsJS, jsEvalJVM, jsEvalJS, testCreator, macrosJVM, macrosJS, nodePreludeDataJVM, simplJsApi)
     .dependsOn(testCreator)
     .settings(
         name := "inferium",
@@ -85,7 +85,7 @@ lazy val core = crossProject
     )
 
 lazy val coreJVM = core.jvm
-//lazy val coreJS = core.js
+lazy val coreJS = core.js
 
 
 //--------------------- cli ---------------------//
@@ -126,7 +126,7 @@ lazy val nodePreludeData = crossProject
     )
 
 lazy val nodePreludeDataJVM = nodePreludeData.jvm
-//lazy val nodePreludeDataJS = nodePreludeData.js
+lazy val nodePreludeDataJS = nodePreludeData.js
 
 //--------------------- jsEval tools ---------------------//
 lazy val jsEval = crossProject
@@ -161,11 +161,24 @@ lazy val testCreator = project
     .dependsOn(testToolsJVM, jsEvalJVM, coreJVM)
     .settings(commonSettings)
     .settings(
-        fork := true,
+        fork := true
         //baseDirectory in Test := file("./extras/testcreator")
     )
 
+//--------------------- macro-test ---------------------//
 lazy val macroTest = project
     .in(file("extras/macros-test"))
     .dependsOn(macrosJVM)
     .settings(commonSettings)
+
+
+//--------------------- test creator ---------------------//
+lazy val simplJsApi = project
+    .in(file("extras/simple-js-api"))
+    .enablePlugins(ScalaJSPlugin)
+    .enablePlugins(ScalaJSBundlerPlugin)
+    .dependsOn(coreJS)
+    .settings(commonSettings)
+    .settings(
+        //scalaJSUseMainModuleInitializer := true
+    )

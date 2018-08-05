@@ -141,12 +141,28 @@ object Playground {
 
         val code2 =
             """
-              |exports.func = function(proc) {
-              |  var x = proc
-              |  x = 3
-              |  return x
-              |};
+              |function f() {
+              |var elements = undefined
+              |return {
+              |    push: (e) => {
+              |        elements = {
+              |            next: elements,
+              |            item: e
+              |        }
+              |    },
               |
+              |    pop: (x) => {
+              |        var result = elements.item
+              |        elements = elements.next
+              |        return result(x)
+              |    }
+              |
+              |    /*inner: () => {
+              |        return elements
+              |    }*/
+              |}
+              |}
+              |exports.f = f
             """.stripMargin
         val code = code2
 

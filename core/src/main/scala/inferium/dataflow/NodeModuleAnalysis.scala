@@ -2,8 +2,9 @@ package inferium.dataflow
 
 import inferium.dataflow.CallableInfo.AnalysisInfo
 import inferium.dataflow.NodeModuleAnalysis.ModuleSource
-import inferium.dataflow.graph.Node
+import inferium.dataflow.graph.{Graph, Node}
 import inferium.dataflow.graph.Node.StateOrigin
+import inferium.dataflow.graph.visitors.ResetVisitor
 import inferium.js.types.js
 import inferium.js.types.js.Instantiator
 import inferium.lattice.{Entity, Heap, UnionValue, _}
@@ -32,6 +33,7 @@ class NodeModuleAnalysis(val source: ModuleSource,
         }
 
         def run(state: ExecutionState): Option[ExecutionState] = {
+            ResetVisitor.reset(Graph(analysable.begin, analysable.end))
             analysable.begin.setNewInState(state, initialStateOrigin)
 
             while (nodesToProcess.nonEmpty) {

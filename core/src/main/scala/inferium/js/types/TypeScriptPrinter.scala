@@ -285,7 +285,7 @@ object TypeScriptPrinter {
                 g =>
                     assert(g.get() == g)
                     val extend = printInline(g.bound, outerGenerics | generics)
-                    g.name + (if (extend == "any" || extend == "{}") "" else " extends " + extend)
+                    g.name + (if (extend == "any" || extend == "{}" || extend == "never") "" else " extends " + extend)
             }.mkString("<", ", ", ">")
         }
 
@@ -337,8 +337,13 @@ object TypeScriptPrinter {
             writer.end()
         }
 
+        def directGenerics(ty: Type): Set[Generic] = ty match {
+            case c: CompoundType => hereGenerics(c)
+            case _ => Set.empty
+        }
+
         def printOverload(writer: Writer, o: Overload, compoundType: CompoundType, outerGenerics: Set[Generic], prefix: String): Unit = {
-            val allFuncGens = this.hereGenerics(o, compoundType)
+            val allFuncGens = this.hereGenerics(o, compoundType) | directGenerics(o.returnType) | o.params.flatMap(p => directGenerics(p.ty)).toSet
             val genList = genericHeader(allFuncGens, outerGenerics)
             writer.print(prefix + genList + o.params.map(printParam(_, allFuncGens)).mkString("(", ", ", ")") + ": " + printInline(o.returnType, allFuncGens))
         }
@@ -404,7 +409,7 @@ object TypeScriptPrinter {
         def print(ty: Type): String = {
             markGenerics(ty, read = true, write = true, Set.empty)
             markNeededGenerics(ty, Set.empty, Set.empty)
-            val res = "\n=> " + printInline(ty, Set.empty)
+            val res = "\nvar exp: " + printInline(ty, Set.empty) + "\nexport = exp"
             builder.toString() + res
         }
     }
