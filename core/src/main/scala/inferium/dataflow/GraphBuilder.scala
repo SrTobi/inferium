@@ -1174,10 +1174,10 @@ class GraphBuilder(config: GraphBuilder.Config) {
         }
 
         def buildFunctionAsScript(name: Option[String],
-                          params: Seq[ast.Pattern],
-                          body: ast.ArrowFunctionBody,
-                          catchTarget: Option[MergeNode],
-                          initialEnv: LexicalEnv): ScriptGraph = {
+                                  params: Seq[ast.Pattern],
+                                  body: ast.ArrowFunctionBody,
+                                  catchTarget: Option[MergeNode],
+                                  initialEnv: LexicalEnv): ScriptGraph = {
             val (bodyGraph, nodeInfo) = buildFunctionBody(name, params, body, catchTarget, initialEnv)
             val endNode = new graph.EndNode()(nodeInfo)
             bodyGraph ~> endNode
